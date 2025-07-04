@@ -9,34 +9,52 @@ import { StatusBadge } from "@/components/copf/StatusBadge";
 
 const mockOcorrencias = [
   {
-    id: "OC-2024-001",
-    agencia: "0001 - Centro",
-    equipamento: "ATM Bradesco 24h",
-    severidade: "Alta",
-    status: "ativa",
-    dataAbertura: "2024-01-15 08:30",
-    descricao: "ATM não está dispensando cédulas",
-    fornecedor: "Diebold Nixdorf"
-  },
-  {
-    id: "OC-2024-002", 
-    agencia: "0015 - Paulista",
-    equipamento: "Ar Condicionado Split",
-    severidade: "Média",
-    status: "resolvida",
-    dataAbertura: "2024-01-14 14:20",
-    descricao: "Temperatura ambiente elevada",
-    fornecedor: "Carrier"
-  },
-  {
-    id: "OC-2024-003",
-    agencia: "0032 - Vila Madalena", 
-    equipamento: "Conectividade MPLS",
+    id: "COPF-2024-001",
+    agencia: "AG0001 - Centro (São Paulo)",
+    equipamento: "ATM Diebold 9800 - Slot 01",
     severidade: "Crítica",
-    status: "ativa",
+    status: "aberta",
+    dataAbertura: "2024-01-15 08:30",
+    dataDeteccao: "2024-01-15 08:25",
+    descricao: "ATM não está dispensando cédulas - erro de hardware na gaveta",
+    fornecedor: "Diebold Nixdorf",
+    responsavel: "João Silva - NOC"
+  },
+  {
+    id: "COPF-2024-002", 
+    agencia: "AG0015 - Paulista (São Paulo)",
+    equipamento: "Split Carrier 18k BTU - Térreo",
+    severidade: "Média",
+    status: "internalizada",
+    dataAbertura: "2024-01-14 14:20",
+    dataDeteccao: "2024-01-14 14:15",
+    descricao: "Temperatura ambiente elevada - possível falha no compressor",
+    fornecedor: "Carrier do Brasil",
+    responsavel: "Maria Santos - Facilities"
+  },
+  {
+    id: "COPF-2024-003",
+    agencia: "AG0032 - Vila Madalena (São Paulo)", 
+    equipamento: "Link MPLS Principal - Roteador Cisco",
+    severidade: "Alta",
+    status: "aberta",
     dataAbertura: "2024-01-15 09:45",
-    descricao: "Perda total de conectividade",
-    fornecedor: "Vivo Empresas"
+    dataDeteccao: "2024-01-15 09:40",
+    descricao: "Perda total de conectividade - link primário inoperante",
+    fornecedor: "Vivo Empresas",
+    responsavel: "Carlos Oliveira - Redes"
+  },
+  {
+    id: "COPF-2024-004",
+    agencia: "AG0008 - Moema (São Paulo)",
+    equipamento: "Terminal POS Ingenico - Caixa 03",
+    severidade: "Baixa",
+    status: "fechada",
+    dataAbertura: "2024-01-13 16:10",
+    dataDeteccao: "2024-01-13 16:05",
+    descricao: "Lentidão nas transações - possível problema de comunicação",
+    fornecedor: "Ingenico Brasil",
+    responsavel: "Ana Costa - Suporte"
   }
 ];
 
@@ -92,7 +110,8 @@ const Ocorrencias = () => {
                   <TableHead>Equipamento</TableHead>
                   <TableHead>Severidade</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Data Abertura</TableHead>
+                  <TableHead>Responsável</TableHead>
+                  <TableHead>Fornecedor</TableHead>
                   <TableHead>Ações</TableHead>
                 </TableRow>
               </TableHeader>
@@ -112,11 +131,14 @@ const Ocorrencias = () => {
                     </TableCell>
                     <TableCell>
                       <StatusBadge status={
-                        ocorrencia.status === "ativa" ? "active" :
-                        ocorrencia.status === "resolvida" ? "resolved" : "pending"
+                        ocorrencia.status === "aberta" ? "active" :
+                        ocorrencia.status === "fechada" ? "resolved" : 
+                        ocorrencia.status === "internalizada" ? "pending" : "pending"
                       } />
                     </TableCell>
-                    <TableCell>{ocorrencia.dataAbertura}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{ocorrencia.dataAbertura}</TableCell>
+                    <TableCell className="text-sm">{ocorrencia.responsavel}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{ocorrencia.fornecedor}</TableCell>
                     <TableCell>
                       <Button variant="ghost" size="sm">
                         <Eye className="h-4 w-4" />

@@ -4,11 +4,13 @@ import { Badge } from "@/components/ui/badge";
 import { MapPin, Thermometer } from "lucide-react";
 
 const mockMapaData = [
-  { agencia: "0001 - Centro", ocorrencias: 8, lat: -23.5505, lng: -46.6333 },
-  { agencia: "0015 - Paulista", ocorrencias: 12, lat: -23.5489, lng: -46.6388 },
-  { agencia: "0032 - Vila Madalena", ocorrencias: 6, lat: -23.5448, lng: -46.6920 },
-  { agencia: "0045 - Pinheiros", ocorrencias: 15, lat: -23.5629, lng: -46.7009 },
-  { agencia: "0067 - Moema", ocorrencias: 4, lat: -23.6005, lng: -46.6639 }
+  { agencia: "AG0001 - Centro (São Paulo)", ocorrencias: 8, lat: -23.5505, lng: -46.6333, regiao: "São Paulo Centro" },
+  { agencia: "AG0015 - Paulista (São Paulo)", ocorrencias: 12, lat: -23.5489, lng: -46.6388, regiao: "São Paulo Zona Sul" },
+  { agencia: "AG0032 - Vila Madalena (São Paulo)", ocorrencias: 6, lat: -23.5448, lng: -46.6920, regiao: "São Paulo Zona Oeste" },
+  { agencia: "AG0045 - Pinheiros (São Paulo)", ocorrencias: 15, lat: -23.5629, lng: -46.7009, regiao: "São Paulo Zona Oeste" },
+  { agencia: "AG0067 - Moema (São Paulo)", ocorrencias: 4, lat: -23.6005, lng: -46.6639, regiao: "São Paulo Zona Sul" },
+  { agencia: "AG0089 - Vila Mariana (São Paulo)", ocorrencias: 9, lat: -23.5881, lng: -46.6394, regiao: "São Paulo Zona Sul" },
+  { agencia: "AG0102 - Itaim Bibi (São Paulo)", ocorrencias: 7, lat: -23.5943, lng: -46.6868, regiao: "São Paulo Zona Sul" }
 ];
 
 const Mapa = () => {

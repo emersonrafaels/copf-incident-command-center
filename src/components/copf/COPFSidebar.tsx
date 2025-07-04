@@ -105,7 +105,7 @@ export function COPFSidebar() {
             {!collapsed && (
               <div>
                 <h2 className="font-semibold text-foreground">COPF</h2>
-                <p className="text-xs text-muted-foreground">Gestão de Ocorrências</p>
+                <p className="text-xs text-muted-foreground">Itaú Unibanco</p>
               </div>
             )}
           </div>

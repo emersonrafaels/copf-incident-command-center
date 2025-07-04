@@ -17,37 +17,37 @@ import {
 // Mock data para demonstração
 const mockOccurrences = [
   {
-    id: "OCR-2024-001",
-    agency: "AG-SP-001 Paulista",
-    equipment: "ATM Bradesco 24h",
-    description: "Falha de conectividade - sem comunicação com servidor central",
+    id: "COPF-2024-001",
+    agency: "AG0001 - Centro (São Paulo)",
+    equipment: "ATM Diebold 9800 - Slot 01",
+    description: "ATM não está dispensando cédulas - erro de hardware na gaveta",
     severity: "critical" as const,
     status: "active" as const,
     createdAt: "2024-01-15T08:30:00",
-    assignedTo: "Equipe Conectividade",
-    vendor: "TechSolution"
+    assignedTo: "João Silva - NOC",
+    vendor: "Diebold Nixdorf"
   },
   {
-    id: "OCR-2024-002", 
-    agency: "AG-RJ-045 Copacabana",
-    equipment: "Sistema Climatização",
-    description: "Temperatura ambiente acima do normal - 28°C",
+    id: "COPF-2024-002", 
+    agency: "AG0015 - Paulista (São Paulo)",
+    equipment: "Split Carrier 18k BTU - Térreo",
+    description: "Temperatura ambiente elevada - possível falha no compressor",
     severity: "high" as const,
     status: "pending" as const,
     createdAt: "2024-01-15T09:15:00",
-    assignedTo: "Manutenção Predial",
-    vendor: "ClimaMax"
+    assignedTo: "Maria Santos - Facilities",
+    vendor: "Carrier do Brasil"
   },
   {
-    id: "OCR-2024-003",
-    agency: "AG-MG-012 Centro",
-    equipment: "Porta Giratória",
-    description: "Travamento intermitente do mecanismo de rotação",
-    severity: "medium" as const,
-    status: "resolved" as const,
+    id: "COPF-2024-003",
+    agency: "AG0032 - Vila Madalena (São Paulo)",
+    equipment: "Link MPLS Principal - Roteador Cisco",
+    description: "Perda total de conectividade - link primário inoperante",
+    severity: "high" as const,
+    status: "active" as const,
     createdAt: "2024-01-14T14:20:00",
-    assignedTo: "Segurança Física",
-    vendor: "SecureAccess"
+    assignedTo: "Carlos Oliveira - Redes",
+    vendor: "Vivo Empresas"
   }
 ]
 
@@ -57,9 +57,9 @@ export function Dashboard() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Dashboard COPF</h1>
+          <h1 className="text-3xl font-bold text-foreground">Painel de Acompanhamento - COPF</h1>
           <p className="text-muted-foreground">
-            Visão geral das ocorrências em estabelecimentos físicos
+            Itaú Unibanco | Central de Operações e Prestação de Facilidades
           </p>
         </div>
         <div className="flex gap-2">
@@ -185,11 +185,11 @@ export function Dashboard() {
           <CardContent>
             <div className="space-y-4">
               {[
-                { name: "AG-SP-001 Paulista", count: 23, severity: "critical" },
-                { name: "AG-RJ-045 Copacabana", count: 18, severity: "high" },
-                { name: "AG-MG-012 Centro", count: 15, severity: "medium" },
-                { name: "AG-RS-089 Porto Alegre", count: 12, severity: "medium" },
-                { name: "AG-BA-034 Salvador", count: 9, severity: "low" }
+                { name: "AG0001 - Centro (São Paulo)", count: 23, severity: "critical" },
+                { name: "AG0015 - Paulista (São Paulo)", count: 18, severity: "high" },
+                { name: "AG0032 - Vila Madalena (São Paulo)", count: 15, severity: "medium" },
+                { name: "AG0045 - Pinheiros (São Paulo)", count: 12, severity: "medium" },
+                { name: "AG0067 - Moema (São Paulo)", count: 9, severity: "low" }
               ].map((agency, index) => (
                 <div key={agency.name} className="flex items-center justify-between p-2 rounded-lg hover:bg-accent">
                   <div className="flex items-center gap-3">

@@ -49,6 +49,19 @@ const statusConfig = {
 export function StatusBadge({ status, className }: StatusBadgeProps) {
   const config = statusConfig[status]
   
+  // Fallback para status inválido
+  if (!config) {
+    console.warn(`Status inválido: ${status}`)
+    return (
+      <Badge 
+        variant="outline"
+        className={cn("bg-muted text-muted-foreground", className)}
+      >
+        {status || "N/A"}
+      </Badge>
+    )
+  }
+  
   return (
     <Badge 
       variant={config.variant}

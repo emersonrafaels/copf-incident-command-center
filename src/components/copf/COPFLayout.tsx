@@ -30,10 +30,10 @@ export function COPFLayout({ children }: COPFLayoutProps) {
                 <SidebarTrigger />
                 <div>
                   <h1 className="text-lg font-semibold text-foreground">
-                    Sistema COPF
+                    Painel de Acompanhamento - COPF
                   </h1>
                   <p className="text-sm text-muted-foreground">
-                    Central de Operações e Prestação de Facilidades - Itaú
+                    Itaú Unibanco | Central de Operações e Prestação de Facilidades
                   </p>
                 </div>
               </div>
