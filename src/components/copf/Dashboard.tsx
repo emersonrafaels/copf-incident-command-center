@@ -1,8 +1,14 @@
+import { useState } from "react"
 import { MetricCard } from "./MetricCard"
 import { StatusBadge } from "./StatusBadge"
+import { InteractiveCharts } from "./InteractiveCharts"
+import { OccurrenceModal } from "./OccurrenceModal"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
+import { useDashboardData } from "@/hooks/useDashboardData"
+import { useToast } from "@/hooks/use-toast"
 import { 
   AlertTriangle, 
   CheckCircle2, 
@@ -11,47 +17,55 @@ import {
   MapPin,
   Users,
   Calendar,
-  Download
+  Download,
+  RefreshCw,
+  Filter
 } from "lucide-react"
 
-// Mock data para demonstração
-const mockOccurrences = [
-  {
-    id: "COPF-2024-001",
-    agency: "AG0001 - Centro (São Paulo)",
-    equipment: "ATM Diebold 9800 - Slot 01",
-    description: "ATM não está dispensando cédulas - erro de hardware na gaveta",
-    severity: "critical" as const,
-    status: "active" as const,
-    createdAt: "2024-01-15T08:30:00",
-    assignedTo: "João Silva - NOC",
-    vendor: "Diebold Nixdorf"
-  },
-  {
-    id: "COPF-2024-002", 
-    agency: "AG0015 - Paulista (São Paulo)",
-    equipment: "Split Carrier 18k BTU - Térreo",
-    description: "Temperatura ambiente elevada - possível falha no compressor",
-    severity: "high" as const,
-    status: "pending" as const,
-    createdAt: "2024-01-15T09:15:00",
-    assignedTo: "Maria Santos - Facilities",
-    vendor: "Carrier do Brasil"
-  },
-  {
-    id: "COPF-2024-003",
-    agency: "AG0032 - Vila Madalena (São Paulo)",
-    equipment: "Link MPLS Principal - Roteador Cisco",
-    description: "Perda total de conectividade - link primário inoperante",
-    severity: "high" as const,
-    status: "active" as const,
-    createdAt: "2024-01-14T14:20:00",
-    assignedTo: "Carlos Oliveira - Redes",
-    vendor: "Vivo Empresas"
-  }
-]
-
 export function Dashboard() {
+  const { 
+    occurrences, 
+    isLoading, 
+    severityData, 
+    timelineData, 
+    mttrData, 
+    equipmentData, 
+    metrics,
+    refreshData 
+  } = useDashboardData()
+  
+  const { toast } = useToast()
+  const [selectedOccurrence, setSelectedOccurrence] = useState<any>(null)
+  const [modalOpen, setModalOpen] = useState(false)
+  const [filterPeriod, setFilterPeriod] = useState('30-days')
+  
+  const handleExport = () => {
+    toast({
+      title: "Exportação iniciada",
+      description: "Os dados estão sendo preparados para download...",
+    })
+    
+    // Simular exportação
+    setTimeout(() => {
+      toast({
+        title: "Download concluído",
+        description: "Relatório COPF exportado com sucesso!",
+      })
+    }, 2000)
+  }
+  
+  const handleOccurrenceClick = (occurrence: any) => {
+    setSelectedOccurrence(occurrence)
+    setModalOpen(true)
+  }
+  
+  const handleRefresh = () => {
+    refreshData()
+    toast({
+      title: "Dados atualizados",
+      description: "Dashboard atualizado com as informações mais recentes.",
+    })
+  }
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -63,11 +77,19 @@ export function Dashboard() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setFilterPeriod(filterPeriod === '30-days' ? '90-days' : '30-days')}
+          >
             <Calendar className="h-4 w-4 mr-2" />
-            Último 30 dias
+            {filterPeriod === '30-days' ? 'Últimos 30 dias' : 'Últimos 90 dias'}
           </Button>
-          <Button variant="corporate" size="sm">
+          <Button variant="outline" size="sm" onClick={handleRefresh}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Atualizar
+          </Button>
+          <Button variant="corporate" size="sm" onClick={handleExport}>
             <Download className="h-4 w-4 mr-2" />
             Exportar
           </Button>
@@ -75,184 +97,174 @@ export function Dashboard() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <MetricCard
-          title="Total de Ocorrências"
-          value={1247}
-          change="+12% vs mês anterior"
-          changeType="negative"
-          icon={<AlertTriangle className="h-5 w-5" />}
-          description="Últimos 30 dias"
-        />
-        <MetricCard
-          title="Ocorrências Resolvidas"
-          value={1089}
-          change="+8% vs mês anterior"
-          changeType="positive"
-          icon={<CheckCircle2 className="h-5 w-5" />}
-          description="87% taxa de resolução"
-        />
-        <MetricCard
-          title="MTTR Médio"
-          value="4.2h"
-          change="-15min vs mês anterior"
-          changeType="positive"
-          icon={<Clock className="h-5 w-5" />}
-          description="Tempo médio de resolução"
-        />
-        <MetricCard
-          title="Agências Afetadas"
-          value={89}
-          change="2 novas esta semana"
-          changeType="neutral"
-          icon={<MapPin className="h-5 w-5" />}
-          description="De 234 totais"
-        />
-      </div>
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <CardHeader className="pb-2">
+                <Skeleton className="h-4 w-32" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-20 mb-2" />
+                <Skeleton className="h-3 w-28" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <MetricCard
+            title="Total de Ocorrências"
+            value={metrics.totalOccurrences}
+            change="+12% vs mês anterior"
+            changeType="negative"
+            icon={<AlertTriangle className="h-5 w-5" />}
+            description={`${filterPeriod === '30-days' ? 'Últimos 30 dias' : 'Últimos 90 dias'}`}
+          />
+          <MetricCard
+            title="Ocorrências Resolvidas"
+            value={metrics.resolvedOccurrences}
+            change="+8% vs mês anterior"
+            changeType="positive"
+            icon={<CheckCircle2 className="h-5 w-5" />}
+            description={`${metrics.resolutionRate}% taxa de resolução`}
+          />
+          <MetricCard
+            title="MTTR Médio"
+            value={metrics.avgMTTR}
+            change="-15min vs mês anterior"
+            changeType="positive"
+            icon={<Clock className="h-5 w-5" />}
+            description="Tempo médio de resolução"
+          />
+          <MetricCard
+            title="Agências Afetadas"
+            value={metrics.affectedAgencies}
+            change="2 novas esta semana"
+            changeType="neutral"
+            icon={<MapPin className="h-5 w-5" />}
+            description="De 234 totais"
+          />
+        </div>
+      )}
 
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Severity Distribution */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" />
-              Distribuição por Severidade
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <StatusBadge status="critical" />
-                  <span className="text-sm">Crítico</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
-                    <div className="w-1/4 h-full bg-destructive rounded-full"></div>
-                  </div>
-                  <span className="text-sm font-medium">23</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <StatusBadge status="high" />
-                  <span className="text-sm">Alto</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
-                    <div className="w-2/5 h-full bg-warning rounded-full"></div>
-                  </div>
-                  <span className="text-sm font-medium">47</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <StatusBadge status="medium" />
-                  <span className="text-sm">Médio</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
-                    <div className="w-3/5 h-full bg-primary rounded-full"></div>
-                  </div>
-                  <span className="text-sm font-medium">89</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <StatusBadge status="low" />
-                  <span className="text-sm">Baixo</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
-                    <div className="w-1/2 h-full bg-muted-foreground rounded-full"></div>
-                  </div>
-                  <span className="text-sm font-medium">88</span>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Top Agencies */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MapPin className="h-5 w-5" />
-              Agências com Mais Ocorrências
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[
-                { name: "AG0001 - Centro (São Paulo)", count: 23, severity: "critical" },
-                { name: "AG0015 - Paulista (São Paulo)", count: 18, severity: "high" },
-                { name: "AG0032 - Vila Madalena (São Paulo)", count: 15, severity: "medium" },
-                { name: "AG0045 - Pinheiros (São Paulo)", count: 12, severity: "medium" },
-                { name: "AG0067 - Moema (São Paulo)", count: 9, severity: "low" }
-              ].map((agency, index) => (
-                <div key={agency.name} className="flex items-center justify-between p-2 rounded-lg hover:bg-accent">
-                  <div className="flex items-center gap-3">
-                    <Badge variant="outline" className="text-xs">
-                      #{index + 1}
-                    </Badge>
-                    <div>
-                      <p className="text-sm font-medium">{agency.name}</p>
-                      <StatusBadge status={agency.severity as any} />
-                    </div>
-                  </div>
-                  <span className="text-sm font-bold">{agency.count}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Interactive Charts */}
+      {isLoading ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <CardHeader>
+                <Skeleton className="h-6 w-40" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-[300px] w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <InteractiveCharts 
+          severityData={severityData}
+          timelineData={timelineData}
+          mttrData={mttrData}
+          equipmentData={equipmentData}
+        />
+      )}
 
       {/* Recent Occurrences */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5" />
-            Ocorrências Recentes
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5" />
+              Ocorrências Recentes
+            </div>
+            <Button variant="outline" size="sm">
+              <Filter className="h-4 w-4 mr-2" />
+              Filtros
+            </Button>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {mockOccurrences.map((occurrence) => (
-              <div 
-                key={occurrence.id} 
-                className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="flex flex-col gap-1">
-                    <StatusBadge status={occurrence.severity} />
-                    <StatusBadge status={occurrence.status} />
+          {isLoading ? (
+            <div className="space-y-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-4 p-4 border rounded-lg animate-pulse">
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-16" />
+                    <Skeleton className="h-4 w-16" />
                   </div>
-                  <div>
-                    <p className="font-medium text-foreground">{occurrence.id}</p>
-                    <p className="text-sm text-muted-foreground">{occurrence.agency}</p>
-                    <p className="text-sm">{occurrence.equipment}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{occurrence.description}</p>
+                  <div className="space-y-2 flex-1">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-3 w-48" />
+                    <Skeleton className="h-3 w-40" />
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium">{occurrence.assignedTo}</p>
-                  <p className="text-xs text-muted-foreground">{occurrence.vendor}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {new Date(occurrence.createdAt).toLocaleDateString('pt-BR')}
-                  </p>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {occurrences.slice(0, 5).map((occurrence) => (
+                <div 
+                  key={occurrence.id} 
+                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer group"
+                  onClick={() => handleOccurrenceClick(occurrence)}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="flex flex-col gap-1">
+                      <StatusBadge status={occurrence.severity} />
+                      <StatusBadge status={occurrence.status} />
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground group-hover:text-primary">
+                        {occurrence.id}
+                      </p>
+                      <p className="text-sm text-muted-foreground">{occurrence.agency}</p>
+                      <p className="text-sm">{occurrence.equipment}</p>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                        {occurrence.description}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-medium">{occurrence.assignedTo}</p>
+                    <p className="text-xs text-muted-foreground">{occurrence.vendor}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(occurrence.createdAt).toLocaleDateString('pt-BR')}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
           <div className="mt-4 pt-4 border-t">
             <Button variant="outline" className="w-full">
-              Ver Todas as Ocorrências
+              Ver Todas as Ocorrências ({occurrences.length})
             </Button>
           </div>
         </CardContent>
       </Card>
+
+      {/* Modal de Detalhes */}
+      <OccurrenceModal 
+        occurrence={selectedOccurrence}
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        onAssign={(id) => {
+          toast({
+            title: "Ocorrência reatribuída",
+            description: `Ocorrência ${id} foi reatribuída com sucesso.`,
+          })
+          setModalOpen(false)
+        }}
+        onComment={(id) => {
+          toast({
+            title: "Comentário adicionado",
+            description: `Comentário adicionado à ocorrência ${id}.`,
+          })
+          setModalOpen(false)
+        }}
+      />
     </div>
   )
 }
