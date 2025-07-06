@@ -2,8 +2,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
 import { StatusBadge } from './StatusBadge'
 import { OccurrenceData } from '@/hooks/useDashboardData'
+import { useToast } from '@/hooks/use-toast'
+import { useState } from 'react'
 import { 
   Building2, 
   Wrench, 
@@ -11,7 +15,9 @@ import {
   Calendar,
   FileText,
   Phone,
-  Clock
+  Clock,
+  Send,
+  MessageSquare
 } from 'lucide-react'
 
 interface OccurrenceModalProps {
@@ -29,10 +35,40 @@ export function OccurrenceModal({
   onAssign, 
   onComment 
 }: OccurrenceModalProps) {
+  const { toast } = useToast()
+  const [vendorMessage, setVendorMessage] = useState('')
+  const [isSendingMessage, setIsSendingMessage] = useState(false)
+  const [showVendorComm, setShowVendorComm] = useState(false)
+
   if (!occurrence) return null
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString('pt-BR')
+  }
+
+  const handleSendToVendor = async () => {
+    if (!vendorMessage.trim()) {
+      toast({
+        title: "Erro",
+        description: "Digite uma mensagem para enviar ao fornecedor",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setIsSendingMessage(true)
+    
+    // Simular envio da mensagem
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    
+    toast({
+      title: "Mensagem Enviada",
+      description: `Fornecedor ${occurrence.vendor} foi notificado sobre a ocorrência ${occurrence.id}`,
+    })
+    
+    setVendorMessage('')
+    setShowVendorComm(false)
+    setIsSendingMessage(false)
   }
 
   const getTimeElapsed = (dateString: string) => {
@@ -179,6 +215,47 @@ export function OccurrenceModal({
             </div>
           </div>
 
+          {/* Comunicação com Fornecedor */}
+          {showVendorComm && (
+            <div className="border rounded-lg p-4 bg-muted/20">
+              <div className="flex items-center gap-2 mb-3">
+                <MessageSquare className="h-4 w-4" />
+                <h4 className="text-sm font-medium">Comunicação com Fornecedor</h4>
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <Label htmlFor="vendor-message" className="text-sm font-medium">
+                    Mensagem para {occurrence.vendor}
+                  </Label>
+                  <Textarea
+                    id="vendor-message"
+                    placeholder="Digite sua mensagem para o fornecedor..."
+                    value={vendorMessage}
+                    onChange={(e) => setVendorMessage(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={handleSendToVendor}
+                    disabled={isSendingMessage}
+                    size="sm"
+                  >
+                    <Send className="mr-2 h-4 w-4" />
+                    {isSendingMessage ? 'Enviando...' : 'Enviar Mensagem'}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setShowVendorComm(false)}
+                  >
+                    Cancelar
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Ações */}
           <div className="flex justify-end gap-2 pt-4">
             <Button variant="outline" onClick={() => onComment?.(occurrence.id)}>
@@ -187,8 +264,12 @@ export function OccurrenceModal({
             <Button variant="outline" onClick={() => onAssign?.(occurrence.id)}>
               Reatribuir
             </Button>
-            <Button variant="corporate">
-              Acionar Fornecedor
+            <Button 
+              variant="premium"
+              onClick={() => setShowVendorComm(!showVendorComm)}
+            >
+              <MessageSquare className="mr-2 h-4 w-4" />
+              {showVendorComm ? 'Cancelar' : 'Comunicar com Fornecedor'}
             </Button>
           </div>
         </div>

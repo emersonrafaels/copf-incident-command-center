@@ -4,61 +4,82 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Filter, Download, Eye } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Search, Filter, Download, Eye, MessageSquare } from "lucide-react";
 import { StatusBadge } from "@/components/copf/StatusBadge";
-
-const mockOcorrencias = [
-  {
-    id: "COPF-2024-001",
-    agencia: "AG0001 - Centro (São Paulo)",
-    equipamento: "ATM Diebold 9800 - Slot 01",
-    severidade: "Crítica",
-    status: "aberta",
-    dataAbertura: "2024-01-15 08:30",
-    dataDeteccao: "2024-01-15 08:25",
-    descricao: "ATM não está dispensando cédulas - erro de hardware na gaveta",
-    fornecedor: "Diebold Nixdorf",
-    responsavel: "João Silva - NOC"
-  },
-  {
-    id: "COPF-2024-002", 
-    agencia: "AG0015 - Paulista (São Paulo)",
-    equipamento: "Split Carrier 18k BTU - Térreo",
-    severidade: "Média",
-    status: "internalizada",
-    dataAbertura: "2024-01-14 14:20",
-    dataDeteccao: "2024-01-14 14:15",
-    descricao: "Temperatura ambiente elevada - possível falha no compressor",
-    fornecedor: "Carrier do Brasil",
-    responsavel: "Maria Santos - Facilities"
-  },
-  {
-    id: "COPF-2024-003",
-    agencia: "AG0032 - Vila Madalena (São Paulo)", 
-    equipamento: "Link MPLS Principal - Roteador Cisco",
-    severidade: "Alta",
-    status: "aberta",
-    dataAbertura: "2024-01-15 09:45",
-    dataDeteccao: "2024-01-15 09:40",
-    descricao: "Perda total de conectividade - link primário inoperante",
-    fornecedor: "Vivo Empresas",
-    responsavel: "Carlos Oliveira - Redes"
-  },
-  {
-    id: "COPF-2024-004",
-    agencia: "AG0008 - Moema (São Paulo)",
-    equipamento: "Terminal POS Ingenico - Caixa 03",
-    severidade: "Baixa",
-    status: "fechada",
-    dataAbertura: "2024-01-13 16:10",
-    dataDeteccao: "2024-01-13 16:05",
-    descricao: "Lentidão nas transações - possível problema de comunicação",
-    fornecedor: "Ingenico Brasil",
-    responsavel: "Ana Costa - Suporte"
-  }
-];
+import { OccurrenceModal } from "@/components/copf/OccurrenceModal";
+import { useDashboardData } from "@/hooks/useDashboardData";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 const Ocorrencias = () => {
+  const { occurrences, isLoading } = useDashboardData()
+  const { toast } = useToast()
+  const [selectedOccurrence, setSelectedOccurrence] = useState(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
+  const [severityFilter, setSeverityFilter] = useState('all')
+  const [vendorPriorityFilter, setVendorPriorityFilter] = useState(false)
+
+  // Filtrar ocorrências
+  const filteredOccurrences = occurrences.filter(occurrence => {
+    const matchesSearch = 
+      occurrence.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      occurrence.agency.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      occurrence.description.toLowerCase().includes(searchTerm.toLowerCase())
+    
+    const matchesStatus = statusFilter === 'all' || occurrence.status === statusFilter
+    const matchesSeverity = severityFilter === 'all' || occurrence.severity === severityFilter
+    
+    // Simular lógica de priorização para fornecedor (críticas e altas são priorizadas)
+    const isVendorPriority = occurrence.severity === 'critical' || occurrence.severity === 'high'
+    const matchesVendorPriority = !vendorPriorityFilter || isVendorPriority
+
+    return matchesSearch && matchesStatus && matchesSeverity && matchesVendorPriority
+  })
+
+  const handleViewDetails = (occurrence) => {
+    setSelectedOccurrence(occurrence)
+    setIsModalOpen(true)
+  }
+
+  const handleExportCSV = () => {
+    toast({
+      title: "Exportação Iniciada",
+      description: "O arquivo CSV será baixado em instantes.",
+    })
+  }
+
+  const getSeverityVariant = (severity: string) => {
+    switch (severity) {
+      case 'critical': return 'destructive'
+      case 'high': return 'secondary'
+      case 'medium': return 'default'
+      default: return 'outline'
+    }
+  }
+
+  const getSeverityLabel = (severity: string) => {
+    switch (severity) {
+      case 'critical': return 'Crítica'
+      case 'high': return 'Alta'
+      case 'medium': return 'Média'
+      case 'low': return 'Baixa'
+      default: return severity
+    }
+  }
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'active': return 'Aberta'
+      case 'pending': return 'Em Andamento'
+      case 'resolved': return 'Resolvida'
+      default: return status
+    }
+  }
+
   return (
     <COPFLayout>
       <div className="space-y-6">
@@ -67,7 +88,7 @@ const Ocorrencias = () => {
             <h1 className="text-2xl font-bold text-foreground">Ocorrências</h1>
             <p className="text-muted-foreground">Lista detalhada de todas as ocorrências registradas</p>
           </div>
-          <Button variant="premium">
+          <Button variant="premium" onClick={handleExportCSV}>
             <Download className="mr-2 h-4 w-4" />
             Exportar CSV
           </Button>
@@ -78,79 +99,135 @@ const Ocorrencias = () => {
             <CardTitle>Filtros e Busca</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-4 flex-wrap">
-              <div className="flex-1 min-w-[200px]">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
                 <Input 
-                  placeholder="Buscar por ID, agência ou descrição..." 
-                  className="w-full"
+                  placeholder="Buscar por ID, agência..." 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <Button variant="outline">
-                <Search className="mr-2 h-4 w-4" />
-                Buscar
-              </Button>
-              <Button variant="outline">
-                <Filter className="mr-2 h-4 w-4" />
-                Filtros
-              </Button>
+              
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os Status</SelectItem>
+                  <SelectItem value="active">Abertas</SelectItem>
+                  <SelectItem value="pending">Em Andamento</SelectItem>
+                  <SelectItem value="resolved">Resolvidas</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={severityFilter} onValueChange={setSeverityFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Severidade" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas as Severidades</SelectItem>
+                  <SelectItem value="critical">Crítica</SelectItem>
+                  <SelectItem value="high">Alta</SelectItem>
+                  <SelectItem value="medium">Média</SelectItem>
+                  <SelectItem value="low">Baixa</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="vendor-priority"
+                  checked={vendorPriorityFilter}
+                  onCheckedChange={(checked) => setVendorPriorityFilter(checked === true)}
+                />
+                <label 
+                  htmlFor="vendor-priority" 
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  Priorizadas para Fornecedor
+                </label>
+              </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Lista de Ocorrências</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>Lista de Ocorrências</CardTitle>
+              <Badge variant="outline">
+                {filteredOccurrences.length} ocorrência(s) encontrada(s)
+              </Badge>
+            </div>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Agência</TableHead>
-                  <TableHead>Equipamento</TableHead>
-                  <TableHead>Severidade</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Responsável</TableHead>
-                  <TableHead>Fornecedor</TableHead>
-                  <TableHead>Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {mockOcorrencias.map((ocorrencia) => (
-                  <TableRow key={ocorrencia.id}>
-                    <TableCell className="font-medium">{ocorrencia.id}</TableCell>
-                    <TableCell>{ocorrencia.agencia}</TableCell>
-                    <TableCell>{ocorrencia.equipamento}</TableCell>
-                    <TableCell>
-                      <Badge variant={
-                        ocorrencia.severidade === "Crítica" ? "destructive" :
-                        ocorrencia.severidade === "Alta" ? "secondary" : "outline"
-                      }>
-                        {ocorrencia.severidade}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <StatusBadge status={
-                        ocorrencia.status === "aberta" ? "active" :
-                        ocorrencia.status === "fechada" ? "resolved" : 
-                        ocorrencia.status === "internalizada" ? "pending" : "pending"
-                      } />
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{ocorrencia.dataAbertura}</TableCell>
-                    <TableCell className="text-sm">{ocorrencia.responsavel}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{ocorrencia.fornecedor}</TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="sm">
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
+            {isLoading ? (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">Carregando ocorrências...</p>
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Agência</TableHead>
+                    <TableHead>Equipamento</TableHead>
+                    <TableHead>Severidade</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Data/Hora</TableHead>
+                    <TableHead>Fornecedor</TableHead>
+                    <TableHead>Ações</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {filteredOccurrences.map((occurrence) => (
+                    <TableRow key={occurrence.id}>
+                      <TableCell className="font-medium">{occurrence.id}</TableCell>
+                      <TableCell className="max-w-[200px] truncate">{occurrence.agency}</TableCell>
+                      <TableCell className="max-w-[150px] truncate">{occurrence.equipment}</TableCell>
+                      <TableCell>
+                        <Badge variant={getSeverityVariant(occurrence.severity)}>
+                          {getSeverityLabel(occurrence.severity)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <StatusBadge status={occurrence.status} />
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {new Date(occurrence.createdAt).toLocaleString('pt-BR')}
+                      </TableCell>
+                      <TableCell className="text-sm">{occurrence.vendor}</TableCell>
+                      <TableCell>
+                        <div className="flex gap-1">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleViewDetails(occurrence)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleViewDetails(occurrence)}
+                          >
+                            <MessageSquare className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
       </div>
+
+      <OccurrenceModal
+        occurrence={selectedOccurrence}
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+      />
     </COPFLayout>
   );
 };
