@@ -1,24 +1,21 @@
-import { ReactNode } from "react"
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
-import { COPFSidebar } from "./COPFSidebar"
-import { Button } from "@/components/ui/button"
-import { Bell, Moon, Sun, User } from "lucide-react"
-import { useState } from "react"
-
+import { ReactNode } from "react";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { COPFSidebar } from "./COPFSidebar";
+import { Button } from "@/components/ui/button";
+import { Bell, Moon, Sun, User } from "lucide-react";
+import { useState } from "react";
 interface COPFLayoutProps {
-  children: ReactNode
+  children: ReactNode;
 }
-
-export function COPFLayout({ children }: COPFLayoutProps) {
-  const [isDarkMode, setIsDarkMode] = useState(false)
-
+export function COPFLayout({
+  children
+}: COPFLayoutProps) {
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode)
-    document.documentElement.classList.toggle("dark")
-  }
-
-  return (
-    <SidebarProvider>
+    setIsDarkMode(!isDarkMode);
+    document.documentElement.classList.toggle("dark");
+  };
+  return <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
         <COPFSidebar />
         
@@ -29,12 +26,8 @@ export function COPFLayout({ children }: COPFLayoutProps) {
               <div className="flex items-center gap-4">
                 <SidebarTrigger />
                 <div>
-                  <h1 className="text-lg font-semibold text-foreground">
-                    Painel de Acompanhamento - COPF
-                  </h1>
-                  <p className="text-sm text-muted-foreground">
-                    Itaú Unibanco | Central de Operações e Prestação de Facilidades
-                  </p>
+                  <h1 className="text-lg font-semibold text-foreground">Ferramenta de Acompanhamento - COPF</h1>
+                  <p className="text-sm text-muted-foreground">Itaú Unibanco | Centro de Operações de Pontos Físicos</p>
                 </div>
               </div>
 
@@ -48,17 +41,8 @@ export function COPFLayout({ children }: COPFLayoutProps) {
                 </Button>
 
                 {/* Dark Mode Toggle */}
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={toggleDarkMode}
-                  title="Alternar modo escuro"
-                >
-                  {isDarkMode ? (
-                    <Sun className="h-5 w-5" />
-                  ) : (
-                    <Moon className="h-5 w-5" />
-                  )}
+                <Button variant="ghost" size="icon" onClick={toggleDarkMode} title="Alternar modo escuro">
+                  {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
                 </Button>
 
                 {/* User Profile */}
@@ -75,6 +59,5 @@ export function COPFLayout({ children }: COPFLayoutProps) {
           </main>
         </div>
       </div>
-    </SidebarProvider>
-  )
+    </SidebarProvider>;
 }
