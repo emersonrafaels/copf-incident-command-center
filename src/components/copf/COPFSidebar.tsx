@@ -7,7 +7,8 @@ import {
   MessageSquare, 
   Users, 
   Settings,
-  Home
+  Home,
+  Building2
 } from "lucide-react"
 
 import {
@@ -53,6 +54,12 @@ const navigation = [
     url: "/comunicacao", 
     icon: MessageSquare,
     description: "Gestão de fornecedores"
+  },
+  { 
+    title: "Visão do Fornecedor", 
+    url: "/visao-fornecedor", 
+    icon: Building2,
+    description: "Dashboard para fornecedores"
   },
   { 
     title: "Equipes", 
