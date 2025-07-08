@@ -56,7 +56,7 @@ export function Dashboard() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Painel de Acompanhamento - COPF</h1>
+          <h1 className="text-3xl font-bold text-foreground">Ferramenta de Acompanhamento - COPF</h1>
           <p className="text-muted-foreground">Itaú Unibanco | Gestão de Ocorrências
         </p>
         </div>
