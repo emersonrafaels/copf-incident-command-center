@@ -136,5 +136,103 @@
 
   body {
     @apply bg-background text-foreground;
+    font-size: clamp(14px, 1.2vw, 16px);
+    line-height: 1.5;
+  }
+
+  /* Zoom responsiveness adjustments */
+  @media (min-zoom: 90%) and (max-zoom: 100%) {
+    html {
+      font-size: 14px;
+    }
+    
+    .sidebar-content {
+      min-width: 240px;
+    }
+    
+    .main-content {
+      padding: clamp(1rem, 2vw, 1.5rem);
+    }
+  }
+
+  @media (min-zoom: 100%) {
+    html {
+      font-size: 16px;
+    }
+  }
+
+  /* Better responsive containers */
+  .responsive-grid {
+    display: grid;
+    gap: clamp(0.75rem, 1.5vw, 1.5rem);
+  }
+
+  .responsive-grid-1 {
+    grid-template-columns: 1fr;
+  }
+
+  .responsive-grid-2 {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+
+  .responsive-grid-3 {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+
+  .responsive-grid-4 {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+
+  /* Improved text scaling */
+  .text-responsive-sm {
+    font-size: clamp(0.75rem, 1vw, 0.875rem);
+  }
+
+  .text-responsive-base {
+    font-size: clamp(0.875rem, 1.2vw, 1rem);
+  }
+
+  .text-responsive-lg {
+    font-size: clamp(1rem, 1.4vw, 1.125rem);
+  }
+
+  .text-responsive-xl {
+    font-size: clamp(1.125rem, 1.6vw, 1.25rem);
+  }
+
+  .text-responsive-2xl {
+    font-size: clamp(1.25rem, 2vw, 1.5rem);
+  }
+
+  .text-responsive-3xl {
+    font-size: clamp(1.5rem, 2.5vw, 1.875rem);
+  }
+
+  /* Responsive spacing */
+  .space-responsive-sm {
+    gap: clamp(0.5rem, 1vw, 0.75rem);
+  }
+
+  .space-responsive-md {
+    gap: clamp(0.75rem, 1.5vw, 1.5rem);
+  }
+
+  .space-responsive-lg {
+    gap: clamp(1rem, 2vw, 2rem);
+  }
+
+  /* Fluid padding and margins */
+  .p-responsive {
+    padding: clamp(0.75rem, 2vw, 1.5rem);
+  }
+
+  .px-responsive {
+    padding-left: clamp(0.75rem, 2vw, 1.5rem);
+    padding-right: clamp(0.75rem, 2vw, 1.5rem);
+  }
+
+  .py-responsive {
+    padding-top: clamp(0.5rem, 1.5vw, 1rem);
+    padding-bottom: clamp(0.5rem, 1.5vw, 1rem);
   }
 }

@@ -99,7 +99,7 @@ const Ocorrencias = () => {
             <CardTitle>Filtros e Busca</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="responsive-grid responsive-grid-4">
               <div>
                 <Input 
                   placeholder="Buscar por ID, agência..." 

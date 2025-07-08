@@ -54,13 +54,13 @@ export function Dashboard() {
   };
   return <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Ferramenta de Acompanhamento - COPF</h1>
-          <p className="text-muted-foreground">Itaú Unibanco | Gestão de Ocorrências
+          <h1 className="text-responsive-3xl font-bold text-foreground">Ferramenta de Acompanhamento - COPF</h1>
+          <p className="text-responsive-base text-muted-foreground">Itaú Unibanco | Gestão de Ocorrências
         </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={() => setFilterPeriod(filterPeriod === '30-days' ? '90-days' : '30-days')}>
             <Calendar className="h-4 w-4 mr-2" />
             {filterPeriod === '30-days' ? 'Últimos 30 dias' : 'Últimos 90 dias'}
@@ -77,7 +77,7 @@ export function Dashboard() {
       </div>
 
       {/* KPI Cards */}
-      {isLoading ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {isLoading ? <div className="responsive-grid responsive-grid-4">
           {Array.from({
         length: 4
       }).map((_, i) => <Card key={i} className="animate-pulse">
@@ -89,7 +89,7 @@ export function Dashboard() {
                 <Skeleton className="h-3 w-28" />
               </CardContent>
             </Card>)}
-        </div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        </div> : <div className="responsive-grid responsive-grid-4">
           <MetricCard title="Total de Ocorrências" value={metrics.totalOccurrences} change="+12% vs mês anterior" changeType="negative" icon={<AlertTriangle className="h-5 w-5" />} description={`${filterPeriod === '30-days' ? 'Últimos 30 dias' : 'Últimos 90 dias'}`} />
           <MetricCard title="Ocorrências Resolvidas" value={metrics.resolvedOccurrences} change="+8% vs mês anterior" changeType="positive" icon={<CheckCircle2 className="h-5 w-5" />} description={`${metrics.resolutionRate}% taxa de resolução`} />
           <MetricCard title="MTTR Médio" value={metrics.avgMTTR} change="-15min vs mês anterior" changeType="positive" icon={<Clock className="h-5 w-5" />} description="Tempo médio de resolução" />
@@ -97,7 +97,7 @@ export function Dashboard() {
         </div>}
 
       {/* Interactive Charts */}
-      {isLoading ? <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {isLoading ? <div className="responsive-grid responsive-grid-2">
           {Array.from({
         length: 4
       }).map((_, i) => <Card key={i} className="animate-pulse">

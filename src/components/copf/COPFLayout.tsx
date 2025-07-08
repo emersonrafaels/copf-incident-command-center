@@ -21,17 +21,17 @@ export function COPFLayout({
         
         <div className="flex-1 flex flex-col">
           {/* Header */}
-          <header className="h-16 border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-            <div className="flex items-center justify-between h-full px-6">
-              <div className="flex items-center gap-4">
+          <header className="h-14 sm:h-16 border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+            <div className="flex items-center justify-between h-full px-responsive">
+              <div className="flex items-center space-responsive-sm">
                 <SidebarTrigger />
-                <div>
-                  <h1 className="text-lg font-semibold text-foreground">Ferramenta de Acompanhamento - COPF</h1>
-                  <p className="text-sm text-muted-foreground">Itaú Unibanco | Centro de Operações de Pontos Físicos</p>
+                <div className="hidden sm:block min-w-0">
+                  <h1 className="text-responsive-lg font-semibold text-foreground truncate">Ferramenta de Acompanhamento - COPF</h1>
+                  <p className="text-responsive-sm text-muted-foreground truncate">Itaú Unibanco | Centro de Operações de Pontos Físicos</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center space-responsive-sm">
                 {/* Notifications */}
                 <Button variant="ghost" size="icon" className="relative">
                   <Bell className="h-5 w-5" />
@@ -54,7 +54,7 @@ export function COPFLayout({
           </header>
 
           {/* Main Content */}
-          <main className="flex-1 p-6 bg-gradient-subtle">
+          <main className="flex-1 p-responsive bg-gradient-subtle main-content">
             {children}
           </main>
         </div>
