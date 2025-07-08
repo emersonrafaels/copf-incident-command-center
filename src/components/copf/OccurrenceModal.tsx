@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { StatusBadge } from './StatusBadge'
 import { OccurrenceData } from '@/hooks/useDashboardData'
 import { useToast } from '@/hooks/use-toast'
@@ -17,7 +18,11 @@ import {
   Phone,
   Clock,
   Send,
-  MessageSquare
+  MessageSquare,
+  Flag,
+  Paperclip,
+  Upload,
+  X
 } from 'lucide-react'
 
 interface OccurrenceModalProps {
@@ -39,6 +44,11 @@ export function OccurrenceModal({
   const [vendorMessage, setVendorMessage] = useState('')
   const [isSendingMessage, setIsSendingMessage] = useState(false)
   const [showVendorComm, setShowVendorComm] = useState(false)
+  const [priority, setPriority] = useState<'critical' | 'high' | 'medium' | 'low'>(
+    (occurrence?.severity as 'critical' | 'high' | 'medium' | 'low') || 'medium'
+  )
+  const [attachments, setAttachments] = useState<File[]>([])
+  const [showPriorityOptions, setShowPriorityOptions] = useState(false)
 
   if (!occurrence) return null
 
@@ -61,14 +71,56 @@ export function OccurrenceModal({
     // Simular envio da mensagem
     await new Promise(resolve => setTimeout(resolve, 1500))
     
+    const priorityText = priority !== occurrence.severity ? ` (Prioridade alterada para ${getPriorityLabel(priority)})` : ''
+    const attachmentText = attachments.length > 0 ? ` com ${attachments.length} anexo(s)` : ''
+    
     toast({
       title: "Mensagem Enviada",
-      description: `Fornecedor ${occurrence.vendor} foi notificado sobre a ocorrência ${occurrence.id}`,
+      description: `Fornecedor ${occurrence.vendor} foi notificado sobre a ocorrência ${occurrence.id}${priorityText}${attachmentText}`,
     })
     
     setVendorMessage('')
+    setAttachments([])
     setShowVendorComm(false)
     setIsSendingMessage(false)
+  }
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || [])
+    setAttachments(prev => [...prev, ...files])
+  }
+
+  const removeAttachment = (index: number) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const handlePriorityChange = (newPriority: string) => {
+    const validPriority = newPriority as 'critical' | 'high' | 'medium' | 'low'
+    setPriority(validPriority)
+    toast({
+      title: "Prioridade Alterada",
+      description: `Ocorrência ${occurrence.id} definida como ${getPriorityLabel(validPriority)}`,
+    })
+  }
+
+  const getPriorityLabel = (priority: string) => {
+    switch (priority) {
+      case 'critical': return 'Crítica'
+      case 'high': return 'Alta'
+      case 'medium': return 'Média'
+      case 'low': return 'Baixa'
+      default: return priority
+    }
+  }
+
+  const getPriorityVariant = (priority: string) => {
+    switch (priority) {
+      case 'critical': return 'destructive'
+      case 'high': return 'secondary'
+      case 'medium': return 'default'
+      case 'low': return 'outline'
+      default: return 'outline'
+    }
   }
 
   const getTimeElapsed = (dateString: string) => {
@@ -222,7 +274,32 @@ export function OccurrenceModal({
                 <MessageSquare className="h-4 w-4" />
                 <h4 className="text-sm font-medium">Comunicação com Fornecedor</h4>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-4">
+                {/* Definir Prioridade */}
+                <div>
+                  <Label className="text-sm font-medium flex items-center gap-2">
+                    <Flag className="h-4 w-4" />
+                    Prioridade da Ocorrência
+                  </Label>
+                  <Select value={priority} onValueChange={handlePriorityChange}>
+                    <SelectTrigger className="w-full mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="critical">🔴 Crítica</SelectItem>
+                      <SelectItem value="high">🟡 Alta</SelectItem>
+                      <SelectItem value="medium">🟢 Média</SelectItem>
+                      <SelectItem value="low">⚪ Baixa</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {priority !== occurrence.severity && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Prioridade alterada de {getPriorityLabel(occurrence.severity)} para {getPriorityLabel(priority)}
+                    </p>
+                  )}
+                </div>
+
+                {/* Mensagem */}
                 <div>
                   <Label htmlFor="vendor-message" className="text-sm font-medium">
                     Mensagem para {occurrence.vendor}
@@ -232,9 +309,63 @@ export function OccurrenceModal({
                     placeholder="Digite sua mensagem para o fornecedor..."
                     value={vendorMessage}
                     onChange={(e) => setVendorMessage(e.target.value)}
-                    className="mt-1"
+                    className="mt-1 min-h-[100px]"
                   />
                 </div>
+
+                {/* Anexos */}
+                <div>
+                  <Label className="text-sm font-medium flex items-center gap-2">
+                    <Paperclip className="h-4 w-4" />
+                    Anexos
+                  </Label>
+                  <div className="mt-1 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="file"
+                        multiple
+                        onChange={handleFileUpload}
+                        className="hidden"
+                        id="file-upload"
+                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => document.getElementById('file-upload')?.click()}
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        Adicionar Arquivo
+                      </Button>
+                      <span className="text-xs text-muted-foreground">
+                        PDF, DOC, IMG até 10MB
+                      </span>
+                    </div>
+                    
+                    {attachments.length > 0 && (
+                      <div className="space-y-1">
+                        {attachments.map((file, index) => (
+                          <div key={index} className="flex items-center gap-2 p-2 bg-muted/50 rounded-md">
+                            <Paperclip className="h-3 w-3" />
+                            <span className="text-xs flex-1 truncate">{file.name}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {(file.size / 1024 / 1024).toFixed(1)}MB
+                            </span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeAttachment(index)}
+                              className="h-6 w-6 p-0"
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 <div className="flex gap-2">
                   <Button 
                     onClick={handleSendToVendor}

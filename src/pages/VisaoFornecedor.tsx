@@ -16,7 +16,10 @@ import {
   MessageSquare,
   Send,
   Bell,
-  Star
+  Star,
+  Paperclip,
+  Flag,
+  Download
 } from "lucide-react";
 import { StatusBadge } from "@/components/copf/StatusBadge";
 import { useDashboardData } from "@/hooks/useDashboardData";
@@ -39,34 +42,58 @@ const VisaoFornecedor = () => {
     occ.severity === 'critical' || occ.severity === 'high'
   )
   
-  // Simular mensagens/comentários recebidos
+  // Simular mensagens/comentários recebidos com mais detalhes
   const receivedMessages = [
     {
       id: 1,
       occurrenceId: "OCC-2024-001",
       from: "COPF - Centro de Operações",
-      message: "Ocorrência crítica no ATM AG-001. Necessária intervenção imediata conforme SLA de 2 horas.",
+      message: "Ocorrência crítica no ATM AG-001. Necessária intervenção imediata conforme SLA de 2 horas. Prioridade alterada para CRÍTICA.",
       timestamp: "2024-01-15T14:30:00Z",
       priority: "critical",
-      read: false
+      read: false,
+      attachments: [
+        { name: "diagnostico_atm.pdf", size: "2.3MB" },
+        { name: "foto_erro.jpg", size: "1.8MB" }
+      ],
+      priorityChanged: true,
+      previousPriority: "high"
     },
     {
       id: 2,
       occurrenceId: "OCC-2024-003", 
       from: "COPF - Centro de Operações",
-      message: "Favor confirmar previsão de resolução para a ocorrência no equipamento de rede principal.",
+      message: "Favor confirmar previsão de resolução para a ocorrência no equipamento de rede principal. Cliente reportando lentidão nas transações.",
       timestamp: "2024-01-15T13:15:00Z",
       priority: "high",
-      read: true
+      read: true,
+      attachments: [],
+      priorityChanged: false
     },
     {
       id: 3,
       occurrenceId: "OCC-2024-005",
       from: "COPF - Escalação",
-      message: "Ocorrência escalada devido ao não cumprimento do SLA. Favor contatar supervisor responsável.",
+      message: "Ocorrência escalada devido ao não cumprimento do SLA. Favor contatar supervisor responsável. Prioridade elevada para CRÍTICA devido ao tempo de resposta.",
       timestamp: "2024-01-15T12:00:00Z", 
       priority: "critical",
-      read: false
+      read: false,
+      attachments: [
+        { name: "relatorio_sla.docx", size: "856KB" }
+      ],
+      priorityChanged: true,
+      previousPriority: "medium"
+    },
+    {
+      id: 4,
+      occurrenceId: "OCC-2024-007",
+      from: "COPF - Centro de Operações",
+      message: "Nova ocorrência registrada. Equipamento apresentando erro intermitente. Verificar se é problema recorrente.",
+      timestamp: "2024-01-15T11:45:00Z",
+      priority: "medium",
+      read: true,
+      attachments: [],
+      priorityChanged: false
     }
   ]
 
@@ -344,28 +371,71 @@ const VisaoFornecedor = () => {
                       className={`${!message.read ? 'border-l-4 border-l-destructive bg-destructive/5' : ''}`}
                     >
                       <CardContent className="pt-4">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <Badge variant="outline">{message.occurrenceId}</Badge>
-                              <Badge variant={getSeverityVariant(message.priority)}>
-                                {getSeverityLabel(message.priority)}
-                              </Badge>
-                              {!message.read && (
-                                <Badge variant="destructive" className="text-xs">
-                                  NOVA
-                                </Badge>
-                              )}
-                            </div>
-                            <div className="text-sm text-muted-foreground mb-2">
-                              <strong>{message.from}</strong> • {getTimeAgo(message.timestamp)}
-                            </div>
-                            <p className="text-sm">{message.message}</p>
-                          </div>
-                          <Button size="sm" variant="outline">
-                            Responder
-                          </Button>
-                        </div>
+                         <div className="flex items-start justify-between gap-4">
+                           <div className="flex-1">
+                             <div className="flex items-center gap-2 mb-2">
+                               <Badge variant="outline">{message.occurrenceId}</Badge>
+                               <Badge variant={getSeverityVariant(message.priority)}>
+                                 {getSeverityLabel(message.priority)}
+                               </Badge>
+                               {message.priorityChanged && (
+                                 <Badge variant="outline" className="text-xs bg-warning/10">
+                                   <Flag className="h-3 w-3 mr-1" />
+                                   Prioridade Alterada
+                                 </Badge>
+                               )}
+                               {message.attachments.length > 0 && (
+                                 <Badge variant="outline" className="text-xs">
+                                   <Paperclip className="h-3 w-3 mr-1" />
+                                   {message.attachments.length} anexo(s)
+                                 </Badge>
+                               )}
+                               {!message.read && (
+                                 <Badge variant="destructive" className="text-xs">
+                                   NOVA
+                                 </Badge>
+                               )}
+                             </div>
+                             <div className="text-sm text-muted-foreground mb-2">
+                               <strong>{message.from}</strong> • {getTimeAgo(message.timestamp)}
+                             </div>
+                             
+                             {message.priorityChanged && (
+                               <div className="text-xs text-warning mb-2 p-2 bg-warning/5 rounded border-l-2 border-warning">
+                                 <Flag className="h-3 w-3 inline mr-1" />
+                                 Prioridade alterada de <strong>{getSeverityLabel(message.previousPriority)}</strong> para <strong>{getSeverityLabel(message.priority)}</strong>
+                               </div>
+                             )}
+                             
+                             <p className="text-sm mb-3">{message.message}</p>
+                             
+                             {message.attachments.length > 0 && (
+                               <div className="space-y-1 mb-3">
+                                 <p className="text-xs font-medium text-muted-foreground">Anexos:</p>
+                                 {message.attachments.map((attachment, idx) => (
+                                   <div key={idx} className="flex items-center gap-2 p-2 bg-muted/30 rounded text-xs">
+                                     <Paperclip className="h-3 w-3" />
+                                     <span className="flex-1">{attachment.name}</span>
+                                     <span className="text-muted-foreground">{attachment.size}</span>
+                                     <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+                                       <Download className="h-3 w-3" />
+                                     </Button>
+                                   </div>
+                                 ))}
+                               </div>
+                             )}
+                           </div>
+                           <div className="flex flex-col gap-2">
+                             <Button size="sm" variant="outline">
+                               Responder
+                             </Button>
+                             {!message.read && (
+                               <Button size="sm" variant="ghost" className="text-xs">
+                                 Marcar como lida
+                               </Button>
+                             )}
+                           </div>
+                         </div>
                       </CardContent>
                     </Card>
                   ))}
