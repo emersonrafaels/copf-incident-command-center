@@ -1,4 +1,5 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -135,7 +136,7 @@ export function OccurrenceModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
@@ -143,7 +144,8 @@ export function OccurrenceModal({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <ScrollArea className="max-h-[70vh] pr-4">
+          <div className="space-y-6">
           {/* Header com ID e Status */}
           <div className="flex items-center justify-between">
             <div>
@@ -403,7 +405,8 @@ export function OccurrenceModal({
               {showVendorComm ? 'Cancelar' : 'Comunicar com Fornecedor'}
             </Button>
           </div>
-        </div>
+          </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   )

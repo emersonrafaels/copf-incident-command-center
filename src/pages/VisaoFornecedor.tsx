@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Clock, 
   AlertTriangle, 
@@ -227,7 +228,8 @@ const VisaoFornecedor = () => {
                 <CardTitle>Todas as Minhas Ocorrências</CardTitle>
               </CardHeader>
               <CardContent>
-                <Table>
+                <ScrollArea className="h-[500px]">
+                  <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>ID</TableHead>
@@ -281,6 +283,7 @@ const VisaoFornecedor = () => {
                     })}
                   </TableBody>
                 </Table>
+                </ScrollArea>
               </CardContent>
             </Card>
           </TabsContent>
@@ -294,7 +297,8 @@ const VisaoFornecedor = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <Table>
+                <ScrollArea className="h-[400px]">
+                  <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>ID</TableHead>
@@ -351,6 +355,7 @@ const VisaoFornecedor = () => {
                     })}
                   </TableBody>
                 </Table>
+                </ScrollArea>
               </CardContent>
             </Card>
           </TabsContent>
@@ -364,7 +369,8 @@ const VisaoFornecedor = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <ScrollArea className="h-[500px]">
+                  <div className="space-y-4">
                   {receivedMessages.map((message) => (
                     <Card 
                       key={message.id} 
@@ -439,8 +445,9 @@ const VisaoFornecedor = () => {
                       </CardContent>
                     </Card>
                   ))}
-                </div>
-              </CardContent>
+                 </div>
+                 </ScrollArea>
+               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search, Filter, Download, Eye, MessageSquare } from "lucide-react";
 import { StatusBadge } from "@/components/copf/StatusBadge";
 import { OccurrenceModal } from "@/components/copf/OccurrenceModal";
@@ -165,7 +166,8 @@ const Ocorrencias = () => {
                 <p className="text-muted-foreground">Carregando ocorrências...</p>
               </div>
             ) : (
-              <Table>
+              <ScrollArea className="h-[600px]">
+                <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>ID</TableHead>
@@ -218,6 +220,7 @@ const Ocorrencias = () => {
                   ))}
                 </TableBody>
               </Table>
+              </ScrollArea>
             )}
           </CardContent>
         </Card>
