@@ -204,13 +204,23 @@ const Ocorrencias = () => {
                             variant="ghost" 
                             size="sm"
                             onClick={() => handleViewDetails(occurrence)}
+                            title="Visualizar detalhes"
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
                           <Button 
                             variant="ghost" 
                             size="sm"
-                            onClick={() => handleViewDetails(occurrence)}
+                            onClick={() => {
+                              setSelectedOccurrence(occurrence)
+                              setIsModalOpen(true)
+                              // Simular abertura direta na aba de comunicação
+                              toast({
+                                title: "Comunicação Iniciada",
+                                description: "Abrindo canal de comunicação com fornecedor.",
+                              })
+                            }}
+                            title="Enviar mensagem"
                           >
                             <MessageSquare className="h-4 w-4" />
                           </Button>

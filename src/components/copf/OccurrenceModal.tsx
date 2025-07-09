@@ -394,9 +394,6 @@ export function OccurrenceModal({
             <Button variant="outline" onClick={() => onComment?.(occurrence.id)}>
               Adicionar Comentário
             </Button>
-            <Button variant="outline" onClick={() => onAssign?.(occurrence.id)}>
-              Reatribuir
-            </Button>
             <Button 
               variant="premium"
               onClick={() => setShowVendorComm(!showVendorComm)}

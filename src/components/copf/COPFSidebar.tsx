@@ -32,13 +32,14 @@ const navigation = [{
   url: "/visao-fornecedor",
   icon: Building2,
   description: "Dashboard para fornecedores"
-}, {
+}];
+const adminNavigation = [{
   title: "Equipes",
   url: "/equipes",
   icon: Users,
-  description: "Gestão de usuários"
-}];
-const adminNavigation = [{
+  description: "Gestão de usuários",
+  hidden: true // Oculto por padrão
+}, {
   title: "Configurações",
   url: "/configuracoes",
   icon: Settings,
@@ -51,6 +52,7 @@ export function COPFSidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
   const collapsed = state === "collapsed";
+  const [showTeams, setShowTeams] = useState(false); // Controlado por configuração
   const isActive = (path: string) => {
     if (path === "/" && currentPath === "/") return true;
     if (path !== "/" && currentPath.startsWith(path)) return true;
@@ -100,7 +102,7 @@ export function COPFSidebar() {
           <SidebarGroupLabel>Administração</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {adminNavigation.map(item => <SidebarMenuItem key={item.title}>
+              {adminNavigation.filter(item => !item.hidden || (item.title === "Equipes" && showTeams)).map(item => <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavCls(item.url)} title={collapsed ? item.description : undefined}>
                       <item.icon className="h-5 w-5" />

@@ -431,16 +431,37 @@ const VisaoFornecedor = () => {
                                </div>
                              )}
                            </div>
-                           <div className="flex flex-col gap-2">
-                             <Button size="sm" variant="outline">
-                               Responder
-                             </Button>
-                             {!message.read && (
-                               <Button size="sm" variant="ghost" className="text-xs">
-                                 Marcar como lida
-                               </Button>
-                             )}
-                           </div>
+                            <div className="flex flex-col gap-2">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => {
+                                  toast({
+                                    title: "Resposta Enviada",
+                                    description: "Sua resposta foi enviada com sucesso.",
+                                  })
+                                }}
+                              >
+                                Responder
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="default"
+                                onClick={() => {
+                                  toast({
+                                    title: "Resposta Rápida",
+                                    description: "Mensagem de confirmação enviada.",
+                                  })
+                                }}
+                              >
+                                Resposta Rápida
+                              </Button>
+                              {!message.read && (
+                                <Button size="sm" variant="ghost" className="text-xs">
+                                  Marcar como lida
+                                </Button>
+                              )}
+                            </div>
                          </div>
                       </CardContent>
                     </Card>
