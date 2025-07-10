@@ -7,7 +7,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, Filter, Download, Eye, MessageSquare, Bot } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Search, Filter, Download, Eye, MessageSquare, Bot, Star, MoreHorizontal, Zap } from "lucide-react";
 import { StatusBadge } from "@/components/copf/StatusBadge";
 import { OccurrenceModal } from "@/components/copf/OccurrenceModal";
 import { useDashboardData } from "@/hooks/useDashboardData";
@@ -54,6 +60,20 @@ const Ocorrencias = () => {
     setSelectedOccurrence(occurrence)
     setModalMode('communication')
     setIsModalOpen(true)
+  }
+
+  const handlePrioritize = (occurrence, type: 'priority_only' | 'priority_with_message') => {
+    if (type === 'priority_only') {
+      toast({
+        title: "Ocorrência Priorizada",
+        description: `Ocorrência ${occurrence.id} foi marcada como prioritária`,
+      })
+    } else {
+      // Abrir modal de comunicação para priorizar com mensagem
+      setSelectedOccurrence(occurrence)
+      setModalMode('communication')
+      setIsModalOpen(true)
+    }
   }
 
   const handleExportExcel = () => {
@@ -331,26 +351,47 @@ const Ocorrencias = () => {
                         {new Date(occurrence.createdAt).toLocaleString('pt-BR')}
                       </TableCell>
                       <TableCell className="text-sm">{occurrence.vendor}</TableCell>
-                      <TableCell>
-                        <div className="flex gap-1">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleViewDetails(occurrence)}
-                            title="Visualizar detalhes"
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
+                       <TableCell>
+                         <div className="flex gap-1">
                            <Button 
                              variant="ghost" 
                              size="sm"
-                             onClick={() => handleSendMessage(occurrence)}
-                             title="Enviar mensagem"
+                             onClick={() => handleViewDetails(occurrence)}
+                             title="Visualizar detalhes"
                            >
-                             <MessageSquare className="h-4 w-4" />
+                             <Eye className="h-4 w-4" />
                            </Button>
-                        </div>
-                      </TableCell>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleSendMessage(occurrence)}
+                              title="Enviar mensagem"
+                            >
+                              <MessageSquare className="h-4 w-4" />
+                            </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent>
+                                <DropdownMenuItem 
+                                  onClick={() => handlePrioritize(occurrence, 'priority_only')}
+                                >
+                                  <Zap className="mr-2 h-4 w-4" />
+                                  Apenas Priorizar
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={() => handlePrioritize(occurrence, 'priority_with_message')}
+                                >
+                                  <MessageSquare className="mr-2 h-4 w-4" />
+                                  Priorizar + Mensagem
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                         </div>
+                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

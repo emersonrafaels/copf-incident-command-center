@@ -8,6 +8,9 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Clock, 
   AlertTriangle, 
@@ -20,9 +23,14 @@ import {
   Star,
   Paperclip,
   Flag,
-  Download
+  Download,
+  Reply,
+  FileText,
+  History,
+  Zap
 } from "lucide-react";
 import { StatusBadge } from "@/components/copf/StatusBadge";
+import { MessageTemplates } from "@/components/copf/MessageTemplates";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -31,6 +39,8 @@ const VisaoFornecedor = () => {
   const { occurrences, isLoading } = useDashboardData()
   const { toast } = useToast()
   const [responseText, setResponseText] = useState("")
+  const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null)
+  const [replyText, setReplyText] = useState("")
   
   // Simular fornecedor logado
   const currentVendor = 'TechSoluções Ltda'
@@ -42,6 +52,37 @@ const VisaoFornecedor = () => {
   const prioritizedOccurrences = vendorOccurrences.filter(occ => 
     occ.severity === 'critical' || occ.severity === 'high'
   )
+  
+  // Simular ocorrências resolvidas
+  const resolvedOccurrences = [
+    {
+      id: "OCC-2024-R001",
+      equipment: "ATM AG-005 - Terminal Principal",
+      severity: "high",
+      resolvedAt: "2024-01-14T16:30:00Z",
+      resolutionTime: "1.5h",
+      satisfactionScore: 5,
+      resolutionSummary: "Substituição do módulo de dispensador de cédulas"
+    },
+    {
+      id: "OCC-2024-R002", 
+      equipment: "Router CORE-02 - Sala Servidores",
+      severity: "critical",
+      resolvedAt: "2024-01-13T14:15:00Z",
+      resolutionTime: "45min",
+      satisfactionScore: 4,
+      resolutionSummary: "Reinicialização do equipamento após atualização de firmware"
+    },
+    {
+      id: "OCC-2024-R003",
+      equipment: "Servidor APP-01 - Data Center",
+      severity: "medium", 
+      resolvedAt: "2024-01-12T11:20:00Z",
+      resolutionTime: "2.2h",
+      satisfactionScore: 5,
+      resolutionSummary: "Limpeza de cache e otimização de performance"
+    }
+  ]
   
   // Simular mensagens/comentários recebidos com mais detalhes
   const receivedMessages = [
@@ -106,6 +147,25 @@ const VisaoFornecedor = () => {
       description: `Resposta enviada para ocorrência ${occurrenceId}`,
     })
     setResponseText("")
+  }
+
+  const handleReplyToMessage = (messageId: number) => {
+    if (!replyText.trim()) return
+    
+    toast({
+      title: "Resposta Enviada",
+      description: `Resposta enviada para a mensagem do COPF`,
+    })
+    setReplyText("")
+    setSelectedMessageId(null)
+  }
+
+  const handleTemplateSelect = (template: any) => {
+    if (selectedMessageId) {
+      setReplyText(template.content)
+    } else {
+      setResponseText(template.content)
+    }
   }
 
   const getSeverityLabel = (severity: string) => {
@@ -216,10 +276,11 @@ const VisaoFornecedor = () => {
         </div>
 
         <Tabs defaultValue="occurrences" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="occurrences">Minhas Ocorrências</TabsTrigger>
             <TabsTrigger value="priority">Ocorrências Priorizadas</TabsTrigger>
             <TabsTrigger value="messages">Mensagens Recebidas</TabsTrigger>
+            <TabsTrigger value="history">Histórico Resolvidas</TabsTrigger>
           </TabsList>
 
           <TabsContent value="occurrences" className="space-y-4">
@@ -334,12 +395,32 @@ const VisaoFornecedor = () => {
                           </TableCell>
                           <TableCell>
                             <div className="space-y-2">
-                              <Textarea 
-                                placeholder="Descreva as ações tomadas..."
-                                value={responseText}
-                                onChange={(e) => setResponseText(e.target.value)}
-                                className="min-h-[60px]"
-                              />
+                              <div className="flex gap-2">
+                                <div className="flex-1">
+                                  <Textarea 
+                                    placeholder="Descreva as ações tomadas..."
+                                    value={responseText}
+                                    onChange={(e) => setResponseText(e.target.value)}
+                                    className="min-h-[60px]"
+                                  />
+                                </div>
+                                <Dialog>
+                                  <DialogTrigger asChild>
+                                    <Button variant="outline" size="sm">
+                                      <FileText className="h-4 w-4" />
+                                    </Button>
+                                  </DialogTrigger>
+                                  <DialogContent className="max-w-lg">
+                                    <DialogHeader>
+                                      <DialogTitle>Templates de Resposta</DialogTitle>
+                                    </DialogHeader>
+                                    <MessageTemplates 
+                                      type="vendor" 
+                                      onSelectTemplate={handleTemplateSelect}
+                                    />
+                                  </DialogContent>
+                                </Dialog>
+                              </div>
                               <Button 
                                 size="sm" 
                                 onClick={() => handleSendResponse(occurrence.id)}
@@ -415,66 +496,172 @@ const VisaoFornecedor = () => {
                              
                              <p className="text-sm mb-3">{message.message}</p>
                              
+                             {/* Anexos */}
                              {message.attachments.length > 0 && (
-                               <div className="space-y-1 mb-3">
-                                 <p className="text-xs font-medium text-muted-foreground">Anexos:</p>
-                                 {message.attachments.map((attachment, idx) => (
-                                   <div key={idx} className="flex items-center gap-2 p-2 bg-muted/30 rounded text-xs">
-                                     <Paperclip className="h-3 w-3" />
-                                     <span className="flex-1">{attachment.name}</span>
-                                     <span className="text-muted-foreground">{attachment.size}</span>
-                                     <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
-                                       <Download className="h-3 w-3" />
-                                     </Button>
+                               <div className="mt-3">
+                                 <p className="text-xs font-medium text-muted-foreground mb-2">Anexos:</p>
+                                 <div className="space-y-1">
+                                   {message.attachments.map((attachment, idx) => (
+                                     <div key={idx} className="flex items-center gap-2 text-xs p-2 bg-muted/50 rounded">
+                                       <Paperclip className="h-3 w-3" />
+                                       <span className="flex-1">{attachment.name}</span>
+                                       <span className="text-muted-foreground">{attachment.size}</span>
+                                       <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+                                         <Download className="h-3 w-3" />
+                                       </Button>
+                                     </div>
+                                   ))}
+                                 </div>
+                               </div>
+                             )}
+
+                             {/* Área de Resposta */}
+                             {selectedMessageId === message.id && (
+                               <div className="mt-4 p-3 bg-muted/30 rounded border">
+                                 <div className="flex gap-2 mb-2">
+                                   <div className="flex-1">
+                                     <Textarea
+                                       placeholder="Digite sua resposta..."
+                                       value={replyText}
+                                       onChange={(e) => setReplyText(e.target.value)}
+                                       className="min-h-[80px]"
+                                     />
                                    </div>
-                                 ))}
+                                   <Dialog>
+                                     <DialogTrigger asChild>
+                                       <Button variant="outline" size="sm">
+                                         <FileText className="h-4 w-4" />
+                                       </Button>
+                                     </DialogTrigger>
+                                     <DialogContent className="max-w-lg">
+                                       <DialogHeader>
+                                         <DialogTitle>Templates de Resposta</DialogTitle>
+                                       </DialogHeader>
+                                       <MessageTemplates 
+                                         type="vendor" 
+                                         onSelectTemplate={handleTemplateSelect}
+                                       />
+                                     </DialogContent>
+                                   </Dialog>
+                                 </div>
+                                 <div className="flex gap-2">
+                                   <Button 
+                                     size="sm" 
+                                     onClick={() => handleReplyToMessage(message.id)}
+                                     disabled={!replyText.trim()}
+                                   >
+                                     <Send className="h-4 w-4 mr-1" />
+                                     Enviar Resposta
+                                   </Button>
+                                   <Button 
+                                     size="sm" 
+                                     variant="outline"
+                                     onClick={() => setSelectedMessageId(null)}
+                                   >
+                                     Cancelar
+                                   </Button>
+                                 </div>
                                </div>
                              )}
                            </div>
-                            <div className="flex flex-col gap-2">
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => {
-                                  toast({
-                                    title: "Resposta Enviada",
-                                    description: "Sua resposta foi enviada com sucesso.",
-                                  })
-                                }}
-                              >
-                                Responder
-                              </Button>
-                              <Button 
-                                size="sm" 
-                                variant="default"
-                                onClick={() => {
-                                  toast({
-                                    title: "Resposta Rápida",
-                                    description: "Mensagem de confirmação enviada.",
-                                  })
-                                }}
-                              >
-                                Resposta Rápida
-                              </Button>
-                              {!message.read && (
-                                <Button size="sm" variant="ghost" className="text-xs">
-                                  Marcar como lida
-                                </Button>
-                              )}
-                            </div>
+                           <div className="text-right">
+                             <Button 
+                               variant="outline" 
+                               size="sm"
+                               onClick={() => setSelectedMessageId(selectedMessageId === message.id ? null : message.id)}
+                             >
+                               <Reply className="h-4 w-4 mr-1" />
+                               {selectedMessageId === message.id ? 'Cancelar' : 'Responder'}
+                             </Button>
+                           </div>
                          </div>
                       </CardContent>
                     </Card>
                   ))}
-                 </div>
-                 </ScrollArea>
-               </CardContent>
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="history" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <History className="h-5 w-5 text-success" />
+                  Histórico de Ocorrências Resolvidas
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-[500px]">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>ID</TableHead>
+                        <TableHead>Equipamento</TableHead>
+                        <TableHead>Severidade</TableHead>
+                        <TableHead>Resolvida em</TableHead>
+                        <TableHead>Tempo de Resolução</TableHead>
+                        <TableHead>Satisfação</TableHead>
+                        <TableHead>Resumo</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {resolvedOccurrences.map((occurrence) => (
+                        <TableRow key={occurrence.id} className="border-l-4 border-l-success">
+                          <TableCell className="font-medium">{occurrence.id}</TableCell>
+                          <TableCell className="max-w-[200px] truncate">{occurrence.equipment}</TableCell>
+                          <TableCell>
+                            <Badge variant={getSeverityVariant(occurrence.severity)}>
+                              {getSeverityLabel(occurrence.severity)}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {new Date(occurrence.resolvedAt).toLocaleDateString('pt-BR')} às {' '}
+                            {new Date(occurrence.resolvedAt).toLocaleTimeString('pt-BR', { 
+                              hour: '2-digit', 
+                              minute: '2-digit' 
+                            })}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-success">
+                              {occurrence.resolutionTime}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              {Array.from({ length: 5 }).map((_, i) => (
+                                <Star 
+                                  key={i} 
+                                  className={`h-4 w-4 ${
+                                    i < occurrence.satisfactionScore 
+                                      ? 'text-yellow-400 fill-yellow-400' 
+                                      : 'text-gray-300'
+                                  }`} 
+                                />
+                              ))}
+                              <span className="text-xs text-muted-foreground ml-1">
+                                ({occurrence.satisfactionScore}/5)
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="max-w-[250px]">
+                            <span className="text-sm text-muted-foreground">
+                              {occurrence.resolutionSummary}
+                            </span>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </ScrollArea>
+              </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
       </div>
     </COPFLayout>
-  );
-};
+  )
+}
 
-export default VisaoFornecedor;
+export default VisaoFornecedor

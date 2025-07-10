@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { StatusBadge } from './StatusBadge'
+import { MessageTemplates } from './MessageTemplates'
 import { OccurrenceData } from '@/hooks/useDashboardData'
 import { useToast } from '@/hooks/use-toast'
 import { useState } from 'react'
@@ -344,19 +345,41 @@ export function OccurrenceModal({
                     )}
                   </div>
 
-                  {/* Mensagem */}
-                  <div>
-                    <Label htmlFor="vendor-message" className="text-sm font-medium">
-                      Mensagem para {occurrence.vendor}
-                    </Label>
-                    <Textarea
-                      id="vendor-message"
-                      placeholder="Digite sua mensagem para o fornecedor..."
-                      value={vendorMessage}
-                      onChange={(e) => setVendorMessage(e.target.value)}
-                      className="mt-1 min-h-[100px]"
-                    />
-                  </div>
+                   {/* Mensagem */}
+                   <div>
+                     <Label htmlFor="vendor-message" className="text-sm font-medium">
+                       Mensagem para {occurrence.vendor}
+                     </Label>
+                     <div className="flex gap-2 mt-1">
+                       <div className="flex-1">
+                         <Textarea
+                           id="vendor-message"
+                           placeholder="Digite sua mensagem para o fornecedor..."
+                           value={vendorMessage}
+                           onChange={(e) => setVendorMessage(e.target.value)}
+                           className="min-h-[100px]"
+                         />
+                       </div>
+                       <Button 
+                         variant="outline" 
+                         onClick={() => setShowPriorityOptions(!showPriorityOptions)}
+                       >
+                         <FileText className="h-4 w-4" />
+                       </Button>
+                     </div>
+                     
+                     {showPriorityOptions && (
+                       <div className="mt-2">
+                         <MessageTemplates 
+                           type="operation" 
+                           onSelectTemplate={(template) => {
+                             setVendorMessage(template.content)
+                             setShowPriorityOptions(false)
+                           }}
+                         />
+                       </div>
+                     )}
+                   </div>
 
                   {/* Anexos */}
                   <div>
