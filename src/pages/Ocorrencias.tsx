@@ -7,22 +7,25 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, Filter, Download, Eye, MessageSquare } from "lucide-react";
+import { Search, Filter, Download, Eye, MessageSquare, Bot } from "lucide-react";
 import { StatusBadge } from "@/components/copf/StatusBadge";
 import { OccurrenceModal } from "@/components/copf/OccurrenceModal";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import * as XLSX from 'xlsx';
 
 const Ocorrencias = () => {
   const { occurrences, isLoading } = useDashboardData()
   const { toast } = useToast()
   const [selectedOccurrence, setSelectedOccurrence] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [modalMode, setModalMode] = useState<'view' | 'communication'>('view')
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [severityFilter, setSeverityFilter] = useState('all')
   const [vendorPriorityFilter, setVendorPriorityFilter] = useState(false)
+  const [showBot, setShowBot] = useState(false)
 
   // Filtrar ocorrências
   const filteredOccurrences = occurrences.filter(occurrence => {
@@ -43,14 +46,76 @@ const Ocorrencias = () => {
 
   const handleViewDetails = (occurrence) => {
     setSelectedOccurrence(occurrence)
+    setModalMode('view')
     setIsModalOpen(true)
   }
 
-  const handleExportCSV = () => {
+  const handleSendMessage = (occurrence) => {
+    setSelectedOccurrence(occurrence)
+    setModalMode('communication')
+    setIsModalOpen(true)
+  }
+
+  const handleExportExcel = () => {
+    // Preparar dados para exportação
+    const exportData = filteredOccurrences.map(occurrence => ({
+      'ID': occurrence.id,
+      'Agência': occurrence.agency,
+      'Equipamento': occurrence.equipment,
+      'Severidade': getSeverityLabel(occurrence.severity),
+      'Status': getStatusLabel(occurrence.status),
+      'Data/Hora': new Date(occurrence.createdAt).toLocaleString('pt-BR'),
+      'Fornecedor': occurrence.vendor,
+      'Responsável': occurrence.assignedTo,
+      'Descrição': occurrence.description
+    }))
+
+    // Criar workbook
+    const ws = XLSX.utils.json_to_sheet(exportData)
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, "Ocorrências")
+
+    // Ajustar largura das colunas
+    const wscols = [
+      { wch: 10 }, // ID
+      { wch: 30 }, // Agência
+      { wch: 20 }, // Equipamento
+      { wch: 15 }, // Severidade
+      { wch: 15 }, // Status
+      { wch: 20 }, // Data/Hora
+      { wch: 20 }, // Fornecedor
+      { wch: 20 }, // Responsável
+      { wch: 50 }  // Descrição
+    ]
+    ws['!cols'] = wscols
+
+    // Baixar arquivo
+    const fileName = `ocorrencias_${new Date().toISOString().split('T')[0]}.xlsx`
+    XLSX.writeFile(wb, fileName)
+
     toast({
-      title: "Exportação Iniciada",
-      description: "O arquivo CSV será baixado em instantes.",
+      title: "Exportação Concluída",
+      description: `Arquivo ${fileName} foi baixado com sucesso.`,
     })
+  }
+
+  const handleBotInteraction = (message: string) => {
+    // Simular resposta do bot
+    const responses = [
+      "Analisando as ocorrências... Encontrei 3 ocorrências críticas que precisam de atenção imediata.",
+      "Com base no histórico, o fornecedor TechSol tem respondido 40% mais rápido que a média.",
+      "Recomendo priorizar as ocorrências da Agência Centro, que têm maior impacto nos clientes.",
+      "Identifiquei um padrão: 60% das falhas ocorrem entre 14h-16h. Sugestão: manutenção preventiva neste horário."
+    ]
+    
+    const randomResponse = responses[Math.floor(Math.random() * responses.length)]
+    
+    setTimeout(() => {
+      toast({
+        title: "Assistente Virtual",
+        description: randomResponse,
+      })
+    }, 1000)
   }
 
   const getSeverityVariant = (severity: string) => {
@@ -89,10 +154,16 @@ const Ocorrencias = () => {
             <h1 className="text-2xl font-bold text-foreground">Ocorrências</h1>
             <p className="text-muted-foreground">Lista detalhada de todas as ocorrências registradas</p>
           </div>
-          <Button variant="premium" onClick={handleExportCSV}>
-            <Download className="mr-2 h-4 w-4" />
-            Exportar CSV
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setShowBot(!showBot)}>
+              <Bot className="mr-2 h-4 w-4" />
+              Assistente IA
+            </Button>
+            <Button variant="premium" onClick={handleExportExcel}>
+              <Download className="mr-2 h-4 w-4" />
+              Exportar Excel
+            </Button>
+          </div>
         </div>
 
         <Card>
@@ -151,6 +222,68 @@ const Ocorrencias = () => {
           </CardContent>
         </Card>
 
+        {/* Bot Assistente */}
+        {showBot && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Bot className="h-5 w-5" />
+                Assistente Virtual - Análise Inteligente
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => handleBotInteraction("Analisar ocorrências críticas")}
+                    className="text-left p-4 h-auto"
+                  >
+                    <div>
+                      <p className="font-medium">Analisar Criticidade</p>
+                      <p className="text-sm text-muted-foreground">Identifica ocorrências que precisam de atenção imediata</p>
+                    </div>
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => handleBotInteraction("Analisar performance fornecedores")}
+                    className="text-left p-4 h-auto"
+                  >
+                    <div>
+                      <p className="font-medium">Performance Fornecedores</p>
+                      <p className="text-sm text-muted-foreground">Avalia tempo de resposta e eficiência</p>
+                    </div>
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => handleBotInteraction("Sugerir otimizações")}
+                    className="text-left p-4 h-auto"
+                  >
+                    <div>
+                      <p className="font-medium">Sugestões de Melhoria</p>
+                      <p className="text-sm text-muted-foreground">Recomendações baseadas em padrões identificados</p>
+                    </div>
+                  </Button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Input 
+                    placeholder="Digite sua pergunta sobre as ocorrências..." 
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        handleBotInteraction(e.currentTarget.value)
+                        e.currentTarget.value = ''
+                      }
+                    }}
+                  />
+                  <Button size="sm" variant="premium">
+                    Perguntar
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -208,22 +341,14 @@ const Ocorrencias = () => {
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => {
-                              setSelectedOccurrence(occurrence)
-                              setIsModalOpen(true)
-                              // Simular abertura direta na aba de comunicação
-                              toast({
-                                title: "Comunicação Iniciada",
-                                description: "Abrindo canal de comunicação com fornecedor.",
-                              })
-                            }}
-                            title="Enviar mensagem"
-                          >
-                            <MessageSquare className="h-4 w-4" />
-                          </Button>
+                           <Button 
+                             variant="ghost" 
+                             size="sm"
+                             onClick={() => handleSendMessage(occurrence)}
+                             title="Enviar mensagem"
+                           >
+                             <MessageSquare className="h-4 w-4" />
+                           </Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -240,6 +365,7 @@ const Ocorrencias = () => {
         occurrence={selectedOccurrence}
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
+        mode={modalMode}
       />
     </COPFLayout>
   );

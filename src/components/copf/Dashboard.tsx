@@ -175,7 +175,7 @@ export function Dashboard() {
       </Card>
 
       {/* Modal de Detalhes */}
-      <OccurrenceModal occurrence={selectedOccurrence} open={modalOpen} onOpenChange={setModalOpen} onAssign={id => {
+      <OccurrenceModal occurrence={selectedOccurrence} open={modalOpen} onOpenChange={setModalOpen} mode="view" onAssign={id => {
       toast({
         title: "Ocorrência reatribuída",
         description: `Ocorrência ${id} foi reatribuída com sucesso.`
