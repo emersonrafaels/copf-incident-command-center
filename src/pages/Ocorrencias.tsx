@@ -361,35 +361,33 @@ const Ocorrencias = () => {
                            >
                              <Eye className="h-4 w-4" />
                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => handleSendMessage(occurrence)}
-                              title="Enviar mensagem"
-                            >
-                              <MessageSquare className="h-4 w-4" />
-                            </Button>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm">
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent>
-                                <DropdownMenuItem 
-                                  onClick={() => handlePrioritize(occurrence, 'priority_only')}
-                                >
-                                  <Zap className="mr-2 h-4 w-4" />
-                                  Apenas Priorizar
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  onClick={() => handlePrioritize(occurrence, 'priority_with_message')}
-                                >
-                                  <MessageSquare className="mr-2 h-4 w-4" />
-                                  Priorizar + Mensagem
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                             <DropdownMenu>
+                               <DropdownMenuTrigger asChild>
+                                 <Button variant="ghost" size="sm" title="Priorizar e/ou enviar mensagem">
+                                   <Zap className="h-4 w-4" />
+                                 </Button>
+                               </DropdownMenuTrigger>
+                               <DropdownMenuContent>
+                                 <DropdownMenuItem 
+                                   onClick={() => handlePrioritize(occurrence, 'priority_only')}
+                                 >
+                                   <Zap className="mr-2 h-4 w-4" />
+                                   Apenas Priorizar
+                                 </DropdownMenuItem>
+                                 <DropdownMenuItem 
+                                   onClick={() => handlePrioritize(occurrence, 'priority_with_message')}
+                                 >
+                                   <MessageSquare className="mr-2 h-4 w-4" />
+                                   Priorizar + Mensagem
+                                 </DropdownMenuItem>
+                                 <DropdownMenuItem 
+                                   onClick={() => handleSendMessage(occurrence)}
+                                 >
+                                   <MessageSquare className="mr-2 h-4 w-4" />
+                                   Apenas Mensagem
+                                 </DropdownMenuItem>
+                               </DropdownMenuContent>
+                             </DropdownMenu>
                          </div>
                        </TableCell>
                     </TableRow>

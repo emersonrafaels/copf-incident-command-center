@@ -519,33 +519,33 @@ const Relatorios = () => {
                     </div>
                   </div>
 
-                  {/* Estatísticas do Long Tail */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <Card>
-                      <CardContent className="p-4 text-center">
-                        <div className="text-2xl font-bold text-primary">2.1h</div>
-                        <div className="text-sm text-muted-foreground">Mediana</div>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardContent className="p-4 text-center">
-                        <div className="text-2xl font-bold text-secondary">3.8h</div>
-                        <div className="text-sm text-muted-foreground">P90 (90%)</div>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardContent className="p-4 text-center">
-                        <div className="text-2xl font-bold text-warning">7.2h</div>
-                        <div className="text-sm text-muted-foreground">P95 (95%)</div>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardContent className="p-4 text-center">
-                        <div className="text-2xl font-bold text-destructive">15.6h</div>
-                        <div className="text-sm text-muted-foreground">P99 (99%)</div>
-                      </CardContent>
-                    </Card>
-                  </div>
+                   {/* Estatísticas do Long Tail */}
+                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+                     <Card>
+                       <CardContent className="p-4 text-center">
+                         <div className="text-2xl font-bold text-primary">2.1h</div>
+                         <div className="text-sm text-muted-foreground">Mediana (P50)</div>
+                       </CardContent>
+                     </Card>
+                     <Card>
+                       <CardContent className="p-4 text-center">
+                         <div className="text-2xl font-bold text-foreground">3.8h</div>
+                         <div className="text-sm text-muted-foreground">P90 (90%)</div>
+                       </CardContent>
+                     </Card>
+                     <Card>
+                       <CardContent className="p-4 text-center">
+                         <div className="text-2xl font-bold text-warning">7.2h</div>
+                         <div className="text-sm text-muted-foreground">P95 (95%)</div>
+                       </CardContent>
+                     </Card>
+                     <Card>
+                       <CardContent className="p-4 text-center">
+                         <div className="text-2xl font-bold text-destructive">15.6h</div>
+                         <div className="text-sm text-muted-foreground">P99 (99%)</div>
+                       </CardContent>
+                     </Card>
+                   </div>
 
                   {/* Análise dos Outliers */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
