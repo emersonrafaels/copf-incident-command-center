@@ -51,7 +51,7 @@ const VisaoFornecedor = () => {
       id: "OCC-2024-001",
       equipment: "ATM AG-001 - Terminal Principal",
       severity: "critical",
-      status: "in_progress",
+      status: "active",
       createdAt: "2024-01-15T10:30:00Z",
       vendor: currentVendor,
       agency: "AG0001 - Centro (São Paulo)"
@@ -60,7 +60,7 @@ const VisaoFornecedor = () => {
       id: "OCC-2024-003",
       equipment: "Router CORE-02 - Sala Servidores",
       severity: "high",
-      status: "open",
+      status: "pending",
       createdAt: "2024-01-15T08:45:00Z",
       vendor: currentVendor,
       agency: "AG0015 - Paulista (São Paulo)"
@@ -69,7 +69,7 @@ const VisaoFornecedor = () => {
       id: "OCC-2024-005",
       equipment: "Servidor APP-01 - Data Center",
       severity: "medium",
-      status: "open",
+      status: "pending",
       createdAt: "2024-01-15T07:20:00Z",
       vendor: currentVendor,
       agency: "AG0032 - Vila Madalena (São Paulo)"
@@ -78,7 +78,7 @@ const VisaoFornecedor = () => {
       id: "OCC-2024-007",
       equipment: "Switch NET-05 - Rede Principal",
       severity: "critical",
-      status: "escalated",
+      status: "critical",
       createdAt: "2024-01-14T16:15:00Z",
       vendor: currentVendor,
       agency: "AG0045 - Pinheiros (São Paulo)"
@@ -87,7 +87,7 @@ const VisaoFornecedor = () => {
       id: "OCC-2024-009",
       equipment: "UPS-03 - Alimentação Crítica",
       severity: "high",
-      status: "in_progress",
+      status: "active",
       createdAt: "2024-01-14T14:30:00Z",
       vendor: currentVendor,
       agency: "AG0067 - Moema (São Paulo)"
@@ -206,9 +206,12 @@ const VisaoFornecedor = () => {
     setSelectedMessageId(null)
   }
 
-  const handleTemplateSelect = (template: any) => {
+  const handleTemplateSelect = (template: any, occurrenceId?: string) => {
     if (selectedMessageId) {
       setReplyText(template.content)
+    } else if (occurrenceId) {
+      // Para templates específicos por ocorrência nas priorizadas
+      setResponseText(template.content)
     } else {
       setResponseText(template.content)
     }
@@ -440,42 +443,49 @@ const VisaoFornecedor = () => {
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <div className="space-y-2">
-                              <div className="flex gap-2">
-                                <div className="flex-1">
-                                  <Textarea 
-                                    placeholder="Descreva as ações tomadas..."
-                                    value={responseText}
-                                    onChange={(e) => setResponseText(e.target.value)}
-                                    className="min-h-[60px]"
-                                  />
-                                </div>
-                                <Dialog>
-                                  <DialogTrigger asChild>
-                                    <Button variant="outline" size="sm">
-                                      <FileText className="h-4 w-4" />
-                                    </Button>
-                                  </DialogTrigger>
-                                  <DialogContent className="max-w-lg">
-                                    <DialogHeader>
-                                      <DialogTitle>Templates de Resposta</DialogTitle>
-                                    </DialogHeader>
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button variant="outline" size="sm">
+                                  <MessageSquare className="h-4 w-4 mr-1" />
+                                  Responder
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-2xl">
+                                <DialogHeader>
+                                  <DialogTitle>Responder à Ocorrência {occurrence.id}</DialogTitle>
+                                </DialogHeader>
+                                <div className="space-y-4">
+                                  <div className="bg-muted/50 p-3 rounded-lg">
+                                    <p className="text-sm text-muted-foreground">Equipamento:</p>
+                                    <p className="font-medium">{occurrence.equipment}</p>
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Textarea 
+                                      placeholder="Descreva as ações tomadas ou situação atual..."
+                                      value={responseText}
+                                      onChange={(e) => setResponseText(e.target.value)}
+                                      className="min-h-[120px]"
+                                    />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <p className="text-sm font-medium">Templates de Resposta:</p>
                                     <MessageTemplates 
                                       type="vendor" 
-                                      onSelectTemplate={handleTemplateSelect}
+                                      onSelectTemplate={(template) => handleTemplateSelect(template, occurrence.id)}
                                     />
-                                  </DialogContent>
-                                </Dialog>
-                              </div>
-                              <Button 
-                                size="sm" 
-                                onClick={() => handleSendResponse(occurrence.id)}
-                                disabled={!responseText.trim()}
-                              >
-                                <Send className="h-4 w-4 mr-1" />
-                                Enviar Resposta
-                              </Button>
-                            </div>
+                                  </div>
+                                  <div className="flex justify-end gap-2">
+                                    <Button 
+                                      onClick={() => handleSendResponse(occurrence.id)}
+                                      disabled={!responseText.trim()}
+                                    >
+                                      <Send className="h-4 w-4 mr-1" />
+                                      Enviar Resposta
+                                    </Button>
+                                  </div>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
                           </TableCell>
                         </TableRow>
                       )
