@@ -103,14 +103,6 @@ const Configuracoes = () => {
                   
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium">SMS - Emergências</p>
-                      <p className="text-sm text-muted-foreground">Notificar por SMS em situações de emergência</p>
-                    </div>
-                    <Switch />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
                       <p className="font-medium">Relatórios Semanais</p>
                       <p className="text-sm text-muted-foreground">Receber resumo semanal por email</p>
                     </div>
