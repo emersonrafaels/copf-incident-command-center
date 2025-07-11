@@ -32,7 +32,7 @@ interface OccurrenceModalProps {
   occurrence: OccurrenceData | null
   open: boolean
   onOpenChange: (open: boolean) => void
-  mode: 'view' | 'communication'
+  mode: 'view' | 'communication' | 'priority_communication'
   onAssign?: (id: string) => void
   onComment?: (id: string) => void
 }
@@ -171,7 +171,7 @@ export function OccurrenceModal({
             ) : (
               <>
                 <MessageSquare className="h-5 w-5" />
-                Comunicação com Fornecedor
+                {mode === 'priority_communication' ? 'Priorizar e Comunicar' : 'Comunicação com Fornecedor'}
               </>
             )}
           </DialogTitle>
@@ -318,9 +318,36 @@ export function OccurrenceModal({
               <div className="border rounded-lg p-4 bg-muted/20">
                 <div className="flex items-center gap-2 mb-3">
                   <MessageSquare className="h-4 w-4" />
-                  <h4 className="text-sm font-medium">Enviar Mensagem para {occurrence.vendor}</h4>
+                  <h4 className="text-sm font-medium">
+                    {mode === 'priority_communication' ? 'Priorizar e Enviar Mensagem' : 'Enviar Mensagem'} para {occurrence.vendor}
+                  </h4>
                 </div>
                 <div className="space-y-4">
+                  {/* Definir Prioridade - apenas no modo priority_communication */}
+                  {mode === 'priority_communication' && (
+                    <div>
+                      <Label className="text-sm font-medium flex items-center gap-2">
+                        <Flag className="h-4 w-4" />
+                        Prioridade da Ocorrência
+                      </Label>
+                      <Select value={priority} onValueChange={handlePriorityChange}>
+                        <SelectTrigger className="w-full mt-1">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="critical">🔴 Crítica</SelectItem>
+                          <SelectItem value="high">🟡 Alta</SelectItem>
+                          <SelectItem value="medium">🟢 Média</SelectItem>
+                          <SelectItem value="low">⚪ Baixa</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {priority !== occurrence.severity && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Prioridade alterada de {getPriorityLabel(occurrence.severity)} para {getPriorityLabel(priority)}
+                        </p>
+                      )}
+                    </div>
+                  )}
 
                    {/* Mensagem */}
                    <div>

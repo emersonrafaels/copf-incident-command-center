@@ -27,7 +27,7 @@ const Ocorrencias = () => {
   const { toast } = useToast()
   const [selectedOccurrence, setSelectedOccurrence] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [modalMode, setModalMode] = useState<'view' | 'communication'>('view')
+  const [modalMode, setModalMode] = useState<'view' | 'communication' | 'priority_communication'>('view')
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [severityFilter, setSeverityFilter] = useState('all')
@@ -73,7 +73,7 @@ const Ocorrencias = () => {
     } else {
       // Abrir modal de comunicação para priorizar com mensagem
       setSelectedOccurrence(occurrence)
-      setModalMode('communication')
+      setModalMode('priority_communication')
       setIsModalOpen(true)
     }
   }
