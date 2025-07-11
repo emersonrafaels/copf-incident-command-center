@@ -321,29 +321,6 @@ export function OccurrenceModal({
                   <h4 className="text-sm font-medium">Enviar Mensagem para {occurrence.vendor}</h4>
                 </div>
                 <div className="space-y-4">
-                  {/* Definir Prioridade */}
-                  <div>
-                    <Label className="text-sm font-medium flex items-center gap-2">
-                      <Flag className="h-4 w-4" />
-                      Prioridade da Ocorrência
-                    </Label>
-                    <Select value={priority} onValueChange={handlePriorityChange}>
-                      <SelectTrigger className="w-full mt-1">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="critical">🔴 Crítica</SelectItem>
-                        <SelectItem value="high">🟡 Alta</SelectItem>
-                        <SelectItem value="medium">🟢 Média</SelectItem>
-                        <SelectItem value="low">⚪ Baixa</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {priority !== occurrence.severity && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Prioridade alterada de {getPriorityLabel(occurrence.severity)} para {getPriorityLabel(priority)}
-                      </p>
-                    )}
-                  </div>
 
                    {/* Mensagem */}
                    <div>

@@ -13,7 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Search, Filter, Download, Eye, MessageSquare, Bot, Star, MoreHorizontal, Zap } from "lucide-react";
+import { Search, Filter, Download, Eye, MessageSquare, Bot, Star, MoreHorizontal, Zap, Clock } from "lucide-react";
 import { StatusBadge } from "@/components/copf/StatusBadge";
 import { OccurrenceModal } from "@/components/copf/OccurrenceModal";
 import { useDashboardData } from "@/hooks/useDashboardData";
@@ -372,19 +372,20 @@ const Ocorrencias = () => {
                            >
                              <Eye className="h-4 w-4" />
                            </Button>
-                             <DropdownMenu>
-                               <DropdownMenuTrigger asChild>
-                                 <Button variant="ghost" size="sm" title="Priorizar e/ou enviar mensagem">
-                                   <Zap className="h-4 w-4" />
-                                 </Button>
-                               </DropdownMenuTrigger>
-                               <DropdownMenuContent>
-                                 <DropdownMenuItem 
-                                   onClick={() => handlePrioritize(occurrence, 'priority_only')}
-                                 >
-                                   <Zap className="mr-2 h-4 w-4" />
-                                   Apenas Priorizar
-                                 </DropdownMenuItem>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="outline" size="sm" className="h-8 px-3" title="Ações da ocorrência">
+                                    <MessageSquare className="h-4 w-4 mr-1" />
+                                    <span className="text-xs">Ações</span>
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-48">
+                                  <DropdownMenuItem 
+                                    onClick={() => handlePrioritize(occurrence, 'priority_only')}
+                                  >
+                                    <Zap className="mr-2 h-4 w-4" />
+                                    Apenas Priorizar
+                                  </DropdownMenuItem>
                                   <DropdownMenuItem 
                                     onClick={() => handlePrioritize(occurrence, 'priority_with_message')}
                                   >
@@ -397,8 +398,8 @@ const Ocorrencias = () => {
                                     <MessageSquare className="mr-2 h-4 w-4" />
                                     Apenas Mensagem
                                   </DropdownMenuItem>
-                               </DropdownMenuContent>
-                             </DropdownMenu>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                          </div>
                        </TableCell>
                     </TableRow>
@@ -431,26 +432,54 @@ const Ocorrencias = () => {
             <Button
               variant="destructive"
               onClick={() => handlePrioritySelect('Crítica')}
-              className="justify-start"
+              className="justify-start h-auto p-4"
             >
-              <Zap className="mr-2 h-4 w-4" />
-              Prioridade Crítica
+              <div className="flex items-start gap-3">
+                <Zap className="h-5 w-5 mt-0.5 text-destructive-foreground" />
+                <div className="text-left">
+                  <p className="font-medium">Prioridade Crítica</p>
+                  <p className="text-sm opacity-90">Requer atenção imediata - SLA 2h</p>
+                </div>
+              </div>
             </Button>
             <Button
               variant="secondary"
               onClick={() => handlePrioritySelect('Alta')}
-              className="justify-start"
+              className="justify-start h-auto p-4"
             >
-              <Star className="mr-2 h-4 w-4" />
-              Prioridade Alta
+              <div className="flex items-start gap-3">
+                <Star className="h-5 w-5 mt-0.5" />
+                <div className="text-left">
+                  <p className="font-medium">Prioridade Alta</p>
+                  <p className="text-sm text-muted-foreground">Importante - SLA 4h</p>
+                </div>
+              </div>
             </Button>
             <Button
               variant="outline"
               onClick={() => handlePrioritySelect('Média')}
-              className="justify-start"
+              className="justify-start h-auto p-4"
             >
-              <MessageSquare className="mr-2 h-4 w-4" />
-              Prioridade Média
+              <div className="flex items-start gap-3">
+                <MessageSquare className="h-5 w-5 mt-0.5" />
+                <div className="text-left">
+                  <p className="font-medium">Prioridade Média</p>
+                  <p className="text-sm text-muted-foreground">Padrão - SLA 8h</p>
+                </div>
+              </div>
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => handlePrioritySelect('Baixa')}
+              className="justify-start h-auto p-4"
+            >
+              <div className="flex items-start gap-3">
+                <Clock className="h-5 w-5 mt-0.5" />
+                <div className="text-left">
+                  <p className="font-medium">Prioridade Baixa</p>
+                  <p className="text-sm text-muted-foreground">Não urgente - SLA 24h</p>
+                </div>
+              </div>
             </Button>
           </div>
           <DialogFooter>
