@@ -16,9 +16,10 @@ const Configuracoes = () => {
         </div>
 
         <Tabs defaultValue="geral" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="geral">Geral</TabsTrigger>
             <TabsTrigger value="notificacoes">Notificações</TabsTrigger>
+            <TabsTrigger value="funcionalidades">Funcionalidades</TabsTrigger>
             <TabsTrigger value="aparencia">Aparência</TabsTrigger>
           </TabsList>
 
@@ -120,6 +121,36 @@ const Configuracoes = () => {
             </Card>
           </TabsContent>
 
+          <TabsContent value="funcionalidades" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-5 w-5" />
+                  Funcionalidades do Sistema
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Mostrar Aba Equipes</p>
+                      <p className="text-sm text-muted-foreground">Exibir a seção de gestão de equipes no menu</p>
+                    </div>
+                    <Switch />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Mostrar Aba Comunicação</p>
+                      <p className="text-sm text-muted-foreground">Exibir a seção de comunicação no menu</p>
+                    </div>
+                    <Switch />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
 
           <TabsContent value="aparencia" className="space-y-6">
             <Card>
@@ -135,22 +166,6 @@ const Configuracoes = () => {
                     <div>
                       <p className="font-medium">Modo Escuro Automático</p>
                       <p className="text-sm text-muted-foreground">Alternar baseado no horário do sistema</p>
-                    </div>
-                    <Switch />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Mostrar Aba Equipes</p>
-                      <p className="text-sm text-muted-foreground">Exibir a seção de gestão de equipes no menu</p>
-                    </div>
-                    <Switch />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Mostrar Aba Comunicação</p>
-                      <p className="text-sm text-muted-foreground">Exibir a seção de comunicação no menu</p>
                     </div>
                     <Switch />
                   </div>
