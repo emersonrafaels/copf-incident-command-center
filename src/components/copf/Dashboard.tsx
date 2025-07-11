@@ -104,15 +104,15 @@ export function Dashboard() {
       description: "Dashboard atualizado com as informações mais recentes."
     });
   };
-  return <div className="space-y-6">
+  return <div className="space-y-8">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
         <div>
           <h1 className="text-responsive-3xl font-bold text-foreground">Ferramenta de Acompanhamento - COPF</h1>
           <p className="text-responsive-base text-muted-foreground">Itaú Unibanco | Gestão de Ocorrências
         </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-3">
           {/* Filtro de Período */}
           <Select value={filterPeriod} onValueChange={setFilterPeriod}>
             <SelectTrigger className="w-auto min-w-[180px]">
