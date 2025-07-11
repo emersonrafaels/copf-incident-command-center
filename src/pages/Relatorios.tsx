@@ -5,7 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { BarChart3, PieChart, TrendingUp, Download, Calendar, Clock, Target, Zap, CheckCircle, AlertCircle, Activity } from "lucide-react";
+import { BarChart3, PieChart, TrendingUp, Download, Calendar, Clock, Target, Zap, CheckCircle, AlertCircle, Activity, Filter } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MetricCard } from "@/components/copf/MetricCard";
 
 const Relatorios = () => {
@@ -15,7 +16,7 @@ const Relatorios = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-foreground">Relatórios</h1>
-            <p className="text-muted-foreground">Análises e métricas detalhadas do sistema</p>
+            <p className="text-muted-foreground">Análises e métricas detalhadas do sistema (2.360 agências)</p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline">
@@ -30,40 +31,41 @@ const Relatorios = () => {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Visão Geral</TabsTrigger>
             <TabsTrigger value="performance">Performance</TabsTrigger>
             <TabsTrigger value="trends">Tendências</TabsTrigger>
             <TabsTrigger value="sla">SLA</TabsTrigger>
+            <TabsTrigger value="longtail">Long Tail</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <MetricCard
                 title="Ocorrências Totais"
-                value="1,234"
-                change="+12%"
+                value="3,847"
+                change="+8%"
                 changeType="positive"
                 icon={<BarChart3 className="h-4 w-4" />}
               />
               <MetricCard
                 title="Taxa de Resolução"
-                value="87.5%"
-                change="+5.2%"
+                value="94.2%"
+                change="+3.1%"
                 changeType="positive"
                 icon={<TrendingUp className="h-4 w-4" />}
               />
               <MetricCard
                 title="MTTR Médio"
-                value="4.2h"
-                change="-15%"
+                value="2.8h"
+                change="-25%"
                 changeType="positive"
                 icon={<BarChart3 className="h-4 w-4" />}
               />
               <MetricCard
-                title="Satisfação"
-                value="94%"
-                change="+8%"
+                title="Agências Ativas"
+                value="2.360"
+                change="+12"
                 changeType="positive"
                 icon={<PieChart className="h-4 w-4" />}
               />
@@ -78,18 +80,18 @@ const Relatorios = () => {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="text-sm">ATMs</span>
-                      <span className="text-sm font-medium">45%</span>
+                      <span className="text-sm font-medium">42%</span>
                     </div>
                     <div className="w-full bg-muted h-2 rounded-full">
-                      <div className="bg-primary h-2 rounded-full" style={{ width: '45%' }}></div>
+                      <div className="bg-primary h-2 rounded-full" style={{ width: '42%' }}></div>
                     </div>
                     
                     <div className="flex items-center justify-between">
                       <span className="text-sm">Climatização</span>
-                      <span className="text-sm font-medium">28%</span>
+                      <span className="text-sm font-medium">31%</span>
                     </div>
                     <div className="w-full bg-muted h-2 rounded-full">
-                      <div className="bg-secondary h-2 rounded-full" style={{ width: '28%' }}></div>
+                      <div className="bg-secondary h-2 rounded-full" style={{ width: '31%' }}></div>
                     </div>
                     
                     <div className="flex items-center justify-between">
@@ -105,32 +107,40 @@ const Relatorios = () => {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Severidade das Ocorrências</CardTitle>
+                  <CardTitle>Distribuição por Região</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm">Crítica</span>
-                      <span className="text-sm font-medium">15%</span>
+                      <span className="text-sm">Sudeste</span>
+                      <span className="text-sm font-medium">45% (1.062 agências)</span>
                     </div>
                     <div className="w-full bg-muted h-2 rounded-full">
-                      <div className="bg-destructive h-2 rounded-full" style={{ width: '15%' }}></div>
+                      <div className="bg-primary h-2 rounded-full" style={{ width: '45%' }}></div>
                     </div>
                     
                     <div className="flex items-center justify-between">
-                      <span className="text-sm">Alta</span>
-                      <span className="text-sm font-medium">35%</span>
+                      <span className="text-sm">Nordeste</span>
+                      <span className="text-sm font-medium">25% (590 agências)</span>
                     </div>
                     <div className="w-full bg-muted h-2 rounded-full">
-                      <div className="bg-warning h-2 rounded-full" style={{ width: '35%' }}></div>
+                      <div className="bg-secondary h-2 rounded-full" style={{ width: '25%' }}></div>
                     </div>
                     
                     <div className="flex items-center justify-between">
-                      <span className="text-sm">Média</span>
-                      <span className="text-sm font-medium">50%</span>
+                      <span className="text-sm">Sul</span>
+                      <span className="text-sm font-medium">18% (425 agências)</span>
                     </div>
                     <div className="w-full bg-muted h-2 rounded-full">
-                      <div className="bg-success h-2 rounded-full" style={{ width: '50%' }}></div>
+                      <div className="bg-accent h-2 rounded-full" style={{ width: '18%' }}></div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Centro-Oeste</span>
+                      <span className="text-sm font-medium">12% (283 agências)</span>
+                    </div>
+                    <div className="w-full bg-muted h-2 rounded-full">
+                      <div className="bg-warning h-2 rounded-full" style={{ width: '12%' }}></div>
                     </div>
                   </div>
                 </CardContent>
@@ -142,29 +152,29 @@ const Relatorios = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <MetricCard
                 title="MTTR Médio"
-                value="2.4h"
-                change="-12%"
+                value="2.1h"
+                change="-18%"
                 changeType="positive"
                 icon={<Clock className="h-4 w-4" />}
               />
               <MetricCard
                 title="Taxa de Resolução"
-                value="94.2%"
-                change="+5.8%"
+                value="96.8%"
+                change="+4.2%"
                 changeType="positive"
                 icon={<CheckCircle className="h-4 w-4" />}
               />
               <MetricCard
                 title="Tempo de Resposta"
-                value="15min"
-                change="-8%"
+                value="12min"
+                change="-15%"
                 changeType="positive"
                 icon={<Zap className="h-4 w-4" />}
               />
               <MetricCard
                 title="Disponibilidade"
-                value="99.8%"
-                change="+0.3%"
+                value="99.4%"
+                change="+0.8%"
                 changeType="positive"
                 icon={<Activity className="h-4 w-4" />}
               />
@@ -179,11 +189,11 @@ const Relatorios = () => {
                   <ScrollArea className="h-[300px]">
                     <div className="space-y-4">
                       {[
-                        { name: "TechServ Solutions", mttr: "1.8h", resolucao: "97%", status: "excellent" },
-                        { name: "GlobalFix Corp", mttr: "2.1h", resolucao: "95%", status: "good" },
-                        { name: "QuickResponse Ltd", mttr: "2.8h", resolucao: "92%", status: "good" },
-                        { name: "ServicePro Inc", mttr: "3.2h", resolucao: "89%", status: "warning" },
-                        { name: "FastFix Technologies", mttr: "4.1h", resolucao: "85%", status: "poor" }
+                        { name: "TechServ Solutions", mttr: "1.5h", resolucao: "98%", status: "excellent" },
+                        { name: "GlobalFix Corp", mttr: "1.8h", resolucao: "96%", status: "excellent" },
+                        { name: "QuickResponse Ltd", mttr: "2.2h", resolucao: "95%", status: "good" },
+                        { name: "ServicePro Inc", mttr: "2.8h", resolucao: "93%", status: "good" },
+                        { name: "FastFix Technologies", mttr: "3.1h", resolucao: "89%", status: "warning" }
                       ].map((vendor, index) => (
                         <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                           <div className="flex items-center gap-3">
@@ -218,10 +228,10 @@ const Relatorios = () => {
                 <CardContent>
                   <div className="space-y-4">
                     {[
-                      { equip: "ATMs", eficiencia: 94, cor: "bg-primary" },
-                      { equip: "Climatização", eficiencia: 87, cor: "bg-secondary" },
-                      { equip: "Conectividade", eficiencia: 91, cor: "bg-accent" },
-                      { equip: "Segurança", eficiencia: 96, cor: "bg-success" }
+                      { equip: "ATMs", eficiencia: 96, cor: "bg-primary" },
+                      { equip: "Climatização", eficiencia: 89, cor: "bg-secondary" },
+                      { equip: "Conectividade", eficiencia: 93, cor: "bg-accent" },
+                      { equip: "Segurança", eficiencia: 98, cor: "bg-success" }
                     ].map((item, index) => (
                       <div key={index} className="space-y-2">
                         <div className="flex justify-between">
@@ -246,12 +256,12 @@ const Relatorios = () => {
                 <CardContent>
                   <div className="space-y-4">
                     {[
-                      { mes: "Janeiro", ocorrencias: 245, variacao: "+5%" },
-                      { mes: "Fevereiro", ocorrencias: 238, variacao: "-3%" },
-                      { mes: "Março", ocorrencias: 267, variacao: "+12%" },
-                      { mes: "Abril", ocorrencias: 223, variacao: "-16%" },
-                      { mes: "Maio", ocorrencias: 251, variacao: "+13%" },
-                      { mes: "Junho", ocorrencias: 234, variacao: "-7%" }
+                      { mes: "Janeiro", ocorrencias: 612, variacao: "+3%" },
+                      { mes: "Fevereiro", ocorrencias: 587, variacao: "-4%" },
+                      { mes: "Março", ocorrencias: 634, variacao: "+8%" },
+                      { mes: "Abril", ocorrencias: 568, variacao: "-10%" },
+                      { mes: "Maio", ocorrencias: 641, variacao: "+13%" },
+                      { mes: "Junho", ocorrencias: 605, variacao: "-6%" }
                     ].map((item, index) => (
                       <div key={index} className="flex items-center justify-between p-3 border rounded">
                         <span className="font-medium">{item.mes}</span>
@@ -275,22 +285,22 @@ const Relatorios = () => {
                   <div className="space-y-4">
                     <div className="p-4 bg-muted rounded-lg">
                       <h4 className="font-medium mb-2">Próximos 30 dias</h4>
-                      <div className="text-2xl font-bold text-primary">~198 ocorrências</div>
+                      <div className="text-2xl font-bold text-primary">~595 ocorrências</div>
                       <p className="text-sm text-muted-foreground">Baseado em padrões históricos</p>
                     </div>
                     
                     <div className="space-y-3">
                       <div className="flex justify-between">
                         <span className="text-sm">Críticas esperadas</span>
-                        <span className="text-sm font-medium">12-15</span>
+                        <span className="text-sm font-medium">35-42</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm">Alta prioridade</span>
-                        <span className="text-sm font-medium">45-52</span>
+                        <span className="text-sm font-medium">125-148</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm">Média prioridade</span>
-                        <span className="text-sm font-medium">98-112</span>
+                        <span className="text-sm font-medium">280-315</span>
                       </div>
                     </div>
 
@@ -300,7 +310,7 @@ const Relatorios = () => {
                         <span className="text-sm font-medium">Alerta de Tendência</span>
                       </div>
                       <p className="text-sm text-muted-foreground mt-1">
-                        Aumento de 15% em falhas de ATM nas últimas 3 semanas
+                        Aumento de 12% em falhas de climatização devido ao período de verão
                       </p>
                     </div>
                   </div>
@@ -338,29 +348,29 @@ const Relatorios = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <MetricCard
                 title="SLA Geral"
-                value="96.5%"
-                change="+2.1%"
+                value="97.8%"
+                change="+1.3%"
                 changeType="positive"
                 icon={<Target className="h-4 w-4" />}
               />
               <MetricCard
                 title="SLA Crítico"
-                value="98.2%"
-                change="+1.5%"
+                value="98.9%"
+                change="+0.7%"
                 changeType="positive"
                 icon={<AlertCircle className="h-4 w-4" />}
               />
               <MetricCard
                 title="Tempo Médio"
-                value="3.2h"
-                change="-18%"
+                value="2.1h"
+                change="-22%"
                 changeType="positive"
                 icon={<Clock className="h-4 w-4" />}
               />
               <MetricCard
                 title="Conformidade"
-                value="94.7%"
-                change="+3.2%"
+                value="96.3%"
+                change="+2.6%"
                 changeType="positive"
                 icon={<CheckCircle className="h-4 w-4" />}
               />
@@ -374,10 +384,10 @@ const Relatorios = () => {
                 <CardContent>
                   <div className="space-y-4">
                     {[
-                      { tipo: "Crítica", meta: "2h", atual: "1.8h", percentual: 98, status: "success" },
-                      { tipo: "Alta", meta: "4h", atual: "3.2h", percentual: 95, status: "success" },
-                      { tipo: "Média", meta: "8h", atual: "6.5h", percentual: 92, status: "warning" },
-                      { tipo: "Baixa", meta: "24h", atual: "18h", percentual: 89, status: "warning" }
+                      { tipo: "Crítica", meta: "1h", atual: "45min", percentual: 99, status: "success" },
+                      { tipo: "Alta", meta: "2h", atual: "1h 35min", percentual: 97, status: "success" },
+                      { tipo: "Média", meta: "4h", atual: "3h 15min", percentual: 95, status: "success" },
+                      { tipo: "Baixa", meta: "6h", atual: "4h 30min", percentual: 93, status: "warning" }
                     ].map((item, index) => (
                       <div key={index} className="space-y-2">
                         <div className="flex justify-between items-center">
@@ -391,8 +401,8 @@ const Relatorios = () => {
                             </Badge>
                           </div>
                         </div>
-                        <div className="text-sm text-muted-foreground">
-                          Tempo atual: {item.atual}
+                        <div className="flex justify-between text-sm">
+                          <span>Tempo atual: {item.atual}</span>
                         </div>
                         <Progress value={item.percentual} className="h-2" />
                       </div>
@@ -403,70 +413,198 @@ const Relatorios = () => {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Histórico de Descumprimento</CardTitle>
+                  <CardTitle>Cumprimento de SLA por Fornecedor</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ScrollArea className="h-[300px]">
-                    <div className="space-y-3">
-                      {[
-                        { data: "2024-01-15", ocorrencia: "OCR-2024-0123", motivo: "Peça indisponível", impacto: "Alto" },
-                        { data: "2024-01-12", ocorrencia: "OCR-2024-0118", motivo: "Fornecedor ausente", impacto: "Médio" },
-                        { data: "2024-01-08", ocorrencia: "OCR-2024-0098", motivo: "Complexidade técnica", impacto: "Alto" },
-                        { data: "2024-01-05", ocorrencia: "OCR-2024-0087", motivo: "Acesso restrito", impacto: "Baixo" }
-                      ].map((item, index) => (
-                        <div key={index} className="p-3 border rounded">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <div className="font-medium text-sm">{item.ocorrencia}</div>
-                              <div className="text-sm text-muted-foreground">{item.data}</div>
-                              <div className="text-sm mt-1">{item.motivo}</div>
-                            </div>
-                            <Badge 
-                              variant={
-                                item.impacto === "Alto" ? "destructive" :
-                                item.impacto === "Médio" ? "secondary" : "outline"
-                              }
-                            >
-                              {item.impacto}
-                            </Badge>
-                          </div>
+                  <div className="space-y-4">
+                    {[
+                      { fornecedor: "TechServ Solutions", sla: 99.2, trend: "+0.3%" },
+                      { fornecedor: "GlobalFix Corp", sla: 98.5, trend: "+1.2%" },
+                      { fornecedor: "QuickResponse Ltd", sla: 96.8, trend: "-0.5%" },
+                      { fornecedor: "ServicePro Inc", sla: 94.2, trend: "+2.1%" },
+                      { fornecedor: "FastFix Technologies", sla: 91.7, trend: "-1.8%" }
+                    ].map((item, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 border rounded">
+                        <span className="font-medium">{item.fornecedor}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg font-bold">{item.sla}%</span>
+                          <Badge variant={item.trend.startsWith('+') ? "default" : "destructive"}>
+                            {item.trend}
+                          </Badge>
                         </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
+                      </div>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
 
+          {/* Nova aba Long Tail */}
+          <TabsContent value="longtail" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Relatórios Executivos</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  Análise Long Tail - Tempos de Resolução
+                </CardTitle>
+                <div className="flex gap-2 mt-4">
+                  <Select defaultValue="all">
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="Segmento" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos os Segmentos</SelectItem>
+                      <SelectItem value="aa">Segmento AA</SelectItem>
+                      <SelectItem value="ab">Segmento AB</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Select defaultValue="all">
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="Equipamento" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos os Equipamentos</SelectItem>
+                      <SelectItem value="atm">ATM</SelectItem>
+                      <SelectItem value="clima">Climatização</SelectItem>
+                      <SelectItem value="conectividade">Conectividade</SelectItem>
+                      <SelectItem value="seguranca">Segurança</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Select defaultValue="all">
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="UF" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas as UFs</SelectItem>
+                      <SelectItem value="sp">São Paulo</SelectItem>
+                      <SelectItem value="rj">Rio de Janeiro</SelectItem>
+                      <SelectItem value="mg">Minas Gerais</SelectItem>
+                      <SelectItem value="ba">Bahia</SelectItem>
+                      <SelectItem value="pr">Paraná</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Button variant="outline">
+                    <Filter className="mr-2 h-4 w-4" />
+                    Aplicar Filtros
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-4 border rounded hover:bg-muted/50 transition-colors cursor-pointer">
-                    <h4 className="font-medium">Relatório Mensal</h4>
-                    <p className="text-sm text-muted-foreground">Resumo completo do mês</p>
-                    <Button variant="outline" size="sm" className="mt-2">
-                      <Download className="h-4 w-4 mr-2" />
-                      Baixar PDF
-                    </Button>
+                <div className="space-y-6">
+                  {/* Gráfico Long Tail simulado */}
+                  <div className="h-80 bg-muted/30 rounded-lg border-2 border-dashed border-muted flex items-center justify-center relative overflow-hidden">
+                    {/* Simulação de barras do long tail */}
+                    <div className="absolute bottom-0 left-0 right-0 flex items-end justify-center gap-1 p-4">
+                      {Array.from({ length: 50 }, (_, i) => {
+                        const height = Math.max(10, 300 - (i * 8) - Math.random() * 20);
+                        const isOutlier = i > 40;
+                        return (
+                          <div 
+                            key={i}
+                            className={`w-3 ${isOutlier ? 'bg-destructive' : 'bg-primary'} transition-all hover:opacity-80 cursor-pointer`}
+                            style={{ height: `${(height/300) * 280}px` }}
+                            title={`Tempo: ${(height/10).toFixed(1)}h`}
+                          />
+                        );
+                      })}
+                    </div>
+                    <div className="text-center text-muted-foreground">
+                      <BarChart3 className="h-8 w-8 mx-auto mb-2" />
+                      <p className="text-sm">Gráfico Long Tail - Tempos de Resolução</p>
+                      <p className="text-xs">Ocorrências ordenadas por tempo crescente</p>
+                    </div>
                   </div>
-                  <div className="p-4 border rounded hover:bg-muted/50 transition-colors cursor-pointer">
-                    <h4 className="font-medium">Dashboard Executivo</h4>
-                    <p className="text-sm text-muted-foreground">KPIs principais</p>
-                    <Button variant="outline" size="sm" className="mt-2">
-                      <Download className="h-4 w-4 mr-2" />
-                      Baixar Excel
-                    </Button>
+
+                  {/* Estatísticas do Long Tail */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <Card>
+                      <CardContent className="p-4 text-center">
+                        <div className="text-2xl font-bold text-primary">2.1h</div>
+                        <div className="text-sm text-muted-foreground">Mediana</div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4 text-center">
+                        <div className="text-2xl font-bold text-secondary">3.8h</div>
+                        <div className="text-sm text-muted-foreground">P90 (90%)</div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4 text-center">
+                        <div className="text-2xl font-bold text-warning">7.2h</div>
+                        <div className="text-sm text-muted-foreground">P95 (95%)</div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4 text-center">
+                        <div className="text-2xl font-bold text-destructive">15.6h</div>
+                        <div className="text-sm text-muted-foreground">P99 (99%)</div>
+                      </CardContent>
+                    </Card>
                   </div>
-                  <div className="p-4 border rounded hover:bg-muted/50 transition-colors cursor-pointer">
-                    <h4 className="font-medium">Análise de Tendências</h4>
-                    <p className="text-sm text-muted-foreground">Projeções e insights</p>
-                    <Button variant="outline" size="sm" className="mt-2">
-                      <Download className="h-4 w-4 mr-2" />
-                      Baixar PowerBI
-                    </Button>
+
+                  {/* Análise dos Outliers */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Outliers (Top 5% - Maior Tempo)</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {[
+                            { id: "OC2847", tempo: "15.6h", motivo: "Peça sem estoque", agencia: "AG0234 - Brasília/DF" },
+                            { id: "OC2831", tempo: "12.3h", motivo: "Acesso restrito", agencia: "AG1456 - Fortaleza/CE" },
+                            { id: "OC2756", tempo: "11.8h", motivo: "Técnico indisponível", agencia: "AG0789 - Curitiba/PR" },
+                            { id: "OC2692", tempo: "10.4h", motivo: "Problema complexo", agencia: "AG0134 - Rio de Janeiro/RJ" },
+                            { id: "OC2634", tempo: "9.7h", motivo: "Aguardando aprovação", agencia: "AG0456 - Belo Horizonte/MG" }
+                          ].map((item, index) => (
+                            <div key={index} className="flex items-center justify-between p-3 bg-destructive/5 border border-destructive/20 rounded">
+                              <div>
+                                <span className="font-medium text-sm">{item.id}</span>
+                                <p className="text-xs text-muted-foreground">{item.agencia}</p>
+                                <p className="text-xs text-muted-foreground">{item.motivo}</p>
+                              </div>
+                              <Badge variant="destructive">{item.tempo}</Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Distribuição por Faixas de Tempo</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {[
+                            { faixa: "< 1h", count: 1247, percent: 32, color: "bg-success" },
+                            { faixa: "1h - 2h", count: 1156, percent: 30, color: "bg-primary" },
+                            { faixa: "2h - 4h", count: 925, percent: 24, color: "bg-secondary" },
+                            { faixa: "4h - 6h", count: 356, percent: 9, color: "bg-warning" },
+                            { faixa: "6h - 12h", count: 134, percent: 3, color: "bg-destructive" },
+                            { faixa: "> 12h", count: 29, percent: 1, color: "bg-destructive" }
+                          ].map((item, index) => (
+                            <div key={index} className="space-y-2">
+                              <div className="flex justify-between text-sm">
+                                <span className="font-medium">{item.faixa}</span>
+                                <span>{item.count} ocorrências ({item.percent}%)</span>
+                              </div>
+                              <div className="w-full bg-muted h-2 rounded-full">
+                                <div 
+                                  className={`${item.color} h-2 rounded-full transition-all`}
+                                  style={{ width: `${item.percent}%` }}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
                 </div>
               </CardContent>
