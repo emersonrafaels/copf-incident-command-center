@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Bell, Shield, Database, Palette, Globe } from "lucide-react";
+import { Settings, Bell, Palette } from "lucide-react";
 
 const Configuracoes = () => {
   return (
@@ -16,11 +16,9 @@ const Configuracoes = () => {
         </div>
 
         <Tabs defaultValue="geral" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="geral">Geral</TabsTrigger>
             <TabsTrigger value="notificacoes">Notificações</TabsTrigger>
-            <TabsTrigger value="seguranca">Segurança</TabsTrigger>
-            <TabsTrigger value="integracao">Integração</TabsTrigger>
             <TabsTrigger value="aparencia">Aparência</TabsTrigger>
           </TabsList>
 
@@ -122,105 +120,6 @@ const Configuracoes = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="seguranca" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Shield className="h-5 w-5" />
-                  Configurações de Segurança
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Autenticação de Dois Fatores</p>
-                      <p className="text-sm text-muted-foreground">Adicionar camada extra de segurança</p>
-                    </div>
-                    <Switch />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Logout Automático</p>
-                      <p className="text-sm text-muted-foreground">Fazer logout após inatividade</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Log de Auditoria</p>
-                      <p className="text-sm text-muted-foreground">Registrar todas as ações do usuário</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                </div>
-                
-                <div className="space-y-4 pt-4 border-t">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Tempo de Sessão (minutos)</label>
-                    <Input defaultValue="480" type="number" />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Máximo de Tentativas de Login</label>
-                    <Input defaultValue="3" type="number" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="integracao" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Database className="h-5 w-5" />
-                  Integrações Externas
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">API ServiceNow</p>
-                      <p className="text-sm text-muted-foreground">Integração com sistema de tickets</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Monitoramento Zabbix</p>
-                      <p className="text-sm text-muted-foreground">Recebe alertas do sistema de monitoramento</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Google Maps API</p>
-                      <p className="text-sm text-muted-foreground">Para visualização geográfica</p>
-                    </div>
-                    <Switch />
-                  </div>
-                </div>
-                
-                <div className="space-y-4 pt-4 border-t">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">URL API ServiceNow</label>
-                    <Input placeholder="https://instance.service-now.com/api" />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Chave API Maps</label>
-                    <Input placeholder="AIzaSy..." type="password" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
 
           <TabsContent value="aparencia" className="space-y-6">
             <Card>
@@ -238,22 +137,6 @@ const Configuracoes = () => {
                       <p className="text-sm text-muted-foreground">Alternar baseado no horário do sistema</p>
                     </div>
                     <Switch />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Animações Reduzidas</p>
-                      <p className="text-sm text-muted-foreground">Reduzir animações para melhor performance</p>
-                    </div>
-                    <Switch />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Sidebar Sempre Visível</p>
-                      <p className="text-sm text-muted-foreground">Manter sidebar expandida por padrão</p>
-                    </div>
-                    <Switch defaultChecked />
                   </div>
                   
                   <div className="flex items-center justify-between">
@@ -277,11 +160,6 @@ const Configuracoes = () => {
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Tamanho de Fonte</label>
                     <Input defaultValue="14" type="number" />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Densidade de Informações</label>
-                    <Input defaultValue="Confortável" />
                   </div>
                 </div>
               </CardContent>
