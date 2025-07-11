@@ -7,9 +7,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useToast } from "@/hooks/use-toast";
-import { AlertTriangle, CheckCircle2, Clock, TrendingUp, MapPin, Users, Calendar, Download, RefreshCw, Filter } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Clock, TrendingUp, MapPin, Users, Calendar, Download, RefreshCw, Filter, CalendarDays } from "lucide-react";
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 export function Dashboard() {
   const {
     occurrences,
@@ -27,19 +34,64 @@ export function Dashboard() {
   const [selectedOccurrence, setSelectedOccurrence] = useState<any>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [filterPeriod, setFilterPeriod] = useState('30-days');
-  const handleExport = () => {
+  const [customDateRange, setCustomDateRange] = useState<{ from?: Date; to?: Date }>({});
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const handleExport = async () => {
     toast({
       title: "Exportação iniciada",
-      description: "Os dados estão sendo preparados para download..."
+      description: "Gerando PDF da dashboard..."
     });
 
-    // Simular exportação
-    setTimeout(() => {
+    try {
+      // Capturar a dashboard como imagem
+      const dashboardElement = document.getElementById('dashboard-content');
+      if (!dashboardElement) return;
+
+      const canvas = await html2canvas(dashboardElement, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('l', 'mm', 'a4'); // landscape orientation
+      
+      const imgWidth = 297; // A4 width in mm (landscape)
+      const pageHeight = 210; // A4 height in mm (landscape)
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+
+      let position = 0;
+
+      // Add title
+      pdf.setFontSize(16);
+      pdf.text('Dashboard COPF - ' + new Date().toLocaleDateString('pt-BR'), 20, 20);
+      
+      position = 30;
+      
+      pdf.addImage(imgData, 'PNG', 10, position, imgWidth - 20, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight + 30;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 10, position, imgWidth - 20, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save(`dashboard-copf-${new Date().toISOString().split('T')[0]}.pdf`);
+      
       toast({
         title: "Download concluído",
-        description: "Relatório COPF exportado com sucesso!"
+        description: "Dashboard exportada em PDF com sucesso!"
       });
-    }, 2000);
+    } catch (error) {
+      toast({
+        title: "Erro na exportação",
+        description: "Não foi possível gerar o PDF. Tente novamente.",
+        variant: "destructive"
+      });
+    }
   };
   const handleOccurrenceClick = (occurrence: any) => {
     setSelectedOccurrence(occurrence);
@@ -61,20 +113,82 @@ export function Dashboard() {
         </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" onClick={() => setFilterPeriod(filterPeriod === '30-days' ? '90-days' : '30-days')}>
-            <Calendar className="h-4 w-4 mr-2" />
-            {filterPeriod === '30-days' ? 'Últimos 30 dias' : 'Últimos 90 dias'}
-          </Button>
+          {/* Filtro de Período */}
+          <Select value={filterPeriod} onValueChange={setFilterPeriod}>
+            <SelectTrigger className="w-auto min-w-[180px]">
+              <Calendar className="h-4 w-4 mr-2" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="30-days">Últimos 30 dias</SelectItem>
+              <SelectItem value="60-days">Últimos 60 dias</SelectItem>
+              <SelectItem value="90-days">Últimos 90 dias</SelectItem>
+              <SelectItem value="custom">Período personalizado</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Seletor de data personalizado */}
+          {filterPeriod === 'custom' && (
+            <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={cn(
+                    "w-auto justify-start text-left font-normal",
+                    !customDateRange.from && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarDays className="h-4 w-4 mr-2" />
+                  {customDateRange.from ? (
+                    customDateRange.to ? (
+                      <>
+                        {format(customDateRange.from, "dd/MM/yyyy")} -{" "}
+                        {format(customDateRange.to, "dd/MM/yyyy")}
+                      </>
+                    ) : (
+                      format(customDateRange.from, "dd/MM/yyyy")
+                    )
+                  ) : (
+                    <span>Selecionar período</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <CalendarComponent
+                  initialFocus
+                  mode="range"
+                  defaultMonth={customDateRange.from}
+                  selected={{
+                    from: customDateRange.from,
+                    to: customDateRange.to
+                  }}
+                  onSelect={(range) => {
+                    setCustomDateRange(range || {});
+                    if (range?.from && range?.to) {
+                      setShowDatePicker(false);
+                    }
+                  }}
+                  numberOfMonths={2}
+                  className="pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+          )}
+
           <Button variant="outline" size="sm" onClick={handleRefresh}>
             <RefreshCw className="h-4 w-4 mr-2" />
             Atualizar
           </Button>
           <Button variant="corporate" size="sm" onClick={handleExport}>
             <Download className="h-4 w-4 mr-2" />
-            Exportar
+            Exportar PDF
           </Button>
         </div>
       </div>
+
+      {/* Dashboard Content Wrapper for PDF Export */}
+      <div id="dashboard-content">
 
       {/* KPI Cards */}
       {isLoading ? <div className="responsive-grid responsive-grid-4">
@@ -188,5 +302,6 @@ export function Dashboard() {
       });
       setModalOpen(false);
     }} />
+      </div>
     </div>;
 }
