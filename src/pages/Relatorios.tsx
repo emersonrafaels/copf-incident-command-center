@@ -8,8 +8,53 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { BarChart3, PieChart, TrendingUp, Download, Calendar, Clock, Target, Zap, CheckCircle, AlertCircle, Activity, Filter } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MetricCard } from "@/components/copf/MetricCard";
+import { useState, useMemo } from "react";
 
 const Relatorios = () => {
+  const [segmentoFilter, setSegmentoFilter] = useState("all");
+  const [equipamentoFilter, setEquipamentoFilter] = useState("all");
+  const [ufFilter, setUfFilter] = useState("all");
+
+  // Dados base que serão filtrados
+  const baseData = useMemo(() => {
+    const data = [];
+    for (let i = 0; i < 50; i++) {
+      const segmentos = ["aa", "ab"];
+      const equipamentos = ["atm", "clima", "conectividade", "seguranca"];
+      const ufs = ["sp", "rj", "mg", "ba", "pr"];
+      
+      data.push({
+        id: i,
+        tempo: Math.max(0.5, 15 - (i * 0.3) - Math.random() * 2),
+        segmento: segmentos[Math.floor(Math.random() * segmentos.length)],
+        equipamento: equipamentos[Math.floor(Math.random() * equipamentos.length)],
+        uf: ufs[Math.floor(Math.random() * ufs.length)]
+      });
+    }
+    return data.sort((a, b) => a.tempo - b.tempo);
+  }, []);
+
+  // Dados filtrados
+  const filteredData = useMemo(() => {
+    return baseData.filter(item => {
+      return (segmentoFilter === "all" || item.segmento === segmentoFilter) &&
+             (equipamentoFilter === "all" || item.equipamento === equipamentoFilter) &&
+             (ufFilter === "all" || item.uf === ufFilter);
+    });
+  }, [baseData, segmentoFilter, equipamentoFilter, ufFilter]);
+
+  // Métricas calculadas
+  const metrics = useMemo(() => {
+    if (filteredData.length === 0) return { p50: 0, p90: 0, p95: 0, p99: 0 };
+    
+    const sortedTimes = filteredData.map(d => d.tempo).sort((a, b) => a - b);
+    const p50 = sortedTimes[Math.floor(sortedTimes.length * 0.5)];
+    const p90 = sortedTimes[Math.floor(sortedTimes.length * 0.9)];
+    const p95 = sortedTimes[Math.floor(sortedTimes.length * 0.95)];
+    const p99 = sortedTimes[Math.floor(sortedTimes.length * 0.99)];
+    
+    return { p50, p90, p95, p99 };
+  }, [filteredData]);
   return (
     <COPFLayout>
       <div className="space-y-6">
@@ -449,7 +494,7 @@ const Relatorios = () => {
                   Análise Long Tail - Tempos de Resolução
                 </CardTitle>
                 <div className="flex gap-2 mt-4">
-                  <Select defaultValue="all">
+                  <Select value={segmentoFilter} onValueChange={setSegmentoFilter}>
                     <SelectTrigger className="w-48">
                       <SelectValue placeholder="Segmento" />
                     </SelectTrigger>
@@ -460,7 +505,7 @@ const Relatorios = () => {
                     </SelectContent>
                   </Select>
                   
-                  <Select defaultValue="all">
+                  <Select value={equipamentoFilter} onValueChange={setEquipamentoFilter}>
                     <SelectTrigger className="w-48">
                       <SelectValue placeholder="Equipamento" />
                     </SelectTrigger>
@@ -473,7 +518,7 @@ const Relatorios = () => {
                     </SelectContent>
                   </Select>
                   
-                  <Select defaultValue="all">
+                  <Select value={ufFilter} onValueChange={setUfFilter}>
                     <SelectTrigger className="w-48">
                       <SelectValue placeholder="UF" />
                     </SelectTrigger>
@@ -499,18 +544,23 @@ const Relatorios = () => {
                   <div className="h-80 rounded-lg relative overflow-hidden">
                     {/* Simulação de barras do long tail */}
                     <div className="absolute bottom-0 left-0 right-0 flex items-end justify-center gap-1 p-4">
-                      {Array.from({ length: 50 }, (_, i) => {
-                        const height = Math.max(10, 300 - (i * 8) - Math.random() * 20);
-                        const isOutlier = i > 40;
+                      {filteredData.length > 0 ? filteredData.map((item, i) => {
+                        const maxTime = Math.max(...filteredData.map(d => d.tempo));
+                        const height = (item.tempo / maxTime) * 280;
+                        const isOutlier = item.tempo > metrics.p95;
                         return (
                           <div 
-                            key={i}
+                            key={item.id}
                             className={`w-3 rounded-t-sm ${isOutlier ? 'bg-destructive/80 hover:bg-destructive' : 'bg-primary/80 hover:bg-primary'} transition-all duration-200 cursor-pointer shadow-sm`}
-                            style={{ height: `${(height/300) * 280}px` }}
-                            title={`Tempo: ${(height/10).toFixed(1)}h - Ocorrência ${i + 1}`}
+                            style={{ height: `${height}px` }}
+                            title={`Tempo: ${item.tempo.toFixed(1)}h - Ocorrência ${item.id + 1}\nSegmento: ${item.segmento.toUpperCase()}\nEquipamento: ${item.equipamento}\nUF: ${item.uf.toUpperCase()}`}
                           />
                         );
-                      })}
+                      }) : (
+                        <div className="text-center text-muted-foreground">
+                          <p className="text-sm">Nenhum dado encontrado para os filtros selecionados</p>
+                        </div>
+                      )}
                     </div>
                     {/* Grid lines for better readability */}
                     <div className="absolute inset-0 pointer-events-none">
@@ -524,47 +574,49 @@ const Relatorios = () => {
                     </div>
                     {/* Y-axis labels */}
                     <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-xs text-muted-foreground py-4">
-                      <span>30h</span>
-                      <span>24h</span>
-                      <span>18h</span>
+                      <span>15h</span>
                       <span>12h</span>
+                      <span>9h</span>
                       <span>6h</span>
+                      <span>3h</span>
                       <span>0h</span>
                     </div>
                     {/* Chart title overlay */}
                     <div className="absolute top-4 left-1/2 transform -translate-x-1/2 text-center">
                       <p className="text-sm font-medium text-foreground">Gráfico Long Tail - Tempos de Resolução</p>
-                      <p className="text-xs text-muted-foreground">Ocorrências ordenadas por tempo crescente</p>
+                      <p className="text-xs text-muted-foreground">
+                        {filteredData.length} ocorrências filtradas
+                      </p>
                     </div>
                   </div>
 
                    {/* Estatísticas do Long Tail */}
                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-                     <Card>
-                       <CardContent className="p-4 text-center">
-                         <div className="text-2xl font-bold text-primary">2.1h</div>
-                         <div className="text-sm text-muted-foreground">Mediana (P50)</div>
-                       </CardContent>
-                     </Card>
-                     <Card>
-                       <CardContent className="p-4 text-center">
-                         <div className="text-2xl font-bold text-foreground">3.8h</div>
-                         <div className="text-sm text-muted-foreground">P90 (90%)</div>
-                       </CardContent>
-                     </Card>
-                     <Card>
-                       <CardContent className="p-4 text-center">
-                         <div className="text-2xl font-bold text-warning">7.2h</div>
-                         <div className="text-sm text-muted-foreground">P95 (95%)</div>
-                       </CardContent>
-                     </Card>
-                     <Card>
-                       <CardContent className="p-4 text-center">
-                         <div className="text-2xl font-bold text-destructive">15.6h</div>
-                         <div className="text-sm text-muted-foreground">P99 (99%)</div>
-                       </CardContent>
-                     </Card>
-                   </div>
+                      <Card>
+                        <CardContent className="p-4 text-center">
+                          <div className="text-2xl font-bold text-primary">{metrics.p50.toFixed(1)}h</div>
+                          <div className="text-sm text-muted-foreground">Mediana (P50)</div>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="p-4 text-center">
+                          <div className="text-2xl font-bold text-foreground">{metrics.p90.toFixed(1)}h</div>
+                          <div className="text-sm text-muted-foreground">P90 (90%)</div>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="p-4 text-center">
+                          <div className="text-2xl font-bold text-warning">{metrics.p95.toFixed(1)}h</div>
+                          <div className="text-sm text-muted-foreground">P95 (95%)</div>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="p-4 text-center">
+                          <div className="text-2xl font-bold text-destructive">{metrics.p99.toFixed(1)}h</div>
+                          <div className="text-sm text-muted-foreground">P99 (99%)</div>
+                        </CardContent>
+                      </Card>
+                    </div>
 
                   {/* Análise dos Outliers */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
