@@ -496,7 +496,7 @@ const Relatorios = () => {
               <CardContent>
                 <div className="space-y-6">
                   {/* Gráfico Long Tail simulado */}
-                  <div className="h-80 bg-muted/30 rounded-lg border-2 border-dashed border-muted flex items-center justify-center relative overflow-hidden">
+                  <div className="h-80 rounded-lg relative overflow-hidden">
                     {/* Simulação de barras do long tail */}
                     <div className="absolute bottom-0 left-0 right-0 flex items-end justify-center gap-1 p-4">
                       {Array.from({ length: 50 }, (_, i) => {
@@ -505,17 +505,36 @@ const Relatorios = () => {
                         return (
                           <div 
                             key={i}
-                            className={`w-3 ${isOutlier ? 'bg-destructive' : 'bg-primary'} transition-all hover:opacity-80 cursor-pointer`}
+                            className={`w-3 rounded-t-sm ${isOutlier ? 'bg-destructive/80 hover:bg-destructive' : 'bg-primary/80 hover:bg-primary'} transition-all duration-200 cursor-pointer shadow-sm`}
                             style={{ height: `${(height/300) * 280}px` }}
-                            title={`Tempo: ${(height/10).toFixed(1)}h`}
+                            title={`Tempo: ${(height/10).toFixed(1)}h - Ocorrência ${i + 1}`}
                           />
                         );
                       })}
                     </div>
-                    <div className="text-center text-muted-foreground">
-                      <BarChart3 className="h-8 w-8 mx-auto mb-2" />
-                      <p className="text-sm">Gráfico Long Tail - Tempos de Resolução</p>
-                      <p className="text-xs">Ocorrências ordenadas por tempo crescente</p>
+                    {/* Grid lines for better readability */}
+                    <div className="absolute inset-0 pointer-events-none">
+                      {Array.from({ length: 5 }, (_, i) => (
+                        <div 
+                          key={i}
+                          className="absolute border-b border-muted/20"
+                          style={{ bottom: `${(i + 1) * 20}%`, left: 0, right: 0 }}
+                        />
+                      ))}
+                    </div>
+                    {/* Y-axis labels */}
+                    <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-xs text-muted-foreground py-4">
+                      <span>30h</span>
+                      <span>24h</span>
+                      <span>18h</span>
+                      <span>12h</span>
+                      <span>6h</span>
+                      <span>0h</span>
+                    </div>
+                    {/* Chart title overlay */}
+                    <div className="absolute top-4 left-1/2 transform -translate-x-1/2 text-center">
+                      <p className="text-sm font-medium text-foreground">Gráfico Long Tail - Tempos de Resolução</p>
+                      <p className="text-xs text-muted-foreground">Ocorrências ordenadas por tempo crescente</p>
                     </div>
                   </div>
 
