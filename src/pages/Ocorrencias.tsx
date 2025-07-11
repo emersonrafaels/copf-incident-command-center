@@ -19,6 +19,7 @@ import { OccurrenceModal } from "@/components/copf/OccurrenceModal";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import * as XLSX from 'xlsx';
 
 const Ocorrencias = () => {
@@ -32,6 +33,8 @@ const Ocorrencias = () => {
   const [severityFilter, setSeverityFilter] = useState('all')
   const [vendorPriorityFilter, setVendorPriorityFilter] = useState(false)
   const [showBot, setShowBot] = useState(false)
+  const [priorityModalOpen, setPriorityModalOpen] = useState(false)
+  const [selectedPriorityOccurrence, setSelectedPriorityOccurrence] = useState(null)
 
   // Filtrar ocorrências
   const filteredOccurrences = occurrences.filter(occurrence => {
@@ -64,16 +67,24 @@ const Ocorrencias = () => {
 
   const handlePrioritize = (occurrence, type: 'priority_only' | 'priority_with_message') => {
     if (type === 'priority_only') {
-      toast({
-        title: "Ocorrência Priorizada",
-        description: `Ocorrência ${occurrence.id} foi marcada como prioritária`,
-      })
+      // Abrir modal para escolher nível de priorização
+      setSelectedPriorityOccurrence(occurrence)
+      setPriorityModalOpen(true)
     } else {
       // Abrir modal de comunicação para priorizar com mensagem
       setSelectedOccurrence(occurrence)
       setModalMode('communication')
       setIsModalOpen(true)
     }
+  }
+
+  const handlePrioritySelect = (level: string) => {
+    toast({
+      title: "Ocorrência Priorizada",
+      description: `Ocorrência ${selectedPriorityOccurrence?.id} foi marcada como prioridade ${level}`,
+    })
+    setPriorityModalOpen(false)
+    setSelectedPriorityOccurrence(null)
   }
 
   const handleExportExcel = () => {
@@ -374,18 +385,18 @@ const Ocorrencias = () => {
                                    <Zap className="mr-2 h-4 w-4" />
                                    Apenas Priorizar
                                  </DropdownMenuItem>
-                                 <DropdownMenuItem 
-                                   onClick={() => handlePrioritize(occurrence, 'priority_with_message')}
-                                 >
-                                   <MessageSquare className="mr-2 h-4 w-4" />
-                                   Priorizar + Mensagem
-                                 </DropdownMenuItem>
-                                 <DropdownMenuItem 
-                                   onClick={() => handleSendMessage(occurrence)}
-                                 >
-                                   <MessageSquare className="mr-2 h-4 w-4" />
-                                   Apenas Mensagem
-                                 </DropdownMenuItem>
+                                  <DropdownMenuItem 
+                                    onClick={() => handlePrioritize(occurrence, 'priority_with_message')}
+                                  >
+                                    <MessageSquare className="mr-2 h-4 w-4" />
+                                    Priorizar + Mensagem
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem 
+                                    onClick={() => handleSendMessage(occurrence)}
+                                  >
+                                    <MessageSquare className="mr-2 h-4 w-4" />
+                                    Apenas Mensagem
+                                  </DropdownMenuItem>
                                </DropdownMenuContent>
                              </DropdownMenu>
                          </div>
@@ -406,6 +417,49 @@ const Ocorrencias = () => {
         onOpenChange={setIsModalOpen}
         mode={modalMode}
       />
+
+      {/* Modal de seleção de prioridade */}
+      <Dialog open={priorityModalOpen} onOpenChange={setPriorityModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Selecionar Nível de Prioridade</DialogTitle>
+            <DialogDescription>
+              Escolha o nível de prioridade para a ocorrência {selectedPriorityOccurrence?.id}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-1 gap-3 py-4">
+            <Button
+              variant="destructive"
+              onClick={() => handlePrioritySelect('Crítica')}
+              className="justify-start"
+            >
+              <Zap className="mr-2 h-4 w-4" />
+              Prioridade Crítica
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => handlePrioritySelect('Alta')}
+              className="justify-start"
+            >
+              <Star className="mr-2 h-4 w-4" />
+              Prioridade Alta
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => handlePrioritySelect('Média')}
+              className="justify-start"
+            >
+              <MessageSquare className="mr-2 h-4 w-4" />
+              Prioridade Média
+            </Button>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPriorityModalOpen(false)}>
+              Cancelar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </COPFLayout>
   );
 };
