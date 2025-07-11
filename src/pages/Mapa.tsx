@@ -110,7 +110,7 @@ const Mapa = () => {
                           <div className="text-xs text-muted-foreground">Total Ocorrências</div>
                         </div>
                         <div className="text-center p-3 bg-muted/50 rounded-lg">
-                          <div className="text-2xl font-bold text-secondary">2.360</div>
+                          <div className="text-2xl font-bold text-foreground">2.360</div>
                           <div className="text-xs text-muted-foreground">Agências Ativas</div>
                         </div>
                         <div className="text-center p-3 bg-muted/50 rounded-lg">
@@ -159,11 +159,11 @@ const Mapa = () => {
                   <span className="text-sm">Crítica/Alta concentração (10+)</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-secondary rounded-full"></div>
+                  <div className="w-4 h-4 bg-yellow-500 rounded-full"></div>
                   <span className="text-sm">Média concentração (5-10)</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-muted rounded-full"></div>
+                  <div className="w-4 h-4 bg-green-500 rounded-full"></div>
                   <span className="text-sm">Baixa concentração (1-5)</span>
                 </div>
               </CardContent>
