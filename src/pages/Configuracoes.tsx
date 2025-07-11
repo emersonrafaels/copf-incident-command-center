@@ -263,6 +263,14 @@ const Configuracoes = () => {
                     </div>
                     <Switch />
                   </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Mostrar Aba Comunicação</p>
+                      <p className="text-sm text-muted-foreground">Exibir a seção de comunicação no menu</p>
+                    </div>
+                    <Switch />
+                  </div>
                 </div>
                 
                 <div className="space-y-4 pt-4 border-t">

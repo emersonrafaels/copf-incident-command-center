@@ -45,8 +45,54 @@ const VisaoFornecedor = () => {
   // Simular fornecedor logado
   const currentVendor = 'TechSoluções Ltda'
   
-  // Filtrar ocorrências do fornecedor atual
-  const vendorOccurrences = occurrences.filter(occ => occ.vendor === currentVendor)
+  // Mock de ocorrências do fornecedor atual
+  const vendorOccurrences = [
+    {
+      id: "OCC-2024-001",
+      equipment: "ATM AG-001 - Terminal Principal",
+      severity: "critical",
+      status: "in_progress",
+      createdAt: "2024-01-15T10:30:00Z",
+      vendor: currentVendor,
+      agency: "AG0001 - Centro (São Paulo)"
+    },
+    {
+      id: "OCC-2024-003",
+      equipment: "Router CORE-02 - Sala Servidores",
+      severity: "high",
+      status: "open",
+      createdAt: "2024-01-15T08:45:00Z",
+      vendor: currentVendor,
+      agency: "AG0015 - Paulista (São Paulo)"
+    },
+    {
+      id: "OCC-2024-005",
+      equipment: "Servidor APP-01 - Data Center",
+      severity: "medium",
+      status: "open",
+      createdAt: "2024-01-15T07:20:00Z",
+      vendor: currentVendor,
+      agency: "AG0032 - Vila Madalena (São Paulo)"
+    },
+    {
+      id: "OCC-2024-007",
+      equipment: "Switch NET-05 - Rede Principal",
+      severity: "critical",
+      status: "escalated",
+      createdAt: "2024-01-14T16:15:00Z",
+      vendor: currentVendor,
+      agency: "AG0045 - Pinheiros (São Paulo)"
+    },
+    {
+      id: "OCC-2024-009",
+      equipment: "UPS-03 - Alimentação Crítica",
+      severity: "high",
+      status: "in_progress",
+      createdAt: "2024-01-14T14:30:00Z",
+      vendor: currentVendor,
+      agency: "AG0067 - Moema (São Paulo)"
+    }
+  ]
   
   // Ocorrências priorizadas para este fornecedor
   const prioritizedOccurrences = vendorOccurrences.filter(occ => 
@@ -320,7 +366,7 @@ const VisaoFornecedor = () => {
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <StatusBadge status={occurrence.status} />
+                            <StatusBadge status={occurrence.status as any} />
                           </TableCell>
                           <TableCell>{hoursSince}h</TableCell>
                           <TableCell>
@@ -602,7 +648,6 @@ const VisaoFornecedor = () => {
                         <TableHead>Severidade</TableHead>
                         <TableHead>Resolvida em</TableHead>
                         <TableHead>Tempo de Resolução</TableHead>
-                        <TableHead>Satisfação</TableHead>
                         <TableHead>Resumo</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -628,24 +673,7 @@ const VisaoFornecedor = () => {
                               {occurrence.resolutionTime}
                             </Badge>
                           </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1">
-                              {Array.from({ length: 5 }).map((_, i) => (
-                                <Star 
-                                  key={i} 
-                                  className={`h-4 w-4 ${
-                                    i < occurrence.satisfactionScore 
-                                      ? 'text-yellow-400 fill-yellow-400' 
-                                      : 'text-gray-300'
-                                  }`} 
-                                />
-                              ))}
-                              <span className="text-xs text-muted-foreground ml-1">
-                                ({occurrence.satisfactionScore}/5)
-                              </span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="max-w-[250px]">
+                          <TableCell className="max-w-[300px]">
                             <span className="text-sm text-muted-foreground">
                               {occurrence.resolutionSummary}
                             </span>

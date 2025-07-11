@@ -53,6 +53,7 @@ export function COPFSidebar() {
   const currentPath = location.pathname;
   const collapsed = state === "collapsed";
   const [showTeams, setShowTeams] = useState(false); // Controlado por configuração
+  const [showCommunication, setShowCommunication] = useState(false); // Controlado por configuração
   const isActive = (path: string) => {
     if (path === "/" && currentPath === "/") return true;
     if (path !== "/" && currentPath.startsWith(path)) return true;
@@ -82,7 +83,10 @@ export function COPFSidebar() {
           <SidebarGroupLabel>Navegação Principal</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navigation.map(item => <SidebarMenuItem key={item.title}>
+              {navigation.filter(item => {
+                if (item.title === "Comunicação") return showCommunication;
+                return true;
+              }).map(item => <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavCls(item.url)} title={collapsed ? item.description : undefined}>
                       <item.icon className="h-5 w-5" />
