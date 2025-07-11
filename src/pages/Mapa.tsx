@@ -2,7 +2,8 @@ import { COPFLayout } from "@/components/copf/COPFLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MapPin, Thermometer, Activity, Clock, Building2 } from "lucide-react";
+import { MapPin, Thermometer, Activity, Clock, Building2, Layers } from "lucide-react";
+import { HeatMap } from "@/components/copf/HeatMap";
 
 const mockMapaData = [
   { agencia: "AG0001 - Centro (São Paulo/SP)", ocorrencias: 23, regiao: "São Paulo Centro", equipamentos: 45, criticidade: "Alta", horarioPico: "14h-16h" },
@@ -36,154 +37,12 @@ const Mapa = () => {
             <Card className="h-[500px]">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5" />
-                  Mapa Interativo
+                  <Layers className="h-5 w-5" />
+                  Mapa de Calor Interativo
                 </CardTitle>
               </CardHeader>
-              <CardContent className="h-full">
-                <div className="bg-gradient-to-br from-green-50 to-yellow-50 dark:from-green-950/20 dark:to-yellow-950/20 h-full rounded-lg relative overflow-hidden border-2 border-muted">
-                  {/* Mapa do Brasil estilizado */}
-                  <svg viewBox="0 0 400 300" className="absolute inset-0 w-full h-full">
-                    {/* Contorno do Brasil simplificado */}
-                    <path 
-                      d="M50 80 Q80 60 120 70 Q160 65 200 75 Q240 70 280 80 Q320 85 350 95 L360 120 Q350 150 340 180 Q330 210 310 240 Q290 260 260 270 Q220 275 180 270 Q140 265 100 250 Q70 230 50 200 Q40 170 45 140 Q48 110 50 80 Z" 
-                      fill="transparent" 
-                      stroke="hsl(var(--border))" 
-                      strokeWidth="2"
-                      className="opacity-60"
-                    />
-                  </svg>
-                  
-                  {/* Heatmap points distribuídos pelo Brasil */}
-                  {[
-                    // São Paulo
-                    { x: 45, y: 70, intensity: 0.9, label: "São Paulo" },
-                    { x: 50, y: 68, intensity: 0.7, label: "ABC Paulista" },
-                    { x: 48, y: 72, intensity: 0.8, label: "Campinas" },
-                    
-                    // Rio de Janeiro  
-                    { x: 55, y: 65, intensity: 0.85, label: "Rio de Janeiro" },
-                    { x: 58, y: 67, intensity: 0.6, label: "Niterói" },
-                    
-                    // Minas Gerais
-                    { x: 52, y: 62, intensity: 0.75, label: "Belo Horizonte" },
-                    { x: 48, y: 60, intensity: 0.5, label: "Uberlândia" },
-                    
-                    // Bahia
-                    { x: 60, y: 45, intensity: 0.65, label: "Salvador" },
-                    { x: 65, y: 48, intensity: 0.4, label: "Feira de Santana" },
-                    
-                    // Pernambuco
-                    { x: 70, y: 35, intensity: 0.7, label: "Recife" },
-                    
-                    // Ceará
-                    { x: 72, y: 25, intensity: 0.6, label: "Fortaleza" },
-                    
-                    // Paraná
-                    { x: 42, y: 75, intensity: 0.55, label: "Curitiba" },
-                    
-                    // Santa Catarina
-                    { x: 45, y: 80, intensity: 0.4, label: "Florianópolis" },
-                    
-                    // Rio Grande do Sul
-                    { x: 40, y: 85, intensity: 0.5, label: "Porto Alegre" },
-                    
-                    // Goiás
-                    { x: 45, y: 50, intensity: 0.45, label: "Goiânia" },
-                    
-                    // Distrito Federal
-                    { x: 48, y: 48, intensity: 0.65, label: "Brasília" },
-                    
-                    // Mato Grosso
-                    { x: 35, y: 45, intensity: 0.3, label: "Cuiabá" },
-                    
-                    // Amazonas
-                    { x: 25, y: 25, intensity: 0.25, label: "Manaus" },
-                    
-                    // Pará
-                    { x: 35, y: 20, intensity: 0.35, label: "Belém" }
-                  ].map((point, index) => {
-                    const getHeatColor = (intensity: number) => {
-                      if (intensity > 0.8) return 'fill-red-500';
-                      if (intensity > 0.6) return 'fill-orange-500';
-                      if (intensity > 0.4) return 'fill-yellow-500';
-                      if (intensity > 0.2) return 'fill-green-500';
-                      return 'fill-blue-500';
-                    };
-                    
-                    const getOpacity = (intensity: number) => {
-                      return 0.3 + (intensity * 0.7);
-                    };
-                    
-                    return (
-                      <circle
-                        key={index}
-                        cx={`${point.x}%`}
-                        cy={`${point.y}%`}
-                        r={6 + (point.intensity * 8)}
-                        className={`${getHeatColor(point.intensity)} hover:opacity-100 cursor-pointer transition-all`}
-                        style={{ opacity: getOpacity(point.intensity) }}
-                      >
-                        <title>{`${point.label}: ${Math.round(point.intensity * 100)}% concentração`}</title>
-                      </circle>
-                    );
-                  })}
-                  
-                  {/* Marcadores de agências principais */}
-                  {mockMapaData.slice(0, 8).map((item, index) => {
-                    const positions = [
-                      { x: 45, y: 70 }, // São Paulo
-                      { x: 55, y: 65 }, // Rio
-                      { x: 52, y: 62 }, // BH
-                      { x: 60, y: 45 }, // Salvador
-                      { x: 70, y: 35 }, // Recife
-                      { x: 72, y: 25 }, // Fortaleza
-                      { x: 42, y: 75 }, // Curitiba
-                      { x: 48, y: 48 }  // Brasília
-                    ];
-                    
-                    return (
-                      <div 
-                        key={index}
-                        className="absolute bg-white dark:bg-gray-800 rounded-full p-1.5 shadow-lg border cursor-pointer hover:scale-110 transition-transform z-10"
-                        style={{
-                          left: `${positions[index]?.x || 50}%`,
-                          top: `${positions[index]?.y || 50}%`,
-                          transform: 'translate(-50%, -50%)'
-                        }}
-                        title={item.agencia}
-                      >
-                        <div className={`w-2.5 h-2.5 rounded-full ${
-                          item.ocorrencias > 25 ? 'bg-red-500' :
-                          item.ocorrencias > 15 ? 'bg-orange-500' : 
-                          item.ocorrencias > 10 ? 'bg-yellow-500' : 'bg-green-500'
-                        }`} />
-                      </div>
-                    );
-                  })}
-                  
-                  <div className="absolute bottom-4 left-4 bg-white/95 dark:bg-gray-800/95 p-3 rounded-lg shadow-lg border">
-                    <p className="text-xs font-medium mb-2">Mapa de Calor - Brasil (2.360 agências)</p>
-                    <div className="flex items-center gap-3 text-xs">
-                      <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                        <span>Crítica</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-                        <span>Alta</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                        <span>Média</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                        <span>Baixa</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              <CardContent className="h-full p-0">
+                <HeatMap />
               </CardContent>
             </Card>
           </div>
