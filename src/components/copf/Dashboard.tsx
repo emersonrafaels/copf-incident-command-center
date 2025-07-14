@@ -290,66 +290,141 @@ export function Dashboard() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading ? <div className="space-y-4">
-              {Array.from({
-            length: 3
-          }).map((_, i) => <div key={i} className="flex items-center gap-4 p-4 border rounded-lg animate-pulse">
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-16" />
-                    <Skeleton className="h-4 w-16" />
+          {isLoading ? (
+            <div className="space-y-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="flex items-start gap-4 p-4 border rounded-xl animate-pulse bg-muted/20">
+                  <div className="flex flex-col gap-2">
+                    <Skeleton className="h-5 w-16 rounded-full" />
+                    <Skeleton className="h-5 w-20 rounded-full" />
                   </div>
                   <div className="space-y-2 flex-1">
-                    <Skeleton className="h-4 w-32" />
-                    <Skeleton className="h-3 w-48" />
-                    <Skeleton className="h-3 w-40" />
+                    <Skeleton className="h-5 w-32" />
+                    <Skeleton className="h-4 w-48" />
+                    <Skeleton className="h-4 w-40" />
+                    <Skeleton className="h-3 w-56" />
                   </div>
-                </div>)}
-            </div> : <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-3 w-16" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : filteredOccurrences.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="rounded-full bg-muted/50 p-4 mb-4">
+                <AlertTriangle className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-medium text-foreground mb-2">Nenhuma ocorrência encontrada</h3>
+              <p className="text-sm text-muted-foreground max-w-sm">
+                Não há ocorrências que correspondam aos filtros aplicados. Tente ajustar os critérios de busca.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
               {filteredOccurrences
                 .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
                 .slice(0, showAllOccurrences ? undefined : 5)
-                .map(occurrence => <div key={occurrence.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer group" onClick={() => handleOccurrenceClick(occurrence)}>
-                  <div className="flex items-center gap-4">
-                    <div className="flex flex-col gap-1">
+                .map((occurrence, index) => (
+                  <div 
+                    key={occurrence.id} 
+                    className="group relative flex items-start gap-4 p-4 border rounded-xl hover:border-primary/30 hover:bg-accent/30 transition-all duration-200 cursor-pointer hover:shadow-md animate-fade-in"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                    onClick={() => handleOccurrenceClick(occurrence)}
+                  >
+                    {/* Indicador de prioridade lateral */}
+                    <div className={`absolute left-0 top-4 bottom-4 w-1 rounded-r-full ${
+                      occurrence.severity === 'critical' ? 'bg-destructive' :
+                      occurrence.severity === 'high' ? 'bg-warning' :
+                      occurrence.severity === 'medium' ? 'bg-primary' : 'bg-muted-foreground'
+                    }`} />
+                    
+                    {/* Badges de status */}
+                    <div className="flex flex-col gap-2 pl-2">
                       <StatusBadge status={occurrence.severity} />
                       <StatusBadge status={occurrence.status} />
                     </div>
-                    <div>
-                      <p className="font-medium text-foreground group-hover:text-primary">
-                        {occurrence.id}
-                      </p>
-                      <p className="text-sm text-muted-foreground">{occurrence.agency}</p>
-                      <div className="flex items-center gap-2 text-sm">
-                        <Badge variant="outline" className="text-xs">{occurrence.segment}</Badge>
-                        <span>{occurrence.equipment}</span>
+                    
+                    {/* Conteúdo principal */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors text-sm">
+                            {occurrence.id}
+                          </h4>
+                          <p className="text-sm text-muted-foreground">{occurrence.agency}</p>
+                        </div>
+                        <div className="text-right flex-shrink-0 ml-4">
+                          <p className="text-sm font-medium text-foreground">{occurrence.vendor}</p>
+                          <div className="flex flex-col text-xs text-muted-foreground">
+                            <span>{new Date(occurrence.createdAt).toLocaleDateString('pt-BR')}</span>
+                            <span>{new Date(occurrence.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+                          </div>
+                        </div>
                       </div>
-                      <p className="text-xs text-muted-foreground">Nº Série: {occurrence.serialNumber}</p>
-                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                      
+                      {/* Detalhes do equipamento */}
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge variant="secondary" className="text-xs font-medium">
+                          {occurrence.segment}
+                        </Badge>
+                        <span className="text-sm font-medium text-foreground">{occurrence.equipment}</span>
+                      </div>
+                      
+                      <p className="text-xs text-muted-foreground mb-1">
+                        Série: <span className="font-mono">{occurrence.serialNumber}</span>
+                      </p>
+                      
+                      <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
                         {occurrence.description}
                       </p>
+                      
+                      {/* Responsável */}
+                      <div className="flex items-center gap-1 mt-2">
+                        <span className="text-xs text-muted-foreground">Responsável:</span>
+                        <span className="text-xs font-medium text-foreground">{occurrence.assignedTo}</span>
+                      </div>
+                    </div>
+                    
+                    {/* Indicador de clique */}
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0">
+                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                        <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium">{occurrence.vendor}</p>
-                    <div className="flex flex-col text-xs text-muted-foreground">
-                      <span>{new Date(occurrence.createdAt).toLocaleDateString('pt-BR')}</span>
-                      <span>{new Date(occurrence.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
-                    </div>
-                  </div>
-                </div>)}
-            </div>}
-          <div className="mt-4 pt-4 border-t">
-            <Button 
-              variant="outline" 
-              className="w-full"
-              onClick={() => setShowAllOccurrences(!showAllOccurrences)}
-            >
-              {showAllOccurrences 
-                ? `Mostrar Apenas Recentes (${Math.min(5, filteredOccurrences.length)} de ${filteredOccurrences.length})`
-                : `Ver Todas as Ocorrências (${filteredOccurrences.length} de ${occurrences.length})`
-              }
-            </Button>
-          </div>
+                ))}
+            </div>
+          )}
+          
+          {/* Botão para ver mais */}
+          {filteredOccurrences.length > 0 && (
+            <div className="mt-6 pt-4 border-t">
+              <Button 
+                variant="outline" 
+                className="w-full group hover:bg-primary hover:text-primary-foreground transition-all duration-200"
+                onClick={() => setShowAllOccurrences(!showAllOccurrences)}
+              >
+                <span className="mr-2">
+                  {showAllOccurrences 
+                    ? `Mostrar Apenas Recentes (${Math.min(5, filteredOccurrences.length)} de ${filteredOccurrences.length})`
+                    : `Ver Todas as Ocorrências (${filteredOccurrences.length} de ${occurrences.length})`
+                  }
+                </span>
+                <svg 
+                  className={`w-4 h-4 transition-transform duration-200 ${showAllOccurrences ? 'rotate-180' : ''}`} 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 
