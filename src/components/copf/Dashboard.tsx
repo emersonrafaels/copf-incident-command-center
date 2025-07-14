@@ -295,7 +295,10 @@ export function Dashboard() {
                   </div>
                 </div>)}
             </div> : <div className="space-y-4">
-              {filteredOccurrences.slice(0, 5).map(occurrence => <div key={occurrence.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer group" onClick={() => handleOccurrenceClick(occurrence)}>
+              {filteredOccurrences
+                .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                .slice(0, 5)
+                .map(occurrence => <div key={occurrence.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer group" onClick={() => handleOccurrenceClick(occurrence)}>
                   <div className="flex items-center gap-4">
                     <div className="flex flex-col gap-1">
                       <StatusBadge status={occurrence.severity} />
@@ -319,9 +322,10 @@ export function Dashboard() {
                   <div className="text-right">
                     <p className="text-sm font-medium">{occurrence.assignedTo}</p>
                     <p className="text-xs text-muted-foreground">{occurrence.vendor}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(occurrence.createdAt).toLocaleDateString('pt-BR')}
-                    </p>
+                    <div className="flex flex-col text-xs text-muted-foreground">
+                      <span>{new Date(occurrence.createdAt).toLocaleDateString('pt-BR')}</span>
+                      <span>{new Date(occurrence.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
                   </div>
                 </div>)}
             </div>}

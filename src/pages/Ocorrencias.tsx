@@ -32,6 +32,9 @@ const Ocorrencias = () => {
   const [statusFilter, setStatusFilter] = useState('all')
   const [severityFilter, setSeverityFilter] = useState('all')
   const [vendorPriorityFilter, setVendorPriorityFilter] = useState(false)
+  const [segmentFilter, setSegmentFilter] = useState('all')
+  const [equipmentFilter, setEquipmentFilter] = useState('all')
+  const [serialNumberFilter, setSerialNumberFilter] = useState('')
   const [showBot, setShowBot] = useState(false)
   const [priorityModalOpen, setPriorityModalOpen] = useState(false)
   const [selectedPriorityOccurrence, setSelectedPriorityOccurrence] = useState(null)
@@ -45,13 +48,19 @@ const Ocorrencias = () => {
     
     const matchesStatus = statusFilter === 'all' || occurrence.status === statusFilter
     const matchesSeverity = severityFilter === 'all' || occurrence.severity === severityFilter
+    const matchesSegment = segmentFilter === 'all' || occurrence.segment === segmentFilter
+    const matchesEquipment = equipmentFilter === 'all' || occurrence.equipment === equipmentFilter
+    const matchesSerial = !serialNumberFilter || occurrence.serialNumber.toLowerCase().includes(serialNumberFilter.toLowerCase())
     
     // Simular lógica de priorização para fornecedor (críticas e altas são priorizadas)
     const isVendorPriority = occurrence.severity === 'critical' || occurrence.severity === 'high'
     const matchesVendorPriority = !vendorPriorityFilter || isVendorPriority
 
-    return matchesSearch && matchesStatus && matchesSeverity && matchesVendorPriority
+    return matchesSearch && matchesStatus && matchesSeverity && matchesSegment && matchesEquipment && matchesSerial && matchesVendorPriority
   })
+
+  // Obter equipamentos únicos para o filtro
+  const uniqueEquipments = Array.from(new Set(occurrences.map(o => o.equipment))).sort()
 
   const handleViewDetails = (occurrence) => {
     setSelectedOccurrence(occurrence)
@@ -202,7 +211,7 @@ const Ocorrencias = () => {
             <CardTitle>Filtros e Busca</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="responsive-grid responsive-grid-4">
+            <div className="responsive-grid responsive-grid-7">
               <div>
                 <Input 
                   placeholder="Buscar por ID, agência..." 
@@ -235,6 +244,35 @@ const Ocorrencias = () => {
                   <SelectItem value="low">Baixa</SelectItem>
                 </SelectContent>
               </Select>
+
+              <Select value={segmentFilter} onValueChange={setSegmentFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Segmento" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="AA">AA</SelectItem>
+                  <SelectItem value="AB">AB</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={equipmentFilter} onValueChange={setEquipmentFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Equipamento" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  {uniqueEquipments.map(equipment => (
+                    <SelectItem key={equipment} value={equipment}>{equipment}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Input
+                placeholder="Nº Série"
+                value={serialNumberFilter}
+                onChange={(e) => setSerialNumberFilter(e.target.value)}
+              />
 
               <div className="flex items-center space-x-2">
                 <Checkbox 
@@ -332,11 +370,13 @@ const Ocorrencias = () => {
             ) : (
               <ScrollArea className="h-[600px]">
                 <Table>
-                <TableHeader>
+                  <TableHeader>
                   <TableRow>
                     <TableHead>ID</TableHead>
                     <TableHead>Agência</TableHead>
+                    <TableHead>Segmento</TableHead>
                     <TableHead>Equipamento</TableHead>
+                    <TableHead>Nº Série</TableHead>
                     <TableHead>Severidade</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Data/Hora</TableHead>
@@ -349,7 +389,11 @@ const Ocorrencias = () => {
                     <TableRow key={occurrence.id}>
                       <TableCell className="font-medium">{occurrence.id}</TableCell>
                       <TableCell className="max-w-[200px] truncate">{occurrence.agency}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{occurrence.segment}</Badge>
+                      </TableCell>
                       <TableCell className="max-w-[150px] truncate">{occurrence.equipment}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{occurrence.serialNumber}</TableCell>
                       <TableCell>
                         <Badge variant={getSeverityVariant(occurrence.severity)}>
                           {getSeverityLabel(occurrence.severity)}
