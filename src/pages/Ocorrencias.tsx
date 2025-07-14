@@ -17,7 +17,7 @@ import { Search, Filter, Download, Eye, MessageSquare, Bot, Star, MoreHorizontal
 import { StatusBadge } from "@/components/copf/StatusBadge";
 import { OccurrenceModal } from "@/components/copf/OccurrenceModal";
 import { useDashboardData } from "@/hooks/useDashboardData";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import * as XLSX from 'xlsx';
@@ -59,8 +59,34 @@ const Ocorrencias = () => {
     return matchesSearch && matchesStatus && matchesSeverity && matchesSegment && matchesEquipment && matchesSerial && matchesVendorPriority
   })
 
-  // Obter equipamentos únicos para o filtro
-  const uniqueEquipments = Array.from(new Set(occurrences.map(o => o.equipment))).sort()
+  // Mapeamento de equipamentos por segmento
+  const equipmentsBySegment = {
+    AA: ['ATM Saque', 'ATM Depósito', 'Cassete'],
+    AB: ['Notebook', 'Desktop', 'Leitor de Cheques/documentos', 'Leitor biométrico', 'PIN PAD', 'Scanner de Cheque', 'Impressora', 'Impressora térmica', 'Impressora multifuncional', 'Monitor LCD/LED', 'Teclado', 'Servidor', 'Televisão', 'Senheiro', 'TCR', 'Classificadora', 'Fragmentadora de Papel']
+  };
+
+  // Obter equipamentos únicos baseado no segmento selecionado
+  const getFilteredEquipments = () => {
+    if (segmentFilter === 'all') {
+      return Array.from(new Set(occurrences.map(o => o.equipment))).sort();
+    } else {
+      const segmentEquipments = equipmentsBySegment[segmentFilter as 'AA' | 'AB'] || [];
+      return occurrences
+        .filter(o => o.segment === segmentFilter && segmentEquipments.includes(o.equipment))
+        .map(o => o.equipment)
+        .filter((equipment, index, arr) => arr.indexOf(equipment) === index)
+        .sort();
+    }
+  };
+
+  const uniqueEquipments = getFilteredEquipments();
+
+  // Resetar filtro de equipamento quando segmento mudar
+  useEffect(() => {
+    if (segmentFilter !== 'all') {
+      setEquipmentFilter('all');
+    }
+  }, [segmentFilter]);
 
   // Verificar se há filtros ativos
   const hasActiveFilters = searchTerm || statusFilter !== 'all' || severityFilter !== 'all' || 
