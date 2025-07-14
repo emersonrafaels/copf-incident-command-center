@@ -215,8 +215,8 @@ export function OccurrenceModal({
                     <p className="text-sm">{occurrence.equipment}</p>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Responsável</p>
-                    <p className="text-sm">{occurrence.assignedTo}</p>
+                    <p className="text-sm font-medium text-muted-foreground">Fornecedor</p>
+                    <p className="text-sm">{occurrence.vendor}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Data/Hora</p>

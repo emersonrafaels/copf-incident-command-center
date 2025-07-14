@@ -121,7 +121,6 @@ const Ocorrencias = () => {
       'Status': getStatusLabel(occurrence.status),
       'Data/Hora': new Date(occurrence.createdAt).toLocaleString('pt-BR'),
       'Fornecedor': occurrence.vendor,
-      'Responsável': occurrence.assignedTo,
       'Descrição': occurrence.description
     }))
 
@@ -139,7 +138,6 @@ const Ocorrencias = () => {
       { wch: 15 }, // Status
       { wch: 20 }, // Data/Hora
       { wch: 20 }, // Fornecedor
-      { wch: 20 }, // Responsável
       { wch: 50 }  // Descrição
     ]
     ws['!cols'] = wscols

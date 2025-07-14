@@ -162,7 +162,7 @@ const VisaoFornecedor = () => {
       id: 3,
       occurrenceId: "OCC-2024-005",
       from: "COPF - Escalação",
-      message: "Ocorrência escalada devido ao não cumprimento do SLA. Favor contatar supervisor responsável. Prioridade elevada para CRÍTICA devido ao tempo de resposta.",
+      message: "Ocorrência escalada devido ao não cumprimento do SLA. Favor contatar fornecedor. Prioridade elevada para CRÍTICA devido ao tempo de resposta.",
       timestamp: "2024-01-15T12:00:00Z", 
       priority: "critical",
       read: false,
