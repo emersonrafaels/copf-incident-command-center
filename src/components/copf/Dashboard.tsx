@@ -289,108 +289,118 @@ export function Dashboard() {
             </div>
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-6">
           {isLoading ? (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="flex items-start gap-4 p-4 border rounded-xl animate-pulse bg-muted/20">
-                  <div className="flex flex-col gap-2">
-                    <Skeleton className="h-5 w-16 rounded-full" />
-                    <Skeleton className="h-5 w-20 rounded-full" />
+                <div key={i} className="flex items-start gap-6 p-5 border rounded-2xl animate-pulse bg-muted/20">
+                  <div className="flex flex-col gap-3">
+                    <Skeleton className="h-6 w-20 rounded-full" />
+                    <Skeleton className="h-6 w-24 rounded-full" />
                   </div>
-                  <div className="space-y-2 flex-1">
-                    <Skeleton className="h-5 w-32" />
+                  <div className="space-y-3 flex-1">
+                    <Skeleton className="h-5 w-40" />
+                    <Skeleton className="h-4 w-56" />
                     <Skeleton className="h-4 w-48" />
-                    <Skeleton className="h-4 w-40" />
-                    <Skeleton className="h-3 w-56" />
+                    <Skeleton className="h-3 w-64" />
                   </div>
                   <div className="space-y-2">
-                    <Skeleton className="h-4 w-20" />
-                    <Skeleton className="h-3 w-16" />
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-3 w-20" />
                   </div>
                 </div>
               ))}
             </div>
           ) : filteredOccurrences.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="rounded-full bg-muted/50 p-4 mb-4">
-                <AlertTriangle className="h-8 w-8 text-muted-foreground" />
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="rounded-full bg-muted/50 p-6 mb-6">
+                <AlertTriangle className="h-10 w-10 text-muted-foreground" />
               </div>
-              <h3 className="text-lg font-medium text-foreground mb-2">Nenhuma ocorrência encontrada</h3>
-              <p className="text-sm text-muted-foreground max-w-sm">
+              <h3 className="text-xl font-semibold text-foreground mb-3">Nenhuma ocorrência encontrada</h3>
+              <p className="text-sm text-muted-foreground max-w-md leading-relaxed">
                 Não há ocorrências que correspondam aos filtros aplicados. Tente ajustar os critérios de busca.
               </p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {filteredOccurrences
                 .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
                 .slice(0, showAllOccurrences ? undefined : 5)
                 .map((occurrence, index) => (
                   <div 
                     key={occurrence.id} 
-                    className="group relative flex items-start gap-4 p-4 border rounded-xl hover:border-primary/30 hover:bg-accent/30 transition-all duration-200 cursor-pointer hover:shadow-md animate-fade-in"
-                    style={{ animationDelay: `${index * 50}ms` }}
+                    className="group relative p-6 border border-border/50 rounded-2xl hover:border-primary/40 hover:bg-accent/20 hover:shadow-lg transition-all duration-300 cursor-pointer animate-fade-in"
+                    style={{ animationDelay: `${index * 75}ms` }}
                     onClick={() => handleOccurrenceClick(occurrence)}
                   >
                     {/* Indicador de prioridade lateral */}
-                    <div className={`absolute left-0 top-4 bottom-4 w-1 rounded-r-full ${
-                      occurrence.severity === 'critical' ? 'bg-destructive' :
-                      occurrence.severity === 'high' ? 'bg-warning' :
-                      occurrence.severity === 'medium' ? 'bg-primary' : 'bg-muted-foreground'
+                    <div className={`absolute left-0 top-6 bottom-6 w-1.5 rounded-r-full ${
+                      occurrence.severity === 'critical' ? 'bg-destructive shadow-lg shadow-destructive/30' :
+                      occurrence.severity === 'high' ? 'bg-warning shadow-lg shadow-warning/30' :
+                      occurrence.severity === 'medium' ? 'bg-primary shadow-lg shadow-primary/30' : 'bg-muted-foreground'
                     }`} />
                     
-                    {/* Badges de status */}
-                    <div className="flex flex-col gap-2 pl-2">
-                      <StatusBadge status={occurrence.severity} />
-                      <StatusBadge status={occurrence.status} />
-                    </div>
-                    
-                    {/* Conteúdo principal */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors text-sm">
+                    {/* Header com ID e informações principais */}
+                    <div className="flex items-start justify-between mb-4 pl-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h4 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">
                             {occurrence.id}
                           </h4>
-                          <p className="text-sm text-muted-foreground">{occurrence.agency}</p>
-                        </div>
-                        <div className="text-right flex-shrink-0 ml-4">
-                          <div className="mb-3">
-                            <span className="text-xs text-muted-foreground">Fornecedor:</span>
-                            <p className="text-sm font-medium text-foreground">{occurrence.vendor}</p>
+                          <div className="flex gap-2">
+                            <StatusBadge status={occurrence.severity} />
+                            <StatusBadge status={occurrence.status} />
                           </div>
-                          <div>
-                            <span className="text-xs text-muted-foreground">Data e Hora da Ocorrência:</span>
-                            <div className="flex flex-col text-xs">
-                              <span className="font-medium text-foreground">{new Date(occurrence.createdAt).toLocaleDateString('pt-BR')}</span>
-                              <span className="font-medium text-foreground">{new Date(occurrence.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground font-medium">{occurrence.agency}</p>
+                      </div>
+                      
+                      {/* Informações do lado direito */}
+                      <div className="text-right space-y-3 min-w-0 flex-shrink-0">
+                        <div>
+                          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Fornecedor</span>
+                          <p className="text-sm font-semibold text-foreground">{occurrence.vendor}</p>
+                        </div>
+                        <div>
+                          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Data da Ocorrência</span>
+                          <div className="text-sm font-semibold text-foreground">
+                            <div>{new Date(occurrence.createdAt).toLocaleDateString('pt-BR')}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {new Date(occurrence.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                             </div>
                           </div>
                         </div>
                       </div>
-                      
-                      {/* Detalhes do equipamento */}
-                      <div className="flex items-center gap-2 mb-2">
-                        <Badge variant="secondary" className="text-xs font-medium">
-                          {occurrence.segment}
-                        </Badge>
-                        <span className="text-sm font-medium text-foreground">{occurrence.equipment}</span>
+                    </div>
+                    
+                    {/* Seção de equipamento */}
+                    <div className="bg-muted/30 rounded-xl p-4 mb-4 ml-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                          <Badge variant="secondary" className="text-xs font-bold px-3 py-1">
+                            {occurrence.segment}
+                          </Badge>
+                          <span className="text-base font-semibold text-foreground">{occurrence.equipment}</span>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Nº Série</span>
+                          <p className="text-sm font-mono font-semibold text-foreground">{occurrence.serialNumber}</p>
+                        </div>
                       </div>
-                      
-                      <p className="text-xs text-muted-foreground mb-1">
-                        Série: <span className="font-mono">{occurrence.serialNumber}</span>
-                      </p>
-                      
-                      <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                    </div>
+                    
+                    {/* Descrição */}
+                    <div className="ml-4">
+                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2 block">Descrição</span>
+                      <p className="text-sm text-foreground leading-relaxed line-clamp-2">
                         {occurrence.description}
                       </p>
                     </div>
                     
                     {/* Indicador de clique */}
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0">
-                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
-                        <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-110">
+                      <div className="w-8 h-8 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center">
+                        <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
                       </div>
@@ -402,20 +412,21 @@ export function Dashboard() {
           
           {/* Botão para ver mais */}
           {filteredOccurrences.length > 0 && (
-            <div className="mt-6 pt-4 border-t">
+            <div className="mt-8 pt-6 border-t border-border/50">
               <Button 
                 variant="outline" 
-                className="w-full group hover:bg-primary hover:text-primary-foreground transition-all duration-200"
+                size="lg"
+                className="w-full group hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-300 text-base font-medium py-6"
                 onClick={() => setShowAllOccurrences(!showAllOccurrences)}
               >
-                <span className="mr-2">
+                <span className="mr-3">
                   {showAllOccurrences 
                     ? `Mostrar Apenas Recentes (${Math.min(5, filteredOccurrences.length)} de ${filteredOccurrences.length})`
                     : `Ver Todas as Ocorrências (${filteredOccurrences.length} de ${occurrences.length})`
                   }
                 </span>
                 <svg 
-                  className={`w-4 h-4 transition-transform duration-200 ${showAllOccurrences ? 'rotate-180' : ''}`} 
+                  className={`w-5 h-5 transition-transform duration-300 ${showAllOccurrences ? 'rotate-180' : ''} group-hover:scale-110`} 
                   fill="none" 
                   stroke="currentColor" 
                   viewBox="0 0 24 24"
