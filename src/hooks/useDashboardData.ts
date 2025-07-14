@@ -189,11 +189,18 @@ export function useDashboardData() {
     { mes: 'Dez', mttr: 4.2 }
   ]
 
+  // Dados dos equipamentos baseados nos segmentos AA e AB mapeados
   const equipmentData: ChartData[] = [
-    { name: 'ATM', value: 35, fill: 'hsl(var(--primary))' },
-    { name: 'POS', value: 28, fill: 'hsl(var(--warning))' },
-    { name: 'Rede', value: 22, fill: 'hsl(var(--success))' },
-    { name: 'Climatização', value: 15, fill: 'hsl(var(--destructive))' }
+    { 
+      name: 'Segmento AA', 
+      value: occurrences.filter(o => o.segment === 'AA').length, 
+      fill: 'hsl(var(--primary))' 
+    },
+    { 
+      name: 'Segmento AB', 
+      value: occurrences.filter(o => o.segment === 'AB').length, 
+      fill: 'hsl(var(--warning))' 
+    }
   ]
 
   const metrics = {

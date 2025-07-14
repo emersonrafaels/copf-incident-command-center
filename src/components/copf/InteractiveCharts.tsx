@@ -135,7 +135,7 @@ export function InteractiveCharts({ severityData, timelineData, mttrData, equipm
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <PieChartIcon className="h-5 w-5" />
-            Tipos de Equipamento
+            Segmentos AA e AB
           </CardTitle>
         </CardHeader>
         <CardContent>
