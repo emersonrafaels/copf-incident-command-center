@@ -358,7 +358,7 @@ const Ocorrencias = () => {
                 <div className="space-y-3">
                   <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                     <Building className="h-4 w-4" />
-                    Local & Equipamento
+                    Segmento & Equipamento
                   </label>
                   <Select value={segmentFilter} onValueChange={setSegmentFilter}>
                     <SelectTrigger className="h-10">
