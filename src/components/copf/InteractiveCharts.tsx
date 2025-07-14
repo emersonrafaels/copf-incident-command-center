@@ -50,12 +50,28 @@ export function InteractiveCharts({ severityData, timelineData, mttrData, equipm
     { name: 'AB', value: equipmentData.find(e => e.name.includes('AB'))?.value || 0, fill: 'hsl(var(--warning))' }
   ]
 
-  const equipmentTypeData = [
-    { name: 'ATM', value: 35, fill: 'hsl(var(--primary))' },
-    { name: 'POS', value: 28, fill: 'hsl(var(--warning))' },
-    { name: 'Rede', value: 22, fill: 'hsl(var(--success))' },
-    { name: 'Climatização', value: 15, fill: 'hsl(var(--destructive))' }
-  ]
+  // Calcular distribuição real de equipamentos baseada nas ocorrências
+  const equipmentCounts = equipmentData.length > 0 ? 
+    Object.values(equipmentData).reduce((acc: any, occurrence: any) => {
+      if (occurrence.equipment) {
+        acc[occurrence.equipment] = (acc[occurrence.equipment] || 0) + 1;
+      }
+      return acc;
+    }, {}) : {};
+
+  // Converter para formato do gráfico
+  const equipmentTypeData = Object.entries(equipmentCounts).map(([equipment, count], index) => ({
+    name: equipment,
+    value: count as number,
+    fill: [
+      'hsl(var(--primary))',
+      'hsl(var(--warning))', 
+      'hsl(var(--success))',
+      'hsl(var(--destructive))',
+      'hsl(var(--muted-foreground))',
+      'hsl(var(--accent))'
+    ][index % 6]
+  })).sort((a, b) => b.value - a.value).slice(0, 6) // Top 6 equipamentos
 
   const currentData = viewMode === 'segment' ? segmentData : equipmentTypeData
 
