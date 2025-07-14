@@ -13,7 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Search, Filter, Download, Eye, MessageSquare, Bot, Star, MoreHorizontal, Zap, Clock } from "lucide-react";
+import { Search, Filter, Download, Eye, MessageSquare, Bot, Star, MoreHorizontal, Zap, Clock, X, Building, Package, Hash, AlertTriangle } from "lucide-react";
 import { StatusBadge } from "@/components/copf/StatusBadge";
 import { OccurrenceModal } from "@/components/copf/OccurrenceModal";
 import { useDashboardData } from "@/hooks/useDashboardData";
@@ -61,6 +61,21 @@ const Ocorrencias = () => {
 
   // Obter equipamentos únicos para o filtro
   const uniqueEquipments = Array.from(new Set(occurrences.map(o => o.equipment))).sort()
+
+  // Verificar se há filtros ativos
+  const hasActiveFilters = searchTerm || statusFilter !== 'all' || severityFilter !== 'all' || 
+    segmentFilter !== 'all' || equipmentFilter !== 'all' || serialNumberFilter || vendorPriorityFilter
+
+  // Limpar todos os filtros
+  const clearAllFilters = () => {
+    setSearchTerm('')
+    setStatusFilter('all')
+    setSeverityFilter('all')
+    setSegmentFilter('all')
+    setEquipmentFilter('all')
+    setSerialNumberFilter('')
+    setVendorPriorityFilter(false)
+  }
 
   const handleViewDetails = (occurrence) => {
     setSelectedOccurrence(occurrence)
@@ -206,86 +221,205 @@ const Ocorrencias = () => {
           </div>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Filtros e Busca</CardTitle>
+        <Card className="shadow-lg border-0 bg-gradient-to-r from-background to-accent/5">
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Filter className="h-5 w-5 text-primary" />
+                Filtros e Busca
+              </CardTitle>
+              {hasActiveFilters && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={clearAllFilters}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Limpar Filtros
+                </Button>
+              )}
+            </div>
+            {hasActiveFilters && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {searchTerm && (
+                  <Badge variant="secondary" className="text-xs">
+                    Busca: {searchTerm}
+                    <X 
+                      className="h-3 w-3 ml-1 cursor-pointer hover:bg-destructive/20 rounded-full" 
+                      onClick={() => setSearchTerm('')}
+                    />
+                  </Badge>
+                )}
+                {statusFilter !== 'all' && (
+                  <Badge variant="secondary" className="text-xs">
+                    Status: {getStatusLabel(statusFilter)}
+                    <X 
+                      className="h-3 w-3 ml-1 cursor-pointer hover:bg-destructive/20 rounded-full" 
+                      onClick={() => setStatusFilter('all')}
+                    />
+                  </Badge>
+                )}
+                {severityFilter !== 'all' && (
+                  <Badge variant="secondary" className="text-xs">
+                    Severidade: {getSeverityLabel(severityFilter)}
+                    <X 
+                      className="h-3 w-3 ml-1 cursor-pointer hover:bg-destructive/20 rounded-full" 
+                      onClick={() => setSeverityFilter('all')}
+                    />
+                  </Badge>
+                )}
+                {segmentFilter !== 'all' && (
+                  <Badge variant="secondary" className="text-xs">
+                    Segmento: {segmentFilter}
+                    <X 
+                      className="h-3 w-3 ml-1 cursor-pointer hover:bg-destructive/20 rounded-full" 
+                      onClick={() => setSegmentFilter('all')}
+                    />
+                  </Badge>
+                )}
+                {equipmentFilter !== 'all' && (
+                  <Badge variant="secondary" className="text-xs">
+                    Equipamento: {equipmentFilter}
+                    <X 
+                      className="h-3 w-3 ml-1 cursor-pointer hover:bg-destructive/20 rounded-full" 
+                      onClick={() => setEquipmentFilter('all')}
+                    />
+                  </Badge>
+                )}
+                {serialNumberFilter && (
+                  <Badge variant="secondary" className="text-xs">
+                    Nº Série: {serialNumberFilter}
+                    <X 
+                      className="h-3 w-3 ml-1 cursor-pointer hover:bg-destructive/20 rounded-full" 
+                      onClick={() => setSerialNumberFilter('')}
+                    />
+                  </Badge>
+                )}
+                {vendorPriorityFilter && (
+                  <Badge variant="secondary" className="text-xs">
+                    Priorizadas
+                    <X 
+                      className="h-3 w-3 ml-1 cursor-pointer hover:bg-destructive/20 rounded-full" 
+                      onClick={() => setVendorPriorityFilter(false)}
+                    />
+                  </Badge>
+                )}
+              </div>
+            )}
           </CardHeader>
           <CardContent>
-            <div className="responsive-grid responsive-grid-7">
-              <div>
+            <div className="space-y-6">
+              {/* Busca Principal */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input 
-                  placeholder="Buscar por ID, agência..." 
+                  placeholder="Buscar por ID, agência ou descrição..." 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 h-11 border-2 focus:border-primary/50 transition-colors"
                 />
               </div>
-              
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos os Status</SelectItem>
-                  <SelectItem value="active">Abertas</SelectItem>
-                  <SelectItem value="pending">Em Andamento</SelectItem>
-                  <SelectItem value="resolved">Resolvidas</SelectItem>
-                </SelectContent>
-              </Select>
 
-              <Select value={severityFilter} onValueChange={setSeverityFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Severidade" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas as Severidades</SelectItem>
-                  <SelectItem value="critical">Crítica</SelectItem>
-                  <SelectItem value="high">Alta</SelectItem>
-                  <SelectItem value="medium">Média</SelectItem>
-                  <SelectItem value="low">Baixa</SelectItem>
-                </SelectContent>
-              </Select>
+              {/* Filtros Agrupados */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Status e Severidade */}
+                <div className="space-y-3">
+                  <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4" />
+                    Status & Severidade
+                  </label>
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="h-10">
+                      <SelectValue placeholder="Selecionar status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos os Status</SelectItem>
+                      <SelectItem value="active">Abertas</SelectItem>
+                      <SelectItem value="pending">Em Andamento</SelectItem>
+                      <SelectItem value="resolved">Resolvidas</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={severityFilter} onValueChange={setSeverityFilter}>
+                    <SelectTrigger className="h-10">
+                      <SelectValue placeholder="Selecionar severidade" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas as Severidades</SelectItem>
+                      <SelectItem value="critical">Crítica</SelectItem>
+                      <SelectItem value="high">Alta</SelectItem>
+                      <SelectItem value="medium">Média</SelectItem>
+                      <SelectItem value="low">Baixa</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <Select value={segmentFilter} onValueChange={setSegmentFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Segmento" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="AA">AA</SelectItem>
-                  <SelectItem value="AB">AB</SelectItem>
-                </SelectContent>
-              </Select>
+                {/* Segmento e Equipamento */}
+                <div className="space-y-3">
+                  <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Building className="h-4 w-4" />
+                    Local & Equipamento
+                  </label>
+                  <Select value={segmentFilter} onValueChange={setSegmentFilter}>
+                    <SelectTrigger className="h-10">
+                      <SelectValue placeholder="Selecionar segmento" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos os Segmentos</SelectItem>
+                      <SelectItem value="AA">Segmento AA</SelectItem>
+                      <SelectItem value="AB">Segmento AB</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={equipmentFilter} onValueChange={setEquipmentFilter}>
+                    <SelectTrigger className="h-10">
+                      <SelectValue placeholder="Selecionar equipamento" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos os Equipamentos</SelectItem>
+                      {uniqueEquipments.map(equipment => (
+                        <SelectItem key={equipment} value={equipment}>{equipment}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <Select value={equipmentFilter} onValueChange={setEquipmentFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Equipamento" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  {uniqueEquipments.map(equipment => (
-                    <SelectItem key={equipment} value={equipment}>{equipment}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                {/* Número de Série */}
+                <div className="space-y-3">
+                  <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Hash className="h-4 w-4" />
+                    Número de Série
+                  </label>
+                  <div className="relative">
+                    <Package className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Ex: ATM001-SP-001"
+                      value={serialNumberFilter}
+                      onChange={(e) => setSerialNumberFilter(e.target.value)}
+                      className="pl-10 h-10"
+                    />
+                  </div>
+                </div>
 
-              <Input
-                placeholder="Nº Série"
-                value={serialNumberFilter}
-                onChange={(e) => setSerialNumberFilter(e.target.value)}
-              />
-
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="vendor-priority"
-                  checked={vendorPriorityFilter}
-                  onCheckedChange={(checked) => setVendorPriorityFilter(checked === true)}
-                />
-                <label 
-                  htmlFor="vendor-priority" 
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Priorizadas para Fornecedor
-                </label>
+                {/* Opções Especiais */}
+                <div className="space-y-3">
+                  <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Star className="h-4 w-4" />
+                    Opções Especiais
+                  </label>
+                  <div className="flex items-center space-x-3 p-3 border rounded-lg bg-accent/20 hover:bg-accent/30 transition-colors">
+                    <Checkbox 
+                      id="vendor-priority"
+                      checked={vendorPriorityFilter}
+                      onCheckedChange={(checked) => setVendorPriorityFilter(checked === true)}
+                    />
+                    <label 
+                      htmlFor="vendor-priority" 
+                      className="text-sm font-medium leading-none cursor-pointer flex-1"
+                    >
+                      Priorizadas para Fornecedor
+                    </label>
+                  </div>
+                </div>
               </div>
             </div>
           </CardContent>
