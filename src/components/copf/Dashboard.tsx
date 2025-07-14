@@ -350,7 +350,7 @@ export function Dashboard() {
                       
                       {/* Informações principais */}
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-start justify-between mb-1">
                           <div>
                             <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors text-sm">
                               {occurrence.id}
