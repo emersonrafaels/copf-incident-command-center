@@ -25,6 +25,7 @@ interface InteractiveChartsProps {
   timelineData: Array<{ date: string; ocorrencias: number; resolvidas: number }>
   mttrData: Array<{ mes: string; mttr: number }>
   equipmentData: Array<{ name: string; value: number; fill: string }>
+  occurrences: Array<{ equipment: string; segment: string }>
 }
 
 const chartConfig = {
@@ -42,7 +43,7 @@ const chartConfig = {
   }
 }
 
-export function InteractiveCharts({ severityData, timelineData, mttrData, equipmentData }: InteractiveChartsProps) {
+export function InteractiveCharts({ severityData, timelineData, mttrData, equipmentData, occurrences }: InteractiveChartsProps) {
   const [viewMode, setViewMode] = useState<'segment' | 'equipment'>('segment')
 
   const segmentData = [
@@ -51,13 +52,12 @@ export function InteractiveCharts({ severityData, timelineData, mttrData, equipm
   ]
 
   // Calcular distribuição real de equipamentos baseada nas ocorrências
-  const equipmentCounts = equipmentData.length > 0 ? 
-    Object.values(equipmentData).reduce((acc: any, occurrence: any) => {
-      if (occurrence.equipment) {
-        acc[occurrence.equipment] = (acc[occurrence.equipment] || 0) + 1;
-      }
-      return acc;
-    }, {}) : {};
+  const equipmentCounts = occurrences.reduce((acc: any, occurrence: any) => {
+    if (occurrence.equipment) {
+      acc[occurrence.equipment] = (acc[occurrence.equipment] || 0) + 1;
+    }
+    return acc;
+  }, {});
 
   // Converter para formato do gráfico
   const equipmentTypeData = Object.entries(equipmentCounts).map(([equipment, count], index) => ({
@@ -71,7 +71,7 @@ export function InteractiveCharts({ severityData, timelineData, mttrData, equipm
       'hsl(var(--muted-foreground))',
       'hsl(var(--accent))'
     ][index % 6]
-  })).sort((a, b) => b.value - a.value).slice(0, 6) // Top 6 equipamentos
+  })).sort((a, b) => b.value - a.value).slice(0, 6); // Top 6 equipamentos
 
   const currentData = viewMode === 'segment' ? segmentData : equipmentTypeData
 

@@ -264,7 +264,7 @@ export function Dashboard() {
                 <Skeleton className="h-[300px] w-full" />
               </CardContent>
             </Card>)}
-        </div> : <InteractiveCharts severityData={severityData} timelineData={timelineData} mttrData={mttrData} equipmentData={equipmentData} />}
+        </div> : <InteractiveCharts severityData={severityData} timelineData={timelineData} mttrData={mttrData} equipmentData={equipmentData} occurrences={occurrences} />}
 
       {/* Recent Occurrences */}
       <Card>
