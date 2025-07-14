@@ -16,7 +16,9 @@ import {
 } from 'recharts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart'
+import { Button } from '@/components/ui/button'
 import { TrendingUp, BarChart3, PieChart as PieChartIcon, Activity } from 'lucide-react'
+import { useState } from 'react'
 
 interface InteractiveChartsProps {
   severityData: Array<{ name: string; value: number; fill: string }>
@@ -41,6 +43,22 @@ const chartConfig = {
 }
 
 export function InteractiveCharts({ severityData, timelineData, mttrData, equipmentData }: InteractiveChartsProps) {
+  const [viewMode, setViewMode] = useState<'segment' | 'equipment'>('segment')
+
+  const segmentData = [
+    { name: 'AA', value: equipmentData.find(e => e.name.includes('AA'))?.value || 0, fill: 'hsl(var(--primary))' },
+    { name: 'AB', value: equipmentData.find(e => e.name.includes('AB'))?.value || 0, fill: 'hsl(var(--warning))' }
+  ]
+
+  const equipmentTypeData = [
+    { name: 'ATM', value: 35, fill: 'hsl(var(--primary))' },
+    { name: 'POS', value: 28, fill: 'hsl(var(--warning))' },
+    { name: 'Rede', value: 22, fill: 'hsl(var(--success))' },
+    { name: 'Climatização', value: 15, fill: 'hsl(var(--destructive))' }
+  ]
+
+  const currentData = viewMode === 'segment' ? segmentData : equipmentTypeData
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Distribuição por Severidade - Bar Chart */}
@@ -130,12 +148,30 @@ export function InteractiveCharts({ severityData, timelineData, mttrData, equipm
         </CardContent>
       </Card>
 
-      {/* Tipos de Equipamento - Pie Chart */}
+      {/* Distribuição de Ocorrências - Pie Chart */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <PieChartIcon className="h-5 w-5" />
-            Segmentos AA e AB
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <PieChartIcon className="h-5 w-5" />
+              Distribuição de Ocorrências
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                variant={viewMode === 'segment' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('segment')}
+              >
+                Segmento
+              </Button>
+              <Button 
+                variant={viewMode === 'equipment' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('equipment')}
+              >
+                Equipamento
+              </Button>
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -143,7 +179,7 @@ export function InteractiveCharts({ severityData, timelineData, mttrData, equipm
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={equipmentData}
+                  data={currentData}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
@@ -152,7 +188,7 @@ export function InteractiveCharts({ severityData, timelineData, mttrData, equipm
                   fill="#8884d8"
                   dataKey="value"
                 >
-                  {equipmentData.map((entry, index) => (
+                  {currentData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.fill} />
                   ))}
                 </Pie>
