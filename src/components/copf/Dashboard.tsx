@@ -320,8 +320,7 @@ export function Dashboard() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-medium">{occurrence.assignedTo}</p>
-                    <p className="text-xs text-muted-foreground">{occurrence.vendor}</p>
+                    <p className="text-sm font-medium">{occurrence.vendor}</p>
                     <div className="flex flex-col text-xs text-muted-foreground">
                       <span>{new Date(occurrence.createdAt).toLocaleDateString('pt-BR')}</span>
                       <span>{new Date(occurrence.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
