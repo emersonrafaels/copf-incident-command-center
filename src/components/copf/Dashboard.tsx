@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Input } from "@/components/ui/input";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useToast } from "@/hooks/use-toast";
 import { AlertTriangle, CheckCircle2, Clock, TrendingUp, MapPin, Users, Calendar, Download, RefreshCw, Filter, CalendarDays } from "lucide-react";
@@ -36,6 +37,9 @@ export function Dashboard() {
   const [filterPeriod, setFilterPeriod] = useState('30-days');
   const [customDateRange, setCustomDateRange] = useState<{ from?: Date; to?: Date }>({});
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [segmentFilter, setSegmentFilter] = useState<string>('all');
+  const [equipmentFilter, setEquipmentFilter] = useState<string>('all');
+  const [serialNumberFilter, setSerialNumberFilter] = useState<string>('');
   const handleExport = async () => {
     toast({
       title: "Exportação iniciada",
@@ -104,6 +108,17 @@ export function Dashboard() {
       description: "Dashboard atualizado com as informações mais recentes."
     });
   };
+
+  // Filtrar ocorrências
+  const filteredOccurrences = occurrences.filter(occurrence => {
+    if (segmentFilter !== 'all' && occurrence.segment !== segmentFilter) return false;
+    if (equipmentFilter !== 'all' && occurrence.equipment !== equipmentFilter) return false;
+    if (serialNumberFilter && !occurrence.serialNumber.toLowerCase().includes(serialNumberFilter.toLowerCase())) return false;
+    return true;
+  });
+
+  // Obter equipamentos únicos para o filtro
+  const uniqueEquipments = Array.from(new Set(occurrences.map(o => o.equipment))).sort();
   return <div className="space-y-8">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
@@ -232,10 +247,36 @@ export function Dashboard() {
               <AlertTriangle className="h-5 w-5" />
               Ocorrências Recentes
             </div>
-            <Button variant="outline" size="sm">
-              <Filter className="h-4 w-4 mr-2" />
-              Filtros
-            </Button>
+            <div className="flex gap-2">
+              <Select value={segmentFilter} onValueChange={setSegmentFilter}>
+                <SelectTrigger className="w-24">
+                  <SelectValue placeholder="Segmento" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="AA">AA</SelectItem>
+                  <SelectItem value="AB">AB</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={equipmentFilter} onValueChange={setEquipmentFilter}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Equipamento" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  {uniqueEquipments.map(equipment => (
+                    <SelectItem key={equipment} value={equipment}>{equipment}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Input
+                type="text"
+                placeholder="Nº Série"
+                value={serialNumberFilter}
+                onChange={(e) => setSerialNumberFilter(e.target.value)}
+                className="w-32"
+              />
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -254,7 +295,7 @@ export function Dashboard() {
                   </div>
                 </div>)}
             </div> : <div className="space-y-4">
-              {occurrences.slice(0, 5).map(occurrence => <div key={occurrence.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer group" onClick={() => handleOccurrenceClick(occurrence)}>
+              {filteredOccurrences.slice(0, 5).map(occurrence => <div key={occurrence.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer group" onClick={() => handleOccurrenceClick(occurrence)}>
                   <div className="flex items-center gap-4">
                     <div className="flex flex-col gap-1">
                       <StatusBadge status={occurrence.severity} />
@@ -265,7 +306,11 @@ export function Dashboard() {
                         {occurrence.id}
                       </p>
                       <p className="text-sm text-muted-foreground">{occurrence.agency}</p>
-                      <p className="text-sm">{occurrence.equipment}</p>
+                      <div className="flex items-center gap-2 text-sm">
+                        <Badge variant="outline" className="text-xs">{occurrence.segment}</Badge>
+                        <span>{occurrence.equipment}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">Nº Série: {occurrence.serialNumber}</p>
                       <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                         {occurrence.description}
                       </p>
@@ -282,7 +327,7 @@ export function Dashboard() {
             </div>}
           <div className="mt-4 pt-4 border-t">
             <Button variant="outline" className="w-full">
-              Ver Todas as Ocorrências ({occurrences.length})
+              Ver Todas as Ocorrências ({filteredOccurrences.length} de {occurrences.length})
             </Button>
           </div>
         </CardContent>

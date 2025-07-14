@@ -3,7 +3,9 @@ import { useState, useEffect } from 'react'
 export interface OccurrenceData {
   id: string
   agency: string
+  segment: 'AA' | 'AB'
   equipment: string
+  serialNumber: string
   description: string
   severity: 'critical' | 'high' | 'medium' | 'low'
   status: 'active' | 'pending' | 'resolved'
@@ -35,11 +37,19 @@ export function useDashboardData() {
 
   // Dados mock mais realistas
   const generateMockData = () => {
+    // Equipamentos por segmento
+    const equipmentsBySegment = {
+      AA: ['ATM Saque', 'ATM Depósito', 'Cassete'],
+      AB: ['Notebook', 'Desktop', 'Leitor de Cheques/documentos', 'Leitor biométrico', 'PIN PAD', 'Scanner de Cheque', 'Impressora', 'Impressora térmica', 'Impressora multifuncional', 'Monitor LCD/LED', 'Teclado', 'Servidor', 'Televisão', 'Senheiro', 'TCR', 'Classificadora', 'Fragmentadora de Papel']
+    };
+
     const mockOccurrences: OccurrenceData[] = [
       {
         id: "COPF-2024-001",
         agency: "AG0001 - Centro (São Paulo)",
-        equipment: "ATM Diebold 9800 - Slot 01",
+        segment: "AA",
+        equipment: "ATM Saque",
+        serialNumber: "ATM001-SP-001",
         description: "ATM não está dispensando cédulas - erro de hardware na gaveta",
         severity: "critical",
         status: "active",
@@ -50,29 +60,35 @@ export function useDashboardData() {
       {
         id: "COPF-2024-002",
         agency: "AG0015 - Paulista (São Paulo)",
-        equipment: "Split Carrier 18k BTU - Térreo",
-        description: "Temperatura ambiente elevada - possível falha no compressor",
+        segment: "AB",
+        equipment: "Impressora térmica",
+        serialNumber: "IMP002-SP-015",
+        description: "Impressora com papel atolado constantemente",
         severity: "high",
         status: "pending",
         createdAt: "2024-01-15T09:15:00",
         assignedTo: "Maria Santos - Facilities",
-        vendor: "Carrier do Brasil"
+        vendor: "Bematech"
       },
       {
         id: "COPF-2024-003",
         agency: "AG0032 - Vila Madalena (São Paulo)",
-        equipment: "Link MPLS Principal - Roteador Cisco",
+        segment: "AB",
+        equipment: "Servidor",
+        serialNumber: "SRV003-SP-032",
         description: "Perda total de conectividade - link primário inoperante",
         severity: "high",
         status: "active",
         createdAt: "2024-01-14T14:20:00",
         assignedTo: "Carlos Oliveira - Redes",
-        vendor: "Vivo Empresas"
+        vendor: "Dell Technologies"
       },
       {
         id: "COPF-2024-004",
         agency: "AG0045 - Pinheiros (São Paulo)",
-        equipment: "Terminal POS Gertec PPC920",
+        segment: "AB",
+        equipment: "PIN PAD",
+        serialNumber: "PIN004-SP-045",
         description: "Terminal não reconhece cartões chip",
         severity: "medium",
         status: "resolved",
@@ -83,28 +99,39 @@ export function useDashboardData() {
       {
         id: "COPF-2024-005",
         agency: "AG0067 - Moema (São Paulo)",
-        equipment: "Impressora Térmica Bematech",
-        description: "Impressora com papel atolado constantemente",
+        segment: "AA",
+        equipment: "ATM Depósito",
+        serialNumber: "ATM005-SP-067",
+        description: "ATM não aceita depósitos - problemas no mecanismo de captura",
         severity: "low",
         status: "pending",
         createdAt: "2024-01-13T16:45:00",
         assignedTo: "Roberto Lima - Suporte",
-        vendor: "Bematech"
+        vendor: "NCR Corporation"
       }
     ]
 
     // Simular chegada de novas ocorrências
-    const additionalOccurrences = Array.from({ length: 15 }, (_, i) => ({
-      id: `COPF-2024-${String(i + 6).padStart(3, '0')}`,
-      agency: `AG${String(Math.floor(Math.random() * 100)).padStart(4, '0')} - ${['Centro', 'Paulista', 'Vila Madalena', 'Pinheiros', 'Moema', 'Itaim'][Math.floor(Math.random() * 6)]} (São Paulo)`,
-      equipment: ['ATM Diebold', 'Split Carrier', 'Link MPLS', 'Terminal POS', 'Impressora Térmica'][Math.floor(Math.random() * 5)],
-      description: ['Erro de hardware', 'Falha de conectividade', 'Problema de temperatura', 'Defeito no leitor'][Math.floor(Math.random() * 4)],
-      severity: ['critical', 'high', 'medium', 'low'][Math.floor(Math.random() * 4)] as any,
-      status: ['active', 'pending', 'resolved'][Math.floor(Math.random() * 3)] as any,
-      createdAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
-      assignedTo: ['João Silva', 'Maria Santos', 'Carlos Oliveira', 'Ana Costa', 'Roberto Lima'][Math.floor(Math.random() * 5)],
-      vendor: ['Diebold Nixdorf', 'Carrier', 'Vivo', 'Gertec', 'Bematech'][Math.floor(Math.random() * 5)]
-    }))
+    const additionalOccurrences = Array.from({ length: 15 }, (_, i) => {
+      const segment: 'AA' | 'AB' = Math.random() > 0.5 ? 'AA' : 'AB';
+      const equipmentList = equipmentsBySegment[segment];
+      const equipment = equipmentList[Math.floor(Math.random() * equipmentList.length)];
+      const agencyNum = String(Math.floor(Math.random() * 100)).padStart(4, '0');
+      
+      return {
+        id: `COPF-2024-${String(i + 6).padStart(3, '0')}`,
+        agency: `AG${agencyNum} - ${['Centro', 'Paulista', 'Vila Madalena', 'Pinheiros', 'Moema', 'Itaim'][Math.floor(Math.random() * 6)]} (São Paulo)`,
+        segment,
+        equipment,
+        serialNumber: `${segment}${String(i + 6).padStart(3, '0')}-SP-${agencyNum}`,
+        description: ['Erro de hardware', 'Falha de conectividade', 'Problema de temperatura', 'Defeito no leitor'][Math.floor(Math.random() * 4)],
+        severity: ['critical', 'high', 'medium', 'low'][Math.floor(Math.random() * 4)] as ('critical' | 'high' | 'medium' | 'low'),
+        status: ['active', 'pending', 'resolved'][Math.floor(Math.random() * 3)] as ('active' | 'pending' | 'resolved'),
+        createdAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
+        assignedTo: ['João Silva', 'Maria Santos', 'Carlos Oliveira', 'Ana Costa', 'Roberto Lima'][Math.floor(Math.random() * 5)],
+        vendor: ['Diebold Nixdorf', 'NCR Corporation', 'Dell Technologies', 'Gertec', 'Bematech'][Math.floor(Math.random() * 5)]
+      }
+    })
 
     return [...mockOccurrences, ...additionalOccurrences]
   }
