@@ -363,7 +363,7 @@ export function Dashboard() {
                               <p className="text-xs font-medium text-foreground">{occurrence.vendor}</p>
                             </div>
                             <div>
-                              <span className="text-xs text-muted-foreground">Data:</span>
+                              <span className="text-xs text-muted-foreground">Data da Ocorrência:</span>
                               <div className="text-xs font-medium text-foreground">
                                 {new Date(occurrence.createdAt).toLocaleDateString('pt-BR')} {new Date(occurrence.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                               </div>
