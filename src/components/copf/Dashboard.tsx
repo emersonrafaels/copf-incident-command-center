@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MetricCard } from "./MetricCard";
 import { StatusBadge } from "./StatusBadge";
 import { InteractiveCharts } from "./InteractiveCharts";
@@ -118,8 +118,34 @@ export function Dashboard() {
     return true;
   });
 
-  // Obter equipamentos únicos para o filtro
-  const uniqueEquipments = Array.from(new Set(occurrences.map(o => o.equipment))).sort();
+  // Mapeamento de equipamentos por segmento
+  const equipmentsBySegment = {
+    AA: ['ATM Saque', 'ATM Depósito', 'Cassete'],
+    AB: ['Notebook', 'Desktop', 'Leitor de Cheques/documentos', 'Leitor biométrico', 'PIN PAD', 'Scanner de Cheque', 'Impressora', 'Impressora térmica', 'Impressora multifuncional', 'Monitor LCD/LED', 'Teclado', 'Servidor', 'Televisão', 'Senheiro', 'TCR', 'Classificadora', 'Fragmentadora de Papel']
+  };
+
+  // Obter equipamentos únicos baseado no segmento selecionado
+  const getFilteredEquipments = () => {
+    if (segmentFilter === 'all') {
+      return Array.from(new Set(occurrences.map(o => o.equipment))).sort();
+    } else {
+      const segmentEquipments = equipmentsBySegment[segmentFilter as 'AA' | 'AB'] || [];
+      return occurrences
+        .filter(o => o.segment === segmentFilter && segmentEquipments.includes(o.equipment))
+        .map(o => o.equipment)
+        .filter((equipment, index, arr) => arr.indexOf(equipment) === index)
+        .sort();
+    }
+  };
+
+  const uniqueEquipments = getFilteredEquipments();
+
+  // Resetar filtro de equipamento quando segmento mudar
+  useEffect(() => {
+    if (segmentFilter !== 'all') {
+      setEquipmentFilter('all');
+    }
+  }, [segmentFilter]);
   return <div className="space-y-8">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
