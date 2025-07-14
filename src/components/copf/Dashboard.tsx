@@ -248,35 +248,44 @@ export function Dashboard() {
               <AlertTriangle className="h-5 w-5" />
               Ocorrências Recentes
             </div>
-            <div className="flex gap-2">
-              <Select value={segmentFilter} onValueChange={setSegmentFilter}>
-                <SelectTrigger className="w-24">
-                  <SelectValue placeholder="Segmento" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="AA">AA</SelectItem>
-                  <SelectItem value="AB">AB</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={equipmentFilter} onValueChange={setEquipmentFilter}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Equipamento" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  {uniqueEquipments.map(equipment => (
-                    <SelectItem key={equipment} value={equipment}>{equipment}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Input
-                type="text"
-                placeholder="Nº Série"
-                value={serialNumberFilter}
-                onChange={(e) => setSerialNumberFilter(e.target.value)}
-                className="w-32"
-              />
+            <div className="flex gap-4 items-end">
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-muted-foreground">Segmento</label>
+                <Select value={segmentFilter} onValueChange={setSegmentFilter}>
+                  <SelectTrigger className="w-24">
+                    <SelectValue placeholder="Segmento" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    <SelectItem value="AA">AA</SelectItem>
+                    <SelectItem value="AB">AB</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-muted-foreground">Equipamento</label>
+                <Select value={equipmentFilter} onValueChange={setEquipmentFilter}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="Equipamento" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    {uniqueEquipments.map(equipment => (
+                      <SelectItem key={equipment} value={equipment}>{equipment}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-muted-foreground">Número de Série</label>
+                <Input
+                  type="text"
+                  placeholder="Nº Série"
+                  value={serialNumberFilter}
+                  onChange={(e) => setSerialNumberFilter(e.target.value)}
+                  className="w-32"
+                />
+              </div>
             </div>
           </CardTitle>
         </CardHeader>
