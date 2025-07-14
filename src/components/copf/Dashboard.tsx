@@ -289,7 +289,7 @@ export function Dashboard() {
             </div>
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-6">
+        <CardContent>
           {isLoading ? (
             <div className="space-y-4">
               {Array.from({ length: 3 }).map((_, i) => (
@@ -322,84 +322,74 @@ export function Dashboard() {
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-2">
               {filteredOccurrences
                 .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
                 .slice(0, showAllOccurrences ? undefined : 5)
                 .map((occurrence, index) => (
                   <div 
                     key={occurrence.id} 
-                    className="group relative p-6 border border-border/50 rounded-2xl hover:border-primary/40 hover:bg-accent/20 hover:shadow-lg transition-all duration-300 cursor-pointer animate-fade-in"
-                    style={{ animationDelay: `${index * 75}ms` }}
+                    className="group relative p-3 border rounded-lg hover:border-primary/30 hover:bg-accent/30 transition-all duration-200 cursor-pointer animate-fade-in"
+                    style={{ animationDelay: `${index * 30}ms` }}
                     onClick={() => handleOccurrenceClick(occurrence)}
                   >
                     {/* Indicador de prioridade lateral */}
-                    <div className={`absolute left-0 top-6 bottom-6 w-1.5 rounded-r-full ${
-                      occurrence.severity === 'critical' ? 'bg-destructive shadow-lg shadow-destructive/30' :
-                      occurrence.severity === 'high' ? 'bg-warning shadow-lg shadow-warning/30' :
-                      occurrence.severity === 'medium' ? 'bg-primary shadow-lg shadow-primary/30' : 'bg-muted-foreground'
+                    <div className={`absolute left-0 top-2 bottom-2 w-1 rounded-r-full ${
+                      occurrence.severity === 'critical' ? 'bg-destructive' :
+                      occurrence.severity === 'high' ? 'bg-warning' :
+                      occurrence.severity === 'medium' ? 'bg-primary' : 'bg-muted-foreground'
                     }`} />
                     
-                    {/* Header com ID e informações principais */}
-                    <div className="flex items-start justify-between mb-4 pl-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h4 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">
-                            {occurrence.id}
-                          </h4>
-                          <div className="flex gap-2">
-                            <StatusBadge status={occurrence.severity} />
-                            <StatusBadge status={occurrence.status} />
-                          </div>
-                        </div>
-                        <p className="text-sm text-muted-foreground font-medium">{occurrence.agency}</p>
+                    {/* Conteúdo principal compacto */}
+                    <div className="flex items-start gap-3 pl-2">
+                      {/* Badges de status */}
+                      <div className="flex flex-col gap-1">
+                        <StatusBadge status={occurrence.severity} />
+                        <StatusBadge status={occurrence.status} />
                       </div>
                       
-                      {/* Informações do lado direito */}
-                      <div className="text-right space-y-3 min-w-0 flex-shrink-0">
-                        <div>
-                          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Fornecedor</span>
-                          <p className="text-sm font-semibold text-foreground">{occurrence.vendor}</p>
-                        </div>
-                        <div>
-                          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Data da Ocorrência</span>
-                          <div className="text-sm font-semibold text-foreground">
-                            <div>{new Date(occurrence.createdAt).toLocaleDateString('pt-BR')}</div>
-                            <div className="text-xs text-muted-foreground">
-                              {new Date(occurrence.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                      {/* Informações principais */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between mb-2">
+                          <div>
+                            <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors text-sm">
+                              {occurrence.id}
+                            </h4>
+                            <p className="text-xs text-muted-foreground">{occurrence.agency}</p>
+                          </div>
+                          <div className="text-right flex-shrink-0 ml-3">
+                            <div className="mb-1">
+                              <span className="text-xs text-muted-foreground">Fornecedor:</span>
+                              <p className="text-xs font-medium text-foreground">{occurrence.vendor}</p>
+                            </div>
+                            <div>
+                              <span className="text-xs text-muted-foreground">Data:</span>
+                              <div className="text-xs font-medium text-foreground">
+                                {new Date(occurrence.createdAt).toLocaleDateString('pt-BR')} {new Date(occurrence.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    </div>
-                    
-                    {/* Seção de equipamento */}
-                    <div className="bg-muted/30 rounded-xl p-4 mb-4 ml-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-3">
-                          <Badge variant="secondary" className="text-xs font-bold px-3 py-1">
+                        
+                        {/* Equipamento em uma linha */}
+                        <div className="flex items-center gap-2 mb-1">
+                          <Badge variant="secondary" className="text-xs px-2 py-0">
                             {occurrence.segment}
                           </Badge>
-                          <span className="text-base font-semibold text-foreground">{occurrence.equipment}</span>
+                          <span className="text-sm font-medium text-foreground">{occurrence.equipment}</span>
+                          <span className="text-xs text-muted-foreground">
+                            Série: <span className="font-mono">{occurrence.serialNumber}</span>
+                          </span>
                         </div>
-                        <div className="text-right">
-                          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Nº Série</span>
-                          <p className="text-sm font-mono font-semibold text-foreground">{occurrence.serialNumber}</p>
-                        </div>
+                        
+                        {/* Descrição compacta */}
+                        <p className="text-sm text-muted-foreground line-clamp-1">
+                          {occurrence.description}
+                        </p>
                       </div>
-                    </div>
-                    
-                    {/* Descrição */}
-                    <div className="ml-4">
-                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2 block">Descrição</span>
-                      <p className="text-sm text-foreground leading-relaxed line-clamp-2">
-                        {occurrence.description}
-                      </p>
-                    </div>
-                    
-                    {/* Indicador de clique */}
-                    <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-110">
-                      <div className="w-8 h-8 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center">
+                      
+                      {/* Indicador de clique pequeno */}
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                         <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
@@ -412,21 +402,20 @@ export function Dashboard() {
           
           {/* Botão para ver mais */}
           {filteredOccurrences.length > 0 && (
-            <div className="mt-8 pt-6 border-t border-border/50">
+            <div className="mt-4 pt-3 border-t">
               <Button 
                 variant="outline" 
-                size="lg"
-                className="w-full group hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-300 text-base font-medium py-6"
+                className="w-full group hover:bg-primary hover:text-primary-foreground transition-all duration-200"
                 onClick={() => setShowAllOccurrences(!showAllOccurrences)}
               >
-                <span className="mr-3">
+                <span className="mr-2 text-sm">
                   {showAllOccurrences 
                     ? `Mostrar Apenas Recentes (${Math.min(5, filteredOccurrences.length)} de ${filteredOccurrences.length})`
                     : `Ver Todas as Ocorrências (${filteredOccurrences.length} de ${occurrences.length})`
                   }
                 </span>
                 <svg 
-                  className={`w-5 h-5 transition-transform duration-300 ${showAllOccurrences ? 'rotate-180' : ''} group-hover:scale-110`} 
+                  className={`w-4 h-4 transition-transform duration-200 ${showAllOccurrences ? 'rotate-180' : ''}`} 
                   fill="none" 
                   stroke="currentColor" 
                   viewBox="0 0 24 24"
