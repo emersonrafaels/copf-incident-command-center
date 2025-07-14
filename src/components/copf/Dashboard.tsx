@@ -379,12 +379,6 @@ export function Dashboard() {
                       <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
                         {occurrence.description}
                       </p>
-                      
-                      {/* Responsável */}
-                      <div className="flex items-center gap-1 mt-2">
-                        <span className="text-xs text-muted-foreground">Responsável:</span>
-                        <span className="text-xs font-medium text-foreground">{occurrence.assignedTo}</span>
-                      </div>
                     </div>
                     
                     {/* Indicador de clique */}
