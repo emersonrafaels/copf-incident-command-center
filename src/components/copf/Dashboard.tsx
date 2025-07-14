@@ -356,11 +356,16 @@ export function Dashboard() {
                           <p className="text-sm text-muted-foreground">{occurrence.agency}</p>
                         </div>
                         <div className="text-right flex-shrink-0 ml-4">
-                          <p className="text-sm font-medium text-foreground">{occurrence.vendor}</p>
-                          <div className="flex flex-col text-xs text-muted-foreground">
-                            <span className="text-xs text-muted-foreground mb-1">Criada em:</span>
-                            <span className="font-medium">{new Date(occurrence.createdAt).toLocaleDateString('pt-BR')}</span>
-                            <span className="font-medium">{new Date(occurrence.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+                          <div className="mb-3">
+                            <span className="text-xs text-muted-foreground">Fornecedor:</span>
+                            <p className="text-sm font-medium text-foreground">{occurrence.vendor}</p>
+                          </div>
+                          <div>
+                            <span className="text-xs text-muted-foreground">Data e Hora da Ocorrência:</span>
+                            <div className="flex flex-col text-xs">
+                              <span className="font-medium text-foreground">{new Date(occurrence.createdAt).toLocaleDateString('pt-BR')}</span>
+                              <span className="font-medium text-foreground">{new Date(occurrence.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+                            </div>
                           </div>
                         </div>
                       </div>
