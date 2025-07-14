@@ -40,6 +40,7 @@ export function Dashboard() {
   const [segmentFilter, setSegmentFilter] = useState<string>('all');
   const [equipmentFilter, setEquipmentFilter] = useState<string>('all');
   const [serialNumberFilter, setSerialNumberFilter] = useState<string>('');
+  const [showAllOccurrences, setShowAllOccurrences] = useState<boolean>(false);
   const handleExport = async () => {
     toast({
       title: "Exportação iniciada",
@@ -297,7 +298,7 @@ export function Dashboard() {
             </div> : <div className="space-y-4">
               {filteredOccurrences
                 .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                .slice(0, 5)
+                .slice(0, showAllOccurrences ? undefined : 5)
                 .map(occurrence => <div key={occurrence.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer group" onClick={() => handleOccurrenceClick(occurrence)}>
                   <div className="flex items-center gap-4">
                     <div className="flex flex-col gap-1">
@@ -329,8 +330,15 @@ export function Dashboard() {
                 </div>)}
             </div>}
           <div className="mt-4 pt-4 border-t">
-            <Button variant="outline" className="w-full">
-              Ver Todas as Ocorrências ({filteredOccurrences.length} de {occurrences.length})
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={() => setShowAllOccurrences(!showAllOccurrences)}
+            >
+              {showAllOccurrences 
+                ? `Mostrar Apenas Recentes (${Math.min(5, filteredOccurrences.length)} de ${filteredOccurrences.length})`
+                : `Ver Todas as Ocorrências (${filteredOccurrences.length} de ${occurrences.length})`
+              }
             </Button>
           </div>
         </CardContent>

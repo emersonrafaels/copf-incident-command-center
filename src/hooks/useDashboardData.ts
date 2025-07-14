@@ -43,6 +43,18 @@ export function useDashboardData() {
       AB: ['Notebook', 'Desktop', 'Leitor de Cheques/documentos', 'Leitor biométrico', 'PIN PAD', 'Scanner de Cheque', 'Impressora', 'Impressora térmica', 'Impressora multifuncional', 'Monitor LCD/LED', 'Teclado', 'Servidor', 'Televisão', 'Senheiro', 'TCR', 'Classificadora', 'Fragmentadora de Papel']
     };
 
+    // Array para rastrear números de agência já usados
+    const usedAgencyNumbers = new Set<string>();
+    
+    const getUniqueAgencyNumber = (): string => {
+      let agencyNum: string;
+      do {
+        agencyNum = String(Math.floor(Math.random() * 1000) + 1).padStart(4, '0');
+      } while (usedAgencyNumbers.has(agencyNum));
+      usedAgencyNumbers.add(agencyNum);
+      return agencyNum;
+    };
+
     const mockOccurrences: OccurrenceData[] = [
       {
         id: "COPF-2024-001",
@@ -116,7 +128,7 @@ export function useDashboardData() {
       const segment: 'AA' | 'AB' = Math.random() > 0.5 ? 'AA' : 'AB';
       const equipmentList = equipmentsBySegment[segment];
       const equipment = equipmentList[Math.floor(Math.random() * equipmentList.length)];
-      const agencyNum = String(Math.floor(Math.random() * 100)).padStart(4, '0');
+      const agencyNum = getUniqueAgencyNumber();
       
       return {
         id: `COPF-2024-${String(i + 6).padStart(3, '0')}`,
