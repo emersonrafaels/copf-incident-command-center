@@ -593,7 +593,7 @@ const Relatorios = () => {
                               axisLine={{ stroke: "hsl(var(--border))" }}
                               tickLine={{ stroke: "hsl(var(--border))" }}
                               label={{ 
-                                value: 'Rank das Ocorrências (ordenadas por tempo de resolução)', 
+                                value: 'Ocorrências ordenadas por tempo de resolução (menor → maior)', 
                                 position: 'insideBottom', 
                                 offset: -5,
                                 style: { 
@@ -636,7 +636,7 @@ const Relatorios = () => {
                                       </div>
                                       <div className="space-y-1 text-sm">
                                         <p><span className="text-muted-foreground">Tempo:</span> <span className="font-medium">{data.tempo}h</span></p>
-                                        <p><span className="text-muted-foreground">Rank:</span> <span className="font-medium">#{data.index}</span></p>
+                                        <p><span className="text-muted-foreground">Posição:</span> <span className="font-medium">#{data.index}</span></p>
                                         <p><span className="text-muted-foreground">Segmento:</span> <span className="font-medium">{data.segmento}</span></p>
                                         <p><span className="text-muted-foreground">Equipamento:</span> <span className="font-medium capitalize">{data.equipamento}</span></p>
                                         <p><span className="text-muted-foreground">UF:</span> <span className="font-medium">{data.uf}</span></p>
@@ -740,33 +740,57 @@ const Relatorios = () => {
                       </div>
                     </div>
 
+                   {/* Explicação sobre P90 e P95 */}
+                   <div className="mb-6 p-4 bg-primary/5 border border-primary/20 rounded-lg">
+                     <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                       <Target className="h-4 w-4" />
+                       Entendendo as Métricas
+                     </h3>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                       <div>
+                         <div className="font-medium text-warning mb-1">Meta P90</div>
+                         <p className="text-muted-foreground">
+                           90% das ocorrências devem ser resolvidas em até {metrics.p90.toFixed(1)}h. 
+                           Esta é nossa meta operacional padrão.
+                         </p>
+                       </div>
+                       <div>
+                         <div className="font-medium text-destructive mb-1">Limite P95</div>
+                         <p className="text-muted-foreground">
+                           Apenas 5% das ocorrências podem ultrapassar {metrics.p95.toFixed(1)}h. 
+                           Casos acima deste limite são considerados outliers críticos.
+                         </p>
+                       </div>
+                     </div>
+                   </div>
+
                    {/* Estatísticas do Long Tail */}
                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-                      <Card>
-                        <CardContent className="p-4 text-center">
-                          <div className="text-2xl font-bold text-primary">{metrics.p50.toFixed(1)}h</div>
-                          <div className="text-sm text-muted-foreground">Mediana (P50)</div>
-                        </CardContent>
-                      </Card>
-                      <Card>
-                        <CardContent className="p-4 text-center">
-                          <div className="text-2xl font-bold text-foreground">{metrics.p90.toFixed(1)}h</div>
-                          <div className="text-sm text-muted-foreground">P90 (90%)</div>
-                        </CardContent>
-                      </Card>
-                      <Card>
-                        <CardContent className="p-4 text-center">
-                          <div className="text-2xl font-bold text-warning">{metrics.p95.toFixed(1)}h</div>
-                          <div className="text-sm text-muted-foreground">P95 (95%)</div>
-                        </CardContent>
-                      </Card>
-                      <Card>
-                        <CardContent className="p-4 text-center">
-                          <div className="text-2xl font-bold text-destructive">{metrics.p99.toFixed(1)}h</div>
-                          <div className="text-sm text-muted-foreground">P99 (99%)</div>
-                        </CardContent>
-                      </Card>
-                    </div>
+                     <Card>
+                       <CardContent className="p-4 text-center">
+                         <div className="text-2xl font-bold text-primary">{metrics.p50.toFixed(1)}h</div>
+                         <div className="text-sm text-muted-foreground">Mediana (P50)</div>
+                       </CardContent>
+                     </Card>
+                     <Card>
+                       <CardContent className="p-4 text-center">
+                         <div className="text-2xl font-bold text-foreground">{metrics.p90.toFixed(1)}h</div>
+                         <div className="text-sm text-muted-foreground">P90 (90%)</div>
+                       </CardContent>
+                     </Card>
+                     <Card>
+                       <CardContent className="p-4 text-center">
+                         <div className="text-2xl font-bold text-warning">{metrics.p95.toFixed(1)}h</div>
+                         <div className="text-sm text-muted-foreground">P95 (95%)</div>
+                       </CardContent>
+                     </Card>
+                     <Card>
+                       <CardContent className="p-4 text-center">
+                         <div className="text-2xl font-bold text-destructive">{metrics.p99.toFixed(1)}h</div>
+                         <div className="text-sm text-muted-foreground">P99 (99%)</div>
+                       </CardContent>
+                     </Card>
+                   </div>
 
                   {/* Análise dos Outliers */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
