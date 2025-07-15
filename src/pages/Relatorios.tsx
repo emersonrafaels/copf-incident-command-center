@@ -58,35 +58,39 @@ const Relatorios = () => {
   }, [filteredData]);
   return (
     <COPFLayout>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Relatórios</h1>
-            <p className="text-muted-foreground">Análises e métricas detalhadas do sistema (2.360 agências)</p>
+      <div className="space-y-8 animate-fade-in">
+        {/* Header melhorado */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 bg-gradient-to-r from-primary/5 via-secondary/5 to-accent/5 rounded-xl border">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold text-foreground tracking-tight">Relatórios</h1>
+            <p className="text-muted-foreground flex items-center gap-2">
+              <Activity className="h-4 w-4" />
+              Análises e métricas detalhadas do sistema • 2.360 agências monitoradas
+            </p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline">
+          <div className="flex gap-3">
+            <Button variant="outline" className="hover-scale">
               <Calendar className="mr-2 h-4 w-4" />
               Período
             </Button>
-            <Button variant="premium">
+            <Button variant="premium" className="hover-scale">
               <Download className="mr-2 h-4 w-4" />
               Exportar
             </Button>
           </div>
         </div>
 
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-            <TabsTrigger value="performance">Performance</TabsTrigger>
-            <TabsTrigger value="trends">Tendências</TabsTrigger>
-            <TabsTrigger value="sla">SLA</TabsTrigger>
-            <TabsTrigger value="longtail">Long Tail</TabsTrigger>
+        <Tabs defaultValue="overview" className="space-y-8">
+          <TabsList className="grid w-full grid-cols-5 h-12 bg-muted/50 p-1">
+            <TabsTrigger value="overview" className="transition-all duration-200">Visão Geral</TabsTrigger>
+            <TabsTrigger value="performance" className="transition-all duration-200">Performance</TabsTrigger>
+            <TabsTrigger value="trends" className="transition-all duration-200">Tendências</TabsTrigger>
+            <TabsTrigger value="sla" className="transition-all duration-200">SLA</TabsTrigger>
+            <TabsTrigger value="longtail" className="transition-all duration-200">Long Tail</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <TabsContent value="overview" className="space-y-8 animate-fade-in">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <MetricCard
                 title="Ocorrências Totais"
                 value="3,847"
@@ -117,85 +121,77 @@ const Relatorios = () => {
               />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Ocorrências por Equipamento</CardTitle>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <Card className="hover-scale border-l-4 border-l-primary">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <BarChart3 className="h-5 w-5 text-primary" />
+                    Ocorrências por Equipamento
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">ATMs</span>
-                      <span className="text-sm font-medium">42%</span>
-                    </div>
-                    <div className="w-full bg-muted h-2 rounded-full">
-                      <div className="bg-primary h-2 rounded-full" style={{ width: '42%' }}></div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Climatização</span>
-                      <span className="text-sm font-medium">31%</span>
-                    </div>
-                    <div className="w-full bg-muted h-2 rounded-full">
-                      <div className="bg-secondary h-2 rounded-full" style={{ width: '31%' }}></div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Conectividade</span>
-                      <span className="text-sm font-medium">27%</span>
-                    </div>
-                    <div className="w-full bg-muted h-2 rounded-full">
-                      <div className="bg-accent h-2 rounded-full" style={{ width: '27%' }}></div>
-                    </div>
+                  <div className="space-y-6">
+                    {[
+                      { name: "ATMs", percent: 42, color: "primary" },
+                      { name: "Climatização", percent: 31, color: "secondary" },
+                      { name: "Conectividade", percent: 27, color: "accent" }
+                    ].map((item, index) => (
+                      <div key={index} className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">{item.name}</span>
+                          <span className="text-sm font-bold text-foreground">{item.percent}%</span>
+                        </div>
+                        <div className="relative w-full bg-muted h-3 rounded-full overflow-hidden">
+                          <div 
+                            className={`bg-${item.color} h-3 rounded-full transition-all duration-700 ease-out shadow-sm`}
+                            style={{ width: `${item.percent}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Distribuição por Região</CardTitle>
+              <Card className="hover-scale border-l-4 border-l-secondary">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <PieChart className="h-5 w-5 text-secondary" />
+                    Distribuição por Região
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Sudeste</span>
-                      <span className="text-sm font-medium">45% (1.062 agências)</span>
-                    </div>
-                    <div className="w-full bg-muted h-2 rounded-full">
-                      <div className="bg-primary h-2 rounded-full" style={{ width: '45%' }}></div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Nordeste</span>
-                      <span className="text-sm font-medium">25% (590 agências)</span>
-                    </div>
-                    <div className="w-full bg-muted h-2 rounded-full">
-                      <div className="bg-secondary h-2 rounded-full" style={{ width: '25%' }}></div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Sul</span>
-                      <span className="text-sm font-medium">18% (425 agências)</span>
-                    </div>
-                    <div className="w-full bg-muted h-2 rounded-full">
-                      <div className="bg-accent h-2 rounded-full" style={{ width: '18%' }}></div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Centro-Oeste</span>
-                      <span className="text-sm font-medium">12% (283 agências)</span>
-                    </div>
-                    <div className="w-full bg-muted h-2 rounded-full">
-                      <div className="bg-warning h-2 rounded-full" style={{ width: '12%' }}></div>
-                    </div>
+                  <div className="space-y-6">
+                    {[
+                      { name: "Sudeste", percent: 45, count: "1.062", color: "primary" },
+                      { name: "Nordeste", percent: 25, count: "590", color: "secondary" },
+                      { name: "Sul", percent: 18, count: "425", color: "accent" },
+                      { name: "Centro-Oeste", percent: 12, count: "283", color: "warning" }
+                    ].map((item, index) => (
+                      <div key={index} className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">{item.name}</span>
+                          <div className="text-right">
+                            <span className="text-sm font-bold text-foreground">{item.percent}%</span>
+                            <p className="text-xs text-muted-foreground">{item.count} agências</p>
+                          </div>
+                        </div>
+                        <div className="relative w-full bg-muted h-3 rounded-full overflow-hidden">
+                          <div 
+                            className={`bg-${item.color} h-3 rounded-full transition-all duration-700 ease-out shadow-sm`}
+                            style={{ width: `${item.percent}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
             </div>
           </TabsContent>
 
-          <TabsContent value="performance" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <TabsContent value="performance" className="space-y-8 animate-fade-in">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <MetricCard
                 title="MTTR Médio"
                 value="2.1h"
@@ -226,13 +222,16 @@ const Relatorios = () => {
               />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Performance por Fornecedor</CardTitle>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <Card className="hover-scale border-l-4 border-l-accent">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Target className="h-5 w-5 text-accent" />
+                    Performance por Fornecedor
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ScrollArea className="h-[300px]">
+                  <ScrollArea className="h-[320px]">
                     <div className="space-y-4">
                       {[
                         { name: "TechServ Solutions", mttr: "1.5h", resolucao: "98%", status: "excellent" },
@@ -241,7 +240,7 @@ const Relatorios = () => {
                         { name: "ServicePro Inc", mttr: "2.8h", resolucao: "93%", status: "good" },
                         { name: "FastFix Technologies", mttr: "3.1h", resolucao: "89%", status: "warning" }
                       ].map((vendor, index) => (
-                        <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div key={index} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/30 transition-colors">
                           <div className="flex items-center gap-3">
                             <Badge 
                               variant={
@@ -257,8 +256,8 @@ const Relatorios = () => {
                             <span className="font-medium">{vendor.name}</span>
                           </div>
                           <div className="text-right text-sm">
-                            <div>MTTR: {vendor.mttr}</div>
-                            <div>Resolução: {vendor.resolucao}</div>
+                            <div className="font-medium">MTTR: {vendor.mttr}</div>
+                            <div className="text-muted-foreground">Resolução: {vendor.resolucao}</div>
                           </div>
                         </div>
                       ))}
@@ -267,24 +266,34 @@ const Relatorios = () => {
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Eficiência por Tipo de Equipamento</CardTitle>
+              <Card className="hover-scale border-l-4 border-l-success">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Activity className="h-5 w-5 text-success" />
+                    Eficiência por Equipamento
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
+                  <div className="space-y-6">
                     {[
-                      { equip: "ATMs", eficiencia: 96, cor: "bg-primary" },
-                      { equip: "Climatização", eficiencia: 89, cor: "bg-secondary" },
-                      { equip: "Conectividade", eficiencia: 93, cor: "bg-accent" },
-                      { equip: "Segurança", eficiencia: 98, cor: "bg-success" }
+                      { equip: "ATMs", eficiencia: 96, cor: "primary" },
+                      { equip: "Climatização", eficiencia: 89, cor: "secondary" },
+                      { equip: "Conectividade", eficiencia: 93, cor: "accent" },
+                      { equip: "Segurança", eficiencia: 98, cor: "success" }
                     ].map((item, index) => (
-                      <div key={index} className="space-y-2">
-                        <div className="flex justify-between">
+                      <div key={index} className="space-y-3">
+                        <div className="flex justify-between items-center">
                           <span className="text-sm font-medium">{item.equip}</span>
-                          <span className="text-sm">{item.eficiencia}%</span>
+                          <span className="text-sm font-bold text-foreground">{item.eficiencia}%</span>
                         </div>
-                        <Progress value={item.eficiencia} className="h-2" />
+                        <div className="relative">
+                          <Progress value={item.eficiencia} className="h-3" />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <span className="text-xs font-medium text-white drop-shadow">
+                              {item.eficiencia}%
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>
