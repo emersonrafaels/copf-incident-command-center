@@ -541,110 +541,204 @@ const Relatorios = () => {
               </CardHeader>
               <CardContent>
                  <div className="space-y-6">
-                   {/* Gráfico Long Tail com Recharts */}
-                   <div className="h-96 w-full">
-                     <div className="mb-4 text-center">
-                       <h3 className="text-sm font-medium text-foreground">Gráfico Long Tail - Tempos de Resolução</h3>
-                       <p className="text-xs text-muted-foreground">
-                         {filteredData.length} ocorrências ordenadas por tempo de resolução
-                       </p>
-                     </div>
-                     
-                     <ResponsiveContainer width="100%" height="100%">
-                       <BarChart
-                         data={filteredData.map((item, index) => ({
-                           index: index + 1,
-                           tempo: parseFloat(item.tempo.toFixed(1)),
-                           isOutlier: item.tempo > metrics.p95,
-                           isNormal: item.tempo <= metrics.p90,
-                           ocorrencia: `OC${item.id + 1000}`,
-                           segmento: item.segmento.toUpperCase(),
-                           equipamento: item.equipamento,
-                           uf: item.uf.toUpperCase()
-                         }))}
-                         margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                       >
-                         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground) / 0.2)" />
-                         <XAxis 
-                           dataKey="index" 
-                           tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
-                           axisLine={{ stroke: "hsl(var(--muted-foreground) / 0.3)" }}
-                         />
-                         <YAxis 
-                           tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
-                           axisLine={{ stroke: "hsl(var(--muted-foreground) / 0.3)" }}
-                           label={{ value: 'Tempo (horas)', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle' } }}
-                         />
-                         <Tooltip 
-                           content={({ active, payload, label }) => {
-                             if (active && payload && payload.length) {
-                               const data = payload[0].payload;
-                               return (
-                                 <div className="bg-background border border-border rounded-lg p-3 shadow-lg">
-                                   <p className="font-medium">{data.ocorrencia}</p>
-                                   <p className="text-sm text-muted-foreground">Tempo: {data.tempo}h</p>
-                                   <p className="text-sm text-muted-foreground">Segmento: {data.segmento}</p>
-                                   <p className="text-sm text-muted-foreground">Equipamento: {data.equipamento}</p>
-                                   <p className="text-sm text-muted-foreground">UF: {data.uf}</p>
-                                   {data.isOutlier && (
-                                     <p className="text-xs text-destructive font-medium mt-1">⚠️ Outlier (&gt;P95)</p>
-                                   )}
-                                 </div>
-                               );
-                             }
-                             return null;
-                           }}
-                         />
-                         
-                          {/* Linha de referência para P90 */}
-                          <ReferenceLine 
-                            y={metrics.p90} 
-                            stroke="hsl(var(--warning))" 
-                            strokeDasharray="5 5" 
-                            label={`P90: ${metrics.p90.toFixed(1)}h`}
-                          />
-                          
-                          {/* Linha de referência para P95 */}
-                          <ReferenceLine 
-                            y={metrics.p95} 
-                            stroke="hsl(var(--destructive))" 
-                            strokeDasharray="5 5" 
-                            label={`P95: ${metrics.p95.toFixed(1)}h`}
-                          />
-                         
-                         <Bar dataKey="tempo" radius={[1, 1, 0, 0]}>
-                           {filteredData.map((item, index) => (
-                             <Cell 
-                               key={`cell-${index}`} 
-                               fill={
-                                 item.tempo > metrics.p95 
-                                   ? "hsl(var(--destructive))" 
-                                   : item.tempo > metrics.p90 
-                                   ? "hsl(var(--warning))" 
-                                   : "hsl(var(--primary))"
-                               } 
-                             />
-                           ))}
-                         </Bar>
-                       </BarChart>
-                     </ResponsiveContainer>
-                     
-                     {/* Legenda do gráfico */}
-                     <div className="flex justify-center gap-6 mt-4 text-xs">
-                       <div className="flex items-center gap-2">
-                         <div className="w-3 h-3 rounded bg-primary"></div>
-                         <span>Dentro do padrão (≤P90)</span>
-                       </div>
-                       <div className="flex items-center gap-2">
-                         <div className="w-3 h-3 rounded bg-warning"></div>
-                         <span>Acima da média (P90-P95)</span>
-                       </div>
-                       <div className="flex items-center gap-2">
-                         <div className="w-3 h-3 rounded bg-destructive"></div>
-                         <span>Outliers (&gt;P95)</span>
-                       </div>
-                     </div>
-                   </div>
+                    {/* Gráfico Long Tail com UI/UX melhorado */}
+                    <div className="relative">
+                      {/* Header com métricas resumidas */}
+                      <div className="mb-6 p-4 bg-gradient-to-r from-primary/5 via-secondary/5 to-accent/5 rounded-lg border">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-primary">{filteredData.length}</div>
+                            <div className="text-sm text-muted-foreground">Total de Ocorrências</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-secondary">{metrics.p50.toFixed(1)}h</div>
+                            <div className="text-sm text-muted-foreground">Mediana (P50)</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-warning">{metrics.p90.toFixed(1)}h</div>
+                            <div className="text-sm text-muted-foreground">P90 (Meta)</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-destructive">{filteredData.filter(d => d.tempo > metrics.p95).length}</div>
+                            <div className="text-sm text-muted-foreground">Outliers (&gt;P95)</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Gráfico melhorado */}
+                      <div className="h-[500px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart
+                            data={filteredData.map((item, index) => ({
+                              index: index + 1,
+                              tempo: parseFloat(item.tempo.toFixed(1)),
+                              isOutlier: item.tempo > metrics.p95,
+                              isNormal: item.tempo <= metrics.p90,
+                              ocorrencia: `OC${item.id + 1000}`,
+                              segmento: item.segmento.toUpperCase(),
+                              equipamento: item.equipamento,
+                              uf: item.uf.toUpperCase()
+                            }))}
+                            margin={{ top: 30, right: 30, left: 50, bottom: 60 }}
+                          >
+                            <CartesianGrid 
+                              strokeDasharray="2 4" 
+                              stroke="hsl(var(--muted-foreground) / 0.15)" 
+                              horizontal={true}
+                              vertical={false}
+                            />
+                            <XAxis 
+                              dataKey="index" 
+                              tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                              axisLine={{ stroke: "hsl(var(--border))" }}
+                              tickLine={{ stroke: "hsl(var(--border))" }}
+                              label={{ 
+                                value: 'Rank das Ocorrências (ordenadas por tempo de resolução)', 
+                                position: 'insideBottom', 
+                                offset: -5,
+                                style: { 
+                                  textAnchor: 'middle', 
+                                  fontSize: '12px',
+                                  fill: 'hsl(var(--foreground))',
+                                  fontWeight: '500'
+                                }
+                              }}
+                            />
+                            <YAxis 
+                              tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                              axisLine={{ stroke: "hsl(var(--border))" }}
+                              tickLine={{ stroke: "hsl(var(--border))" }}
+                              label={{ 
+                                value: 'Tempo de Resolução (horas)', 
+                                angle: -90, 
+                                position: 'insideLeft', 
+                                style: { 
+                                  textAnchor: 'middle',
+                                  fontSize: '12px',
+                                  fill: 'hsl(var(--foreground))',
+                                  fontWeight: '500'
+                                }
+                              }}
+                            />
+                            <Tooltip 
+                              cursor={{ fill: "hsl(var(--muted) / 0.3)" }}
+                              content={({ active, payload, label }) => {
+                                if (active && payload && payload.length) {
+                                  const data = payload[0].payload;
+                                  return (
+                                    <div className="bg-background/95 backdrop-blur-sm border border-border rounded-lg p-4 shadow-xl">
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <div className={`w-3 h-3 rounded-full ${
+                                          data.isOutlier ? 'bg-destructive' : 
+                                          data.tempo > metrics.p90 ? 'bg-warning' : 'bg-primary'
+                                        }`}></div>
+                                        <p className="font-semibold text-foreground">{data.ocorrencia}</p>
+                                      </div>
+                                      <div className="space-y-1 text-sm">
+                                        <p><span className="text-muted-foreground">Tempo:</span> <span className="font-medium">{data.tempo}h</span></p>
+                                        <p><span className="text-muted-foreground">Rank:</span> <span className="font-medium">#{data.index}</span></p>
+                                        <p><span className="text-muted-foreground">Segmento:</span> <span className="font-medium">{data.segmento}</span></p>
+                                        <p><span className="text-muted-foreground">Equipamento:</span> <span className="font-medium capitalize">{data.equipamento}</span></p>
+                                        <p><span className="text-muted-foreground">UF:</span> <span className="font-medium">{data.uf}</span></p>
+                                      </div>
+                                      {data.isOutlier && (
+                                        <div className="mt-2 p-2 bg-destructive/10 border border-destructive/20 rounded text-xs">
+                                          <span className="text-destructive font-medium">⚠️ Outlier - Investigação necessária</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                }
+                                return null;
+                              }}
+                            />
+                            
+                            {/* Linhas de referência melhoradas */}
+                            <ReferenceLine 
+                              y={metrics.p90} 
+                              stroke="hsl(var(--warning))" 
+                              strokeDasharray="6 4" 
+                              strokeWidth={2}
+                              label={{ 
+                                value: `Meta P90: ${metrics.p90.toFixed(1)}h`, 
+                                position: "top",
+                                style: { 
+                                  fontSize: '11px', 
+                                  fill: 'hsl(var(--warning))',
+                                  fontWeight: '600'
+                                }
+                              }}
+                            />
+                            
+                            <ReferenceLine 
+                              y={metrics.p95} 
+                              stroke="hsl(var(--destructive))" 
+                              strokeDasharray="6 4" 
+                              strokeWidth={2}
+                              label={{ 
+                                value: `Limite P95: ${metrics.p95.toFixed(1)}h`, 
+                                position: "top",
+                                style: { 
+                                  fontSize: '11px', 
+                                  fill: 'hsl(var(--destructive))',
+                                  fontWeight: '600'
+                                }
+                              }}
+                            />
+                            
+                            <Bar 
+                              dataKey="tempo" 
+                              radius={[2, 2, 0, 0]} 
+                              strokeWidth={1}
+                            >
+                              {filteredData.map((item, index) => (
+                                <Cell 
+                                  key={`cell-${index}`} 
+                                  fill={
+                                    item.tempo > metrics.p95 
+                                      ? "hsl(var(--destructive))" 
+                                      : item.tempo > metrics.p90 
+                                      ? "hsl(var(--warning))" 
+                                      : "hsl(var(--primary))"
+                                  }
+                                  stroke={
+                                    item.tempo > metrics.p95 
+                                      ? "hsl(var(--destructive))" 
+                                      : item.tempo > metrics.p90 
+                                      ? "hsl(var(--warning))" 
+                                      : "hsl(var(--primary))"
+                                  }
+                                />
+                              ))}
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+
+                      {/* Legenda melhorada */}
+                      <div className="mt-6 p-4 bg-muted/30 rounded-lg">
+                        <div className="flex flex-wrap justify-center gap-6 text-sm">
+                          <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 rounded bg-primary shadow-sm"></div>
+                            <span className="font-medium">Dentro do padrão</span>
+                            <span className="text-muted-foreground">(&le; {metrics.p90.toFixed(1)}h)</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 rounded bg-warning shadow-sm"></div>
+                            <span className="font-medium">Acima da meta</span>
+                            <span className="text-muted-foreground">({metrics.p90.toFixed(1)}h - {metrics.p95.toFixed(1)}h)</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 rounded bg-destructive shadow-sm"></div>
+                            <span className="font-medium">Outliers críticos</span>
+                            <span className="text-muted-foreground">(&gt; {metrics.p95.toFixed(1)}h)</span>
+                          </div>
+                        </div>
+                        <div className="mt-3 text-center text-xs text-muted-foreground">
+                          Distribuição Long Tail: {Math.round((filteredData.filter(d => d.tempo <= metrics.p90).length / filteredData.length) * 100)}% das ocorrências são resolvidas dentro da meta
+                        </div>
+                      </div>
+                    </div>
 
                    {/* Estatísticas do Long Tail */}
                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
