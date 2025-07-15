@@ -661,7 +661,7 @@ const Relatorios = () => {
                               strokeWidth={2}
                               label={{ 
                                 value: `Meta P90: ${metrics.p90.toFixed(1)}h`, 
-                                position: "top",
+                                position: "insideTopLeft",
                                 style: { 
                                   fontSize: '11px', 
                                   fill: 'hsl(var(--warning))',
@@ -677,7 +677,7 @@ const Relatorios = () => {
                               strokeWidth={2}
                               label={{ 
                                 value: `Limite P95: ${metrics.p95.toFixed(1)}h`, 
-                                position: "top",
+                                position: "insideTopRight",
                                 style: { 
                                   fontSize: '11px', 
                                   fill: 'hsl(var(--destructive))',
