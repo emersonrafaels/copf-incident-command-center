@@ -560,7 +560,7 @@ const Relatorios = () => {
                             <div className="text-sm text-muted-foreground">Total de Ocorrências</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-secondary">{metrics.p50.toFixed(1)}h</div>
+                            <div className="text-2xl font-bold text-foreground">{metrics.p50.toFixed(1)}h</div>
                             <div className="text-sm text-muted-foreground">Mediana (P50)</div>
                           </div>
                           <div className="text-center">
