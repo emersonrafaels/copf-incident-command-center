@@ -14,6 +14,7 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useToast } from "@/hooks/use-toast";
 import { AlertTriangle, CheckCircle2, Clock, TrendingUp, MapPin, Users, Calendar, Download, RefreshCw, Filter, CalendarDays, Truck } from "lucide-react";
@@ -48,7 +49,7 @@ export function Dashboard() {
   const [vendorFilter, setVendorFilter] = useState<string>('all');
   const [transportadoraFilter, setTransportadoraFilter] = useState<string>('all');
   const [agenciaFilter, setAgenciaFilter] = useState<string>('');
-  const [ufFilter, setUfFilter] = useState<string>('all');
+  const [ufFilter, setUfFilter] = useState<string[]>([]);
   const [tipoAgenciaFilter, setTipoAgenciaFilter] = useState<string>('all');
   const [pontoVipFilter, setPontoVipFilter] = useState<string>('all');
 
@@ -131,9 +132,9 @@ export function Dashboard() {
     if (agenciaFilter && !occurrence.agency.includes(agenciaFilter)) return false;
     
     // Filtro de UF
-    if (ufFilter !== 'all') {
+    if (ufFilter.length > 0) {
       const agencyUF = occurrence.agency.split(' - ')[1] || 'SP'; // Simular UF baseado na agência
-      if (agencyUF !== ufFilter) return false;
+      if (!ufFilter.includes(agencyUF)) return false;
     }
     
     // Simular tipo de agência baseado na agência
@@ -213,7 +214,7 @@ export function Dashboard() {
   const hasActiveFilters = segmentFilter !== 'all' || equipmentFilter !== 'all' || 
     serialNumberFilter || statusFilter !== 'all' || overrideFilter || 
     vendorFilter !== 'all' || transportadoraFilter !== 'all' || agenciaFilter ||
-    ufFilter !== 'all' || tipoAgenciaFilter !== 'all' || pontoVipFilter !== 'all';
+    ufFilter.length > 0 || tipoAgenciaFilter !== 'all' || pontoVipFilter !== 'all';
 
   // Limpar todos os filtros
   const clearAllFilters = () => {
@@ -225,7 +226,7 @@ export function Dashboard() {
     setVendorFilter('all');
     setTransportadoraFilter('all');
     setAgenciaFilter('');
-    setUfFilter('all');
+    setUfFilter([]);
     setTipoAgenciaFilter('all');
     setPontoVipFilter('all');
   };
@@ -351,17 +352,46 @@ export function Dashboard() {
 
             <div className="flex flex-col gap-2">
               <Label className="text-sm font-medium text-muted-foreground">UF</Label>
-              <Select value={ufFilter} onValueChange={setUfFilter}>
-                <SelectTrigger className="h-9">
-                  <SelectValue placeholder="Todos os estados" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  {estadosBrasil.map(uf => (
-                    <SelectItem key={uf} value={uf}>{uf}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full h-9 justify-between"
+                  >
+                    {ufFilter.length > 0 
+                      ? `${ufFilter.length} estado${ufFilter.length > 1 ? 's' : ''} selecionado${ufFilter.length > 1 ? 's' : ''}`
+                      : "Todos os estados"
+                    }
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-60 p-0 bg-background border border-border z-50" align="start">
+                  <div className="p-3">
+                    <div className="space-y-1">
+                      {estadosBrasil.map((uf) => (
+                        <div key={uf} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`uf-${uf}`}
+                            checked={ufFilter.includes(uf)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setUfFilter([...ufFilter, uf]);
+                              } else {
+                                setUfFilter(ufFilter.filter(u => u !== uf));
+                              }
+                            }}
+                          />
+                          <Label
+                            htmlFor={`uf-${uf}`}
+                            className="text-sm cursor-pointer"
+                          >
+                            {uf}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div className="flex flex-col gap-2">
