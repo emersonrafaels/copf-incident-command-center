@@ -173,13 +173,31 @@ export function Dashboard() {
     }
   }, [segmentFilter]);
 
+  // Verificar se há filtros ativos
+  const hasActiveFilters = segmentFilter !== 'all' || equipmentFilter !== 'all' || 
+    serialNumberFilter || statusFilter !== 'all' || overrideFilter || 
+    vendorFilter !== 'all' || transportadoraFilter !== 'all';
+
+  // Limpar todos os filtros
+  const clearAllFilters = () => {
+    setSegmentFilter('all');
+    setEquipmentFilter('all');
+    setSerialNumberFilter('');
+    setStatusFilter('all');
+    setOverrideFilter(false);
+    setVendorFilter('all');
+    setTransportadoraFilter('all');
+  };
+
   return (
     <div className="space-y-8">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
         <div>
           <h1 className="text-responsive-3xl font-bold text-foreground">Ferramenta de Acompanhamento - COPF</h1>
-          <p className="text-responsive-base text-muted-foreground">Itaú Unibanco | Gestão de Ocorrências</p>
+          <p className="text-responsive-base text-muted-foreground">
+            Itaú Unibanco | {hasActiveFilters ? 'Visão Filtrada' : 'Visão Geral do Parque'}
+          </p>
         </div>
         <div className="flex flex-wrap gap-3">
           {/* Filtro de Período */}
@@ -255,6 +273,133 @@ export function Dashboard() {
           </Button>
         </div>
       </div>
+
+      {/* Filtros */}
+      <Card className="animate-fade-in">
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Filter className="h-5 w-5" />
+              Filtros
+              {hasActiveFilters && (
+                <Badge variant="secondary" className="ml-2">
+                  {filteredOccurrences.length} ocorrências filtradas
+                </Badge>
+              )}
+            </div>
+            {hasActiveFilters && (
+              <Button variant="outline" size="sm" onClick={clearAllFilters}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Limpar Filtros
+              </Button>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+            <div className="flex flex-col gap-2">
+              <Label className="text-sm font-medium text-muted-foreground">Segmento</Label>
+              <Select value={segmentFilter} onValueChange={setSegmentFilter}>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Todos os segmentos" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="AA">AA</SelectItem>
+                  <SelectItem value="AB">AB</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="flex flex-col gap-2">
+              <Label className="text-sm font-medium text-muted-foreground">Equipamento</Label>
+              <Select value={equipmentFilter} onValueChange={setEquipmentFilter}>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Todos os equipamentos" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  {uniqueEquipments.map(equipment => (
+                    <SelectItem key={equipment} value={equipment}>{equipment}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="flex flex-col gap-2">
+              <Label className="text-sm font-medium text-muted-foreground">Status</Label>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Todos os status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="open">Aberta</SelectItem>
+                  <SelectItem value="in-progress">Em Andamento</SelectItem>
+                  <SelectItem value="pending">Pendente</SelectItem>
+                  <SelectItem value="resolved">Resolvida</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label className="text-sm font-medium text-muted-foreground">Fornecedor</Label>
+              <Select value={vendorFilter} onValueChange={setVendorFilter}>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Todos os fornecedores" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  {uniqueVendors.map(vendor => (
+                    <SelectItem key={vendor} value={vendor}>{vendor}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {segmentFilter === 'AB' && (
+              <div className="flex flex-col gap-2">
+                <Label className="text-sm font-medium text-muted-foreground">Transportadora</Label>
+                <Select value={transportadoraFilter} onValueChange={setTransportadoraFilter}>
+                  <SelectTrigger className="h-9">
+                    <Truck className="h-4 w-4 mr-2" />
+                    <SelectValue placeholder="Todas as transportadoras" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas</SelectItem>
+                    {uniqueTransportadoras.map(transportadora => (
+                      <SelectItem key={transportadora} value={transportadora}>{transportadora}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-2">
+              <Label className="text-sm font-medium text-muted-foreground">Nº Série</Label>
+              <Input
+                type="text"
+                placeholder="Buscar por série..."
+                value={serialNumberFilter}
+                onChange={(e) => setSerialNumberFilter(e.target.value)}
+                className="h-9"
+              />
+            </div>
+          </div>
+
+          {/* Switch para ocorrências vencidas */}
+          <div className="flex items-center space-x-2 pt-4 border-t mt-4">
+            <Switch
+              id="override-filter"
+              checked={overrideFilter}
+              onCheckedChange={setOverrideFilter}
+            />
+            <Label htmlFor="override-filter" className="text-sm font-medium">
+              Apenas ocorrências vencidas (SLA ultrapassado)
+            </Label>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Dashboard Content Wrapper for PDF Export */}
       <div id="dashboard-content">
