@@ -482,7 +482,13 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                       </div>
                       
                       {/* Hover indicator */}
-                      <div className="absolute inset-0 border-2 border-white/0 rounded-xl transition-all duration-300 group-hover:border-white/30"></div>
+                      <div className={`absolute inset-0 border-2 border-white/0 rounded-xl transition-all duration-300 group-hover:${
+                        item.criticalityScore >= 80 ? 'border-red-300/50' :
+                        item.criticalityScore >= 60 ? 'border-orange-300/50' :
+                        item.criticalityScore >= 40 ? 'border-yellow-300/50' :
+                        item.criticalityScore >= 20 ? 'border-blue-300/50' :
+                        'border-green-300/50'
+                      }`}></div>
                     </div>
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs bg-background/95 backdrop-blur-sm border border-border/80">
