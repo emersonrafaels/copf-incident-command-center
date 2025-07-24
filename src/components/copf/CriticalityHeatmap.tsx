@@ -397,9 +397,9 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                           </p>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2 text-xs">
-                          {/* SLA - sempre mostrar */}
-                          <div className={`flex items-center gap-1 rounded-md px-2 py-1 ${
+                        <div className="grid grid-cols-2 gap-1 text-xs">
+                          {/* SLA */}
+                          <div className={`flex items-center gap-1 rounded-md px-1.5 py-1 ${
                             item.slaBreached ? (
                               item.slaStatus === 'above' ? 'bg-red-500/20' : 
                               item.slaStatus === 'below' ? 'bg-green-500/20' : 'bg-white/10'
@@ -407,17 +407,17 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                           }`}>
                             {item.slaBreached ? (
                               item.slaStatus === 'above' ? (
-                                <ArrowUp className="h-3 w-3 text-red-300" />
+                                <ArrowUp className="h-2.5 w-2.5 text-red-300" />
                               ) : item.slaStatus === 'below' ? (
-                                <ArrowDown className="h-3 w-3 text-green-300" />
+                                <ArrowDown className="h-2.5 w-2.5 text-green-300" />
                               ) : (
-                                <AlertTriangle className="h-3 w-3" />
+                                <AlertTriangle className="h-2.5 w-2.5" />
                               )
                             ) : (
-                              <AlertTriangle className="h-3 w-3 opacity-50" />
+                              <Minus className="h-2.5 w-2.5 opacity-50" />
                             )}
-                            <span className="text-[10px] opacity-75">SLA</span>
-                            <span>
+                            <span className="text-[9px] opacity-75">SLA</span>
+                            <span className="text-[10px] font-medium">
                               {item.slaBreached ? (
                                 item.slaStatus === 'above' ? `+${item.slaDifference}%` : 
                                 item.slaStatus === 'below' ? `-${item.slaDifference}%` : 
@@ -426,13 +426,31 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                             </span>
                           </div>
 
-                          {/* Volume - sempre mostrar */}
-                          <div className={`flex items-center gap-1 rounded-md px-2 py-1 ${
+                          {/* Volume */}
+                          <div className={`flex items-center gap-1 rounded-md px-1.5 py-1 ${
                             item.volumeAtipico ? 'bg-orange-500/20' : 'bg-white/10'
                           }`}>
-                            <TrendingUp className={`h-3 w-3 ${item.volumeAtipico ? 'text-orange-300' : 'opacity-50'}`} />
-                            <span className="text-[10px] opacity-75">VOL</span>
-                            <span>{item.reincidencia}</span>
+                            <TrendingUp className={`h-2.5 w-2.5 ${item.volumeAtipico ? 'text-orange-300' : 'opacity-50'}`} />
+                            <span className="text-[9px] opacity-75">VOL</span>
+                            <span className="text-[10px] font-medium">{item.reincidencia}</span>
+                          </div>
+
+                          {/* Aging */}
+                          <div className={`flex items-center gap-1 rounded-md px-1.5 py-1 ${
+                            item.aging > 10 ? 'bg-yellow-500/20' : 'bg-white/10'
+                          }`}>
+                            <Clock className={`h-2.5 w-2.5 ${item.aging > 10 ? 'text-yellow-300' : 'opacity-50'}`} />
+                            <span className="text-[9px] opacity-75">AGE</span>
+                            <span className="text-[10px] font-medium">{item.aging}d</span>
+                          </div>
+
+                          {/* Reincidência */}
+                          <div className={`flex items-center gap-1 rounded-md px-1.5 py-1 ${
+                            item.reincidencia > 3 ? 'bg-purple-500/20' : 'bg-white/10'
+                          }`}>
+                            <RotateCcw className={`h-2.5 w-2.5 ${item.reincidencia > 3 ? 'text-purple-300' : 'opacity-50'}`} />
+                            <span className="text-[9px] opacity-75">REI</span>
+                            <span className="text-[10px] font-medium">{item.reincidencia}</span>
                           </div>
                         </div>
                       </div>
