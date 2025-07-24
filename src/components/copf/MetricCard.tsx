@@ -44,7 +44,7 @@ export function MetricCard({
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold text-foreground mb-1">
-          {value.toLocaleString()}
+          {isNaN(Number(value)) ? "—" : Number(value).toLocaleString()}
         </div>
         <div className="flex items-center justify-between">
           {change && (
