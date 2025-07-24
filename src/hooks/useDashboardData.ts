@@ -255,14 +255,19 @@ export function useDashboardData() {
     }
   ], [occurrences])
 
-  const metrics = useMemo(() => ({
-    totalOccurrences: occurrences.length,
-    resolvedOccurrences: occurrences.filter(o => o.status === 'encerrada').length,
-    pendingOccurrences: occurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_atuacao').length,
-    avgMTTR: '4.2h',
-    affectedAgencies: new Set(occurrences.map(o => o.agency)).size,
-    resolutionRate: Math.round((occurrences.filter(o => o.status === 'encerrada').length / occurrences.length) * 100)
-  }), [occurrences])
+  const metrics = useMemo(() => {
+    const resolvedCount = occurrences.filter(o => o.status === 'encerrada').length
+    const totalCount = occurrences.length
+    
+    return {
+      totalOccurrences: totalCount,
+      resolvedOccurrences: resolvedCount,
+      pendingOccurrences: occurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_atuacao').length,
+      avgMTTR: '4.2h',
+      affectedAgencies: new Set(occurrences.map(o => o.agency)).size,
+      resolutionRate: totalCount > 0 ? Math.round((resolvedCount / totalCount) * 100) : 0
+    }
+  }, [occurrences])
 
   return {
     occurrences,
