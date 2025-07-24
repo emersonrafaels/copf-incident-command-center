@@ -336,263 +336,411 @@ export function Dashboard() {
       </div>
 
       {/* Filtros */}
-      <Card className="animate-fade-in">
-        <CardHeader>
+      <Card className="animate-fade-in border-border/50 bg-gradient-to-r from-card to-muted/20">
+        <CardHeader className="pb-4">
           <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Filter className="h-5 w-5" />
-              Filtros
-              {hasActiveFilters && (
-                <Badge variant="secondary" className="ml-2">
-                  {filteredOccurrences.length} ocorrências filtradas
-                </Badge>
-              )}
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Filter className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold">Filtros Avançados</h3>
+                {hasActiveFilters && (
+                  <p className="text-sm text-muted-foreground">
+                    {filteredOccurrences.length} resultado{filteredOccurrences.length !== 1 ? 's' : ''} encontrado{filteredOccurrences.length !== 1 ? 's' : ''}
+                  </p>
+                )}
+              </div>
             </div>
             {hasActiveFilters && (
-              <Button variant="outline" size="sm" onClick={clearAllFilters}>
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Limpar Filtros
-              </Button>
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20">
+                  {Object.values({
+                    agencia: agenciaFilter.length > 0,
+                    uf: ufFilter.length > 0,
+                    tipoAgencia: tipoAgenciaFilter !== 'all',
+                    pontoVip: pontoVipFilter !== 'all',
+                    segmento: segmentFilter !== 'all',
+                    equipamento: equipmentFilter !== 'all',
+                    serie: serialNumberFilter !== '',
+                    status: statusFilter !== 'all',
+                    fornecedor: vendorFilter !== 'all',
+                    transportadora: transportadoraFilter !== 'all',
+                    vencidas: overrideFilter
+                  }).filter(Boolean).length} filtro{Object.values({
+                    agencia: agenciaFilter.length > 0,
+                    uf: ufFilter.length > 0,
+                    tipoAgencia: tipoAgenciaFilter !== 'all',
+                    pontoVip: pontoVipFilter !== 'all',
+                    segmento: segmentFilter !== 'all',
+                    equipamento: equipmentFilter !== 'all',
+                    serie: serialNumberFilter !== '',
+                    status: statusFilter !== 'all',
+                    fornecedor: vendorFilter !== 'all',
+                    transportadora: transportadoraFilter !== 'all',
+                    vencidas: overrideFilter
+                  }).filter(Boolean).length !== 1 ? 's' : ''} ativo{Object.values({
+                    agencia: agenciaFilter.length > 0,
+                    uf: ufFilter.length > 0,
+                    tipoAgencia: tipoAgenciaFilter !== 'all',
+                    pontoVip: pontoVipFilter !== 'all',
+                    segmento: segmentFilter !== 'all',
+                    equipamento: equipmentFilter !== 'all',
+                    serie: serialNumberFilter !== '',
+                    status: statusFilter !== 'all',
+                    fornecedor: vendorFilter !== 'all',
+                    transportadora: transportadoraFilter !== 'all',
+                    vencidas: overrideFilter
+                  }).filter(Boolean).length !== 1 ? 's' : ''}
+                </Badge>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={clearAllFilters}
+                  className="hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20 transition-colors"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Limpar Filtros
+                </Button>
+              </div>
             )}
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            {/* Filtros de Localização */}
-            <div>
-              <h4 className="text-sm font-semibold text-foreground mb-3">Localização</h4>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="flex flex-col gap-2">
-                  <Label className="text-sm font-medium text-muted-foreground">Agência</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full h-9 justify-between"
-                      >
-                        {agenciaFilter.length > 0 
-                          ? `${agenciaFilter.length} agência${agenciaFilter.length > 1 ? 's' : ''} selecionada${agenciaFilter.length > 1 ? 's' : ''}`
-                          : "Todas as agências"
-                        }
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-60 p-0 bg-background border border-border z-50" align="start">
-                      <div className="p-3">
-                        <div className="space-y-1 max-h-48 overflow-y-auto">
-                          {uniqueAgencies.map((agency) => (
-                            <div key={agency} className="flex items-center space-x-2">
-                              <Checkbox
-                                id={`agency-${agency}`}
-                                checked={agenciaFilter.includes(agency)}
-                                onCheckedChange={(checked) => {
-                                  if (checked) {
-                                    setAgenciaFilter([...agenciaFilter, agency]);
-                                  } else {
-                                    setAgenciaFilter(agenciaFilter.filter(a => a !== agency));
-                                  }
-                                }}
-                              />
-                              <Label
-                                htmlFor={`agency-${agency}`}
-                                className="text-sm cursor-pointer"
-                              >
-                                {agency}
-                              </Label>
-                            </div>
-                          ))}
+        <CardContent className="space-y-8">
+          {/* Filtros de Localização */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 pb-2 border-b border-border/50">
+              <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                <div className="w-2 h-2 rounded-full bg-primary"></div>
+              </div>
+              <h4 className="text-base font-semibold text-foreground">Localização</h4>
+            </div>
+            <div className="responsive-grid responsive-grid-4">
+              <div className="group space-y-3">
+                <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                  Agência
+                </Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm"
+                    >
+                      {agenciaFilter.length > 0 ? (
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                            {agenciaFilter.length}
+                          </Badge>
+                          <span className="text-sm">
+                            agência{agenciaFilter.length > 1 ? 's' : ''} selecionada{agenciaFilter.length > 1 ? 's' : ''}
+                          </span>
                         </div>
+                      ) : (
+                        "Todas as agências"
+                      )}
+                      <div className="w-4 h-4 opacity-50">⌄</div>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                    <div className="p-4">
+                      <div className="pb-3 mb-3 border-b border-border/50">
+                        <h5 className="font-medium text-sm">Selecionar Agências</h5>
+                        <p className="text-xs text-muted-foreground mt-1">Escolha uma ou mais agências</p>
                       </div>
-                    </PopoverContent>
-                  </Popover>
-                </div>
+                      <div className="space-y-2 max-h-64 overflow-y-auto">
+                        {uniqueAgencies.map((agency) => (
+                          <div key={agency} className="flex items-center space-x-3 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                            <Checkbox
+                              id={`agency-${agency}`}
+                              checked={agenciaFilter.includes(agency)}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setAgenciaFilter([...agenciaFilter, agency]);
+                                } else {
+                                  setAgenciaFilter(agenciaFilter.filter(a => a !== agency));
+                                }
+                              }}
+                              className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                            />
+                            <Label
+                              htmlFor={`agency-${agency}`}
+                              className="text-sm cursor-pointer flex-1 font-medium"
+                            >
+                              Agência {agency}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
 
-                <div className="flex flex-col gap-2">
-                  <Label className="text-sm font-medium text-muted-foreground">UF</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full h-9 justify-between"
-                      >
-                        {ufFilter.length > 0 
-                          ? `${ufFilter.length} estado${ufFilter.length > 1 ? 's' : ''} selecionado${ufFilter.length > 1 ? 's' : ''}`
-                          : "Todos os estados"
-                        }
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-60 p-0 bg-background border border-border z-50" align="start">
-                      <div className="p-3">
-                        <div className="space-y-1">
-                          {availableUFs.map((uf) => (
-                            <div key={uf} className="flex items-center space-x-2">
-                              <Checkbox
-                                id={`uf-${uf}`}
-                                checked={ufFilter.includes(uf)}
-                                onCheckedChange={(checked) => {
-                                  if (checked) {
-                                    setUfFilter([...ufFilter, uf]);
-                                  } else {
-                                    setUfFilter(ufFilter.filter(u => u !== uf));
-                                  }
-                                }}
-                              />
-                              <Label
-                                htmlFor={`uf-${uf}`}
-                                className="text-sm cursor-pointer"
-                              >
-                                {uf}
-                              </Label>
-                            </div>
-                          ))}
+              <div className="group space-y-3">
+                <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                  Estado (UF)
+                </Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm"
+                    >
+                      {ufFilter.length > 0 ? (
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                            {ufFilter.length}
+                          </Badge>
+                          <span className="text-sm">
+                            estado{ufFilter.length > 1 ? 's' : ''} selecionado{ufFilter.length > 1 ? 's' : ''}
+                          </span>
                         </div>
+                      ) : (
+                        "Todos os estados"
+                      )}
+                      <div className="w-4 h-4 opacity-50">⌄</div>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                    <div className="p-4">
+                      <div className="pb-3 mb-3 border-b border-border/50">
+                        <h5 className="font-medium text-sm">Selecionar Estados</h5>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {agenciaFilter.length > 0 ? 'Filtrado pelas agências selecionadas' : 'Escolha um ou mais estados'}
+                        </p>
                       </div>
-                    </PopoverContent>
-                  </Popover>
-                </div>
+                      <div className="grid grid-cols-3 gap-2 max-h-64 overflow-y-auto">
+                        {availableUFs.map((uf) => (
+                          <div key={uf} className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                            <Checkbox
+                              id={`uf-${uf}`}
+                              checked={ufFilter.includes(uf)}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setUfFilter([...ufFilter, uf]);
+                                } else {
+                                  setUfFilter(ufFilter.filter(u => u !== uf));
+                                }
+                              }}
+                              className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                            />
+                            <Label
+                              htmlFor={`uf-${uf}`}
+                              className="text-sm cursor-pointer font-medium"
+                            >
+                              {uf}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
 
-                <div className="flex flex-col gap-2">
-                  <Label className="text-sm font-medium text-muted-foreground">Tipo da Agência</Label>
-                  <Select value={tipoAgenciaFilter} onValueChange={setTipoAgenciaFilter}>
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="Todos os tipos" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos</SelectItem>
-                      <SelectItem value="convencional">Convencional</SelectItem>
-                      <SelectItem value="terceirizada">Ponto Terceirizado</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="group space-y-3">
+                <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                  Tipo da Agência
+                </Label>
+                <Select value={tipoAgenciaFilter} onValueChange={setTipoAgenciaFilter}>
+                  <SelectTrigger className="h-10 hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                    <SelectValue placeholder="Todos os tipos" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background/95 backdrop-blur-sm border border-border/80">
+                    <SelectItem value="all">Todos os tipos</SelectItem>
+                    <SelectItem value="convencional">Convencional</SelectItem>
+                    <SelectItem value="terceirizada">Ponto Terceirizado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-                <div className="flex flex-col gap-2">
-                  <Label className="text-sm font-medium text-muted-foreground">Ponto VIP</Label>
-                  <Select value={pontoVipFilter} onValueChange={setPontoVipFilter}>
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="Todos" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos</SelectItem>
-                      <SelectItem value="sim">Sim</SelectItem>
-                      <SelectItem value="nao">Não</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="group space-y-3">
+                <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                  Ponto VIP
+                </Label>
+                <Select value={pontoVipFilter} onValueChange={setPontoVipFilter}>
+                  <SelectTrigger className="h-10 hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                    <SelectValue placeholder="Todos" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background/95 backdrop-blur-sm border border-border/80">
+                    <SelectItem value="all">Todos</SelectItem>
+                    <SelectItem value="sim">Sim</SelectItem>
+                    <SelectItem value="nao">Não</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
+          </div>
 
-            {/* Filtros de Equipamento */}
-            <div>
-              <h4 className="text-sm font-semibold text-foreground mb-3">Equipamento</h4>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="flex flex-col gap-2">
-                  <Label className="text-sm font-medium text-muted-foreground">Segmento</Label>
-                  <Select value={segmentFilter} onValueChange={setSegmentFilter}>
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="Todos os segmentos" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos</SelectItem>
-                      <SelectItem value="AA">AA</SelectItem>
-                      <SelectItem value="AB">AB</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="flex flex-col gap-2">
-                  <Label className="text-sm font-medium text-muted-foreground">Equipamento</Label>
-                  <Select value={equipmentFilter} onValueChange={setEquipmentFilter}>
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="Todos os equipamentos" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos</SelectItem>
-                      {uniqueEquipments.map(equipment => (
-                        <SelectItem key={equipment} value={equipment}>{equipment}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="flex flex-col gap-2">
-                  <Label className="text-sm font-medium text-muted-foreground">Nº Série</Label>
+          {/* Filtros de Equipamento */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 pb-2 border-b border-border/50">
+              <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                <div className="w-2 h-2 rounded-full bg-primary"></div>
+              </div>
+              <h4 className="text-base font-semibold text-foreground">Equipamento</h4>
+            </div>
+            <div className="responsive-grid responsive-grid-4">
+              <div className="group space-y-3">
+                <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                  Segmento
+                </Label>
+                <Select value={segmentFilter} onValueChange={setSegmentFilter}>
+                  <SelectTrigger className="h-10 hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                    <SelectValue placeholder="Todos os segmentos" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background/95 backdrop-blur-sm border border-border/80">
+                    <SelectItem value="all">Todos os segmentos</SelectItem>
+                    <SelectItem value="AA">Segmento AA</SelectItem>
+                    <SelectItem value="AB">Segmento AB</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="group space-y-3">
+                <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                  Equipamento
+                </Label>
+                <Select value={equipmentFilter} onValueChange={setEquipmentFilter}>
+                  <SelectTrigger className="h-10 hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                    <SelectValue placeholder="Todos os equipamentos" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background/95 backdrop-blur-sm border border-border/80">
+                    <SelectItem value="all">Todos os equipamentos</SelectItem>
+                    {uniqueEquipments.map(equipment => (
+                      <SelectItem key={equipment} value={equipment}>{equipment}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="group space-y-3">
+                <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                  Número de Série
+                </Label>
+                <div className="relative">
                   <Input
                     type="text"
                     placeholder="Buscar por série..."
                     value={serialNumberFilter}
                     onChange={(e) => setSerialNumberFilter(e.target.value)}
-                    className="h-9"
+                    className="h-10 pl-10 hover:border-primary/30 focus:border-primary transition-colors"
                   />
-                </div>
-                
-                <div className="flex flex-col gap-2">
-                  <Label className="text-sm font-medium text-muted-foreground">Status</Label>
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="Todos os status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos</SelectItem>
-                      <SelectItem value="open">Aberta</SelectItem>
-                      <SelectItem value="in-progress">Em Andamento</SelectItem>
-                      <SelectItem value="pending">Pendente</SelectItem>
-                      <SelectItem value="resolved">Resolvida</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground">
+                    🔍
+                  </div>
                 </div>
               </div>
+              
+              <div className="group space-y-3">
+                <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                  Status
+                </Label>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="h-10 hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                    <SelectValue placeholder="Todos os status" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background/95 backdrop-blur-sm border border-border/80">
+                    <SelectItem value="all">Todos os status</SelectItem>
+                    <SelectItem value="open">🔴 Aberta</SelectItem>
+                    <SelectItem value="in-progress">🟡 Em Andamento</SelectItem>
+                    <SelectItem value="pending">🟠 Pendente</SelectItem>
+                    <SelectItem value="resolved">🟢 Resolvida</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
+          </div>
 
-            {/* Filtros de Fornecedor */}
-            <div>
-              <h4 className="text-sm font-semibold text-foreground mb-3">Fornecedor</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex flex-col gap-2">
-                  <Label className="text-sm font-medium text-muted-foreground">Fornecedor</Label>
-                  <Select value={vendorFilter} onValueChange={setVendorFilter}>
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="Todos os fornecedores" />
+          {/* Filtros de Fornecedor */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 pb-2 border-b border-border/50">
+              <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                <div className="w-2 h-2 rounded-full bg-primary"></div>
+              </div>
+              <h4 className="text-base font-semibold text-foreground">Fornecedor</h4>
+            </div>
+            <div className="responsive-grid responsive-grid-2">
+              <div className="group space-y-3">
+                <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                  Fornecedor
+                </Label>
+                <Select value={vendorFilter} onValueChange={setVendorFilter}>
+                  <SelectTrigger className="h-10 hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                    <SelectValue placeholder="Todos os fornecedores" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background/95 backdrop-blur-sm border border-border/80">
+                    <SelectItem value="all">Todos os fornecedores</SelectItem>
+                    {uniqueVendors.map(vendor => (
+                      <SelectItem key={vendor} value={vendor}>{vendor}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {tipoAgenciaAtual === 'terceirizada' && (
+                <div className="group space-y-3">
+                  <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                    Transportadora
+                  </Label>
+                  <Select value={transportadoraFilter} onValueChange={setTransportadoraFilter}>
+                    <SelectTrigger className="h-10 hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                      <Truck className="h-4 w-4 mr-2 text-primary" />
+                      <SelectValue placeholder="Todas as transportadoras" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos</SelectItem>
-                      {uniqueVendors.map(vendor => (
-                        <SelectItem key={vendor} value={vendor}>{vendor}</SelectItem>
+                    <SelectContent className="bg-background/95 backdrop-blur-sm border border-border/80">
+                      <SelectItem value="all">Todas as transportadoras</SelectItem>
+                      {uniqueTransportadoras.map(transportadora => (
+                        <SelectItem key={transportadora} value={transportadora}>{transportadora}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-
-                {tipoAgenciaAtual === 'terceirizada' && (
-                  <div className="flex flex-col gap-2">
-                    <Label className="text-sm font-medium text-muted-foreground">Transportadora</Label>
-                    <Select value={transportadoraFilter} onValueChange={setTransportadoraFilter}>
-                      <SelectTrigger className="h-9">
-                        <Truck className="h-4 w-4 mr-2" />
-                        <SelectValue placeholder="Todas as transportadoras" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Todas</SelectItem>
-                        {uniqueTransportadoras.map(transportadora => (
-                          <SelectItem key={transportadora} value={transportadora}>{transportadora}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-              </div>
+              )}
             </div>
+          </div>
 
-            {/* Filtros Especiais */}
-            <div>
-              <h4 className="text-sm font-semibold text-foreground mb-3">Filtros Especiais</h4>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="override-filter"
-                  checked={overrideFilter}
-                  onCheckedChange={setOverrideFilter}
-                />
-                <Label htmlFor="override-filter" className="text-sm font-medium">
-                  Apenas ocorrências vencidas
-                </Label>
+          {/* Filtros Especiais */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 pb-2 border-b border-border/50">
+              <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                <div className="w-2 h-2 rounded-full bg-primary"></div>
+              </div>
+              <h4 className="text-base font-semibold text-foreground">Filtros Especiais</h4>
+            </div>
+            <div className="p-4 rounded-lg bg-muted/30 border border-border/50">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <Switch
+                    id="override-filter"
+                    checked={overrideFilter}
+                    onCheckedChange={setOverrideFilter}
+                    className="data-[state=checked]:bg-primary"
+                  />
+                  <div>
+                    <Label htmlFor="override-filter" className="text-sm font-medium cursor-pointer">
+                      Ocorrências Vencidas
+                    </Label>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Mostrar apenas ocorrências que já passaram do prazo
+                    </p>
+                  </div>
+                </div>
+                {overrideFilter && (
+                  <Badge variant="secondary" className="bg-warning/10 text-warning border-warning/20">
+                    Ativo
+                  </Badge>
+                )}
               </div>
             </div>
           </div>
