@@ -3,6 +3,7 @@ import { MetricCard } from "./MetricCard";
 import { StatusBadge } from "./StatusBadge";
 import { InteractiveCharts } from "./InteractiveCharts";
 import { OccurrenceModal } from "./OccurrenceModal";
+import { CriticalityHeatmap } from "./CriticalityHeatmap";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,9 +12,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useToast } from "@/hooks/use-toast";
-import { AlertTriangle, CheckCircle2, Clock, TrendingUp, MapPin, Users, Calendar, Download, RefreshCw, Filter, CalendarDays } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Clock, TrendingUp, MapPin, Users, Calendar, Download, RefreshCw, Filter, CalendarDays, Truck } from "lucide-react";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { format } from "date-fns";
@@ -40,6 +43,10 @@ export function Dashboard() {
   const [segmentFilter, setSegmentFilter] = useState<string>('all');
   const [equipmentFilter, setEquipmentFilter] = useState<string>('all');
   const [serialNumberFilter, setSerialNumberFilter] = useState<string>('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [overrideFilter, setOverrideFilter] = useState<boolean>(false);
+  const [vendorFilter, setVendorFilter] = useState<string>('all');
+  const [transportadoraFilter, setTransportadoraFilter] = useState<string>('all');
   const [showAllOccurrences, setShowAllOccurrences] = useState<boolean>(false);
   const handleExport = async () => {
     toast({
@@ -115,6 +122,26 @@ export function Dashboard() {
     if (segmentFilter !== 'all' && occurrence.segment !== segmentFilter) return false;
     if (equipmentFilter !== 'all' && occurrence.equipment !== equipmentFilter) return false;
     if (serialNumberFilter && !occurrence.serialNumber.toLowerCase().includes(serialNumberFilter.toLowerCase())) return false;
+    if (statusFilter !== 'all' && occurrence.status !== statusFilter) return false;
+    if (vendorFilter !== 'all' && occurrence.vendor !== vendorFilter) return false;
+    
+    // Filtro de transportadora apenas para AB
+    if (transportadoraFilter !== 'all' && occurrence.segment === 'AB') {
+      // Simular transportadora baseada no vendor
+      const transportadora = occurrence.vendor.includes('Express') ? 'Express Logística' : 
+                           occurrence.vendor.includes('Tech') ? 'TechTransporte' : 'LogiCorp';
+      if (transportadora !== transportadoraFilter) return false;
+    }
+    
+    // Filtro de ocorrências vencidas
+    if (overrideFilter) {
+      const createdDate = new Date(occurrence.createdAt);
+      const hoursDiff = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60);
+      const slaLimit = (occurrence.severity === 'critical' || occurrence.severity === 'high') ? 24 : 72;
+      const isOverdue = hoursDiff > slaLimit && occurrence.status !== 'resolved';
+      if (!isOverdue) return false;
+    }
+    
     return true;
   });
 
@@ -140,12 +167,34 @@ export function Dashboard() {
 
   const uniqueEquipments = getFilteredEquipments();
 
+  // Obter fornecedores únicos
+  const uniqueVendors = Array.from(new Set(occurrences.map(o => o.vendor))).sort();
+
+  // Obter transportadoras (simuladas para AB)
+  const uniqueTransportadoras = ['Express Logística', 'TechTransporte', 'LogiCorp'];
+
   // Resetar filtro de equipamento quando segmento mudar
   useEffect(() => {
     if (segmentFilter !== 'all') {
       setEquipmentFilter('all');
     }
   }, [segmentFilter]);
+
+  // Verificar se há filtros ativos
+  const hasActiveFilters = segmentFilter !== 'all' || equipmentFilter !== 'all' || 
+    serialNumberFilter || statusFilter !== 'all' || overrideFilter || 
+    vendorFilter !== 'all' || transportadoraFilter !== 'all';
+
+  // Limpar todos os filtros
+  const clearAllFilters = () => {
+    setSegmentFilter('all');
+    setEquipmentFilter('all');
+    setSerialNumberFilter('');
+    setStatusFilter('all');
+    setOverrideFilter(false);
+    setVendorFilter('all');
+    setTransportadoraFilter('all');
+  };
   return <div className="space-y-8">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
@@ -252,6 +301,9 @@ export function Dashboard() {
           <MetricCard title="Agências Afetadas" value={metrics.affectedAgencies} change="2 novas esta semana" changeType="neutral" icon={<MapPin className="h-5 w-5" />} description="De 234 totais" />
         </div>}
 
+      {/* Criticality Heatmap */}
+      <CriticalityHeatmap occurrences={filteredOccurrences} />
+
       {/* Interactive Charts */}
       {isLoading ? <div className="responsive-grid responsive-grid-2">
           {Array.from({
@@ -273,47 +325,123 @@ export function Dashboard() {
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5" />
               Ocorrências Recentes
+              {hasActiveFilters && (
+                <Badge variant="secondary" className="ml-2">
+                  {filteredOccurrences.length} filtradas
+                </Badge>
+              )}
             </div>
-            <div className="flex gap-4 items-end">
+            {hasActiveFilters && (
+              <Button variant="outline" size="sm" onClick={clearAllFilters}>
+                <Filter className="h-4 w-4 mr-2" />
+                Limpar Filtros
+              </Button>
+            )}
+          </CardTitle>
+          
+          {/* Filtros */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 pt-4">
+            <div className="flex flex-col gap-1">
+              <Label className="text-sm font-medium text-muted-foreground">Segmento</Label>
+              <Select value={segmentFilter} onValueChange={setSegmentFilter}>
+                <SelectTrigger className="h-8">
+                  <SelectValue placeholder="Segmento" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="AA">AA</SelectItem>
+                  <SelectItem value="AB">AB</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="flex flex-col gap-1">
+              <Label className="text-sm font-medium text-muted-foreground">Equipamento</Label>
+              <Select value={equipmentFilter} onValueChange={setEquipmentFilter}>
+                <SelectTrigger className="h-8">
+                  <SelectValue placeholder="Equipamento" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  {uniqueEquipments.map(equipment => (
+                    <SelectItem key={equipment} value={equipment}>{equipment}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="flex flex-col gap-1">
+              <Label className="text-sm font-medium text-muted-foreground">Status</Label>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="h-8">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="open">Aberta</SelectItem>
+                  <SelectItem value="in-progress">Em Andamento</SelectItem>
+                  <SelectItem value="pending">Pendente</SelectItem>
+                  <SelectItem value="resolved">Resolvida</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <Label className="text-sm font-medium text-muted-foreground">Fornecedor</Label>
+              <Select value={vendorFilter} onValueChange={setVendorFilter}>
+                <SelectTrigger className="h-8">
+                  <SelectValue placeholder="Fornecedor" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  {uniqueVendors.map(vendor => (
+                    <SelectItem key={vendor} value={vendor}>{vendor}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {segmentFilter === 'AB' && (
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-muted-foreground">Segmento</label>
-                <Select value={segmentFilter} onValueChange={setSegmentFilter}>
-                  <SelectTrigger className="w-24">
-                    <SelectValue placeholder="Segmento" />
+                <Label className="text-sm font-medium text-muted-foreground">Transportadora</Label>
+                <Select value={transportadoraFilter} onValueChange={setTransportadoraFilter}>
+                  <SelectTrigger className="h-8">
+                    <Truck className="h-4 w-4 mr-2" />
+                    <SelectValue placeholder="Transportadora" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Todos</SelectItem>
-                    <SelectItem value="AA">AA</SelectItem>
-                    <SelectItem value="AB">AB</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-muted-foreground">Equipamento</label>
-                <Select value={equipmentFilter} onValueChange={setEquipmentFilter}>
-                  <SelectTrigger className="w-40">
-                    <SelectValue placeholder="Equipamento" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos</SelectItem>
-                    {uniqueEquipments.map(equipment => (
-                      <SelectItem key={equipment} value={equipment}>{equipment}</SelectItem>
+                    <SelectItem value="all">Todas</SelectItem>
+                    {uniqueTransportadoras.map(transportadora => (
+                      <SelectItem key={transportadora} value={transportadora}>{transportadora}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-muted-foreground">Número de Série</label>
-                <Input
-                  type="text"
-                  placeholder="Nº Série"
-                  value={serialNumberFilter}
-                  onChange={(e) => setSerialNumberFilter(e.target.value)}
-                  className="w-32"
-                />
-              </div>
+            )}
+
+            <div className="flex flex-col gap-1">
+              <Label className="text-sm font-medium text-muted-foreground">Nº Série</Label>
+              <Input
+                type="text"
+                placeholder="Buscar série..."
+                value={serialNumberFilter}
+                onChange={(e) => setSerialNumberFilter(e.target.value)}
+                className="h-8"
+              />
             </div>
-          </CardTitle>
+          </div>
+
+          {/* Switch para ocorrências vencidas */}
+          <div className="flex items-center space-x-2 pt-4">
+            <Switch
+              id="override-filter"
+              checked={overrideFilter}
+              onCheckedChange={setOverrideFilter}
+            />
+            <Label htmlFor="override-filter" className="text-sm font-medium">
+              Apenas ocorrências vencidas (SLA ultrapassado)
+            </Label>
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
