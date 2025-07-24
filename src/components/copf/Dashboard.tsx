@@ -541,7 +541,7 @@ export function Dashboard() {
             <MetricCard 
               title="Total de Agências" 
               value={2360} 
-              description="Distribuídas no Brasil" 
+              description="2360 agências no total" 
               icon={<MapPin className="h-5 w-5" />} 
             />
           </div>
