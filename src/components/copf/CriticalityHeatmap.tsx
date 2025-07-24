@@ -394,15 +394,16 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                         </div>
 
                         {/* Principais métricas de negócio */}
-                        <div className="bg-black/20 backdrop-blur-sm rounded-lg p-3 mb-2">
-                          <div className="text-xs opacity-90 mb-2 font-medium">{item.occurrenceCount} ocorrências ativas</div>
-                          <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-3">
+                          <div className="text-xs opacity-90 font-medium">{item.occurrenceCount} ocorrências ativas</div>
+                          
+                          <div className="grid grid-cols-2 gap-3">
                             {/* SLA - Principal indicador */}
-                            <div className={`p-2 rounded-md ${
+                            <div className={`p-2 rounded-lg ${
                               item.slaBreached ? (
-                                item.slaStatus === 'above' ? 'bg-red-500/30 border border-red-400/30' : 
-                                item.slaStatus === 'below' ? 'bg-green-500/30 border border-green-400/30' : 'bg-white/10'
-                              ) : 'bg-white/10'
+                                item.slaStatus === 'above' ? 'bg-red-500/30 border border-red-400/40' : 
+                                item.slaStatus === 'below' ? 'bg-green-500/30 border border-green-400/40' : 'bg-white/20'
+                              ) : 'bg-white/20'
                             }`}>
                               <div className="flex items-center gap-1 mb-1">
                                 {item.slaBreached ? (
@@ -416,7 +417,7 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                                 ) : (
                                   <Minus className="h-3 w-3 opacity-50" />
                                 )}
-                                <span className="text-[9px] opacity-75">COMPLIANCE SLA</span>
+                                <span className="text-[9px] opacity-75">SLA</span>
                               </div>
                               <div className="text-sm font-bold">
                                 {item.slaBreached ? (
@@ -429,54 +430,55 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                             </div>
 
                             {/* Aging - Indicador de tempo */}
-                            <div className={`p-2 rounded-md ${
-                              item.aging > 10 ? 'bg-yellow-500/30 border border-yellow-400/30' : 'bg-white/10'
+                            <div className={`p-2 rounded-lg ${
+                              item.aging > 10 ? 'bg-yellow-500/30 border border-yellow-400/40' : 'bg-white/20'
                             }`}>
                               <div className="flex items-center gap-1 mb-1">
                                 <Clock className={`h-3 w-3 ${item.aging > 10 ? 'text-yellow-200' : 'opacity-50'}`} />
-                                <span className="text-[9px] opacity-75">TEMPO MÉDIO</span>
+                                <span className="text-[9px] opacity-75">AGING</span>
                               </div>
                               <div className="text-sm font-bold">{item.aging} dias</div>
-                              <div className="text-[8px] opacity-70">aging médio</div>
+                              <div className="text-[8px] opacity-70">tempo médio</div>
                             </div>
                           </div>
-                        </div>
 
-                        {/* Métricas secundárias */}
-                        <div className="grid grid-cols-2 gap-1 text-xs">
-                          <div className={`flex items-center justify-between gap-1 rounded-md px-2 py-1 ${
-                            item.volumeAtipico ? 'bg-orange-500/20' : 'bg-white/10'
-                          }`}>
-                            <div className="flex items-center gap-1">
-                              <TrendingUp className={`h-2.5 w-2.5 ${item.volumeAtipico ? 'text-orange-300' : 'opacity-50'}`} />
-                              <span className="text-[9px] opacity-75">VOL</span>
+                          
+                          {/* Métricas secundárias */}
+                          <div className="grid grid-cols-2 gap-2 text-xs">
+                            <div className={`flex items-center justify-between gap-1 rounded-md px-2 py-1.5 ${
+                              item.volumeAtipico ? 'bg-orange-500/30' : 'bg-white/20'
+                            }`}>
+                              <div className="flex items-center gap-1">
+                                <TrendingUp className={`h-2.5 w-2.5 ${item.volumeAtipico ? 'text-orange-300' : 'opacity-50'}`} />
+                                <span className="text-[9px] opacity-75">VOLUME</span>
+                              </div>
+                              <span className="text-[10px] font-medium">{item.reincidencia}</span>
                             </div>
-                            <span className="text-[10px] font-medium">{item.reincidencia}</span>
-                          </div>
 
-                          <div className={`flex items-center justify-between gap-1 rounded-md px-2 py-1 ${
-                            (() => {
-                              const totalAgencies = new Set(occurrences.filter(occ => occ.equipment === item.equipment && occ.segment === item.segment).map(occ => occ.agency)).size;
-                              const reincidenceRate = totalAgencies > 0 ? Math.round((item.reincidencia / totalAgencies) * 100) : 0;
-                              return reincidenceRate > 30 ? 'bg-purple-500/20' : 'bg-white/10';
-                            })()
-                          }`}>
-                            <div className="flex items-center gap-1">
-                              <RotateCcw className={`h-2.5 w-2.5 ${
-                                (() => {
-                                  const totalAgencies = new Set(occurrences.filter(occ => occ.equipment === item.equipment && occ.segment === item.segment).map(occ => occ.agency)).size;
-                                  const reincidenceRate = totalAgencies > 0 ? Math.round((item.reincidencia / totalAgencies) * 100) : 0;
-                                  return reincidenceRate > 30 ? 'text-purple-300' : 'opacity-50';
-                                })()
-                              }`} />
-                              <span className="text-[9px] opacity-75">REI</span>
-                            </div>
-                            <span className="text-[10px] font-medium">
-                              {(() => {
+                            <div className={`flex items-center justify-between gap-1 rounded-md px-2 py-1.5 ${
+                              (() => {
                                 const totalAgencies = new Set(occurrences.filter(occ => occ.equipment === item.equipment && occ.segment === item.segment).map(occ => occ.agency)).size;
-                                return totalAgencies > 0 ? Math.round((item.reincidencia / totalAgencies) * 100) : 0;
-                              })()}%
-                            </span>
+                                const reincidenceRate = totalAgencies > 0 ? Math.round((item.reincidencia / totalAgencies) * 100) : 0;
+                                return reincidenceRate > 30 ? 'bg-purple-500/30' : 'bg-white/20';
+                              })()
+                            }`}>
+                              <div className="flex items-center gap-1">
+                                <RotateCcw className={`h-2.5 w-2.5 ${
+                                  (() => {
+                                    const totalAgencies = new Set(occurrences.filter(occ => occ.equipment === item.equipment && occ.segment === item.segment).map(occ => occ.agency)).size;
+                                    const reincidenceRate = totalAgencies > 0 ? Math.round((item.reincidencia / totalAgencies) * 100) : 0;
+                                    return reincidenceRate > 30 ? 'text-purple-300' : 'opacity-50';
+                                  })()
+                                }`} />
+                                <span className="text-[9px] opacity-75">RECORRÊNCIA</span>
+                              </div>
+                              <span className="text-[10px] font-medium">
+                                {(() => {
+                                  const totalAgencies = new Set(occurrences.filter(occ => occ.equipment === item.equipment && occ.segment === item.segment).map(occ => occ.agency)).size;
+                                  return totalAgencies > 0 ? Math.round((item.reincidencia / totalAgencies) * 100) : 0;
+                                })()}%
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
