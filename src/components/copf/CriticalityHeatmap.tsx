@@ -409,21 +409,24 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                       <div className="absolute inset-0 border-2 border-white/0 rounded-xl transition-all duration-300 group-hover:border-white/30"></div>
                     </div>
                   </TooltipTrigger>
-                  <TooltipContent className="max-w-xs bg-background/95 backdrop-blur-sm border border-border/80">
-                    <div className="space-y-2">
-                      <div className="font-semibold">{item.equipment} ({item.segment})</div>
-                      <div className="space-y-1 text-sm">
-                        <div>Criticidade: <span className="font-semibold">{getCriticalityLabel(item.criticalityScore)} ({item.criticalityScore})</span></div>
-                        <div>Aging médio: <span className="font-semibold">{item.aging} dias</span></div>
-                        <div>Reincidência: <span className="font-semibold">{item.reincidencia} ocorrências</span></div>
-                        <div>Quantidade de Agências com SLA Vencido: <span className="font-semibold text-destructive">
-                          {item.agenciesWithSLABreach}
-                        </span></div>
-                        <div>Volume: <span className={`font-semibold ${item.volumeAtipico ? 'text-warning' : 'text-success'}`}>
-                          {item.volumeAtipico ? 'Atípico' : 'Normal'}
-                        </span></div>
-                      </div>
-                    </div>
+                   <TooltipContent className="max-w-xs bg-background/95 backdrop-blur-sm border border-border/80">
+                     <div className="space-y-2">
+                       <div className="font-semibold">{item.equipment} ({item.segment})</div>
+                       <div className="space-y-1 text-sm">
+                         <div>Criticidade: <span className="font-semibold">{getCriticalityLabel(item.criticalityScore)} ({item.criticalityScore})</span></div>
+                         <div>Aging médio: <span className="font-semibold">{item.aging} dias</span></div>
+                         <div>Reincidência: <span className="font-semibold">{item.reincidencia} ocorrências ({Math.round((item.reincidencia / item.occurrenceCount) * 100)}%)</span></div>
+                         <div>Quantidade de Agências com SLA Vencido: <span className="font-semibold text-destructive">
+                           {item.agenciesWithSLABreach} ({(() => {
+                             const totalAgencies = new Set(occurrences.filter(occ => occ.equipment === item.equipment && occ.segment === item.segment).map(occ => occ.agency)).size;
+                             return totalAgencies > 0 ? Math.round((item.agenciesWithSLABreach / totalAgencies) * 100) : 0;
+                           })()}%)
+                         </span></div>
+                         <div>Volume: <span className={`font-semibold ${item.volumeAtipico ? 'text-warning' : 'text-success'}`}>
+                           {item.volumeAtipico ? 'Atípico' : 'Normal'}
+                         </span></div>
+                       </div>
+                     </div>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
