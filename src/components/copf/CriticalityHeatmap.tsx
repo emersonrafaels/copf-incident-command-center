@@ -1,10 +1,11 @@
+
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { AlertTriangle, Clock, RotateCcw, TrendingUp, Info, Calculator, ArrowUp, ArrowDown, Minus, Activity, Filter } from "lucide-react";
+import { AlertTriangle, Clock, RotateCcw, TrendingUp, Info, Calculator, ArrowUp, ArrowDown, Minus, Activity } from "lucide-react";
 import { useFilters } from "@/contexts/FiltersContext";
 
 interface CriticalityData {
@@ -456,12 +457,6 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                 <h3 className="text-xl font-semibold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
                   Mapa de Criticidade por Equipamento
                 </h3>
-                {activeFiltersCount > 0 && (
-                  <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 flex items-center gap-1">
-                    <Filter className="h-3 w-3" />
-                    {activeFiltersCount} filtro{activeFiltersCount !== 1 ? 's' : ''} ativo{activeFiltersCount !== 1 ? 's' : ''}
-                  </Badge>
-                )}
               </div>
               <p className="text-sm text-muted-foreground">
                 Análise baseada em baselines específicos por tipo de equipamento
@@ -648,7 +643,7 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
         {criticalityData.length === 0 && (
           <div className="text-center py-16 text-muted-foreground">
             <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-muted/30 flex items-center justify-center">
-              {activeFiltersCount > 0 ? <Filter className="h-10 w-10 opacity-50" /> : <AlertTriangle className="h-10 w-10 opacity-50" />}
+              {activeFiltersCount > 0 ? <AlertTriangle className="h-10 w-10 opacity-50" /> : <AlertTriangle className="h-10 w-10 opacity-50" />}
             </div>
             <h4 className="font-semibold mb-2 text-lg">
               {activeFiltersCount > 0 ? 'Nenhum equipamento encontrado' : 'Sem dados suficientes'}
