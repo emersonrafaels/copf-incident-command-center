@@ -299,29 +299,29 @@ export function Dashboard() {
           title="Total de Ocorrências"
           value={filteredOccurrences.length.toString()}
           icon={<AlertTriangle className="h-4 w-4" />}
-          variant="default"
           change={`+${Math.round((filteredOccurrences.length / occurrences.length) * 100)}% do total`}
+          changeType="neutral"
         />
         <MetricCard
           title="Ocorrências Críticas"
           value={filteredOccurrences.filter(o => o.severity === 'critical').length.toString()}
           icon={<CheckCircle2 className="h-4 w-4" />}
-          variant="destructive"
           change={`${Math.round((filteredOccurrences.filter(o => o.severity === 'critical').length / filteredOccurrences.length) * 100)}% do filtrado`}
+          changeType="negative"
         />
         <MetricCard
           title="Em Andamento"
           value={filteredOccurrences.filter(o => o.status === 'pending').length.toString()}
           icon={<Clock className="h-4 w-4" />}
-          variant="warning"
           change={`${Math.round((filteredOccurrences.filter(o => o.status === 'pending').length / filteredOccurrences.length) * 100)}% do filtrado`}
+          changeType="neutral"
         />
         <MetricCard
           title="Resolvidas"
           value={filteredOccurrences.filter(o => o.status === 'resolved').length.toString()}
           icon={<TrendingUp className="h-4 w-4" />}
-          variant="success"
           change={`${Math.round((filteredOccurrences.filter(o => o.status === 'resolved').length / filteredOccurrences.length) * 100)}% do filtrado`}
+          changeType="positive"
         />
       </div>
 
