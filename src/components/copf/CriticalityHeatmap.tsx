@@ -24,12 +24,16 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
   // Calcular dados de criticidade por equipamento
   const calculateCriticalityData = (): CriticalityData[] => {
     const equipmentMap = new Map<string, any>();
+    const agencyMap = new Map<string, any>();
 
+    // Agrupar por equipamento e por agência
     occurrences.forEach(occ => {
-      const key = `${occ.equipment}-${occ.segment}`;
+      const equipmentKey = `${occ.equipment}-${occ.segment}`;
+      const agencyKey = occ.agency;
       
-      if (!equipmentMap.has(key)) {
-        equipmentMap.set(key, {
+      // Equipamentos
+      if (!equipmentMap.has(equipmentKey)) {
+        equipmentMap.set(equipmentKey, {
           equipment: occ.equipment,
           segment: occ.segment,
           occurrences: [],
@@ -37,10 +41,34 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
         });
       }
       
-      const data = equipmentMap.get(key);
-      data.occurrences.push(occ);
-      data.totalCount++;
+      const equipmentData = equipmentMap.get(equipmentKey);
+      equipmentData.occurrences.push(occ);
+      equipmentData.totalCount++;
+
+      // Agências
+      if (!agencyMap.has(agencyKey)) {
+        agencyMap.set(agencyKey, {
+          agency: agencyKey,
+          occurrences: []
+        });
+      }
+      
+      const agencyData = agencyMap.get(agencyKey);
+      agencyData.occurrences.push(occ);
     });
+
+    // Calcular percentual de agências com SLA estourado
+    let agenciesWithSLABreach = 0;
+    agencyMap.forEach((agencyData) => {
+      const hasSLABreach = agencyData.occurrences.some((occ: any) => {
+        const hours = (Date.now() - new Date(occ.createdAt).getTime()) / (1000 * 60 * 60);
+        const slaLimit = (occ.severity === 'critical' || occ.severity === 'high') ? 24 : 72;
+        return hours > slaLimit && occ.status !== 'resolved';
+      });
+      if (hasSLABreach) agenciesWithSLABreach++;
+    });
+
+    const percentualAgenciasSLA = agencyMap.size > 0 ? (agenciesWithSLABreach / agencyMap.size) * 100 : 0;
 
     const criticalityData: CriticalityData[] = [];
 
@@ -66,23 +94,37 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
       const recentOccurrences = occs.filter((occ: any) => new Date(occ.createdAt) >= thirtyDaysAgo);
       const reincidencia = recentOccurrences.length;
 
+      // Calcular percentual de ocorrências reincidentes (ocorrências que se repetem no mesmo equipamento)
+      const occurrencesByTypeCount = new Map<string, number>();
+      recentOccurrences.forEach((occ: any) => {
+        const type = occ.type || 'unknown';
+        occurrencesByTypeCount.set(type, (occurrencesByTypeCount.get(type) || 0) + 1);
+      });
+      
+      let reincidentOccurrences = 0;
+      occurrencesByTypeCount.forEach(count => {
+        if (count > 1) reincidentOccurrences += count;
+      });
+
+      const percentualReincidencia = recentOccurrences.length > 0 ? (reincidentOccurrences / recentOccurrences.length) * 100 : 0;
+
       // Volume atípico (mais que 5 ocorrências no período)
       const volumeAtipico = reincidencia > 5;
 
-      // Calcular score de criticidade (0-100)
+      // Calcular score de criticidade (0-100) baseado nos 4 fatores
       let criticalityScore = 0;
       
-      // Peso por aging (máximo 25 pontos)
-      criticalityScore += Math.min(avgAging * 2, 25);
+      // Peso por aging (máximo 20 pontos)
+      criticalityScore += Math.min(avgAging * 1.5, 20);
       
-      // Peso por SLA (25 pontos se quebrado)
-      if (slaBreached) criticalityScore += 25;
+      // Peso por volume de ocorrências (máximo 20 pontos)
+      criticalityScore += Math.min(reincidencia * 2, 20);
       
-      // Peso por reincidência (máximo 25 pontos)
-      criticalityScore += Math.min(reincidencia * 3, 25);
+      // Peso por percentual de reincidência (máximo 30 pontos)
+      criticalityScore += Math.min(percentualReincidencia * 0.3, 30);
       
-      // Peso por volume atípico (25 pontos)
-      if (volumeAtipico) criticalityScore += 25;
+      // Peso por percentual de agências com SLA estourado (máximo 30 pontos)
+      criticalityScore += Math.min(percentualAgenciasSLA * 0.3, 30);
 
       criticalityData.push({
         equipment,
@@ -137,7 +179,7 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
           <div className="bg-muted/50 p-4 rounded-lg">
             <h4 className="font-semibold mb-2">Fórmula de Criticidade</h4>
             <p className="text-sm text-muted-foreground">
-              Score = Aging (max 25) + SLA Quebrado (25) + Reincidência (max 25) + Volume Atípico (25)
+              Score = Aging (max 20) + Volume (max 20) + % Reincidência (max 30) + % Agências SLA Estourado (max 30)
             </p>
           </div>
           
@@ -146,20 +188,20 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
               <div className="border rounded-lg p-3">
                 <div className="flex items-center gap-2 mb-2">
                   <Clock className="h-4 w-4 text-primary" />
-                  <h5 className="font-medium">Aging (0-25 pontos)</h5>
+                  <h5 className="font-medium">Aging (0-20 pontos)</h5>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Média de dias desde a criação das ocorrências abertas. Máximo de 25 pontos ({'>'}=12.5 dias).
+                  Média de dias desde a criação das ocorrências abertas. Máximo de 20 pontos ({'>'}=13.3 dias).
                 </p>
               </div>
               
               <div className="border rounded-lg p-3">
                 <div className="flex items-center gap-2 mb-2">
-                  <AlertTriangle className="h-4 w-4 text-warning" />
-                  <h5 className="font-medium">SLA Quebrado (0-25 pontos)</h5>
+                  <TrendingUp className="h-4 w-4 text-accent" />
+                  <h5 className="font-medium">Volume de Ocorrências (0-20 pontos)</h5>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  25 pontos se houver ocorrência crítica/alta {'>'}24h ou média/baixa {'>'}72h sem resolução.
+                  Número de ocorrências nos últimos 30 dias × 2. Máximo de 20 pontos ({'>'}=10 ocorrências).
                 </p>
               </div>
             </div>
@@ -168,20 +210,20 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
               <div className="border rounded-lg p-3">
                 <div className="flex items-center gap-2 mb-2">
                   <RotateCcw className="h-4 w-4 text-destructive" />
-                  <h5 className="font-medium">Reincidência (0-25 pontos)</h5>
+                  <h5 className="font-medium">% Reincidência (0-30 pontos)</h5>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Número de ocorrências nos últimos 30 dias × 3. Máximo de 25 pontos ({'>'}=8 ocorrências).
+                  Percentual de ocorrências reincidentes (mesmo tipo) × 0.3. Máximo de 30 pontos (100% reincidência).
                 </p>
               </div>
               
               <div className="border rounded-lg p-3">
                 <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp className="h-4 w-4 text-success" />
-                  <h5 className="font-medium">Volume Atípico (0-25 pontos)</h5>
+                  <AlertTriangle className="h-4 w-4 text-warning" />
+                  <h5 className="font-medium">% Agências SLA Estourado (0-30 pontos)</h5>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  25 pontos se houver mais de 5 ocorrências nos últimos 30 dias.
+                  Percentual de agências com SLA estourado × 0.3. Máximo de 30 pontos (100% das agências).
                 </p>
               </div>
             </div>
@@ -233,7 +275,7 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
             <div>
               <h3 className="text-lg font-semibold">Mapa de Criticidade por Equipamento</h3>
               <p className="text-sm text-muted-foreground">
-                Análise baseada em aging, SLA, reincidência e volume atípico
+                Análise baseada em aging, volume, percentual de reincidência e percentual de agências com SLA estourado
               </p>
             </div>
           </div>
