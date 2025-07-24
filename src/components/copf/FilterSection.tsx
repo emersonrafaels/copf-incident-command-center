@@ -481,8 +481,10 @@ export function FilterSection({ className }: FilterSectionProps) {
                         <CommandList>
                           <CommandGroup>
                             {[
-                              { value: 'convencional', label: 'Convencional' },
-                              { value: 'terceirizada', label: 'Ponto Terceirizado' }
+                              { value: 'convencional', label: 'Agência Convencional' },
+                              { value: 'terceirizada', label: 'Agência Terceirizada' },
+                              { value: 'pab', label: 'PAB' },
+                              { value: 'pae', label: 'PAE' }
                             ].map(tipo => (
                               <CommandItem key={tipo.value} onSelect={() => {
                                 const isSelected = tipoAgenciaFilter.includes(tipo.value);
