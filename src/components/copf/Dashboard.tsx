@@ -325,6 +325,12 @@ export function Dashboard() {
         />
       </div>
 
+      {/* Mapa de Criticidade */}
+      <div className="space-y-6">
+        <h2 className="text-responsive-2xl font-bold text-foreground">Mapa de Criticidade por Equipamento</h2>
+        <CriticalityHeatmap occurrences={filteredOccurrences} />
+      </div>
+
       {/* Gráficos Interativos */}
       <div className="space-y-6">
         <h2 className="text-responsive-2xl font-bold text-foreground">Análise de Dados</h2>
@@ -335,12 +341,6 @@ export function Dashboard() {
           equipmentData={equipmentData}
           occurrences={filteredOccurrences}
         />
-      </div>
-
-      {/* Mapa de Criticidade */}
-      <div className="space-y-6">
-        <h2 className="text-responsive-2xl font-bold text-foreground">Mapa de Criticidade por Equipamento</h2>
-        <CriticalityHeatmap occurrences={filteredOccurrences} />
       </div>
 
       {/* Lista de Ocorrências Recentes */}
