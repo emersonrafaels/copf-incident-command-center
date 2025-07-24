@@ -48,7 +48,7 @@ export function Dashboard() {
   const [overrideFilter, setOverrideFilter] = useState<boolean>(false);
   const [vendorFilter, setVendorFilter] = useState<string>('all');
   const [transportadoraFilter, setTransportadoraFilter] = useState<string>('all');
-  const [agenciaFilter, setAgenciaFilter] = useState<string>('');
+  const [agenciaFilter, setAgenciaFilter] = useState<string[]>([]);
   const [ufFilter, setUfFilter] = useState<string[]>([]);
   const [tipoAgenciaFilter, setTipoAgenciaFilter] = useState<string>('all');
   const [pontoVipFilter, setPontoVipFilter] = useState<string>('all');
@@ -129,7 +129,10 @@ export function Dashboard() {
     if (vendorFilter !== 'all' && occurrence.vendor !== vendorFilter) return false;
     
     // Filtro de agência por número
-    if (agenciaFilter && !occurrence.agency.includes(agenciaFilter)) return false;
+    if (agenciaFilter.length > 0) {
+      const agencyNumber = occurrence.agency.match(/\d+/)?.[0] || '';
+      if (!agenciaFilter.includes(agencyNumber)) return false;
+    }
     
     // Filtro de UF
     if (ufFilter.length > 0) {
