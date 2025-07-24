@@ -390,7 +390,7 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div 
-                    className={`group relative p-5 rounded-2xl border-2 cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-xl animate-fade-in ${getCriticalityColor(item.criticalityScore)} text-white overflow-hidden backdrop-blur-sm`}
+                    className="group relative p-5 rounded-2xl border-2 cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-xl animate-fade-in border-border/30 bg-card text-foreground overflow-hidden backdrop-blur-sm"
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
                     {/* Background patterns */}
