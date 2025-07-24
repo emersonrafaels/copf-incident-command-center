@@ -123,27 +123,67 @@ export function useDashboardData() {
       }
     ]
 
-    // Simular chegada de novas ocorrências
-    const additionalOccurrences = Array.from({ length: 15 }, (_, i) => {
-      const segment: 'AA' | 'AB' = Math.random() > 0.5 ? 'AA' : 'AB';
-      const equipmentList = equipmentsBySegment[segment];
+    // Gerar ocorrências do segmento AA (1251 por dia)
+    const aaOccurrences = Array.from({ length: 1251 }, (_, i) => {
+      const equipmentList = equipmentsBySegment.AA;
       const equipment = equipmentList[Math.floor(Math.random() * equipmentList.length)];
       const agencyNum = getUniqueAgencyNumber();
       
       return {
-        id: `COPF-2024-${String(i + 6).padStart(3, '0')}`,
-        agency: `AG${agencyNum} - ${['Centro', 'Paulista', 'Vila Madalena', 'Pinheiros', 'Moema', 'Itaim'][Math.floor(Math.random() * 6)]} (São Paulo)`,
-        segment,
+        id: `COPF-2024-AA-${String(i + 1).padStart(4, '0')}`,
+        agency: `AG${agencyNum} - ${['Centro', 'Paulista', 'Vila Madalena', 'Pinheiros', 'Moema', 'Itaim', 'Brooklin', 'Vila Olímpia', 'Jardins', 'Liberdade'][Math.floor(Math.random() * 10)]} (São Paulo)`,
+        segment: 'AA' as const,
         equipment,
-        serialNumber: `${segment}${String(i + 6).padStart(3, '0')}-SP-${agencyNum}`,
-        description: ['Erro de hardware', 'Falha de conectividade', 'Problema de temperatura', 'Defeito no leitor'][Math.floor(Math.random() * 4)],
+        serialNumber: `AA${String(i + 1).padStart(4, '0')}-SP-${agencyNum}`,
+        description: [
+          'ATM não está dispensando cédulas - erro de hardware na gaveta',
+          'ATM não aceita depósitos - problemas no mecanismo de captura',
+          'Erro de conectividade com o servidor central',
+          'Cassete com defeito no sensor de notas',
+          'Falha na autenticação biométrica',
+          'Problema no leitor de cartão magnético'
+        ][Math.floor(Math.random() * 6)],
         severity: ['critical', 'high', 'medium', 'low'][Math.floor(Math.random() * 4)] as ('critical' | 'high' | 'medium' | 'low'),
         status: ['a_iniciar', 'em_atuacao', 'encerrada', 'cancelada'][Math.floor(Math.random() * 4)] as ('a_iniciar' | 'em_atuacao' | 'encerrada' | 'cancelada'),
         createdAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
-        assignedTo: ['João Silva', 'Maria Santos', 'Carlos Oliveira', 'Ana Costa', 'Roberto Lima'][Math.floor(Math.random() * 5)],
-        vendor: ['Diebold Nixdorf', 'NCR Corporation', 'Dell Technologies', 'Gertec', 'Bematech'][Math.floor(Math.random() * 5)]
+        assignedTo: ['João Silva - NOC', 'Maria Santos - Facilities', 'Carlos Oliveira - Redes', 'Ana Costa - POS', 'Roberto Lima - Suporte'][Math.floor(Math.random() * 5)],
+        vendor: ['Diebold Nixdorf', 'NCR Corporation', 'Itautec'][Math.floor(Math.random() * 3)]
       }
-    })
+    });
+
+    // Gerar ocorrências do segmento AB (266 por dia)
+    const abOccurrences = Array.from({ length: 266 }, (_, i) => {
+      const equipmentList = equipmentsBySegment.AB;
+      const equipment = equipmentList[Math.floor(Math.random() * equipmentList.length)];
+      const agencyNum = getUniqueAgencyNumber();
+      
+      return {
+        id: `COPF-2024-AB-${String(i + 1).padStart(4, '0')}`,
+        agency: `AG${agencyNum} - ${['Centro', 'Paulista', 'Vila Madalena', 'Pinheiros', 'Moema', 'Itaim', 'Brooklin', 'Vila Olímpia', 'Jardins', 'Liberdade'][Math.floor(Math.random() * 10)]} (São Paulo)`,
+        segment: 'AB' as const,
+        equipment,
+        serialNumber: `AB${String(i + 1).padStart(4, '0')}-SP-${agencyNum}`,
+        description: [
+          'Impressora com papel atolado constantemente',
+          'Perda total de conectividade - link primário inoperante', 
+          'Terminal não reconhece cartões chip',
+          'Monitor com falha na exibição',
+          'Teclado com teclas não responsivas',
+          'Servidor com alta latência',
+          'Scanner não consegue ler documentos',
+          'Leitor biométrico não funciona',
+          'Televisão sem sinal',
+          'Classificadora com erro de contagem'
+        ][Math.floor(Math.random() * 10)],
+        severity: ['critical', 'high', 'medium', 'low'][Math.floor(Math.random() * 4)] as ('critical' | 'high' | 'medium' | 'low'),
+        status: ['a_iniciar', 'em_atuacao', 'encerrada', 'cancelada'][Math.floor(Math.random() * 4)] as ('a_iniciar' | 'em_atuacao' | 'encerrada' | 'cancelada'),
+        createdAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
+        assignedTo: ['João Silva - NOC', 'Maria Santos - Facilities', 'Carlos Oliveira - Redes', 'Ana Costa - POS', 'Roberto Lima - Suporte'][Math.floor(Math.random() * 5)],
+        vendor: ['Dell Technologies', 'HP', 'Lenovo', 'Gertec', 'Bematech', 'Epson', 'Canon'][Math.floor(Math.random() * 7)]
+      }
+    });
+
+    const additionalOccurrences = [...aaOccurrences, ...abOccurrences];
 
     return [...mockOccurrences, ...additionalOccurrences]
   }
