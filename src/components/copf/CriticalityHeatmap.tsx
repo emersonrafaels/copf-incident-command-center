@@ -511,7 +511,7 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                       <div className="flex justify-between">
                         <span>Volume vs baseline:</span>
                         <span className={`font-semibold ${item.volumeAtipico ? 'text-warning' : 'text-success'}`}>
-                          {item.percentualVolumeBaseline}% ({item.volumeAtipico ? 'Atípico' : 'Normal'})
+                          {item.percentualVolumeBaseline}% <span className="mx-1">({item.volumeAtipico ? 'Atípico' : 'Normal'})</span>
                         </span>
                       </div>
                       <div className="flex justify-between">
