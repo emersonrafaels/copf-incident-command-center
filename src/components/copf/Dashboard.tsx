@@ -539,10 +539,12 @@ export function Dashboard() {
               description="Tempo médio de resolução" 
             />
             <MetricCard 
-              title="Total de Agências" 
-              value={2360} 
-              description="2360 agências no total" 
+              title="Agências Afetadas" 
+              value={20} 
+              change="2 novas esta semana" 
+              changeType="neutral" 
               icon={<MapPin className="h-5 w-5" />} 
+              description="De 2360 totais" 
             />
           </div>
         )}
