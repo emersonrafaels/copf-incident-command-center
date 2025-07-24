@@ -4,7 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { AlertTriangle, Clock, RotateCcw, TrendingUp, Info, Calculator, ArrowUp, ArrowDown, Minus, Activity } from "lucide-react";
+import { AlertTriangle, Clock, RotateCcw, TrendingUp, Info, Calculator, ArrowUp, ArrowDown, Minus, Activity, Filter } from "lucide-react";
+import { useFilters } from "@/contexts/FiltersContext";
 
 interface CriticalityData {
   equipment: string;
@@ -40,13 +41,113 @@ const EQUIPMENT_BASELINES = {
 };
 
 export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
+  const filters = useFilters();
+
+  // Aplicar filtros às ocorrências antes do processamento
+  const filteredOccurrences = useMemo(() => {
+    return occurrences.filter(occ => {
+      // Filtros de Localização
+      if (filters.agenciaFilter.length > 0 && !filters.agenciaFilter.includes(occ.agency)) return false;
+      if (filters.ufFilter.length > 0 && !filters.ufFilter.includes(occ.uf)) return false;
+      if (filters.tipoAgenciaFilter.length > 0 && !filters.tipoAgenciaFilter.includes(occ.tipoAgencia)) return false;
+
+      // Filtros de Segmento/Equipamento
+      if (filters.segmentFilter !== 'all' && occ.segment !== filters.segmentFilter) return false;
+      if (filters.equipmentFilter !== 'all' && occ.equipment !== filters.equipmentFilter) return false;
+      if (filters.segmentFilterMulti.length > 0 && !filters.segmentFilterMulti.includes(occ.segment)) return false;
+      if (filters.equipmentFilterMulti.length > 0 && !filters.equipmentFilterMulti.includes(occ.equipment)) return false;
+
+      // Filtros de Status
+      if (filters.statusFilter !== 'all' && occ.status !== filters.statusFilter) return false;
+      if (filters.statusFilterMulti.length > 0 && !filters.statusFilterMulti.includes(occ.status)) return false;
+
+      // Filtros de Fornecedor
+      if (filters.vendorFilter !== 'all' && occ.vendor !== filters.vendorFilter) return false;
+      if (filters.vendorFilterMulti.length > 0 && !filters.vendorFilterMulti.includes(occ.vendor)) return false;
+      if (filters.transportadoraFilter !== 'all' && occ.transportadora !== filters.transportadoraFilter) return false;
+
+      // Filtros de Serial Number
+      if (filters.serialNumberFilter && !occ.serialNumber?.toLowerCase().includes(filters.serialNumberFilter.toLowerCase())) return false;
+
+      // Filtros Especiais
+      if (filters.overrideFilter) {
+        const hours = (Date.now() - new Date(occ.createdAt).getTime()) / (1000 * 60 * 60);
+        const slaLimit = (occ.severity === 'critical' || occ.severity === 'high') ? 24 : 72;
+        if (!(hours > slaLimit && occ.status !== 'encerrada')) return false;
+      }
+
+      if (filters.reincidentFilter) {
+        // Lógica para identificar ocorrências reincidentes
+        const recentOccurrences = occurrences.filter(o => 
+          o.equipment === occ.equipment && 
+          o.agency === occ.agency &&
+          Math.abs(new Date(o.createdAt).getTime() - new Date(occ.createdAt).getTime()) <= (30 * 24 * 60 * 60 * 1000)
+        );
+        if (recentOccurrences.length <= 1) return false;
+      }
+
+      if (filters.vendorPriorityFilter && (!occ.priorizado || !occ.vendor)) return false;
+
+      // Filtros de Período
+      if (filters.filterPeriod && filters.filterPeriod !== 'all') {
+        const occDate = new Date(occ.createdAt);
+        const now = new Date();
+        let daysLimit = 30;
+
+        switch (filters.filterPeriod) {
+          case '7d': daysLimit = 7; break;
+          case '15d': daysLimit = 15; break;
+          case '30d': daysLimit = 30; break;
+          case '60d': daysLimit = 60; break;
+          case '90d': daysLimit = 90; break;
+        }
+
+        const daysDiff = (now.getTime() - occDate.getTime()) / (1000 * 60 * 60 * 24);
+        if (daysDiff > daysLimit) return false;
+      }
+
+      // Filtro de Data Customizada
+      if (filters.customDateRange.from || filters.customDateRange.to) {
+        const occDate = new Date(occ.createdAt);
+        if (filters.customDateRange.from && occDate < filters.customDateRange.from) return false;
+        if (filters.customDateRange.to && occDate > filters.customDateRange.to) return false;
+      }
+
+      return true;
+    });
+  }, [occurrences, filters]);
+
+  // Contar filtros ativos
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (filters.agenciaFilter.length > 0) count++;
+    if (filters.ufFilter.length > 0) count++;
+    if (filters.tipoAgenciaFilter.length > 0) count++;
+    if (filters.segmentFilter !== 'all') count++;
+    if (filters.equipmentFilter !== 'all') count++;
+    if (filters.segmentFilterMulti.length > 0) count++;
+    if (filters.equipmentFilterMulti.length > 0) count++;
+    if (filters.statusFilter !== 'all') count++;
+    if (filters.statusFilterMulti.length > 0) count++;
+    if (filters.vendorFilter !== 'all') count++;
+    if (filters.vendorFilterMulti.length > 0) count++;
+    if (filters.transportadoraFilter !== 'all') count++;
+    if (filters.serialNumberFilter) count++;
+    if (filters.overrideFilter) count++;
+    if (filters.reincidentFilter) count++;
+    if (filters.vendorPriorityFilter) count++;
+    if (filters.filterPeriod && filters.filterPeriod !== 'all') count++;
+    if (filters.customDateRange.from || filters.customDateRange.to) count++;
+    return count;
+  }, [filters]);
+
   // Calcular dados de criticidade por equipamento - Memoizado para performance
   const criticalityData = useMemo((): CriticalityData[] => {
     const equipmentMap = new Map<string, any>();
     const agencyMap = new Map<string, any>();
 
-    // Agrupar por equipamento e por agência
-    occurrences.forEach(occ => {
+    // Agrupar por equipamento e por agência usando dados filtrados
+    filteredOccurrences.forEach(occ => {
       const equipmentKey = `${occ.equipment}-${occ.segment}`;
       const agencyKey = occ.agency;
       
@@ -208,7 +309,7 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
     });
 
     return criticalityData.sort((a, b) => b.criticalityScore - a.criticalityScore);
-  }, [occurrences]);
+  }, [filteredOccurrences]);
 
   const getCriticalityColor = (score: number) => {
     if (score >= 80) return 'bg-gradient-to-br from-red-600/90 via-red-700/95 to-red-800/95 border-red-500/30 shadow-xl shadow-red-500/20';
@@ -351,11 +452,24 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
               <AlertTriangle className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h3 className="text-xl font-semibold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
-                Mapa de Criticidade por Equipamento
-              </h3>
-              <p className="text-sm text-muted-foreground mt-1">
+              <div className="flex items-center gap-3 mb-1">
+                <h3 className="text-xl font-semibold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
+                  Mapa de Criticidade por Equipamento
+                </h3>
+                {activeFiltersCount > 0 && (
+                  <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 flex items-center gap-1">
+                    <Filter className="h-3 w-3" />
+                    {activeFiltersCount} filtro{activeFiltersCount !== 1 ? 's' : ''} ativo{activeFiltersCount !== 1 ? 's' : ''}
+                  </Badge>
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground">
                 Análise baseada em baselines específicos por tipo de equipamento
+                {filteredOccurrences.length !== occurrences.length && (
+                  <span className="ml-2 text-primary font-medium">
+                    ({filteredOccurrences.length} de {occurrences.length} ocorrências)
+                  </span>
+                )}
               </p>
             </div>
           </div>
@@ -534,12 +648,27 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
         {criticalityData.length === 0 && (
           <div className="text-center py-16 text-muted-foreground">
             <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-muted/30 flex items-center justify-center">
-              <AlertTriangle className="h-10 w-10 opacity-50" />
+              {activeFiltersCount > 0 ? <Filter className="h-10 w-10 opacity-50" /> : <AlertTriangle className="h-10 w-10 opacity-50" />}
             </div>
-            <h4 className="font-semibold mb-2 text-lg">Sem dados suficientes</h4>
+            <h4 className="font-semibold mb-2 text-lg">
+              {activeFiltersCount > 0 ? 'Nenhum equipamento encontrado' : 'Sem dados suficientes'}
+            </h4>
             <p className="text-sm max-w-md mx-auto">
-              Aguardando dados de ocorrências para gerar a análise de criticidade por equipamento
+              {activeFiltersCount > 0 
+                ? 'Os filtros aplicados não retornaram equipamentos. Tente ajustar os critérios de filtragem.'
+                : 'Aguardando dados de ocorrências para gerar a análise de criticidade por equipamento'
+              }
             </p>
+            {activeFiltersCount > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => filters.clearAllFilters()}
+                className="mt-4"
+              >
+                Limpar Filtros
+              </Button>
+            )}
           </div>
         )}
       </CardContent>
