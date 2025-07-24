@@ -206,11 +206,11 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
   }, [occurrences]);
 
   const getCriticalityColor = (score: number) => {
-    if (score >= 80) return 'bg-gradient-to-br from-destructive via-red-600 to-red-700 border-destructive/20';
-    if (score >= 60) return 'bg-gradient-to-br from-warning via-orange-500 to-orange-600 border-warning/20';
-    if (score >= 40) return 'bg-gradient-to-br from-yellow-500 via-yellow-600 to-amber-600 border-yellow-500/20';
-    if (score >= 20) return 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 border-blue-500/20';
-    return 'bg-gradient-to-br from-success via-emerald-600 to-emerald-700 border-success/20';
+    if (score >= 80) return 'bg-gradient-to-br from-red-600/90 via-red-700/95 to-red-800/95 border-red-500/30 shadow-xl shadow-red-500/20';
+    if (score >= 60) return 'bg-gradient-to-br from-orange-500/90 via-orange-600/95 to-orange-700/95 border-orange-400/30 shadow-xl shadow-orange-500/20';
+    if (score >= 40) return 'bg-gradient-to-br from-amber-500/90 via-yellow-600/95 to-yellow-700/95 border-yellow-400/30 shadow-xl shadow-yellow-500/20';
+    if (score >= 20) return 'bg-gradient-to-br from-blue-500/90 via-blue-600/95 to-blue-700/95 border-blue-400/30 shadow-xl shadow-blue-500/20';
+    return 'bg-gradient-to-br from-emerald-500/90 via-emerald-600/95 to-emerald-700/95 border-emerald-400/30 shadow-xl shadow-emerald-500/20';
   };
 
   const getCriticalityLabel = (score: number) => {
@@ -427,16 +427,16 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                         
                         {/* Métricas principais em grid 2x2 */}
                         <div className="grid grid-cols-2 gap-3">
-                          {/* Aging vs Baseline */}
+                          {/* Aging Médio */}
                           <div className="p-3 rounded-xl border border-white/20 bg-white/5">
                             <div className="flex items-center gap-1 mb-2">
                               <Clock className="h-3 w-3" />
                               <span className="text-xs opacity-80">AGING</span>
                             </div>
                             <div className="text-sm font-bold">
-                              {item.agingVariation > 0 ? '+' : ''}{item.agingVariation}%
+                              {item.aging}d
                             </div>
-                            <div className="text-xs opacity-70">vs {item.agingBaseline}d</div>
+                            <div className="text-xs opacity-70">média atual</div>
                           </div>
 
                           {/* Volume vs Baseline */}
