@@ -1,0 +1,768 @@
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Filter, RefreshCw, ChevronDown, ChevronUp, Check, Truck } from "lucide-react";
+import { useFilters } from "@/contexts/FiltersContext";
+import { useDashboardData } from "@/hooks/useDashboardData";
+import { cn } from "@/lib/utils";
+
+interface FilterSectionProps {
+  className?: string;
+}
+
+export function FilterSection({ className }: FilterSectionProps) {
+  const [isSpecialFiltersOpen, setIsSpecialFiltersOpen] = useState(true);
+  const { occurrences } = useDashboardData();
+  const {
+    agenciaFilter,
+    ufFilter,
+    tipoAgenciaFilter,
+    pontoVipFilter,
+    segmentFilterMulti,
+    equipmentFilterMulti,
+    statusFilterMulti,
+    vendorFilterMulti,
+    transportadoraFilterMulti,
+    serialNumberFilter,
+    overrideFilter,
+    vendorPriorityFilter,
+    hasActiveFilters,
+    updateFilter,
+    clearAllFilters
+  } = useFilters();
+
+  // Mapeamento de equipamentos por segmento
+  const equipmentsBySegment = {
+    AA: ['ATM Saque', 'ATM Depósito', 'Cassete'],
+    AB: ['Notebook', 'Desktop', 'Leitor de Cheques/documentos', 'Leitor biométrico', 'PIN PAD', 'Scanner de Cheque', 'Impressora', 'Impressora térmica', 'Impressora multifuncional', 'Monitor LCD/LED', 'Teclado', 'Servidor', 'Televisão', 'Senheiro', 'TCR', 'Classificadora', 'Fragmentadora de Papel']
+  };
+
+  // Obter equipamentos únicos baseado no segmento selecionado
+  const getFilteredEquipments = () => {
+    if (segmentFilterMulti.length === 0) {
+      return Array.from(new Set(occurrences.map(o => o.equipment))).sort();
+    } else {
+      const filteredEquipments = segmentFilterMulti.flatMap(segment => 
+        equipmentsBySegment[segment as 'AA' | 'AB'] || []
+      );
+      return Array.from(new Set(filteredEquipments)).sort();
+    }
+  };
+
+  const uniqueEquipments = getFilteredEquipments();
+  const uniqueVendors = Array.from(new Set(occurrences.map(o => o.vendor))).sort();
+
+  // Dados de transportadoras e seus fornecedores
+  const transportadoraFornecedores = {
+    'Express Logística': ['Fornecedor A', 'Fornecedor B', 'Fornecedor C'],
+    'TechTransporte': ['Fornecedor D', 'Fornecedor E'],
+    'LogiCorp': ['Fornecedor F', 'Fornecedor G', 'Fornecedor H']
+  };
+  const uniqueTransportadoras = Object.keys(transportadoraFornecedores);
+
+  // Filtrar fornecedores baseado na transportadora selecionada
+  const getFilteredVendors = () => {
+    if (!tipoAgenciaFilter.includes('terceirizada')) return uniqueVendors;
+    if (transportadoraFilterMulti.length === 0) return uniqueVendors;
+    const filteredVendors = transportadoraFilterMulti.flatMap(t => transportadoraFornecedores[t] || []);
+    return filteredVendors.length > 0 ? filteredVendors : uniqueVendors;
+  };
+  const availableVendors = getFilteredVendors();
+
+  // Gerar agências únicas baseadas nas ocorrências
+  const uniqueAgencies = Array.from(new Set(occurrences.map(o => o.agency.match(/\d+/)?.[0] || ''))).filter(Boolean).sort();
+
+  // Estados brasileiros
+  const estadosBrasil = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'];
+
+  // Filtrar UFs baseadas nas agências selecionadas
+  const availableUFs = agenciaFilter.length === 0 ? estadosBrasil : Array.from(new Set(agenciaFilter.map(agencyNumber => {
+    // Lógica simplificada: agências 0-999 = SP, 1000-1999 = RJ, etc.
+    const num = parseInt(agencyNumber);
+    if (num <= 999) return 'SP';
+    if (num <= 1999) return 'RJ';
+    if (num <= 2999) return 'MG';
+    if (num <= 3999) return 'RS';
+    return 'PR';
+  })));
+
+  // Verificar tipo de agência atual (para mostrar filtros condicionais)
+  const tipoAgenciaAtual = tipoAgenciaFilter.includes('terceirizada') ? 'terceirizada' : tipoAgenciaFilter.includes('convencional') ? 'convencional' : 'all';
+
+  return (
+    <Card className={cn("animate-fade-in border-border/50 bg-gradient-to-r from-card to-muted/20", className)}>
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <Filter className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold">Filtros</h3>
+              {hasActiveFilters && (
+                <p className="text-sm text-muted-foreground">
+                  Filtros ativos aplicados
+                </p>
+              )}
+            </div>
+          </div>
+          {hasActiveFilters && (
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20">
+                {Object.values({
+                  agencia: agenciaFilter.length > 0,
+                  uf: ufFilter.length > 0,
+                  tipoAgencia: tipoAgenciaFilter.length > 0,
+                  pontoVip: pontoVipFilter.length > 0,
+                  segmento: segmentFilterMulti.length > 0,
+                  equipamento: equipmentFilterMulti.length > 0,
+                  status: statusFilterMulti.length > 0,
+                  fornecedor: vendorFilterMulti.length > 0,
+                  transportadora: transportadoraFilterMulti.length > 0,
+                  serie: serialNumberFilter !== '',
+                  vencidas: overrideFilter,
+                  priorizado: vendorPriorityFilter
+                }).filter(Boolean).length} filtro{Object.values({
+                  agencia: agenciaFilter.length > 0,
+                  uf: ufFilter.length > 0,
+                  tipoAgencia: tipoAgenciaFilter.length > 0,
+                  pontoVip: pontoVipFilter.length > 0,
+                  segmento: segmentFilterMulti.length > 0,
+                  equipamento: equipmentFilterMulti.length > 0,
+                  status: statusFilterMulti.length > 0,
+                  fornecedor: vendorFilterMulti.length > 0,
+                  transportadora: transportadoraFilterMulti.length > 0,
+                  serie: serialNumberFilter !== '',
+                  vencidas: overrideFilter,
+                  priorizado: vendorPriorityFilter
+                }).filter(Boolean).length !== 1 ? 's' : ''} ativo{Object.values({
+                  agencia: agenciaFilter.length > 0,
+                  uf: ufFilter.length > 0,
+                  tipoAgencia: tipoAgenciaFilter.length > 0,
+                  pontoVip: pontoVipFilter.length > 0,
+                  segmento: segmentFilterMulti.length > 0,
+                  equipamento: equipmentFilterMulti.length > 0,
+                  status: statusFilterMulti.length > 0,
+                  fornecedor: vendorFilterMulti.length > 0,
+                  transportadora: transportadoraFilterMulti.length > 0,
+                  serie: serialNumberFilter !== '',
+                  vencidas: overrideFilter,
+                  priorizado: vendorPriorityFilter
+                }).filter(Boolean).length !== 1 ? 's' : ''}
+              </Badge>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={clearAllFilters}
+                className="hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20 transition-colors"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Limpar Filtros
+              </Button>
+            </div>
+          )}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-8">
+        {/* Filtros de Localização */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 pb-2 border-b border-border/50">
+            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+              <div className="w-2 h-2 rounded-full bg-primary"></div>
+            </div>
+            <h4 className="text-base font-semibold text-foreground">Localização</h4>
+          </div>
+          <div className="responsive-grid responsive-grid-4">
+            {/* Agência */}
+            <div className="group space-y-3">
+              <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                Agência
+              </Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                    {agenciaFilter.length > 0 ? (
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                          {agenciaFilter.length}
+                        </Badge>
+                        <span className="text-sm">
+                          {agenciaFilter.length === 1 ? `Agência ${agenciaFilter[0]}` : `${agenciaFilter.length} agências`}
+                        </span>
+                      </div>
+                    ) : "Todas as agências"}
+                    <div className="w-4 h-4 opacity-50">⌄</div>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                  <Command>
+                    <CommandInput placeholder="Buscar agência..." className="h-9" />
+                    <CommandEmpty>Nenhuma agência encontrada.</CommandEmpty>
+                    <CommandList>
+                      <CommandGroup className="max-h-64 overflow-y-auto">
+                        {uniqueAgencies.map(agency => (
+                          <CommandItem key={agency} onSelect={() => {
+                            const isSelected = agenciaFilter.includes(agency);
+                            if (isSelected) {
+                              updateFilter('agenciaFilter', agenciaFilter.filter(a => a !== agency));
+                            } else {
+                              updateFilter('agenciaFilter', [...agenciaFilter, agency]);
+                            }
+                          }}>
+                            <Check className={cn("mr-2 h-4 w-4", agenciaFilter.includes(agency) ? "opacity-100" : "opacity-0")} />
+                            Agência {agency}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* UF */}
+            <div className="group space-y-3">
+              <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                Estado (UF)
+                {agenciaFilter.length > 0 && (
+                  <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                    Filtrado por agência
+                  </Badge>
+                )}
+              </Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                    {ufFilter.length > 0 ? (
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                          {ufFilter.length}
+                        </Badge>
+                        <span className="text-sm">
+                          {ufFilter.length === 1 ? ufFilter[0] : `${ufFilter.length} estados`}
+                        </span>
+                      </div>
+                    ) : "Todos os estados"}
+                    <div className="w-4 h-4 opacity-50">⌄</div>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                  <Command>
+                    <CommandInput placeholder="Buscar estado..." className="h-9" />
+                    <CommandEmpty>Nenhum estado encontrado.</CommandEmpty>
+                    <CommandList>
+                      <CommandGroup className="max-h-64 overflow-y-auto">
+                        {availableUFs.map(uf => (
+                          <CommandItem key={uf} onSelect={() => {
+                            const isSelected = ufFilter.includes(uf);
+                            if (isSelected) {
+                              updateFilter('ufFilter', ufFilter.filter(u => u !== uf));
+                            } else {
+                              updateFilter('ufFilter', [...ufFilter, uf]);
+                            }
+                          }}>
+                            <Check className={cn("mr-2 h-4 w-4", ufFilter.includes(uf) ? "opacity-100" : "opacity-0")} />
+                            {uf}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Tipo de Agência */}
+            <div className="group space-y-3">
+              <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                Tipo de Agência
+              </Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                    {tipoAgenciaFilter.length > 0 ? (
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                          {tipoAgenciaFilter.length}
+                        </Badge>
+                        <span className="text-sm">
+                          {tipoAgenciaFilter.length === 1 ? tipoAgenciaFilter[0] : `${tipoAgenciaFilter.length} tipos`}
+                        </span>
+                      </div>
+                    ) : "Todos os tipos"}
+                    <div className="w-4 h-4 opacity-50">⌄</div>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                  <Command>
+                    <CommandInput placeholder="Buscar tipo..." className="h-9" />
+                    <CommandEmpty>Nenhum tipo encontrado.</CommandEmpty>
+                    <CommandList>
+                      <CommandGroup>
+                        {[
+                          { value: 'convencional', label: 'Convencional' },
+                          { value: 'terceirizada', label: 'Ponto Terceirizado' }
+                        ].map(tipo => (
+                          <CommandItem key={tipo.value} onSelect={() => {
+                            const isSelected = tipoAgenciaFilter.includes(tipo.value);
+                            if (isSelected) {
+                              updateFilter('tipoAgenciaFilter', tipoAgenciaFilter.filter(t => t !== tipo.value));
+                            } else {
+                              updateFilter('tipoAgenciaFilter', [...tipoAgenciaFilter, tipo.value]);
+                            }
+                          }}>
+                            <Check className={cn("mr-2 h-4 w-4", tipoAgenciaFilter.includes(tipo.value) ? "opacity-100" : "opacity-0")} />
+                            {tipo.label}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Ponto VIP */}
+            <div className="group space-y-3">
+              <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                Ponto VIP
+              </Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                    {pontoVipFilter.length > 0 ? (
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                          {pontoVipFilter.length}
+                        </Badge>
+                        <span className="text-sm">
+                          {pontoVipFilter.length === 1 ? (pontoVipFilter[0] === 'sim' ? 'VIP' : 'Não VIP') : `${pontoVipFilter.length} tipos`}
+                        </span>
+                      </div>
+                    ) : "Todos"}
+                    <div className="w-4 h-4 opacity-50">⌄</div>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                  <Command>
+                    <CommandInput placeholder="Buscar tipo..." className="h-9" />
+                    <CommandEmpty>Nenhum tipo encontrado.</CommandEmpty>
+                    <CommandList>
+                      <CommandGroup>
+                        {[
+                          { value: 'sim', label: 'VIP' },
+                          { value: 'nao', label: 'Não VIP' }
+                        ].map(vip => (
+                          <CommandItem key={vip.value} onSelect={() => {
+                            const isSelected = pontoVipFilter.includes(vip.value);
+                            if (isSelected) {
+                              updateFilter('pontoVipFilter', pontoVipFilter.filter(v => v !== vip.value));
+                            } else {
+                              updateFilter('pontoVipFilter', [...pontoVipFilter, vip.value]);
+                            }
+                          }}>
+                            <Check className={cn("mr-2 h-4 w-4", pontoVipFilter.includes(vip.value) ? "opacity-100" : "opacity-0")} />
+                            {vip.label}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+        </div>
+
+        {/* Filtros de Equipamento */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 pb-2 border-b border-border/50">
+            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+              <div className="w-2 h-2 rounded-full bg-primary"></div>
+            </div>
+            <h4 className="text-base font-semibold text-foreground">Equipamento</h4>
+          </div>
+          <div className="responsive-grid responsive-grid-4">
+            {/* Segmento */}
+            <div className="group space-y-3">
+              <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                Segmento
+              </Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                    {segmentFilterMulti.length > 0 ? (
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                          {segmentFilterMulti.length}
+                        </Badge>
+                        <span className="text-sm">
+                          {segmentFilterMulti.length === 1 ? `Segmento ${segmentFilterMulti[0]}` : `${segmentFilterMulti.length} segmentos`}
+                        </span>
+                      </div>
+                    ) : "Todos os segmentos"}
+                    <div className="w-4 h-4 opacity-50">⌄</div>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                  <Command>
+                    <CommandInput placeholder="Buscar segmento..." className="h-9" />
+                    <CommandEmpty>Nenhum segmento encontrado.</CommandEmpty>
+                    <CommandList>
+                      <CommandGroup>
+                        {['AA', 'AB'].map(segment => (
+                          <CommandItem key={segment} onSelect={() => {
+                            const isSelected = segmentFilterMulti.includes(segment);
+                            if (isSelected) {
+                              updateFilter('segmentFilterMulti', segmentFilterMulti.filter(s => s !== segment));
+                            } else {
+                              updateFilter('segmentFilterMulti', [...segmentFilterMulti, segment]);
+                            }
+                          }}>
+                            <Check className={cn("mr-2 h-4 w-4", segmentFilterMulti.includes(segment) ? "opacity-100" : "opacity-0")} />
+                            Segmento {segment}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Equipamento */}
+            <div className="group space-y-3">
+              <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                Equipamento
+              </Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                    {equipmentFilterMulti.length > 0 ? (
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                          {equipmentFilterMulti.length}
+                        </Badge>
+                        <span className="text-sm">
+                          {equipmentFilterMulti.length === 1 ? equipmentFilterMulti[0] : `${equipmentFilterMulti.length} equipamentos`}
+                        </span>
+                      </div>
+                    ) : "Todos os equipamentos"}
+                    <div className="w-4 h-4 opacity-50">⌄</div>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                  <Command>
+                    <CommandInput placeholder="Buscar equipamento..." className="h-9" />
+                    <CommandEmpty>Nenhum equipamento encontrado.</CommandEmpty>
+                    <CommandList>
+                      <CommandGroup className="max-h-64 overflow-y-auto">
+                        {uniqueEquipments.map(equipment => (
+                          <CommandItem key={equipment} onSelect={() => {
+                            const isSelected = equipmentFilterMulti.includes(equipment);
+                            if (isSelected) {
+                              updateFilter('equipmentFilterMulti', equipmentFilterMulti.filter(e => e !== equipment));
+                            } else {
+                              updateFilter('equipmentFilterMulti', [...equipmentFilterMulti, equipment]);
+                            }
+                          }}>
+                            <Check className={cn("mr-2 h-4 w-4", equipmentFilterMulti.includes(equipment) ? "opacity-100" : "opacity-0")} />
+                            {equipment}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Número de Série */}
+            <div className="group space-y-3">
+              <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                Número de Série
+              </Label>
+              <div className="relative">
+                <Input
+                  type="text"
+                  placeholder="Buscar por série..."
+                  value={serialNumberFilter}
+                  onChange={e => updateFilter('serialNumberFilter', e.target.value)}
+                  className="h-10 pl-10 hover:border-primary/30 focus:border-primary transition-colors"
+                />
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground">
+                  🔍
+                </div>
+              </div>
+            </div>
+
+            {/* Status */}
+            <div className="group space-y-3">
+              <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                Status
+              </Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                    {statusFilterMulti.length > 0 ? (
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                          {statusFilterMulti.length}
+                        </Badge>
+                        <span className="text-sm">
+                          {statusFilterMulti.length === 1 ? 
+                            ({'open': 'Aberta', 'in-progress': 'Em Andamento', 'pending': 'Pendente', 'resolved': 'Resolvida'}[statusFilterMulti[0]] || statusFilterMulti[0]) 
+                            : `${statusFilterMulti.length} status`}
+                        </span>
+                      </div>
+                    ) : "Todos os status"}
+                    <div className="w-4 h-4 opacity-50">⌄</div>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                  <Command>
+                    <CommandInput placeholder="Buscar status..." className="h-9" />
+                    <CommandEmpty>Nenhum status encontrado.</CommandEmpty>
+                    <CommandList>
+                      <CommandGroup>
+                        {[
+                          { value: 'open', label: '🔴 Aberta' },
+                          { value: 'in-progress', label: '🟡 Em Andamento' },
+                          { value: 'pending', label: '🟠 Pendente' },
+                          { value: 'resolved', label: '🟢 Resolvida' }
+                        ].map(status => (
+                          <CommandItem key={status.value} onSelect={() => {
+                            const isSelected = statusFilterMulti.includes(status.value);
+                            if (isSelected) {
+                              updateFilter('statusFilterMulti', statusFilterMulti.filter(s => s !== status.value));
+                            } else {
+                              updateFilter('statusFilterMulti', [...statusFilterMulti, status.value]);
+                            }
+                          }}>
+                            <Check className={cn("mr-2 h-4 w-4", statusFilterMulti.includes(status.value) ? "opacity-100" : "opacity-0")} />
+                            {status.label}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+        </div>
+
+        {/* Filtros de Fornecedor */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 pb-2 border-b border-border/50">
+            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+              <div className="w-2 h-2 rounded-full bg-primary"></div>
+            </div>
+            <h4 className="text-base font-semibold text-foreground">Fornecedor</h4>
+          </div>
+          <div className="responsive-grid responsive-grid-2">
+            {tipoAgenciaAtual === 'terceirizada' && (
+              <div className="group space-y-3">
+                <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                  Transportadora
+                </Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                      <div className="flex items-center gap-2">
+                        <Truck className="h-4 w-4 text-primary" />
+                        {transportadoraFilterMulti.length > 0 ? (
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                              {transportadoraFilterMulti.length}
+                            </Badge>
+                            <span className="text-sm">
+                              {transportadoraFilterMulti.length === 1 ? transportadoraFilterMulti[0] : `${transportadoraFilterMulti.length} transportadoras`}
+                            </span>
+                          </div>
+                        ) : "Todas as transportadoras"}
+                      </div>
+                      <div className="w-4 h-4 opacity-50">⌄</div>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                    <Command>
+                      <CommandInput placeholder="Buscar transportadora..." className="h-9" />
+                      <CommandEmpty>Nenhuma transportadora encontrada.</CommandEmpty>
+                      <CommandList>
+                        <CommandGroup>
+                          {uniqueTransportadoras.map(transportadora => (
+                            <CommandItem key={transportadora} onSelect={() => {
+                              const isSelected = transportadoraFilterMulti.includes(transportadora);
+                              if (isSelected) {
+                                updateFilter('transportadoraFilterMulti', transportadoraFilterMulti.filter(t => t !== transportadora));
+                              } else {
+                                updateFilter('transportadoraFilterMulti', [...transportadoraFilterMulti, transportadora]);
+                              }
+                              // Resetar filtro de fornecedor quando mudar transportadora
+                              updateFilter('vendorFilterMulti', []);
+                            }}>
+                              <Check className={cn("mr-2 h-4 w-4", transportadoraFilterMulti.includes(transportadora) ? "opacity-100" : "opacity-0")} />
+                              {transportadora}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            )}
+
+            <div className="group space-y-3">
+              <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                Fornecedor
+                {tipoAgenciaAtual === 'terceirizada' && transportadoraFilterMulti.length > 0 && (
+                  <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                    {transportadoraFilterMulti.length} selecionada{transportadoraFilterMulti.length > 1 ? 's' : ''}
+                  </Badge>
+                )}
+              </Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                    {vendorFilterMulti.length > 0 ? (
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                          {vendorFilterMulti.length}
+                        </Badge>
+                        <span className="text-sm">
+                          {vendorFilterMulti.length === 1 ? vendorFilterMulti[0] : `${vendorFilterMulti.length} fornecedores`}
+                        </span>
+                      </div>
+                    ) : "Todos os fornecedores"}
+                    <div className="w-4 h-4 opacity-50">⌄</div>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                  <Command>
+                    <CommandInput placeholder="Buscar fornecedor..." className="h-9" />
+                    <CommandEmpty>Nenhum fornecedor encontrado.</CommandEmpty>
+                    <CommandList>
+                      <CommandGroup className="max-h-64 overflow-y-auto">
+                        {availableVendors.map(vendor => (
+                          <CommandItem key={vendor} onSelect={() => {
+                            const isSelected = vendorFilterMulti.includes(vendor);
+                            if (isSelected) {
+                              updateFilter('vendorFilterMulti', vendorFilterMulti.filter(v => v !== vendor));
+                            } else {
+                              updateFilter('vendorFilterMulti', [...vendorFilterMulti, vendor]);
+                            }
+                          }}>
+                            <Check className={cn("mr-2 h-4 w-4", vendorFilterMulti.includes(vendor) ? "opacity-100" : "opacity-0")} />
+                            {vendor}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+        </div>
+
+        {/* Filtros Especiais */}
+        <Collapsible open={isSpecialFiltersOpen} onOpenChange={setIsSpecialFiltersOpen}>
+          <CollapsibleTrigger asChild>
+            <Button
+              variant="ghost"
+              className="w-full justify-between p-0 pb-2 border-b border-border/50 hover:bg-transparent"
+            >
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                  <div className="w-2 h-2 rounded-full bg-primary"></div>
+                </div>
+                <h4 className="text-base font-semibold text-foreground">Filtros Especiais</h4>
+              </div>
+              {isSpecialFiltersOpen ? (
+                <ChevronUp className="h-4 w-4 text-muted-foreground" />
+              ) : (
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              )}
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-4 pt-4">
+            <div className="space-y-4">
+              {/* Ocorrências Vencidas */}
+              <div className="p-4 rounded-lg bg-muted/30 border border-border/50">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <Switch
+                      id="override-filter"
+                      checked={overrideFilter}
+                      onCheckedChange={(checked) => updateFilter('overrideFilter', checked)}
+                      className="data-[state=checked]:bg-primary"
+                    />
+                    <div>
+                      <Label htmlFor="override-filter" className="text-sm font-medium cursor-pointer">
+                        Ocorrências Vencidas
+                      </Label>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Mostrar apenas ocorrências que já passaram do prazo
+                      </p>
+                    </div>
+                  </div>
+                  {overrideFilter && (
+                    <Badge variant="secondary" className="bg-warning/10 text-warning border-warning/20">
+                      Ativo
+                    </Badge>
+                  )}
+                </div>
+              </div>
+
+              {/* Priorizadas com o Fornecedor */}
+              <div className="p-4 rounded-lg bg-muted/30 border border-border/50">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <Switch
+                      id="vendor-priority-filter"
+                      checked={vendorPriorityFilter}
+                      onCheckedChange={(checked) => updateFilter('vendorPriorityFilter', checked)}
+                      className="data-[state=checked]:bg-primary"
+                    />
+                    <div>
+                      <Label htmlFor="vendor-priority-filter" className="text-sm font-medium cursor-pointer">
+                        Priorizadas com o Fornecedor
+                      </Label>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Mostrar apenas ocorrências priorizadas para comunicação com fornecedor
+                      </p>
+                    </div>
+                  </div>
+                  {vendorPriorityFilter && (
+                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+                      Ativo
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+      </CardContent>
+    </Card>
+  );
+}

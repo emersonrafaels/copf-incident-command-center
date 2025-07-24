@@ -13,14 +13,17 @@ import Equipes from "./pages/Equipes";
 import Configuracoes from "./pages/Configuracoes";
 import NotFound from "./pages/NotFound";
 
+import { FiltersProvider } from "./contexts/FiltersContext";
+
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
+    <FiltersProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/ocorrencias" element={<Ocorrencias />} />
@@ -35,7 +38,8 @@ const App = () => (
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
-  </QueryClientProvider>
+  </FiltersProvider>
+</QueryClientProvider>
 );
 
 export default App;
