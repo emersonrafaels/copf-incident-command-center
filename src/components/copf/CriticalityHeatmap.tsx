@@ -205,16 +205,12 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
     return criticalityData.sort((a, b) => b.criticalityScore - a.criticalityScore);
   }, [occurrences]);
 
-  const getEquipmentColor = (equipment: string) => {
-    const equipmentColors = {
-      'ATM': 'bg-gradient-to-br from-blue-500 to-blue-600 border-blue-500/20',
-      'POS': 'bg-gradient-to-br from-green-500 to-green-600 border-green-500/20',
-      'Servidor': 'bg-gradient-to-br from-purple-500 to-purple-600 border-purple-500/20',
-      'Impressora': 'bg-gradient-to-br from-orange-500 to-orange-600 border-orange-500/20',
-      'Rede': 'bg-gradient-to-br from-cyan-500 to-cyan-600 border-cyan-500/20',
-      'default': 'bg-gradient-to-br from-slate-500 to-slate-600 border-slate-500/20'
-    };
-    return equipmentColors[equipment as keyof typeof equipmentColors] || equipmentColors.default;
+  const getCriticalityColor = (score: number) => {
+    if (score >= 80) return 'bg-gradient-to-br from-destructive via-red-600 to-red-700 border-destructive/20';
+    if (score >= 60) return 'bg-gradient-to-br from-warning via-orange-500 to-orange-600 border-warning/20';
+    if (score >= 40) return 'bg-gradient-to-br from-yellow-500 via-yellow-600 to-amber-600 border-yellow-500/20';
+    if (score >= 20) return 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 border-blue-500/20';
+    return 'bg-gradient-to-br from-success via-emerald-600 to-emerald-700 border-success/20';
   };
 
   const getCriticalityLabel = (score: number) => {
@@ -394,7 +390,7 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div 
-                    className={`group relative p-5 rounded-2xl border-2 cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-xl animate-fade-in ${getEquipmentColor(item.equipment)} text-white overflow-hidden backdrop-blur-sm`}
+                    className={`group relative p-5 rounded-2xl border-2 cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-xl animate-fade-in ${getCriticalityColor(item.criticalityScore)} text-white overflow-hidden backdrop-blur-sm`}
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
                     {/* Background patterns */}
@@ -432,11 +428,7 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                         {/* Métricas principais em grid 2x2 */}
                         <div className="grid grid-cols-2 gap-3">
                           {/* Aging vs Baseline */}
-                          <div className={`p-3 rounded-xl border ${
-                            item.agingVariation > 50 ? 'bg-red-500/25 border-red-400/30' : 
-                            item.agingVariation > 0 ? 'bg-yellow-500/25 border-yellow-400/30' : 
-                            'bg-green-500/25 border-green-400/30'
-                          }`}>
+                          <div className="p-3 rounded-xl border border-white/20 bg-white/5">
                             <div className="flex items-center gap-1 mb-2">
                               <Clock className="h-3 w-3" />
                               <span className="text-xs opacity-80">AGING</span>
@@ -448,9 +440,7 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                           </div>
 
                           {/* Volume vs Baseline */}
-                          <div className={`p-3 rounded-xl border ${
-                            item.volumeAtipico ? 'bg-orange-500/25 border-orange-400/30' : 'bg-blue-500/25 border-blue-400/30'
-                          }`}>
+                          <div className="p-3 rounded-xl border border-white/20 bg-white/5">
                             <div className="flex items-center gap-1 mb-2">
                               <TrendingUp className="h-3 w-3" />
                               <span className="text-xs opacity-80">VOLUME</span>
@@ -460,11 +450,7 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                           </div>
 
                           {/* SLA Status */}
-                          <div className={`p-3 rounded-xl border ${
-                            item.slaStatus === 'above' ? 'bg-red-500/25 border-red-400/30' : 
-                            item.slaStatus === 'below' ? 'bg-green-500/25 border-green-400/30' : 
-                            'bg-blue-500/25 border-blue-400/30'
-                          }`}>
+                          <div className="p-3 rounded-xl border border-white/20 bg-white/5">
                             <div className="flex items-center gap-1 mb-2">
                               {item.slaStatus === 'above' ? (
                                 <ArrowUp className="h-3 w-3" />
@@ -484,9 +470,7 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                           </div>
 
                           {/* Reincidência */}
-                          <div className={`p-3 rounded-xl border ${
-                            item.reincidenciaPercentual > 30 ? 'bg-purple-500/25 border-purple-400/30' : 'bg-gray-500/25 border-gray-400/30'
-                          }`}>
+                          <div className="p-3 rounded-xl border border-white/20 bg-white/5">
                             <div className="flex items-center gap-1 mb-2">
                               <RotateCcw className="h-3 w-3" />
                               <span className="text-xs opacity-80">REIN</span>
