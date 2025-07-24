@@ -182,15 +182,21 @@ const ClickableChartsComponent = memo(function ClickableCharts({ occurrences }: 
     })
 
     return last7Days.map(({ date, fullDate }) => {
-      const dayOccurrences = occurrences.filter(occ => 
-        new Date(occ.createdAt).toDateString() === new Date(fullDate).toDateString()
-      )
+      const dayOccurrences = occurrences.filter(occ => {
+        const occDate = new Date(occ.createdAt)
+        const targetDate = new Date(fullDate)
+        return occDate.toDateString() === targetDate.toDateString()
+      })
+      
+      const total = dayOccurrences.length || 0
+      const critical = dayOccurrences.filter(o => o.severity === 'critical').length || 0
+      const high = dayOccurrences.filter(o => o.severity === 'high').length || 0
       
       return {
         date,
-        total: dayOccurrences.length,
-        critical: dayOccurrences.filter(o => o.severity === 'critical').length,
-        high: dayOccurrences.filter(o => o.severity === 'high').length
+        total: isNaN(total) ? 0 : total,
+        critical: isNaN(critical) ? 0 : critical,
+        high: isNaN(high) ? 0 : high
       }
     })
   }, [occurrences])
@@ -226,13 +232,17 @@ const ClickableChartsComponent = memo(function ClickableCharts({ occurrences }: 
     }, {} as Record<string, { total: number, resolved: number }>)
 
     return Object.entries(vendorData)
-      .map(([vendor, data]) => ({
-        name: vendor,
-        performance: Math.round((data.resolved / data.total) * 100),
-        total: data.total,
-        fill: data.resolved / data.total > 0.8 ? 'hsl(var(--success))' : 
-              data.resolved / data.total > 0.6 ? 'hsl(var(--warning))' : 'hsl(var(--destructive))'
-      }))
+      .filter(([, data]) => data.total > 0) // Filtrar vendors sem ocorrências
+      .map(([vendor, data]) => {
+        const performance = data.total > 0 ? Math.round((data.resolved / data.total) * 100) : 0
+        return {
+          name: vendor,
+          performance: isNaN(performance) ? 0 : performance,
+          total: data.total,
+          fill: performance > 80 ? 'hsl(var(--success))' : 
+                performance > 60 ? 'hsl(var(--warning))' : 'hsl(var(--destructive))'
+        }
+      })
       .sort((a, b) => b.performance - a.performance)
       .slice(0, 5)
   }, [occurrences])
@@ -252,13 +262,17 @@ const ClickableChartsComponent = memo(function ClickableCharts({ occurrences }: 
 
     return Object.entries(equipmentData)
       .filter(([, data]) => data.total >= 3) // Apenas equipamentos com 3+ ocorrências
-      .map(([equipment, data]) => ({
-        equipment,
-        total: data.total,
-        reincidenceRate: Math.round((data.reincident / data.total) * 100),
-        fill: data.reincident / data.total > 0.3 ? 'hsl(var(--destructive))' : 
-              data.reincident / data.total > 0.1 ? 'hsl(var(--warning))' : 'hsl(var(--success))'
-      }))
+      .map(([equipment, data]) => {
+        const reincidenceRate = data.total > 0 ? Math.round((data.reincident / data.total) * 100) : 0
+        return {
+          equipment,
+          total: data.total,
+          reincidenceRate: isNaN(reincidenceRate) ? 0 : reincidenceRate,
+          fill: reincidenceRate > 30 ? 'hsl(var(--destructive))' : 
+                reincidenceRate > 10 ? 'hsl(var(--warning))' : 'hsl(var(--success))'
+        }
+      })
+      .filter(item => item.total > 0 && item.reincidenceRate >= 0) // Filtrar dados inválidos
   }, [occurrences])
 
   return (
