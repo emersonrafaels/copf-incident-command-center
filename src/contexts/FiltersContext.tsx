@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 export interface FiltersState {
@@ -19,6 +20,8 @@ export interface FiltersState {
   // Filtros de localização
   agenciaFilter: string[];
   ufFilter: string[];
+  municipioFilter: string[];
+  dinegFilter: string[];
   tipoAgenciaFilter: string[];
   pontoVipFilter: string[];
   
@@ -57,6 +60,8 @@ const defaultFilters: FiltersState = {
   
   agenciaFilter: [],
   ufFilter: [],
+  municipioFilter: [],
+  dinegFilter: [],
   tipoAgenciaFilter: [],
   pontoVipFilter: [],
   
@@ -101,6 +106,8 @@ export const FiltersProvider: React.FC<{ children: ReactNode }> = ({ children })
     filters.transportadoraFilter !== 'all' ||
     filters.agenciaFilter.length > 0 ||
     filters.ufFilter.length > 0 ||
+    filters.municipioFilter.length > 0 ||
+    filters.dinegFilter.length > 0 ||
     filters.tipoAgenciaFilter.length > 0 ||
     filters.pontoVipFilter.length > 0;
 

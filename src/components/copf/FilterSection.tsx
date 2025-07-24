@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,8 @@ export function FilterSection({ className }: FilterSectionProps) {
   const {
     agenciaFilter,
     ufFilter,
+    municipioFilter,
+    dinegFilter,
     tipoAgenciaFilter,
     pontoVipFilter,
     segmentFilterMulti,
@@ -95,6 +98,47 @@ export function FilterSection({ className }: FilterSectionProps) {
     return 'PR';
   })));
 
+  // Dados de municípios por UF (alguns exemplos)
+  const municipiosPorUF = {
+    'SP': ['São Paulo', 'Campinas', 'Santos', 'Ribeirão Preto', 'Sorocaba', 'Osasco', 'Santo André', 'São Bernardo do Campo', 'Guarulhos', 'Bauru'],
+    'RJ': ['Rio de Janeiro', 'Niterói', 'Campos dos Goytacazes', 'Nova Iguaçu', 'Petrópolis', 'Volta Redonda', 'Duque de Caxias', 'Nova Friburgo', 'Cabo Frio', 'Angra dos Reis'],
+    'MG': ['Belo Horizonte', 'Uberlândia', 'Contagem', 'Juiz de Fora', 'Betim', 'Montes Claros', 'Ribeirão das Neves', 'Uberaba', 'Governador Valadares', 'Ipatinga'],
+    'RS': ['Porto Alegre', 'Caxias do Sul', 'Pelotas', 'Canoas', 'Santa Maria', 'Gravataí', 'Viamão', 'Novo Hamburgo', 'São Leopoldo', 'Rio Grande'],
+    'PR': ['Curitiba', 'Londrina', 'Maringá', 'Ponta Grossa', 'Cascavel', 'São José dos Pinhais', 'Foz do Iguaçu', 'Colombo', 'Guarapuava', 'Paranaguá']
+  };
+
+  // Filtrar municípios baseados nos UFs selecionados
+  const availableMunicipios = ufFilter.length === 0 
+    ? Object.values(municipiosPorUF).flat().sort()
+    : ufFilter.flatMap(uf => municipiosPorUF[uf as keyof typeof municipiosPorUF] || []).sort();
+
+  // Diretorias de Negócio (DINEG)
+  const dinegOptions = [
+    'DINEG Metropolitana',
+    'DINEG Interior',
+    'DINEG Capital',
+    'DINEG Região Sul',
+    'DINEG Região Norte',
+    'DINEG Região Nordeste',
+    'DINEG Região Centro-Oeste',
+    'DINEG Varejo',
+    'DINEG Atacado',
+    'DINEG Pessoa Jurídica'
+  ];
+
+  // Filtrar DINEG baseado nas agências selecionadas (lógica simplificada)
+  const availableDinegs = agenciaFilter.length === 0 ? dinegOptions : dinegOptions.filter((dineg, index) => {
+    // Lógica simplificada para demonstração
+    const agencyNumbers = agenciaFilter.map(a => parseInt(a));
+    const hasMatchingAgency = agencyNumbers.some(num => {
+      if (num <= 500 && index < 3) return true;
+      if (num > 500 && num <= 1000 && index >= 3 && index < 6) return true;
+      if (num > 1000 && index >= 6) return true;
+      return false;
+    });
+    return hasMatchingAgency;
+  });
+
   // Verificar tipo de agência atual (para mostrar filtros condicionais)
   const tipoAgenciaAtual = tipoAgenciaFilter.includes('terceirizada') ? 'terceirizada' : tipoAgenciaFilter.includes('convencional') ? 'convencional' : 'all';
 
@@ -124,6 +168,8 @@ export function FilterSection({ className }: FilterSectionProps) {
                       {Object.values({
                         agencia: agenciaFilter.length > 0,
                         uf: ufFilter.length > 0,
+                        municipio: municipioFilter.length > 0,
+                        dineg: dinegFilter.length > 0,
                         tipoAgencia: tipoAgenciaFilter.length > 0,
                         pontoVip: pontoVipFilter.length > 0,
                         segmento: segmentFilterMulti.length > 0,
@@ -138,6 +184,8 @@ export function FilterSection({ className }: FilterSectionProps) {
                       }).filter(Boolean).length} filtro{Object.values({
                         agencia: agenciaFilter.length > 0,
                         uf: ufFilter.length > 0,
+                        municipio: municipioFilter.length > 0,
+                        dineg: dinegFilter.length > 0,
                         tipoAgencia: tipoAgenciaFilter.length > 0,
                         pontoVip: pontoVipFilter.length > 0,
                         segmento: segmentFilterMulti.length > 0,
@@ -152,6 +200,8 @@ export function FilterSection({ className }: FilterSectionProps) {
                       }).filter(Boolean).length !== 1 ? 's' : ''} ativo{Object.values({
                         agencia: agenciaFilter.length > 0,
                         uf: ufFilter.length > 0,
+                        municipio: municipioFilter.length > 0,
+                        dineg: dinegFilter.length > 0,
                         tipoAgencia: tipoAgenciaFilter.length > 0,
                         pontoVip: pontoVipFilter.length > 0,
                         segmento: segmentFilterMulti.length > 0,
@@ -194,7 +244,7 @@ export function FilterSection({ className }: FilterSectionProps) {
                 </div>
                 <h4 className="text-base font-semibold text-foreground">Localização</h4>
               </div>
-              <div className="responsive-grid responsive-grid-4">
+              <div className="responsive-grid responsive-grid-6">
                 {/* Agência */}
                 <div className="group space-y-3">
                   <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
@@ -287,6 +337,112 @@ export function FilterSection({ className }: FilterSectionProps) {
                               }}>
                                 <Check className={cn("mr-2 h-4 w-4", ufFilter.includes(uf) ? "opacity-100" : "opacity-0")} />
                                 {uf}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                {/* Município */}
+                <div className="group space-y-3">
+                  <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                    Município
+                    {ufFilter.length > 0 && (
+                      <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                        Filtrado por UF
+                      </Badge>
+                    )}
+                  </Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                        {municipioFilter.length > 0 ? (
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                              {municipioFilter.length}
+                            </Badge>
+                            <span className="text-sm">
+                              {municipioFilter.length === 1 ? municipioFilter[0] : `${municipioFilter.length} municípios`}
+                            </span>
+                          </div>
+                        ) : "Todos os municípios"}
+                        <div className="w-4 h-4 opacity-50">⌄</div>
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                      <Command>
+                        <CommandInput placeholder="Buscar município..." className="h-9" />
+                        <CommandEmpty>Nenhum município encontrado.</CommandEmpty>
+                        <CommandList>
+                          <CommandGroup className="max-h-64 overflow-y-auto">
+                            {availableMunicipios.map(municipio => (
+                              <CommandItem key={municipio} onSelect={() => {
+                                const isSelected = municipioFilter.includes(municipio);
+                                if (isSelected) {
+                                  updateFilter('municipioFilter', municipioFilter.filter(m => m !== municipio));
+                                } else {
+                                  updateFilter('municipioFilter', [...municipioFilter, municipio]);
+                                }
+                              }}>
+                                <Check className={cn("mr-2 h-4 w-4", municipioFilter.includes(municipio) ? "opacity-100" : "opacity-0")} />
+                                {municipio}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                {/* DINEG */}
+                <div className="group space-y-3">
+                  <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                    DINEG
+                    {agenciaFilter.length > 0 && (
+                      <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                        Filtrado por agência
+                      </Badge>
+                    )}
+                  </Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                        {dinegFilter.length > 0 ? (
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                              {dinegFilter.length}
+                            </Badge>
+                            <span className="text-sm">
+                              {dinegFilter.length === 1 ? dinegFilter[0] : `${dinegFilter.length} diretorias`}
+                            </span>
+                          </div>
+                        ) : "Todas as diretorias"}
+                        <div className="w-4 h-4 opacity-50">⌄</div>
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                      <Command>
+                        <CommandInput placeholder="Buscar DINEG..." className="h-9" />
+                        <CommandEmpty>Nenhuma diretoria encontrada.</CommandEmpty>
+                        <CommandList>
+                          <CommandGroup className="max-h-64 overflow-y-auto">
+                            {availableDinegs.map(dineg => (
+                              <CommandItem key={dineg} onSelect={() => {
+                                const isSelected = dinegFilter.includes(dineg);
+                                if (isSelected) {
+                                  updateFilter('dinegFilter', dinegFilter.filter(d => d !== dineg));
+                                } else {
+                                  updateFilter('dinegFilter', [...dinegFilter, dineg]);
+                                }
+                              }}>
+                                <Check className={cn("mr-2 h-4 w-4", dinegFilter.includes(dineg) ? "opacity-100" : "opacity-0")} />
+                                {dineg}
                               </CommandItem>
                             ))}
                           </CommandGroup>
