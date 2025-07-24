@@ -64,7 +64,7 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
       const hasSLABreach = agencyData.occurrences.some((occ: any) => {
         const hours = (Date.now() - new Date(occ.createdAt).getTime()) / (1000 * 60 * 60);
         const slaLimit = (occ.severity === 'critical' || occ.severity === 'high') ? 24 : 72;
-        return hours > slaLimit && occ.status !== 'resolved';
+        return hours > slaLimit && occ.status !== 'encerrada';
       });
       if (hasSLABreach) agenciesWithSLABreach++;
     });
@@ -86,7 +86,7 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
       const slaBreached = occs.some((occ: any) => {
         const hours = (Date.now() - new Date(occ.createdAt).getTime()) / (1000 * 60 * 60);
         const slaLimit = (occ.severity === 'critical' || occ.severity === 'high') ? 24 : 72;
-        return hours > slaLimit && occ.status !== 'resolved';
+        return hours > slaLimit && occ.status !== 'encerrada';
       });
 
       // Calcular reincidência (ocorrências do mesmo equipamento nos últimos 30 dias)
