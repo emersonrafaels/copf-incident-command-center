@@ -12,6 +12,7 @@ interface CriticalityData {
   criticalityScore: number;
   aging: number;
   slaBreached: boolean;
+  slaBreach: number;
   reincidencia: number;
   volumeAtipico: boolean;
   occurrenceCount: number;
@@ -83,11 +84,17 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
         return sum + daysDiff;
       }, 0) / occs.length;
 
-      // Verificar se há SLA quebrado (mais de 24h para critical/high, 72h para medium/low)
+      // Verificar se há SLA quebrado e calcular o maior valor de breach
+      let maxSLABreach = 0;
       const slaBreached = occs.some((occ: any) => {
         const hours = (Date.now() - new Date(occ.createdAt).getTime()) / (1000 * 60 * 60);
         const slaLimit = (occ.severity === 'critical' || occ.severity === 'high') ? 24 : 72;
-        return hours > slaLimit && occ.status !== 'encerrada';
+        const isBreached = hours > slaLimit && occ.status !== 'encerrada';
+        if (isBreached) {
+          const breachAmount = hours - slaLimit;
+          maxSLABreach = Math.max(maxSLABreach, breachAmount);
+        }
+        return isBreached;
       });
 
       // Calcular reincidência (ocorrências do mesmo equipamento nos últimos 30 dias)
@@ -148,6 +155,7 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
         criticalityScore: Math.min(criticalityScore, 100),
         aging: Math.round(avgAging),
         slaBreached,
+        slaBreach: Math.round(maxSLABreach),
         reincidencia,
         volumeAtipico,
         occurrenceCount: totalCount,
@@ -392,7 +400,7 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                           {item.slaBreached && (
                             <div className="flex items-center gap-1.5 bg-white/10 rounded-md px-2 py-1">
                               <AlertTriangle className="h-3 w-3" />
-                              <span>SLA</span>
+                              <span>+{Math.round(item.slaBreach)}h</span>
                             </div>
                           )}
                           {item.volumeAtipico && (
