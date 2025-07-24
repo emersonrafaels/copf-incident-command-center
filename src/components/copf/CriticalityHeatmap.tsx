@@ -19,6 +19,7 @@ interface CriticalityData {
   volumeAtipico: boolean;
   occurrenceCount: number;
   agenciesWithSLABreach: number;
+  percentualVolumeBaseline: number;
 }
 
 interface CriticalityHeatmapProps {
@@ -126,8 +127,10 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
 
       const percentualReincidencia = recentOccurrences.length > 0 ? (reincidentOccurrences / recentOccurrences.length) * 100 : 0;
 
-      // Volume atípico (mais que 5 ocorrências no período)
-      const volumeAtipico = reincidencia > 5;
+      // Calcular % de volume em relação ao baseline (baseline = 3 ocorrências/30 dias)
+      const baselineVolume = 3;
+      const percentualVolumeBaseline = baselineVolume > 0 ? Math.round((reincidencia / baselineVolume) * 100) : 0;
+      const volumeAtipico = percentualVolumeBaseline > 167; // 167% = 5 ocorrências vs baseline de 3
 
       // Calcular score de criticidade (0-100) baseado nos 4 fatores
       let criticalityScore = 0;
@@ -170,7 +173,8 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
         reincidencia,
         volumeAtipico,
         occurrenceCount: totalCount,
-        agenciesWithSLABreach: equipmentAgenciesWithSLA
+        agenciesWithSLABreach: equipmentAgenciesWithSLA,
+        percentualVolumeBaseline
       });
     });
 
@@ -445,15 +449,15 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                           
                           {/* Métricas secundárias */}
                           <div className="grid grid-cols-2 gap-2 text-xs">
-                            <div className={`flex items-center justify-between gap-1 rounded-md px-2 py-1.5 ${
-                              item.volumeAtipico ? 'bg-orange-500/30' : 'bg-white/20'
-                            }`}>
-                              <div className="flex items-center gap-1">
-                                <TrendingUp className={`h-2.5 w-2.5 ${item.volumeAtipico ? 'text-orange-300' : 'opacity-50'}`} />
-                                <span className="text-[9px] opacity-75">VOLUME</span>
-                              </div>
-                              <span className="text-[10px] font-medium">{item.reincidencia}</span>
-                            </div>
+                             <div className={`flex items-center justify-between gap-1 rounded-md px-2 py-1.5 ${
+                               item.volumeAtipico ? 'bg-orange-500/30' : 'bg-white/20'
+                             }`}>
+                               <div className="flex items-center gap-1">
+                                 <TrendingUp className={`h-2.5 w-2.5 ${item.volumeAtipico ? 'text-orange-300' : 'opacity-50'}`} />
+                                 <span className="text-[8px] opacity-75 truncate">%VOL</span>
+                               </div>
+                               <span className="text-[10px] font-medium">{item.percentualVolumeBaseline}%</span>
+                             </div>
 
                             <div className={`flex items-center justify-between gap-1 rounded-md px-2 py-1.5 ${
                               (() => {
