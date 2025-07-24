@@ -163,7 +163,7 @@ export function Dashboard() {
       const createdDate = new Date(occurrence.createdAt);
       const hoursDiff = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60);
       const slaLimit = occurrence.severity === 'critical' || occurrence.severity === 'high' ? 24 : 72;
-      const isOverdue = hoursDiff > slaLimit && occurrence.status !== 'resolved';
+      const isOverdue = hoursDiff > slaLimit && occurrence.status !== 'encerrada';
       if (!isOverdue) return false;
     }
 
@@ -311,16 +311,16 @@ export function Dashboard() {
         />
         <MetricCard
           title="Em Andamento"
-          value={filteredOccurrences.filter(o => o.status === 'pending').length.toString()}
+          value={filteredOccurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_atuacao').length.toString()}
           icon={<Clock className="h-4 w-4" />}
-          change={`${Math.round((filteredOccurrences.filter(o => o.status === 'pending').length / filteredOccurrences.length) * 100)}% do filtrado`}
+          change={`${Math.round((filteredOccurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_atuacao').length / filteredOccurrences.length) * 100)}% do filtrado`}
           changeType="neutral"
         />
         <MetricCard
           title="Resolvidas"
-          value={filteredOccurrences.filter(o => o.status === 'resolved').length.toString()}
+          value={filteredOccurrences.filter(o => o.status === 'encerrada').length.toString()}
           icon={<TrendingUp className="h-4 w-4" />}
-          change={`${Math.round((filteredOccurrences.filter(o => o.status === 'resolved').length / filteredOccurrences.length) * 100)}% do filtrado`}
+          change={`${Math.round((filteredOccurrences.filter(o => o.status === 'encerrada').length / filteredOccurrences.length) * 100)}% do filtrado`}
           changeType="positive"
         />
       </div>
@@ -404,9 +404,10 @@ export function Dashboard() {
                           occurrence.severity === 'medium' ? 'text-primary' : 'text-muted-foreground'
                         }`} />
                       </div>
-                      <div className={`absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 border-background ${
-                        occurrence.status === 'resolved' ? 'bg-success' :
-                        occurrence.status === 'pending' ? 'bg-warning' : 'bg-destructive'
+                       <div className={`absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 border-background ${
+                        occurrence.status === 'encerrada' ? 'bg-success' :
+                        occurrence.status === 'em_atuacao' ? 'bg-warning' :
+                        occurrence.status === 'a_iniciar' ? 'bg-muted' : 'bg-destructive'
                       }`} />
                     </div>
                     <div className="flex-1 min-w-0">

@@ -8,7 +8,7 @@ export interface OccurrenceData {
   serialNumber: string
   description: string
   severity: 'critical' | 'high' | 'medium' | 'low'
-  status: 'pending' | 'resolved'
+  status: 'a_iniciar' | 'em_atuacao' | 'encerrada' | 'cancelada'
   createdAt: string
   assignedTo: string
   vendor: string
@@ -64,7 +64,7 @@ export function useDashboardData() {
         serialNumber: "ATM001-SP-001",
         description: "ATM não está dispensando cédulas - erro de hardware na gaveta",
         severity: "critical",
-        status: "pending",
+        status: "em_atuacao",
         createdAt: "2024-01-15T08:30:00",
         assignedTo: "João Silva - NOC",
         vendor: "Diebold Nixdorf"
@@ -77,7 +77,7 @@ export function useDashboardData() {
         serialNumber: "IMP002-SP-015",
         description: "Impressora com papel atolado constantemente",
         severity: "high",
-        status: "pending",
+        status: "a_iniciar",
         createdAt: "2024-01-15T09:15:00",
         assignedTo: "Maria Santos - Facilities",
         vendor: "Bematech"
@@ -90,7 +90,7 @@ export function useDashboardData() {
         serialNumber: "SRV003-SP-032",
         description: "Perda total de conectividade - link primário inoperante",
         severity: "high",
-        status: "pending",
+        status: "em_atuacao",
         createdAt: "2024-01-14T14:20:00",
         assignedTo: "Carlos Oliveira - Redes",
         vendor: "Dell Technologies"
@@ -103,7 +103,7 @@ export function useDashboardData() {
         serialNumber: "PIN004-SP-045",
         description: "Terminal não reconhece cartões chip",
         severity: "medium",
-        status: "resolved",
+        status: "encerrada",
         createdAt: "2024-01-14T11:00:00",
         assignedTo: "Ana Costa - POS",
         vendor: "Gertec"
@@ -116,7 +116,7 @@ export function useDashboardData() {
         serialNumber: "ATM005-SP-067",
         description: "ATM não aceita depósitos - problemas no mecanismo de captura",
         severity: "low",
-        status: "pending",
+        status: "a_iniciar",
         createdAt: "2024-01-13T16:45:00",
         assignedTo: "Roberto Lima - Suporte",
         vendor: "NCR Corporation"
@@ -138,7 +138,7 @@ export function useDashboardData() {
         serialNumber: `${segment}${String(i + 6).padStart(3, '0')}-SP-${agencyNum}`,
         description: ['Erro de hardware', 'Falha de conectividade', 'Problema de temperatura', 'Defeito no leitor'][Math.floor(Math.random() * 4)],
         severity: ['critical', 'high', 'medium', 'low'][Math.floor(Math.random() * 4)] as ('critical' | 'high' | 'medium' | 'low'),
-        status: ['pending', 'resolved'][Math.floor(Math.random() * 2)] as ('pending' | 'resolved'),
+        status: ['a_iniciar', 'em_atuacao', 'encerrada', 'cancelada'][Math.floor(Math.random() * 4)] as ('a_iniciar' | 'em_atuacao' | 'encerrada' | 'cancelada'),
         createdAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
         assignedTo: ['João Silva', 'Maria Santos', 'Carlos Oliveira', 'Ana Costa', 'Roberto Lima'][Math.floor(Math.random() * 5)],
         vendor: ['Diebold Nixdorf', 'NCR Corporation', 'Dell Technologies', 'Gertec', 'Bematech'][Math.floor(Math.random() * 5)]
@@ -217,11 +217,11 @@ export function useDashboardData() {
 
   const metrics = {
     totalOccurrences: occurrences.length,
-    resolvedOccurrences: occurrences.filter(o => o.status === 'resolved').length,
-    pendingOccurrences: occurrences.filter(o => o.status === 'pending').length,
+    resolvedOccurrences: occurrences.filter(o => o.status === 'encerrada').length,
+    pendingOccurrences: occurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_atuacao').length,
     avgMTTR: '4.2h',
     affectedAgencies: new Set(occurrences.map(o => o.agency)).size,
-    resolutionRate: Math.round((occurrences.filter(o => o.status === 'resolved').length / occurrences.length) * 100)
+    resolutionRate: Math.round((occurrences.filter(o => o.status === 'encerrada').length / occurrences.length) * 100)
   }
 
   return {

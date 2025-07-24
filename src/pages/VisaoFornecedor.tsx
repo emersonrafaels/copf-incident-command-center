@@ -51,7 +51,7 @@ const VisaoFornecedor = () => {
       id: "OCC-2024-001",
       equipment: "ATM AG-001 - Terminal Principal",
       severity: "critical",
-      status: "pending" as const,
+      status: "em_atuacao" as const,
       createdAt: "2024-01-15T10:30:00Z",
       vendor: currentVendor,
       agency: "AG0001 - Centro (São Paulo)"
@@ -60,7 +60,7 @@ const VisaoFornecedor = () => {
       id: "OCC-2024-003",
       equipment: "Router CORE-02 - Sala Servidores",
       severity: "high",
-      status: "pending" as const,
+      status: "a_iniciar" as const,
       createdAt: "2024-01-15T08:45:00Z",
       vendor: currentVendor,
       agency: "AG0015 - Paulista (São Paulo)"
@@ -69,7 +69,7 @@ const VisaoFornecedor = () => {
       id: "OCC-2024-005",
       equipment: "Servidor APP-01 - Data Center",
       severity: "medium",
-      status: "resolved" as const,
+      status: "encerrada" as const,
       createdAt: "2024-01-15T07:20:00Z",
       vendor: currentVendor,
       agency: "AG0032 - Vila Madalena (São Paulo)"
@@ -78,7 +78,7 @@ const VisaoFornecedor = () => {
       id: "OCC-2024-007",
       equipment: "Switch NET-05 - Rede Principal",
       severity: "critical",
-      status: "pending" as const,
+      status: "em_atuacao" as const,
       createdAt: "2024-01-14T16:15:00Z",
       vendor: currentVendor,
       agency: "AG0045 - Pinheiros (São Paulo)"
@@ -87,7 +87,7 @@ const VisaoFornecedor = () => {
       id: "OCC-2024-009",
       equipment: "UPS-03 - Alimentação Crítica",
       severity: "high",
-      status: "pending" as const,
+      status: "a_iniciar" as const,
       createdAt: "2024-01-14T14:30:00Z",
       vendor: currentVendor,
       agency: "AG0067 - Moema (São Paulo)"

@@ -274,7 +274,7 @@ export function OccurrenceModal({
                     </div>
                   </div>
                   
-                  {occurrence.status === 'pending' && (
+                  {(occurrence.status === 'a_iniciar' || occurrence.status === 'em_atuacao') && (
                     <div className="flex gap-3 p-2 bg-warning/10 rounded-lg">
                       <div className="w-2 h-2 bg-warning rounded-full mt-2"></div>
                       <div>
@@ -286,7 +286,7 @@ export function OccurrenceModal({
                     </div>
                   )}
 
-                  {occurrence.status === 'resolved' && (
+                  {occurrence.status === 'encerrada' && (
                     <div className="flex gap-3 p-2 bg-success/10 rounded-lg">
                       <div className="w-2 h-2 bg-success rounded-full mt-2"></div>
                       <div>

@@ -95,7 +95,7 @@ const Ocorrencias = () => {
       const createdDate = new Date(occurrence.createdAt);
       const hoursDiff = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60);
       const slaLimit = occurrence.severity === 'critical' || occurrence.severity === 'high' ? 24 : 72;
-      const isOverdue = hoursDiff > slaLimit && occurrence.status !== 'resolved';
+      const isOverdue = hoursDiff > slaLimit && occurrence.status !== 'encerrada';
       if (!isOverdue) return false;
     }
     
