@@ -84,7 +84,7 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
         return sum + daysDiff;
       }, 0) / occs.length;
 
-      // Verificar se há SLA quebrado e contar quantas ocorrências têm SLA vencido
+      // Verificar se há SLA quebrado e calcular percentual de ocorrências com SLA vencido
       let slaBreachedCount = 0;
       const slaBreached = occs.some((occ: any) => {
         const hours = (Date.now() - new Date(occ.createdAt).getTime()) / (1000 * 60 * 60);
@@ -95,6 +95,9 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
         }
         return isBreached;
       });
+
+      // Calcular percentual de SLA vencido
+      const slaBreachPercentage = occs.length > 0 ? Math.round((slaBreachedCount / occs.length) * 100) : 0;
 
       // Calcular reincidência (ocorrências do mesmo equipamento nos últimos 30 dias)
       const thirtyDaysAgo = new Date();
@@ -154,7 +157,7 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
         criticalityScore: Math.min(criticalityScore, 100),
         aging: Math.round(avgAging),
         slaBreached,
-        slaBreach: slaBreachedCount,
+        slaBreach: slaBreachPercentage,
         reincidencia,
         volumeAtipico,
         occurrenceCount: totalCount,
@@ -399,7 +402,7 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                           {item.slaBreached && (
                             <div className="flex items-center gap-1.5 bg-white/10 rounded-md px-2 py-1">
                               <AlertTriangle className="h-3 w-3" />
-                              <span>{item.slaBreach}</span>
+                              <span>{item.slaBreach}%</span>
                             </div>
                           )}
                           {item.volumeAtipico && (
