@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { MetricCard } from "./MetricCard";
 import { StatusBadge } from "./StatusBadge";
-import { InteractiveCharts } from "./InteractiveCharts";
+import { EnhancedInteractiveCharts } from "./EnhancedInteractiveCharts";
 import { OccurrenceModal } from "./OccurrenceModal";
 import { CriticalityHeatmap } from "./CriticalityHeatmap";
 import { FilterSection } from "./FilterSection";
@@ -46,6 +46,7 @@ export function Dashboard() {
     to?: Date;
   }>({});
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [occurrenceFilter, setOccurrenceFilter] = useState('all'); // all, today, slaToday
 
   // Usar filtros do contexto
   const filters = useFilters();
@@ -121,7 +122,8 @@ export function Dashboard() {
   };
 
   // Filtrar ocorrências - Memoizado para performance
-  const filteredOccurrences = useMemo(() => occurrences.filter(occurrence => {
+  const filteredOccurrences = useMemo(() => {
+    let filtered = occurrences.filter(occurrence => {
     // Filtros multiselect
     if (segmentFilterMulti.length > 0 && !segmentFilterMulti.includes(occurrence.segment)) return false;
     if (equipmentFilterMulti.length > 0 && !equipmentFilterMulti.includes(occurrence.equipment)) return false;
@@ -174,7 +176,27 @@ export function Dashboard() {
     }
 
     return true;
-  }), [occurrences, segmentFilterMulti, equipmentFilterMulti, statusFilterMulti, vendorFilterMulti, transportadoraFilterMulti, serialNumberFilter, agenciaFilter, ufFilter, tipoAgenciaFilter, pontoVipFilter, overrideFilter, vendorPriorityFilter]);
+    });
+
+    // Aplicar filtros específicos da tabela de ocorrências
+    if (occurrenceFilter === 'today') {
+      const today = new Date().toDateString();
+      filtered = filtered.filter(occ => 
+        new Date(occ.createdAt).toDateString() === today
+      );
+    } else if (occurrenceFilter === 'slaToday') {
+      const today = new Date();
+      filtered = filtered.filter(occ => {
+        const createdDate = new Date(occ.createdAt);
+        const hoursDiff = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60);
+        const slaLimit = occ.severity === 'critical' || occ.severity === 'high' ? 24 : 72;
+        const slaExpiryDate = new Date(createdDate.getTime() + (slaLimit * 60 * 60 * 1000));
+        return slaExpiryDate.toDateString() === today.toDateString() && occ.status !== 'encerrada';
+      });
+    }
+
+    return filtered;
+  }, [occurrences, segmentFilterMulti, equipmentFilterMulti, statusFilterMulti, vendorFilterMulti, transportadoraFilterMulti, serialNumberFilter, agenciaFilter, ufFilter, tipoAgenciaFilter, pontoVipFilter, overrideFilter, vendorPriorityFilter, occurrenceFilter]);
 
   // Mapeamento de equipamentos por segmento
   const equipmentsBySegment = {
@@ -334,7 +356,7 @@ export function Dashboard() {
       {/* Gráficos Interativos */}
       <div className="space-y-6">
         <h2 className="text-responsive-2xl font-bold text-foreground">Análise de Dados</h2>
-        <InteractiveCharts
+        <EnhancedInteractiveCharts
           severityData={severityData}
           timelineData={timelineData}
           mttrData={mttrData}
@@ -357,6 +379,19 @@ export function Dashboard() {
               </p>
             </div>
           </CardTitle>
+          <div className="flex gap-2">
+            <Select value={occurrenceFilter} onValueChange={setOccurrenceFilter}>
+              <SelectTrigger className="w-auto min-w-[200px]">
+                <Filter className="h-4 w-4 mr-2" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as ocorrências</SelectItem>
+                <SelectItem value="today">Entraram hoje</SelectItem>
+                <SelectItem value="slaToday">SLA vence hoje</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </CardHeader>
         <CardContent className="pt-0">
           {isLoading ? (
@@ -511,7 +546,7 @@ export function Dashboard() {
                   <Skeleton className="h-[300px] w-full" />
                 </CardContent>
               </Card>)}
-          </div> : <InteractiveCharts severityData={severityData} timelineData={timelineData} mttrData={mttrData} equipmentData={equipmentData} occurrences={filteredOccurrences} />}
+          </div> : <EnhancedInteractiveCharts severityData={severityData} timelineData={timelineData} mttrData={mttrData} equipmentData={equipmentData} occurrences={filteredOccurrences} />}
       </div>
 
       {/* Occurrence Details Modal */}

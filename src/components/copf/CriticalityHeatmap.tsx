@@ -361,7 +361,7 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                           </Badge>
                           <div className="text-right">
                             <div className="text-lg font-bold leading-none">
-                              {item.criticalityScore}
+                              {Math.round(item.criticalityScore)}
                             </div>
                             <div className="text-xs opacity-75">
                               {getCriticalityLabel(item.criticalityScore)}
@@ -374,21 +374,21 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                             {item.equipment}
                           </h4>
                           <p className="text-xs opacity-90">
-                            {item.occurrenceCount} ocorrência{item.occurrenceCount !== 1 ? 's' : ''}
+                            {Math.round(item.occurrenceCount)} ocorrência{item.occurrenceCount !== 1 ? 's' : ''}
                           </p>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2 text-xs">
-                          <div className="flex items-center gap-1.5 bg-white/10 rounded-md px-2 py-1">
-                            <Clock className="h-3 w-3" />
-                            <span>{item.aging}d</span>
-                          </div>
-                          {item.reincidencia > 1 && (
+                          <div className="grid grid-cols-2 gap-2 text-xs">
                             <div className="flex items-center gap-1.5 bg-white/10 rounded-md px-2 py-1">
-                              <RotateCcw className="h-3 w-3" />
-                              <span>{item.reincidencia}x</span>
+                              <Clock className="h-3 w-3" />
+                              <span>{Math.round(item.aging)}d</span>
                             </div>
-                          )}
+                            {item.reincidencia > 1 && (
+                              <div className="flex items-center gap-1.5 bg-white/10 rounded-md px-2 py-1">
+                                <RotateCcw className="h-3 w-3" />
+                                <span>{Math.round(item.reincidencia)}x</span>
+                              </div>
+                            )}
                           {item.slaBreached && (
                             <div className="flex items-center gap-1.5 bg-white/10 rounded-md px-2 py-1">
                               <AlertTriangle className="h-3 w-3" />
