@@ -507,22 +507,22 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                           {item.agingVariation > 0 ? '+' : ''}{item.agingVariation}%
                         </span>
                       </div>
-                      <div className="flex justify-between">
-                        <span>Reincidência:</span>
-                        <span className="font-semibold">{item.reincidencia} ocorrências ({item.reincidenciaPercentual}%)</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Volume vs baseline:</span>
-                        <span className={`font-semibold ${item.volumeAtipico ? 'text-warning' : 'text-success'}`}>
-                          {item.percentualVolumeBaseline}% <span className="mx-1">({item.volumeAtipico ? 'Atípico' : 'Normal'})</span>
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Agências SLA vencido:</span>
-                        <span className="font-semibold text-destructive">
-                          {item.agenciesWithSLABreach}
-                        </span>
-                      </div>
+                       <div className="flex justify-between">
+                         <span>Reincidência:</span>
+                         <span className="font-semibold">{item.reincidencia} ocorrências ({item.reincidenciaPercentual}%)</span>
+                       </div>
+                       <div className="flex justify-between">
+                         <span>Volume vs baseline:</span>
+                         <span className={`font-semibold ${item.volumeAtipico ? 'text-warning' : 'text-success'}`}>
+                           {item.percentualVolumeBaseline}%  <span className="mx-1">({item.volumeAtipico ? 'Atípico' : 'Normal'})</span>
+                         </span>
+                       </div>
+                       <div className="flex justify-between">
+                         <span>Agências SLA vencido:</span>
+                         <span className="font-semibold text-destructive">
+                           {item.agenciesWithSLABreach}
+                         </span>
+                       </div>
                     </div>
                   </div>
                 </TooltipContent>
