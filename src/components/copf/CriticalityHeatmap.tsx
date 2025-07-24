@@ -501,7 +501,7 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                     <div className="space-y-2">
                       <div className="font-semibold">{item.equipment} ({item.segment})</div>
                       <div className="space-y-1 text-sm">
-                        <div>Criticidade: <span className="font-semibold">{getCriticalityLabel(item.criticalityScore)} ({item.criticalityScore})</span></div>
+                        <div>Criticidade: <span className="capitalize">{getCriticalityLabel(item.criticalityScore)} ({item.criticalityScore})</span></div>
                         <div>Aging médio: <span className="font-semibold">{item.aging} dias</span></div>
                         <div>Reincidência: <span className="font-semibold">{item.reincidencia} ocorrências ({Math.round((item.reincidencia / item.occurrenceCount) * 100)}%)</span></div>
                         <div>Quantidade de Agências com SLA Vencido: <span className="font-semibold text-destructive">
