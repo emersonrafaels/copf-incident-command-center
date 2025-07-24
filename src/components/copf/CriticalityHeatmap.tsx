@@ -205,12 +205,16 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
     return criticalityData.sort((a, b) => b.criticalityScore - a.criticalityScore);
   }, [occurrences]);
 
-  const getCriticalityColor = (score: number) => {
-    if (score >= 80) return 'bg-gradient-to-br from-destructive via-red-600 to-red-700 border-destructive/20';
-    if (score >= 60) return 'bg-gradient-to-br from-warning via-orange-500 to-orange-600 border-warning/20';
-    if (score >= 40) return 'bg-gradient-to-br from-yellow-500 via-yellow-600 to-amber-600 border-yellow-500/20';
-    if (score >= 20) return 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 border-blue-500/20';
-    return 'bg-gradient-to-br from-success via-emerald-600 to-emerald-700 border-success/20';
+  const getEquipmentColor = (equipment: string) => {
+    const equipmentColors = {
+      'ATM': 'bg-gradient-to-br from-blue-500 to-blue-600 border-blue-500/20',
+      'POS': 'bg-gradient-to-br from-green-500 to-green-600 border-green-500/20',
+      'Servidor': 'bg-gradient-to-br from-purple-500 to-purple-600 border-purple-500/20',
+      'Impressora': 'bg-gradient-to-br from-orange-500 to-orange-600 border-orange-500/20',
+      'Rede': 'bg-gradient-to-br from-cyan-500 to-cyan-600 border-cyan-500/20',
+      'default': 'bg-gradient-to-br from-slate-500 to-slate-600 border-slate-500/20'
+    };
+    return equipmentColors[equipment as keyof typeof equipmentColors] || equipmentColors.default;
   };
 
   const getCriticalityLabel = (score: number) => {
@@ -390,7 +394,7 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div 
-                    className="group relative p-5 rounded-2xl border-2 cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-xl animate-fade-in border-border/30 bg-card text-foreground overflow-hidden backdrop-blur-sm"
+                    className={`group relative p-5 rounded-2xl border-2 cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-xl animate-fade-in ${getEquipmentColor(item.equipment)} text-white overflow-hidden backdrop-blur-sm`}
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
                     {/* Background patterns */}
