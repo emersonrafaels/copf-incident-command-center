@@ -338,189 +338,211 @@ export function Dashboard() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
-            <div className="flex flex-col gap-2">
-              <Label className="text-sm font-medium text-muted-foreground">Agência</Label>
-              <Input
-                type="text"
-                placeholder="0 a 9999"
-                value={agenciaFilter}
-                onChange={(e) => setAgenciaFilter(e.target.value)}
-                className="h-9"
-              />
-            </div>
+          <div className="space-y-6">
+            {/* Filtros de Localização */}
+            <div>
+              <h4 className="text-sm font-semibold text-foreground mb-3">Localização</h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="flex flex-col gap-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Agência</Label>
+                  <Input
+                    type="text"
+                    placeholder="0 a 9999"
+                    value={agenciaFilter}
+                    onChange={(e) => setAgenciaFilter(e.target.value)}
+                    className="h-9"
+                  />
+                </div>
 
-            <div className="flex flex-col gap-2">
-              <Label className="text-sm font-medium text-muted-foreground">UF</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full h-9 justify-between"
-                  >
-                    {ufFilter.length > 0 
-                      ? `${ufFilter.length} estado${ufFilter.length > 1 ? 's' : ''} selecionado${ufFilter.length > 1 ? 's' : ''}`
-                      : "Todos os estados"
-                    }
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-60 p-0 bg-background border border-border z-50" align="start">
-                  <div className="p-3">
-                    <div className="space-y-1">
-                      {estadosBrasil.map((uf) => (
-                        <div key={uf} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`uf-${uf}`}
-                            checked={ufFilter.includes(uf)}
-                            onCheckedChange={(checked) => {
-                              if (checked) {
-                                setUfFilter([...ufFilter, uf]);
-                              } else {
-                                setUfFilter(ufFilter.filter(u => u !== uf));
-                              }
-                            }}
-                          />
-                          <Label
-                            htmlFor={`uf-${uf}`}
-                            className="text-sm cursor-pointer"
-                          >
-                            {uf}
-                          </Label>
+                <div className="flex flex-col gap-2">
+                  <Label className="text-sm font-medium text-muted-foreground">UF</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full h-9 justify-between"
+                      >
+                        {ufFilter.length > 0 
+                          ? `${ufFilter.length} estado${ufFilter.length > 1 ? 's' : ''} selecionado${ufFilter.length > 1 ? 's' : ''}`
+                          : "Todos os estados"
+                        }
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-60 p-0 bg-background border border-border z-50" align="start">
+                      <div className="p-3">
+                        <div className="space-y-1">
+                          {estadosBrasil.map((uf) => (
+                            <div key={uf} className="flex items-center space-x-2">
+                              <Checkbox
+                                id={`uf-${uf}`}
+                                checked={ufFilter.includes(uf)}
+                                onCheckedChange={(checked) => {
+                                  if (checked) {
+                                    setUfFilter([...ufFilter, uf]);
+                                  } else {
+                                    setUfFilter(ufFilter.filter(u => u !== uf));
+                                  }
+                                }}
+                              />
+                              <Label
+                                htmlFor={`uf-${uf}`}
+                                className="text-sm cursor-pointer"
+                              >
+                                {uf}
+                              </Label>
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </div>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
 
-            <div className="flex flex-col gap-2">
-              <Label className="text-sm font-medium text-muted-foreground">Tipo da Agência</Label>
-              <Select value={tipoAgenciaFilter} onValueChange={setTipoAgenciaFilter}>
-                <SelectTrigger className="h-9">
-                  <SelectValue placeholder="Todos os tipos" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="convencional">Convencional</SelectItem>
-                  <SelectItem value="terceirizada">Ponto Terceirizado</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+                <div className="flex flex-col gap-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Tipo da Agência</Label>
+                  <Select value={tipoAgenciaFilter} onValueChange={setTipoAgenciaFilter}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Todos os tipos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value="convencional">Convencional</SelectItem>
+                      <SelectItem value="terceirizada">Ponto Terceirizado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            <div className="flex flex-col gap-2">
-              <Label className="text-sm font-medium text-muted-foreground">Ponto VIP</Label>
-              <Select value={pontoVipFilter} onValueChange={setPontoVipFilter}>
-                <SelectTrigger className="h-9">
-                  <SelectValue placeholder="Todos" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="sim">Sim</SelectItem>
-                  <SelectItem value="nao">Não</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="flex flex-col gap-2">
-              <Label className="text-sm font-medium text-muted-foreground">Segmento</Label>
-              <Select value={segmentFilter} onValueChange={setSegmentFilter}>
-                <SelectTrigger className="h-9">
-                  <SelectValue placeholder="Todos os segmentos" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="AA">AA</SelectItem>
-                  <SelectItem value="AB">AB</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="flex flex-col gap-2">
-              <Label className="text-sm font-medium text-muted-foreground">Equipamento</Label>
-              <Select value={equipmentFilter} onValueChange={setEquipmentFilter}>
-                <SelectTrigger className="h-9">
-                  <SelectValue placeholder="Todos os equipamentos" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  {uniqueEquipments.map(equipment => (
-                    <SelectItem key={equipment} value={equipment}>{equipment}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="flex flex-col gap-2">
-              <Label className="text-sm font-medium text-muted-foreground">Status</Label>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="h-9">
-                  <SelectValue placeholder="Todos os status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="open">Aberta</SelectItem>
-                  <SelectItem value="in-progress">Em Andamento</SelectItem>
-                  <SelectItem value="pending">Pendente</SelectItem>
-                  <SelectItem value="resolved">Resolvida</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <Label className="text-sm font-medium text-muted-foreground">Fornecedor</Label>
-              <Select value={vendorFilter} onValueChange={setVendorFilter}>
-                <SelectTrigger className="h-9">
-                  <SelectValue placeholder="Todos os fornecedores" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  {uniqueVendors.map(vendor => (
-                    <SelectItem key={vendor} value={vendor}>{vendor}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {tipoAgenciaAtual === 'terceirizada' && (
-              <div className="flex flex-col gap-2">
-                <Label className="text-sm font-medium text-muted-foreground">Transportadora</Label>
-                <Select value={transportadoraFilter} onValueChange={setTransportadoraFilter}>
-                  <SelectTrigger className="h-9">
-                    <Truck className="h-4 w-4 mr-2" />
-                    <SelectValue placeholder="Todas as transportadoras" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todas</SelectItem>
-                    {uniqueTransportadoras.map(transportadora => (
-                      <SelectItem key={transportadora} value={transportadora}>{transportadora}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex flex-col gap-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Ponto VIP</Label>
+                  <Select value={pontoVipFilter} onValueChange={setPontoVipFilter}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value="sim">Sim</SelectItem>
+                      <SelectItem value="nao">Não</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-            )}
-
-            <div className="flex flex-col gap-2">
-              <Label className="text-sm font-medium text-muted-foreground">Nº Série</Label>
-              <Input
-                type="text"
-                placeholder="Buscar por série..."
-                value={serialNumberFilter}
-                onChange={(e) => setSerialNumberFilter(e.target.value)}
-                className="h-9"
-              />
             </div>
-          </div>
-          {/* Switch para ocorrências vencidas */}
-          <div className="flex items-center space-x-2 pt-4 border-t mt-4">
-            <Switch
-              id="override-filter"
-              checked={overrideFilter}
-              onCheckedChange={setOverrideFilter}
-            />
-            <Label htmlFor="override-filter" className="text-sm font-medium">
-              Apenas ocorrências vencidas (SLA ultrapassado)
-            </Label>
+
+            {/* Filtros de Equipamento */}
+            <div>
+              <h4 className="text-sm font-semibold text-foreground mb-3">Equipamento</h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="flex flex-col gap-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Segmento</Label>
+                  <Select value={segmentFilter} onValueChange={setSegmentFilter}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Todos os segmentos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value="AA">AA</SelectItem>
+                      <SelectItem value="AB">AB</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="flex flex-col gap-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Equipamento</Label>
+                  <Select value={equipmentFilter} onValueChange={setEquipmentFilter}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Todos os equipamentos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      {uniqueEquipments.map(equipment => (
+                        <SelectItem key={equipment} value={equipment}>{equipment}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="flex flex-col gap-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Nº Série</Label>
+                  <Input
+                    type="text"
+                    placeholder="Buscar por série..."
+                    value={serialNumberFilter}
+                    onChange={(e) => setSerialNumberFilter(e.target.value)}
+                    className="h-9"
+                  />
+                </div>
+                
+                <div className="flex flex-col gap-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Status</Label>
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Todos os status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value="open">Aberta</SelectItem>
+                      <SelectItem value="in-progress">Em Andamento</SelectItem>
+                      <SelectItem value="pending">Pendente</SelectItem>
+                      <SelectItem value="resolved">Resolvida</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            {/* Filtros de Fornecedor */}
+            <div>
+              <h4 className="text-sm font-semibold text-foreground mb-3">Fornecedor</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Fornecedor</Label>
+                  <Select value={vendorFilter} onValueChange={setVendorFilter}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Todos os fornecedores" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      {uniqueVendors.map(vendor => (
+                        <SelectItem key={vendor} value={vendor}>{vendor}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {tipoAgenciaAtual === 'terceirizada' && (
+                  <div className="flex flex-col gap-2">
+                    <Label className="text-sm font-medium text-muted-foreground">Transportadora</Label>
+                    <Select value={transportadoraFilter} onValueChange={setTransportadoraFilter}>
+                      <SelectTrigger className="h-9">
+                        <Truck className="h-4 w-4 mr-2" />
+                        <SelectValue placeholder="Todas as transportadoras" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todas</SelectItem>
+                        {uniqueTransportadoras.map(transportadora => (
+                          <SelectItem key={transportadora} value={transportadora}>{transportadora}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Filtros Especiais */}
+            <div>
+              <h4 className="text-sm font-semibold text-foreground mb-3">Filtros Especiais</h4>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="override-filter"
+                  checked={overrideFilter}
+                  onCheckedChange={setOverrideFilter}
+                />
+                <Label htmlFor="override-filter" className="text-sm font-medium">
+                  Apenas ocorrências vencidas
+                </Label>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
