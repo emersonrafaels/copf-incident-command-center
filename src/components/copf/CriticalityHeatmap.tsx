@@ -439,9 +439,9 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                               <span className="text-xs opacity-80">AGING</span>
                             </div>
                             <div className="text-sm font-bold">
-                              {item.aging}d vs {item.agingBaseline}d
+                              {item.aging}d
                             </div>
-                            <div className="text-xs opacity-70">atual vs baseline</div>
+                            <div className="text-xs opacity-70">baseline: {item.agingBaseline}d</div>
                           </div>
 
                           {/* Volume vs Baseline */}
@@ -451,7 +451,7 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                               <span className="text-xs opacity-80">VOLUME</span>
                             </div>
                             <div className="text-sm font-bold">{item.percentualVolumeBaseline}%</div>
-                            <div className="text-xs opacity-70">do baseline</div>
+                            <div className="text-xs opacity-70">baseline: 100%</div>
                           </div>
 
                           {/* SLA Status */}
@@ -467,11 +467,9 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                               <span className="text-xs opacity-80">SLA</span>
                             </div>
                             <div className="text-sm font-bold">
-                              {item.slaStatus === 'above' ? `+${item.slaDifference}%` : 
-                               item.slaStatus === 'below' ? `-${item.slaDifference}%` : 
-                               'Normal'}
+                              {item.slaBreach}%
                             </div>
-                            <div className="text-xs opacity-70">vs baseline</div>
+                            <div className="text-xs opacity-70">baseline: {EQUIPMENT_BASELINES[item.equipment as keyof typeof EQUIPMENT_BASELINES]?.sla || EQUIPMENT_BASELINES.default.sla}%</div>
                           </div>
 
                           {/* Reincidência */}
@@ -481,7 +479,7 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                               <span className="text-xs opacity-80">REIN</span>
                             </div>
                             <div className="text-sm font-bold">{item.reincidenciaPercentual}%</div>
-                            <div className="text-xs opacity-70">reincidência</div>
+                            <div className="text-xs opacity-70">baseline: 0%</div>
                           </div>
                         </div>
                       </div>
