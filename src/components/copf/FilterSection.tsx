@@ -34,6 +34,7 @@ export function FilterSection({ className }: FilterSectionProps) {
     serialNumberFilter,
     overrideFilter,
     vendorPriorityFilter,
+    reincidentFilter,
     hasActiveFilters,
     updateFilter,
     clearAllFilters
@@ -132,7 +133,8 @@ export function FilterSection({ className }: FilterSectionProps) {
                         transportadora: transportadoraFilterMulti.length > 0,
                         serie: serialNumberFilter !== '',
                         vencidas: overrideFilter,
-                        priorizado: vendorPriorityFilter
+                        priorizado: vendorPriorityFilter,
+                        reincidentes: reincidentFilter
                       }).filter(Boolean).length} filtro{Object.values({
                         agencia: agenciaFilter.length > 0,
                         uf: ufFilter.length > 0,
@@ -145,7 +147,8 @@ export function FilterSection({ className }: FilterSectionProps) {
                         transportadora: transportadoraFilterMulti.length > 0,
                         serie: serialNumberFilter !== '',
                         vencidas: overrideFilter,
-                        priorizado: vendorPriorityFilter
+                        priorizado: vendorPriorityFilter,
+                        reincidentes: reincidentFilter
                       }).filter(Boolean).length !== 1 ? 's' : ''} ativo{Object.values({
                         agencia: agenciaFilter.length > 0,
                         uf: ufFilter.length > 0,
@@ -158,7 +161,8 @@ export function FilterSection({ className }: FilterSectionProps) {
                         transportadora: transportadoraFilterMulti.length > 0,
                         serie: serialNumberFilter !== '',
                         vencidas: overrideFilter,
-                        priorizado: vendorPriorityFilter
+                        priorizado: vendorPriorityFilter,
+                        reincidentes: reincidentFilter
                       }).filter(Boolean).length !== 1 ? 's' : ''}
                     </Badge>
                     <Button
@@ -692,7 +696,7 @@ export function FilterSection({ className }: FilterSectionProps) {
                   </Button>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="space-y-4">
-                  <div className="responsive-grid responsive-grid-2">
+                  <div className="responsive-grid responsive-grid-3">
                     {/* Ocorrências Vencidas */}
                     <div className="flex items-center space-x-2 p-3 border border-border/50 rounded-lg bg-background/50 hover:bg-accent/10 transition-colors">
                       <Switch
@@ -716,6 +720,19 @@ export function FilterSection({ className }: FilterSectionProps) {
                       />
                       <Label htmlFor="vendor-priority-filter" className="text-sm cursor-pointer select-none">
                         Priorizadas com o Fornecedor
+                      </Label>
+                    </div>
+
+                    {/* Ocorrências Reincidentes */}
+                    <div className="flex items-center space-x-2 p-3 border border-border/50 rounded-lg bg-background/50 hover:bg-accent/10 transition-colors">
+                      <Switch
+                        id="reincident-filter"
+                        checked={reincidentFilter}
+                        onCheckedChange={(checked) => updateFilter('reincidentFilter', checked)}
+                        className="data-[state=checked]:bg-primary"
+                      />
+                      <Label htmlFor="reincident-filter" className="text-sm cursor-pointer select-none">
+                        Ocorrências Reincidentes
                       </Label>
                     </div>
                   </div>

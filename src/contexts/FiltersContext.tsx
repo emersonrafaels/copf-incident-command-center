@@ -25,6 +25,7 @@ export interface FiltersState {
   // Filtros especiais
   overrideFilter: boolean;
   vendorPriorityFilter: boolean;
+  reincidentFilter: boolean;
   
   // Filtros de período
   filterPeriod: string;
@@ -61,6 +62,7 @@ const defaultFilters: FiltersState = {
   
   overrideFilter: false,
   vendorPriorityFilter: false,
+  reincidentFilter: false,
   
   filterPeriod: '30-days',
   customDateRange: {}
@@ -94,6 +96,7 @@ export const FiltersProvider: React.FC<{ children: ReactNode }> = ({ children })
     filters.statusFilter !== 'all' ||
     filters.overrideFilter ||
     filters.vendorPriorityFilter ||
+    filters.reincidentFilter ||
     filters.vendorFilter !== 'all' ||
     filters.transportadoraFilter !== 'all' ||
     filters.agenciaFilter.length > 0 ||
