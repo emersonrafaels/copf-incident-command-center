@@ -49,7 +49,7 @@ export function useDashboardData() {
     const getUniqueAgencyNumber = (): string => {
       let agencyNum: string;
       do {
-        agencyNum = String(Math.floor(Math.random() * 1000) + 1).padStart(4, '0');
+        agencyNum = String(Math.floor(Math.random() * 9999) + 1).padStart(4, '0');
       } while (usedAgencyNumbers.has(agencyNum));
       usedAgencyNumbers.add(agencyNum);
       return agencyNum;
