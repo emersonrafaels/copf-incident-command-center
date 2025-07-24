@@ -35,6 +35,12 @@ const Ocorrencias = () => {
   const [segmentFilter, setSegmentFilter] = useState('all')
   const [equipmentFilter, setEquipmentFilter] = useState('all')
   const [serialNumberFilter, setSerialNumberFilter] = useState('')
+  const [vendorFilter, setVendorFilter] = useState('all')
+  const [transportadoraFilter, setTransportadoraFilter] = useState('all')
+  const [agenciaFilter, setAgenciaFilter] = useState('')
+  const [ufFilter, setUfFilter] = useState('all')
+  const [tipoAgenciaFilter, setTipoAgenciaFilter] = useState('all')
+  const [pontoVipFilter, setPontoVipFilter] = useState('all')
   const [showBot, setShowBot] = useState(false)
   const [priorityModalOpen, setPriorityModalOpen] = useState(false)
   const [selectedPriorityOccurrence, setSelectedPriorityOccurrence] = useState(null)
@@ -51,12 +57,40 @@ const Ocorrencias = () => {
     const matchesSegment = segmentFilter === 'all' || occurrence.segment === segmentFilter
     const matchesEquipment = equipmentFilter === 'all' || occurrence.equipment === equipmentFilter
     const matchesSerial = !serialNumberFilter || occurrence.serialNumber.toLowerCase().includes(serialNumberFilter.toLowerCase())
+    const matchesVendor = vendorFilter === 'all' || occurrence.vendor === vendorFilter
+    
+    // Filtro de agência por número
+    const matchesAgencia = !agenciaFilter || occurrence.agency.includes(agenciaFilter)
+    
+    // Filtro de UF
+    const agencyUF = occurrence.agency.split(' - ')[1] || 'SP'; // Simular UF baseado na agência
+    const matchesUF = ufFilter === 'all' || agencyUF === ufFilter
+    
+    // Simular tipo de agência baseado na agência
+    const tipoAgencia = occurrence.agency.includes('Terceirizada') ? 'terceirizada' : 'convencional'
+    const matchesTipoAgencia = tipoAgenciaFilter === 'all' || tipoAgencia === tipoAgenciaFilter
+    
+    // Simular ponto VIP (agências com número terminado em 0, 5 são VIP)
+    const agencyNumber = occurrence.agency.match(/\d+/)?.[0] || '0'
+    const isVip = agencyNumber.endsWith('0') || agencyNumber.endsWith('5')
+    const matchesPontoVip = pontoVipFilter === 'all' || 
+      (pontoVipFilter === 'sim' && isVip) || 
+      (pontoVipFilter === 'nao' && !isVip)
+    
+    // Filtro de transportadora apenas para terceirizadas
+    const matchesTransportadora = transportadoraFilter === 'all' || 
+      (tipoAgencia === 'terceirizada' && 
+       (occurrence.vendor.includes('Express') ? 'Express Logística' : 
+        occurrence.vendor.includes('Tech') ? 'TechTransporte' : 'LogiCorp') === transportadoraFilter)
     
     // Simular lógica de priorização para fornecedor (críticas e altas são priorizadas)
     const isVendorPriority = occurrence.severity === 'critical' || occurrence.severity === 'high'
     const matchesVendorPriority = !vendorPriorityFilter || isVendorPriority
 
-    return matchesSearch && matchesStatus && matchesSeverity && matchesSegment && matchesEquipment && matchesSerial && matchesVendorPriority
+    return matchesSearch && matchesStatus && matchesSeverity && matchesSegment && 
+           matchesEquipment && matchesSerial && matchesVendor && matchesAgencia &&
+           matchesUF && matchesTipoAgencia && matchesPontoVip && matchesTransportadora &&
+           matchesVendorPriority
   })
 
   // Mapeamento de equipamentos por segmento
@@ -80,6 +114,19 @@ const Ocorrencias = () => {
   };
 
   const uniqueEquipments = getFilteredEquipments();
+  const uniqueVendors = Array.from(new Set(occurrences.map(o => o.vendor))).sort();
+  const uniqueTransportadoras = ['Express Logística', 'TechTransporte', 'LogiCorp'];
+  
+  // Estados brasileiros
+  const estadosBrasil = [
+    'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 
+    'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 
+    'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
+  ];
+
+  // Verificar tipo de agência atual (para mostrar filtros condicionais)
+  const tipoAgenciaAtual = tipoAgenciaFilter === 'terceirizada' ? 'terceirizada' : 
+                           tipoAgenciaFilter === 'convencional' ? 'convencional' : 'all';
 
   // Resetar filtro de equipamento quando segmento mudar
   useEffect(() => {
@@ -90,7 +137,9 @@ const Ocorrencias = () => {
 
   // Verificar se há filtros ativos
   const hasActiveFilters = searchTerm || statusFilter !== 'all' || severityFilter !== 'all' || 
-    segmentFilter !== 'all' || equipmentFilter !== 'all' || serialNumberFilter || vendorPriorityFilter
+    segmentFilter !== 'all' || equipmentFilter !== 'all' || serialNumberFilter || vendorPriorityFilter ||
+    vendorFilter !== 'all' || transportadoraFilter !== 'all' || agenciaFilter ||
+    ufFilter !== 'all' || tipoAgenciaFilter !== 'all' || pontoVipFilter !== 'all'
 
   // Limpar todos os filtros
   const clearAllFilters = () => {
@@ -101,6 +150,12 @@ const Ocorrencias = () => {
     setEquipmentFilter('all')
     setSerialNumberFilter('')
     setVendorPriorityFilter(false)
+    setVendorFilter('all')
+    setTransportadoraFilter('all')
+    setAgenciaFilter('')
+    setUfFilter('all')
+    setTipoAgenciaFilter('all')
+    setPontoVipFilter('all')
   }
 
   const handleViewDetails = (occurrence) => {
@@ -346,7 +401,61 @@ const Ocorrencias = () => {
               </div>
 
               {/* Filtros Agrupados */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                {/* Agência e UF */}
+                <div className="space-y-3">
+                  <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Building className="h-4 w-4" />
+                    Agência & UF
+                  </label>
+                  <Input
+                    type="text"
+                    placeholder="0 a 9999"
+                    value={agenciaFilter}
+                    onChange={(e) => setAgenciaFilter(e.target.value)}
+                    className="h-10"
+                  />
+                  <Select value={ufFilter} onValueChange={setUfFilter}>
+                    <SelectTrigger className="h-10">
+                      <SelectValue placeholder="Selecionar UF" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos os Estados</SelectItem>
+                      {estadosBrasil.map(uf => (
+                        <SelectItem key={uf} value={uf}>{uf}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Tipo de Agência e VIP */}
+                <div className="space-y-3">
+                  <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Building className="h-4 w-4" />
+                    Tipo & VIP
+                  </label>
+                  <Select value={tipoAgenciaFilter} onValueChange={setTipoAgenciaFilter}>
+                    <SelectTrigger className="h-10">
+                      <SelectValue placeholder="Tipo de agência" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos os Tipos</SelectItem>
+                      <SelectItem value="convencional">Convencional</SelectItem>
+                      <SelectItem value="terceirizada">Ponto Terceirizado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={pontoVipFilter} onValueChange={setPontoVipFilter}>
+                    <SelectTrigger className="h-10">
+                      <SelectValue placeholder="Ponto VIP" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value="sim">Sim</SelectItem>
+                      <SelectItem value="nao">Não</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 {/* Status e Severidade */}
                 <div className="space-y-3">
                   <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
@@ -381,7 +490,7 @@ const Ocorrencias = () => {
                 {/* Segmento e Equipamento */}
                 <div className="space-y-3">
                   <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                    <Building className="h-4 w-4" />
+                    <Package className="h-4 w-4" />
                     Segmento & Equipamento
                   </label>
                   <Select value={segmentFilter} onValueChange={setSegmentFilter}>
@@ -407,7 +516,41 @@ const Ocorrencias = () => {
                   </Select>
                 </div>
 
-                {/* Número de Série */}
+                {/* Fornecedor e Transportadora */}
+                <div className="space-y-3">
+                  <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Package className="h-4 w-4" />
+                    Fornecedor{tipoAgenciaAtual === 'terceirizada' ? ' & Transportadora' : ''}
+                  </label>
+                  <Select value={vendorFilter} onValueChange={setVendorFilter}>
+                    <SelectTrigger className="h-10">
+                      <SelectValue placeholder="Selecionar fornecedor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos os Fornecedores</SelectItem>
+                      {uniqueVendors.map(vendor => (
+                        <SelectItem key={vendor} value={vendor}>{vendor}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {tipoAgenciaAtual === 'terceirizada' && (
+                    <Select value={transportadoraFilter} onValueChange={setTransportadoraFilter}>
+                      <SelectTrigger className="h-10">
+                        <SelectValue placeholder="Selecionar transportadora" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todas as Transportadoras</SelectItem>
+                        {uniqueTransportadoras.map(transportadora => (
+                          <SelectItem key={transportadora} value={transportadora}>{transportadora}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+              </div>
+
+              {/* Número de Série e Opções Especiais */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-3">
                   <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                     <Hash className="h-4 w-4" />
@@ -424,7 +567,6 @@ const Ocorrencias = () => {
                   </div>
                 </div>
 
-                {/* Opções Especiais */}
                 <div className="space-y-3">
                   <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                     <Star className="h-4 w-4" />

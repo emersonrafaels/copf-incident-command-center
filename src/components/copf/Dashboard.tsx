@@ -47,6 +47,10 @@ export function Dashboard() {
   const [overrideFilter, setOverrideFilter] = useState<boolean>(false);
   const [vendorFilter, setVendorFilter] = useState<string>('all');
   const [transportadoraFilter, setTransportadoraFilter] = useState<string>('all');
+  const [agenciaFilter, setAgenciaFilter] = useState<string>('');
+  const [ufFilter, setUfFilter] = useState<string>('all');
+  const [tipoAgenciaFilter, setTipoAgenciaFilter] = useState<string>('all');
+  const [pontoVipFilter, setPontoVipFilter] = useState<string>('all');
 
   const handleExport = async () => {
     toast({
@@ -123,8 +127,29 @@ export function Dashboard() {
     if (statusFilter !== 'all' && occurrence.status !== statusFilter) return false;
     if (vendorFilter !== 'all' && occurrence.vendor !== vendorFilter) return false;
     
-    // Filtro de transportadora apenas para AB
-    if (transportadoraFilter !== 'all' && occurrence.segment === 'AB') {
+    // Filtro de agência por número
+    if (agenciaFilter && !occurrence.agency.includes(agenciaFilter)) return false;
+    
+    // Filtro de UF
+    if (ufFilter !== 'all') {
+      const agencyUF = occurrence.agency.split(' - ')[1] || 'SP'; // Simular UF baseado na agência
+      if (agencyUF !== ufFilter) return false;
+    }
+    
+    // Simular tipo de agência baseado na agência
+    const tipoAgencia = occurrence.agency.includes('Terceirizada') ? 'terceirizada' : 'convencional';
+    if (tipoAgenciaFilter !== 'all' && tipoAgencia !== tipoAgenciaFilter) return false;
+    
+    // Simular ponto VIP (agências com número terminado em 0, 5 são VIP)
+    const agencyNumber = occurrence.agency.match(/\d+/)?.[0] || '0';
+    const isVip = agencyNumber.endsWith('0') || agencyNumber.endsWith('5');
+    if (pontoVipFilter !== 'all') {
+      const expectedVip = pontoVipFilter === 'sim';
+      if (isVip !== expectedVip) return false;
+    }
+    
+    // Filtro de transportadora apenas para terceirizadas
+    if (transportadoraFilter !== 'all' && tipoAgencia === 'terceirizada') {
       const transportadora = occurrence.vendor.includes('Express') ? 'Express Logística' : 
                            occurrence.vendor.includes('Tech') ? 'TechTransporte' : 'LogiCorp';
       if (transportadora !== transportadoraFilter) return false;
@@ -165,6 +190,17 @@ export function Dashboard() {
   const uniqueEquipments = getFilteredEquipments();
   const uniqueVendors = Array.from(new Set(occurrences.map(o => o.vendor))).sort();
   const uniqueTransportadoras = ['Express Logística', 'TechTransporte', 'LogiCorp'];
+  
+  // Estados brasileiros
+  const estadosBrasil = [
+    'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 
+    'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 
+    'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
+  ];
+
+  // Verificar tipo de agência atual (para mostrar filtros condicionais)
+  const tipoAgenciaAtual = tipoAgenciaFilter === 'terceirizada' ? 'terceirizada' : 
+                           tipoAgenciaFilter === 'convencional' ? 'convencional' : 'all';
 
   // Resetar filtro de equipamento quando segmento mudar
   useEffect(() => {
@@ -176,7 +212,8 @@ export function Dashboard() {
   // Verificar se há filtros ativos
   const hasActiveFilters = segmentFilter !== 'all' || equipmentFilter !== 'all' || 
     serialNumberFilter || statusFilter !== 'all' || overrideFilter || 
-    vendorFilter !== 'all' || transportadoraFilter !== 'all';
+    vendorFilter !== 'all' || transportadoraFilter !== 'all' || agenciaFilter ||
+    ufFilter !== 'all' || tipoAgenciaFilter !== 'all' || pontoVipFilter !== 'all';
 
   // Limpar todos os filtros
   const clearAllFilters = () => {
@@ -187,6 +224,10 @@ export function Dashboard() {
     setOverrideFilter(false);
     setVendorFilter('all');
     setTransportadoraFilter('all');
+    setAgenciaFilter('');
+    setUfFilter('all');
+    setTipoAgenciaFilter('all');
+    setPontoVipFilter('all');
   };
 
   return (
@@ -296,7 +337,61 @@ export function Dashboard() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
+            <div className="flex flex-col gap-2">
+              <Label className="text-sm font-medium text-muted-foreground">Agência</Label>
+              <Input
+                type="text"
+                placeholder="0 a 9999"
+                value={agenciaFilter}
+                onChange={(e) => setAgenciaFilter(e.target.value)}
+                className="h-9"
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label className="text-sm font-medium text-muted-foreground">UF</Label>
+              <Select value={ufFilter} onValueChange={setUfFilter}>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Todos os estados" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  {estadosBrasil.map(uf => (
+                    <SelectItem key={uf} value={uf}>{uf}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label className="text-sm font-medium text-muted-foreground">Tipo da Agência</Label>
+              <Select value={tipoAgenciaFilter} onValueChange={setTipoAgenciaFilter}>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Todos os tipos" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="convencional">Convencional</SelectItem>
+                  <SelectItem value="terceirizada">Ponto Terceirizado</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label className="text-sm font-medium text-muted-foreground">Ponto VIP</Label>
+              <Select value={pontoVipFilter} onValueChange={setPontoVipFilter}>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Todos" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="sim">Sim</SelectItem>
+                  <SelectItem value="nao">Não</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
             <div className="flex flex-col gap-2">
               <Label className="text-sm font-medium text-muted-foreground">Segmento</Label>
               <Select value={segmentFilter} onValueChange={setSegmentFilter}>
@@ -357,7 +452,7 @@ export function Dashboard() {
               </Select>
             </div>
 
-            {segmentFilter === 'AB' && (
+            {tipoAgenciaAtual === 'terceirizada' && (
               <div className="flex flex-col gap-2">
                 <Label className="text-sm font-medium text-muted-foreground">Transportadora</Label>
                 <Select value={transportadoraFilter} onValueChange={setTransportadoraFilter}>
@@ -386,7 +481,6 @@ export function Dashboard() {
               />
             </div>
           </div>
-
           {/* Switch para ocorrências vencidas */}
           <div className="flex items-center space-x-2 pt-4 border-t mt-4">
             <Switch
