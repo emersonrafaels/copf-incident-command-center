@@ -178,11 +178,11 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
   }, [occurrences]);
 
   const getCriticalityColor = (score: number) => {
-    if (score >= 80) return 'bg-gradient-to-br from-red-600 to-red-700';
-    if (score >= 60) return 'bg-gradient-to-br from-orange-600 to-orange-700';
-    if (score >= 40) return 'bg-gradient-to-br from-yellow-600 to-yellow-700';
-    if (score >= 20) return 'bg-gradient-to-br from-blue-600 to-blue-700';
-    return 'bg-gradient-to-br from-green-600 to-green-700';
+    if (score >= 80) return 'bg-gradient-to-br from-red-500 to-red-600 shadow-lg shadow-red-500/25';
+    if (score >= 60) return 'bg-gradient-to-br from-orange-500 to-orange-600 shadow-lg shadow-orange-500/25';
+    if (score >= 40) return 'bg-gradient-to-br from-amber-500 to-amber-600 shadow-lg shadow-amber-500/25';
+    if (score >= 20) return 'bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg shadow-blue-500/25';
+    return 'bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg shadow-emerald-500/25';
   };
 
   const getCriticalityLabel = (score: number) => {
@@ -470,7 +470,7 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                                     return reincidenceRate > 30 ? 'text-purple-300' : 'opacity-50';
                                   })()
                                 }`} />
-                                <span className="text-[9px] opacity-75">RECORRÊNCIA</span>
+                                <span className="text-[8px] opacity-75 truncate">REC</span>
                               </div>
                               <span className="text-[10px] font-medium">
                                 {(() => {
