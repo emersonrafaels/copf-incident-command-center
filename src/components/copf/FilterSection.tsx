@@ -710,19 +710,6 @@ export function FilterSection({ className }: FilterSectionProps) {
                       </Label>
                     </div>
 
-                    {/* Priorizadas com o Fornecedor */}
-                    <div className="flex items-center space-x-2 p-3 border border-border/50 rounded-lg bg-background/50 hover:bg-accent/10 transition-colors">
-                      <Switch
-                        id="vendor-priority-filter"
-                        checked={vendorPriorityFilter}
-                        onCheckedChange={(checked) => updateFilter('vendorPriorityFilter', checked)}
-                        className="data-[state=checked]:bg-primary"
-                      />
-                      <Label htmlFor="vendor-priority-filter" className="text-sm cursor-pointer select-none">
-                        Priorizadas com o Fornecedor
-                      </Label>
-                    </div>
-
                     {/* Ocorrências Reincidentes */}
                     <div className="flex items-center space-x-2 p-3 border border-border/50 rounded-lg bg-background/50 hover:bg-accent/10 transition-colors">
                       <Switch
@@ -733,6 +720,19 @@ export function FilterSection({ className }: FilterSectionProps) {
                       />
                       <Label htmlFor="reincident-filter" className="text-sm cursor-pointer select-none">
                         Ocorrências Reincidentes
+                      </Label>
+                    </div>
+
+                    {/* Priorizadas com o Fornecedor */}
+                    <div className="flex items-center space-x-2 p-3 border border-border/50 rounded-lg bg-background/50 hover:bg-accent/10 transition-colors">
+                      <Switch
+                        id="vendor-priority-filter"
+                        checked={vendorPriorityFilter}
+                        onCheckedChange={(checked) => updateFilter('vendorPriorityFilter', checked)}
+                        className="data-[state=checked]:bg-primary"
+                      />
+                      <Label htmlFor="vendor-priority-filter" className="text-sm cursor-pointer select-none">
+                        Priorizadas com o Fornecedor
                       </Label>
                     </div>
                   </div>
