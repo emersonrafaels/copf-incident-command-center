@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { MetricCard } from "./MetricCard";
 import { StatusBadge } from "./StatusBadge";
-import { ClickableCharts } from "./ClickableCharts";
+import { EnhancedStorytellingCharts } from "./EnhancedStorytellingCharts";
 import { OccurrenceModal } from "./OccurrenceModal";
 import { CriticalityHeatmap } from "./CriticalityHeatmap";
 import { FilterSection } from "./FilterSection";
@@ -356,7 +356,7 @@ export function Dashboard() {
       {/* Gráficos Clicáveis */}
       <div className="space-y-6">
         <h2 className="text-responsive-2xl font-bold text-foreground">Análise de Dados - Clique para Filtrar</h2>
-        <ClickableCharts occurrences={filteredOccurrences} />
+        <EnhancedStorytellingCharts occurrences={filteredOccurrences} />
       </div>
 
       {/* Lista de Ocorrências Recentes */}
@@ -528,7 +528,7 @@ export function Dashboard() {
         {/* Criticality Heatmap */}
         <CriticalityHeatmap occurrences={filteredOccurrences} />
 
-        {/* Interactive Charts */}
+        {/* Enhanced Storytelling Charts */}
         {isLoading ? <div className="responsive-grid responsive-grid-2">
             {Array.from({
           length: 4
@@ -540,7 +540,7 @@ export function Dashboard() {
                   <Skeleton className="h-[300px] w-full" />
                 </CardContent>
               </Card>)}
-          </div> : <ClickableCharts occurrences={filteredOccurrences} />}
+          </div> : <EnhancedStorytellingCharts occurrences={filteredOccurrences} />}
       </div>
 
       {/* Occurrence Details Modal */}
