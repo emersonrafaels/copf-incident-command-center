@@ -21,6 +21,7 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+
 export function Dashboard() {
   const {
     occurrences,
@@ -32,9 +33,8 @@ export function Dashboard() {
     metrics,
     refreshData
   } = useDashboardData();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+  
   const [selectedOccurrence, setSelectedOccurrence] = useState<any>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [filterPeriod, setFilterPeriod] = useState('30-days');
@@ -47,7 +47,7 @@ export function Dashboard() {
   const [overrideFilter, setOverrideFilter] = useState<boolean>(false);
   const [vendorFilter, setVendorFilter] = useState<string>('all');
   const [transportadoraFilter, setTransportadoraFilter] = useState<string>('all');
-  const [showAllOccurrences, setShowAllOccurrences] = useState<boolean>(false);
+
   const handleExport = async () => {
     toast({
       title: "Exportação iniciada",
@@ -55,7 +55,6 @@ export function Dashboard() {
     });
 
     try {
-      // Capturar a dashboard como imagem
       const dashboardElement = document.getElementById('dashboard-content');
       if (!dashboardElement) return;
 
@@ -66,21 +65,18 @@ export function Dashboard() {
       });
 
       const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('l', 'mm', 'a4'); // landscape orientation
+      const pdf = new jsPDF('l', 'mm', 'a4');
       
-      const imgWidth = 297; // A4 width in mm (landscape)
-      const pageHeight = 210; // A4 height in mm (landscape)
+      const imgWidth = 297;
+      const pageHeight = 210;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       let heightLeft = imgHeight;
-
       let position = 0;
 
-      // Add title
       pdf.setFontSize(16);
       pdf.text('Dashboard COPF - ' + new Date().toLocaleDateString('pt-BR'), 20, 20);
       
       position = 30;
-      
       pdf.addImage(imgData, 'PNG', 10, position, imgWidth - 20, imgHeight);
       heightLeft -= pageHeight;
 
@@ -105,10 +101,12 @@ export function Dashboard() {
       });
     }
   };
+
   const handleOccurrenceClick = (occurrence: any) => {
     setSelectedOccurrence(occurrence);
     setModalOpen(true);
   };
+
   const handleRefresh = () => {
     refreshData();
     toast({
@@ -127,7 +125,6 @@ export function Dashboard() {
     
     // Filtro de transportadora apenas para AB
     if (transportadoraFilter !== 'all' && occurrence.segment === 'AB') {
-      // Simular transportadora baseada no vendor
       const transportadora = occurrence.vendor.includes('Express') ? 'Express Logística' : 
                            occurrence.vendor.includes('Tech') ? 'TechTransporte' : 'LogiCorp';
       if (transportadora !== transportadoraFilter) return false;
@@ -166,11 +163,7 @@ export function Dashboard() {
   };
 
   const uniqueEquipments = getFilteredEquipments();
-
-  // Obter fornecedores únicos
   const uniqueVendors = Array.from(new Set(occurrences.map(o => o.vendor))).sort();
-
-  // Obter transportadoras (simuladas para AB)
   const uniqueTransportadoras = ['Express Logística', 'TechTransporte', 'LogiCorp'];
 
   // Resetar filtro de equipamento quando segmento mudar
@@ -180,28 +173,13 @@ export function Dashboard() {
     }
   }, [segmentFilter]);
 
-  // Verificar se há filtros ativos
-  const hasActiveFilters = segmentFilter !== 'all' || equipmentFilter !== 'all' || 
-    serialNumberFilter || statusFilter !== 'all' || overrideFilter || 
-    vendorFilter !== 'all' || transportadoraFilter !== 'all';
-
-  // Limpar todos os filtros
-  const clearAllFilters = () => {
-    setSegmentFilter('all');
-    setEquipmentFilter('all');
-    setSerialNumberFilter('');
-    setStatusFilter('all');
-    setOverrideFilter(false);
-    setVendorFilter('all');
-    setTransportadoraFilter('all');
-  };
-  return <div className="space-y-8">
+  return (
+    <div className="space-y-8">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
         <div>
           <h1 className="text-responsive-3xl font-bold text-foreground">Ferramenta de Acompanhamento - COPF</h1>
-          <p className="text-responsive-base text-muted-foreground">Itaú Unibanco | Gestão de Ocorrências
-        </p>
+          <p className="text-responsive-base text-muted-foreground">Itaú Unibanco | Gestão de Ocorrências</p>
         </div>
         <div className="flex flex-wrap gap-3">
           {/* Filtro de Período */}
@@ -280,322 +258,88 @@ export function Dashboard() {
 
       {/* Dashboard Content Wrapper for PDF Export */}
       <div id="dashboard-content">
-
-      {/* KPI Cards */}
-      {isLoading ? <div className="responsive-grid responsive-grid-4">
-          {Array.from({
-        length: 4
-      }).map((_, i) => <Card key={i} className="animate-pulse">
-              <CardHeader className="pb-2">
-                <Skeleton className="h-4 w-32" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-8 w-20 mb-2" />
-                <Skeleton className="h-3 w-28" />
-              </CardContent>
-            </Card>)}
-        </div> : <div className="responsive-grid responsive-grid-4 mb-6">
-          <MetricCard title="Total de Ocorrências" value={metrics.totalOccurrences} change="+12% vs mês anterior" changeType="negative" icon={<AlertTriangle className="h-5 w-5" />} description={`${filterPeriod === '30-days' ? 'Últimos 30 dias' : 'Últimos 90 dias'}`} />
-          <MetricCard title="Ocorrências Resolvidas" value={metrics.resolvedOccurrences} change="+8% vs mês anterior" changeType="positive" icon={<CheckCircle2 className="h-5 w-5" />} description={`${metrics.resolutionRate}% taxa de resolução`} />
-          <MetricCard title="MTTR Médio" value={metrics.avgMTTR} change="-15min vs mês anterior" changeType="positive" icon={<Clock className="h-5 w-5" />} description="Tempo médio de resolução" />
-          <MetricCard title="Agências Afetadas" value={metrics.affectedAgencies} change="2 novas esta semana" changeType="neutral" icon={<MapPin className="h-5 w-5" />} description="De 234 totais" />
-        </div>}
-
-      {/* Criticality Heatmap */}
-      <CriticalityHeatmap occurrences={filteredOccurrences} />
-
-      {/* Interactive Charts */}
-      {isLoading ? <div className="responsive-grid responsive-grid-2">
-          {Array.from({
-        length: 4
-      }).map((_, i) => <Card key={i} className="animate-pulse">
-              <CardHeader>
-                <Skeleton className="h-6 w-40" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-[300px] w-full" />
-              </CardContent>
-            </Card>)}
-        </div> : <InteractiveCharts severityData={severityData} timelineData={timelineData} mttrData={mttrData} equipmentData={equipmentData} occurrences={occurrences} />}
-
-      {/* Recent Occurrences */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5" />
-              Ocorrências Recentes
-              {hasActiveFilters && (
-                <Badge variant="secondary" className="ml-2">
-                  {filteredOccurrences.length} filtradas
-                </Badge>
-              )}
-            </div>
-            {hasActiveFilters && (
-              <Button variant="outline" size="sm" onClick={clearAllFilters}>
-                <Filter className="h-4 w-4 mr-2" />
-                Limpar Filtros
-              </Button>
-            )}
-          </CardTitle>
-          
-          {/* Filtros */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 pt-4">
-            <div className="flex flex-col gap-1">
-              <Label className="text-sm font-medium text-muted-foreground">Segmento</Label>
-              <Select value={segmentFilter} onValueChange={setSegmentFilter}>
-                <SelectTrigger className="h-8">
-                  <SelectValue placeholder="Segmento" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="AA">AA</SelectItem>
-                  <SelectItem value="AB">AB</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="flex flex-col gap-1">
-              <Label className="text-sm font-medium text-muted-foreground">Equipamento</Label>
-              <Select value={equipmentFilter} onValueChange={setEquipmentFilter}>
-                <SelectTrigger className="h-8">
-                  <SelectValue placeholder="Equipamento" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  {uniqueEquipments.map(equipment => (
-                    <SelectItem key={equipment} value={equipment}>{equipment}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="flex flex-col gap-1">
-              <Label className="text-sm font-medium text-muted-foreground">Status</Label>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="h-8">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="open">Aberta</SelectItem>
-                  <SelectItem value="in-progress">Em Andamento</SelectItem>
-                  <SelectItem value="pending">Pendente</SelectItem>
-                  <SelectItem value="resolved">Resolvida</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <Label className="text-sm font-medium text-muted-foreground">Fornecedor</Label>
-              <Select value={vendorFilter} onValueChange={setVendorFilter}>
-                <SelectTrigger className="h-8">
-                  <SelectValue placeholder="Fornecedor" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  {uniqueVendors.map(vendor => (
-                    <SelectItem key={vendor} value={vendor}>{vendor}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {segmentFilter === 'AB' && (
-              <div className="flex flex-col gap-1">
-                <Label className="text-sm font-medium text-muted-foreground">Transportadora</Label>
-                <Select value={transportadoraFilter} onValueChange={setTransportadoraFilter}>
-                  <SelectTrigger className="h-8">
-                    <Truck className="h-4 w-4 mr-2" />
-                    <SelectValue placeholder="Transportadora" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todas</SelectItem>
-                    {uniqueTransportadoras.map(transportadora => (
-                      <SelectItem key={transportadora} value={transportadora}>{transportadora}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            <div className="flex flex-col gap-1">
-              <Label className="text-sm font-medium text-muted-foreground">Nº Série</Label>
-              <Input
-                type="text"
-                placeholder="Buscar série..."
-                value={serialNumberFilter}
-                onChange={(e) => setSerialNumberFilter(e.target.value)}
-                className="h-8"
-              />
-            </div>
+        {/* KPI Cards */}
+        {isLoading ? (
+          <div className="responsive-grid responsive-grid-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Card key={i} className="animate-pulse">
+                <CardHeader className="pb-2">
+                  <Skeleton className="h-4 w-32" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-8 w-20 mb-2" />
+                  <Skeleton className="h-3 w-28" />
+                </CardContent>
+              </Card>
+            ))}
           </div>
-
-          {/* Switch para ocorrências vencidas */}
-          <div className="flex items-center space-x-2 pt-4">
-            <Switch
-              id="override-filter"
-              checked={overrideFilter}
-              onCheckedChange={setOverrideFilter}
+        ) : (
+          <div className="responsive-grid responsive-grid-4 mb-6">
+            <MetricCard 
+              title="Total de Ocorrências" 
+              value={metrics.totalOccurrences} 
+              change="+12% vs mês anterior" 
+              changeType="negative" 
+              icon={<AlertTriangle className="h-5 w-5" />} 
+              description={`${filterPeriod === '30-days' ? 'Últimos 30 dias' : 'Últimos 90 dias'}`} 
             />
-            <Label htmlFor="override-filter" className="text-sm font-medium">
-              Apenas ocorrências vencidas (SLA ultrapassado)
-            </Label>
+            <MetricCard 
+              title="Ocorrências Resolvidas" 
+              value={metrics.resolvedOccurrences} 
+              change="+8% vs mês anterior" 
+              changeType="positive" 
+              icon={<CheckCircle2 className="h-5 w-5" />} 
+              description={`${metrics.resolutionRate}% taxa de resolução`} 
+            />
+            <MetricCard 
+              title="MTTR Médio" 
+              value={metrics.avgMTTR} 
+              change="-15min vs mês anterior" 
+              changeType="positive" 
+              icon={<Clock className="h-5 w-5" />} 
+              description="Tempo médio de resolução" 
+            />
+            <MetricCard 
+              title="Agências Afetadas" 
+              value={metrics.affectedAgencies} 
+              change="2 novas esta semana" 
+              changeType="neutral" 
+              icon={<MapPin className="h-5 w-5" />} 
+              description="De 234 totais" 
+            />
           </div>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="space-y-4">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="flex items-start gap-6 p-5 border rounded-2xl animate-pulse bg-muted/20">
-                  <div className="flex flex-col gap-3">
-                    <Skeleton className="h-6 w-20 rounded-full" />
-                    <Skeleton className="h-6 w-24 rounded-full" />
-                  </div>
-                  <div className="space-y-3 flex-1">
-                    <Skeleton className="h-5 w-40" />
-                    <Skeleton className="h-4 w-56" />
-                    <Skeleton className="h-4 w-48" />
-                    <Skeleton className="h-3 w-64" />
-                  </div>
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-3 w-20" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : filteredOccurrences.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="rounded-full bg-muted/50 p-6 mb-6">
-                <AlertTriangle className="h-10 w-10 text-muted-foreground" />
-              </div>
-              <h3 className="text-xl font-semibold text-foreground mb-3">Nenhuma ocorrência encontrada</h3>
-              <p className="text-sm text-muted-foreground max-w-md leading-relaxed">
-                Não há ocorrências que correspondam aos filtros aplicados. Tente ajustar os critérios de busca.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {filteredOccurrences
-                .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                .slice(0, showAllOccurrences ? undefined : 5)
-                .map((occurrence, index) => (
-                  <div 
-                    key={occurrence.id} 
-                    className="group relative p-3 border rounded-lg hover:border-primary/30 hover:bg-accent/30 transition-all duration-200 cursor-pointer animate-fade-in"
-                    style={{ animationDelay: `${index * 30}ms` }}
-                    onClick={() => handleOccurrenceClick(occurrence)}
-                  >
-                    {/* Indicador de prioridade lateral */}
-                    <div className={`absolute left-0 top-2 bottom-2 w-1 rounded-r-full ${
-                      occurrence.severity === 'critical' ? 'bg-destructive' :
-                      occurrence.severity === 'high' ? 'bg-warning' :
-                      occurrence.severity === 'medium' ? 'bg-primary' : 'bg-muted-foreground'
-                    }`} />
-                    
-                    {/* Conteúdo principal compacto */}
-                    <div className="flex items-start gap-3 pl-2">
-                      {/* Badges de status */}
-                      <div className="flex flex-col gap-1">
-                        <StatusBadge status={occurrence.severity} />
-                        <StatusBadge status={occurrence.status} />
-                      </div>
-                      
-                      {/* Informações principais */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between mb-1">
-                          <div>
-                            <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors text-sm">
-                              {occurrence.id}
-                            </h4>
-                            <p className="text-xs text-muted-foreground">{occurrence.agency}</p>
-                          </div>
-                          <div className="text-right flex-shrink-0 ml-3">
-                            <div className="mb-1">
-                              <span className="text-xs text-muted-foreground">Fornecedor:</span>
-                              <p className="text-xs font-medium text-foreground">{occurrence.vendor}</p>
-                            </div>
-                            <div>
-                              <span className="text-xs text-muted-foreground">Data da Ocorrência:</span>
-                              <div className="text-xs font-medium text-foreground">
-                                {new Date(occurrence.createdAt).toLocaleDateString('pt-BR')} {new Date(occurrence.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        {/* Equipamento em uma linha */}
-                        <div className="flex items-center gap-2 mb-1">
-                          <Badge variant="secondary" className="text-xs px-2 py-0">
-                            {occurrence.segment}
-                          </Badge>
-                          <span className="text-sm font-medium text-foreground">{occurrence.equipment}</span>
-                          <span className="text-xs text-muted-foreground">
-                            Série: <span className="font-mono">{occurrence.serialNumber}</span>
-                          </span>
-                        </div>
-                        
-                        {/* Descrição compacta */}
-                        <p className="text-sm text-muted-foreground line-clamp-1">
-                          {occurrence.description}
-                        </p>
-                      </div>
-                      
-                      {/* Indicador de clique pequeno */}
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                        <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-            </div>
-          )}
-          
-          {/* Botão para ver mais */}
-          {filteredOccurrences.length > 0 && (
-            <div className="mt-4 pt-3 border-t">
-              <Button 
-                variant="outline" 
-                className="w-full group hover:bg-primary hover:text-primary-foreground transition-all duration-200"
-                onClick={() => setShowAllOccurrences(!showAllOccurrences)}
-              >
-                <span className="mr-2 text-sm">
-                  {showAllOccurrences 
-                    ? `Mostrar Apenas Recentes (${Math.min(5, filteredOccurrences.length)} de ${filteredOccurrences.length})`
-                    : `Ver Todas as Ocorrências (${filteredOccurrences.length} de ${occurrences.length})`
-                  }
-                </span>
-                <svg 
-                  className={`w-4 h-4 transition-transform duration-200 ${showAllOccurrences ? 'rotate-180' : ''}`} 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        )}
 
-      {/* Modal de Detalhes */}
-      <OccurrenceModal occurrence={selectedOccurrence} open={modalOpen} onOpenChange={setModalOpen} mode="view" onAssign={id => {
-      toast({
-        title: "Ocorrência reatribuída",
-        description: `Ocorrência ${id} foi reatribuída com sucesso.`
-      });
-      setModalOpen(false);
-    }} onComment={id => {
-      toast({
-        title: "Comentário adicionado",
-        description: `Comentário adicionado à ocorrência ${id}.`
-      });
-      setModalOpen(false);
-    }} />
+        {/* Criticality Heatmap */}
+        <CriticalityHeatmap occurrences={filteredOccurrences} />
+
+        {/* Interactive Charts */}
+        {isLoading ? (
+          <div className="responsive-grid responsive-grid-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Card key={i} className="animate-pulse">
+                <CardHeader>
+                  <Skeleton className="h-6 w-40" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-[300px] w-full" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <InteractiveCharts 
+            severityData={severityData} 
+            timelineData={timelineData} 
+            mttrData={mttrData} 
+            equipmentData={equipmentData} 
+            occurrences={filteredOccurrences} 
+          />
+        )}
       </div>
-    </div>;
+
+      {/* Occurrence Details Modal */}
+      <OccurrenceModal open={modalOpen} onOpenChange={setModalOpen} occurrence={selectedOccurrence} mode="view" />
+    </div>
+  );
 }
