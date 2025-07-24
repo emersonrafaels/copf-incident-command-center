@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { MetricCard } from "./MetricCard";
 import { StatusBadge } from "./StatusBadge";
-import { EnhancedInteractiveCharts } from "./EnhancedInteractiveCharts";
+import { ClickableCharts } from "./ClickableCharts";
 import { OccurrenceModal } from "./OccurrenceModal";
 import { CriticalityHeatmap } from "./CriticalityHeatmap";
 import { FilterSection } from "./FilterSection";
@@ -353,16 +353,10 @@ export function Dashboard() {
         <CriticalityHeatmap occurrences={filteredOccurrences} />
       </div>
 
-      {/* Gráficos Interativos */}
+      {/* Gráficos Clicáveis */}
       <div className="space-y-6">
-        <h2 className="text-responsive-2xl font-bold text-foreground">Análise de Dados</h2>
-        <EnhancedInteractiveCharts
-          severityData={severityData}
-          timelineData={timelineData}
-          mttrData={mttrData}
-          equipmentData={equipmentData}
-          occurrences={filteredOccurrences}
-        />
+        <h2 className="text-responsive-2xl font-bold text-foreground">Análise de Dados - Clique para Filtrar</h2>
+        <ClickableCharts occurrences={filteredOccurrences} />
       </div>
 
       {/* Lista de Ocorrências Recentes */}
@@ -546,7 +540,7 @@ export function Dashboard() {
                   <Skeleton className="h-[300px] w-full" />
                 </CardContent>
               </Card>)}
-          </div> : <EnhancedInteractiveCharts severityData={severityData} timelineData={timelineData} mttrData={mttrData} equipmentData={equipmentData} occurrences={filteredOccurrences} />}
+          </div> : <ClickableCharts occurrences={filteredOccurrences} />}
       </div>
 
       {/* Occurrence Details Modal */}
