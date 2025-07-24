@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 
 export interface OccurrenceData {
   id: string
@@ -35,8 +35,8 @@ export function useDashboardData() {
   const [occurrences, setOccurrences] = useState<OccurrenceData[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
-  // Dados mock mais realistas
-  const generateMockData = () => {
+  // Dados mock mais realistas - Memoizado para performance
+  const generateMockData = useCallback(() => {
     // Equipamentos por segmento
     const equipmentsBySegment = {
       AA: ['ATM Saque', 'ATM Depósito', 'Cassete'],
@@ -123,8 +123,8 @@ export function useDashboardData() {
       }
     ]
 
-    // Gerar ocorrências do segmento AA (1251 por dia)
-    const aaOccurrences = Array.from({ length: 1251 }, (_, i) => {
+    // Gerar ocorrências do segmento AA (reduzido para 400 para otimização)
+    const aaOccurrences = Array.from({ length: 400 }, (_, i) => {
       const equipmentList = equipmentsBySegment.AA;
       const equipment = equipmentList[Math.floor(Math.random() * equipmentList.length)];
       const agencyNum = getUniqueAgencyNumber();
@@ -151,8 +151,8 @@ export function useDashboardData() {
       }
     });
 
-    // Gerar ocorrências do segmento AB (266 por dia)
-    const abOccurrences = Array.from({ length: 266 }, (_, i) => {
+    // Gerar ocorrências do segmento AB (reduzido para 100 para otimização)
+    const abOccurrences = Array.from({ length: 100 }, (_, i) => {
       const equipmentList = equipmentsBySegment.AB;
       const equipment = equipmentList[Math.floor(Math.random() * equipmentList.length)];
       const agencyNum = getUniqueAgencyNumber();
@@ -186,7 +186,7 @@ export function useDashboardData() {
     const additionalOccurrences = [...aaOccurrences, ...abOccurrences];
 
     return [...mockOccurrences, ...additionalOccurrences]
-  }
+  }, [])
 
   useEffect(() => {
     // Simular carregamento
@@ -198,8 +198,8 @@ export function useDashboardData() {
     return () => clearTimeout(timer)
   }, [])
 
-  // Dados processados para gráficos
-  const severityData: ChartData[] = [
+  // Dados processados para gráficos - Memoizados para performance
+  const severityData: ChartData[] = useMemo(() => [
     {
       name: 'Crítico',
       value: occurrences.filter(o => o.severity === 'critical').length,
@@ -220,7 +220,7 @@ export function useDashboardData() {
       value: occurrences.filter(o => o.severity === 'low').length,
       fill: 'hsl(var(--muted-foreground))'
     }
-  ]
+  ], [occurrences])
 
   const timelineData: TimelineData[] = [
     { date: '01/01', ocorrencias: 45, resolvidas: 38 },
@@ -241,8 +241,8 @@ export function useDashboardData() {
     { mes: 'Dez', mttr: 4.2 }
   ]
 
-  // Dados dos equipamentos baseados nos segmentos AA e AB mapeados
-  const equipmentData: ChartData[] = [
+  // Dados dos equipamentos baseados nos segmentos AA e AB mapeados - Memoizados
+  const equipmentData: ChartData[] = useMemo(() => [
     { 
       name: 'Segmento AA', 
       value: occurrences.filter(o => o.segment === 'AA').length, 
@@ -253,16 +253,16 @@ export function useDashboardData() {
       value: occurrences.filter(o => o.segment === 'AB').length, 
       fill: 'hsl(var(--warning))' 
     }
-  ]
+  ], [occurrences])
 
-  const metrics = {
+  const metrics = useMemo(() => ({
     totalOccurrences: occurrences.length,
     resolvedOccurrences: occurrences.filter(o => o.status === 'encerrada').length,
     pendingOccurrences: occurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_atuacao').length,
     avgMTTR: '4.2h',
     affectedAgencies: new Set(occurrences.map(o => o.agency)).size,
     resolutionRate: Math.round((occurrences.filter(o => o.status === 'encerrada').length / occurrences.length) * 100)
-  }
+  }), [occurrences])
 
   return {
     occurrences,
@@ -272,12 +272,12 @@ export function useDashboardData() {
     mttrData,
     equipmentData,
     metrics,
-    refreshData: () => {
+    refreshData: useCallback(() => {
       setIsLoading(true)
       setTimeout(() => {
         setOccurrences(generateMockData())
         setIsLoading(false)
       }, 500)
-    }
+    }, [generateMockData])
   }
 }

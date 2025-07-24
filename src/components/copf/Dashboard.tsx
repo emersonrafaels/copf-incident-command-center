@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { MetricCard } from "./MetricCard";
 import { StatusBadge } from "./StatusBadge";
 import { InteractiveCharts } from "./InteractiveCharts";
@@ -120,8 +120,8 @@ export function Dashboard() {
     });
   };
 
-  // Filtrar ocorrências
-  const filteredOccurrences = occurrences.filter(occurrence => {
+  // Filtrar ocorrências - Memoizado para performance
+  const filteredOccurrences = useMemo(() => occurrences.filter(occurrence => {
     // Filtros multiselect
     if (segmentFilterMulti.length > 0 && !segmentFilterMulti.includes(occurrence.segment)) return false;
     if (equipmentFilterMulti.length > 0 && !equipmentFilterMulti.includes(occurrence.equipment)) return false;
@@ -174,7 +174,7 @@ export function Dashboard() {
     }
 
     return true;
-  });
+  }), [occurrences, segmentFilterMulti, equipmentFilterMulti, statusFilterMulti, vendorFilterMulti, transportadoraFilterMulti, serialNumberFilter, agenciaFilter, ufFilter, tipoAgenciaFilter, pontoVipFilter, overrideFilter, vendorPriorityFilter]);
 
   // Mapeamento de equipamentos por segmento
   const equipmentsBySegment = {

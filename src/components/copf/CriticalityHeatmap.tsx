@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,8 +23,8 @@ interface CriticalityHeatmapProps {
 }
 
 export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
-  // Calcular dados de criticidade por equipamento
-  const calculateCriticalityData = (): CriticalityData[] => {
+  // Calcular dados de criticidade por equipamento - Memoizado para performance
+  const criticalityData = useMemo((): CriticalityData[] => {
     const equipmentMap = new Map<string, any>();
     const agencyMap = new Map<string, any>();
 
@@ -155,9 +156,7 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
     });
 
     return criticalityData.sort((a, b) => b.criticalityScore - a.criticalityScore);
-  };
-
-  const criticalityData = calculateCriticalityData();
+  }, [occurrences]);
 
   const getCriticalityColor = (score: number) => {
     if (score >= 80) return 'bg-destructive';

@@ -18,7 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart'
 import { Button } from '@/components/ui/button'
 import { TrendingUp, BarChart3, PieChart as PieChartIcon, Activity } from 'lucide-react'
-import { useState } from 'react'
+import React, { useState, memo } from 'react'
 
 interface InteractiveChartsProps {
   severityData: Array<{ name: string; value: number; fill: string }>
@@ -43,7 +43,7 @@ const chartConfig = {
   }
 }
 
-export function InteractiveCharts({ severityData, timelineData, mttrData, equipmentData, occurrences }: InteractiveChartsProps) {
+const InteractiveChartsComponent = memo(function InteractiveCharts({ severityData, timelineData, mttrData, equipmentData, occurrences }: InteractiveChartsProps) {
   const [viewMode, setViewMode] = useState<'segment' | 'equipment'>('segment')
 
   const segmentData = [
@@ -434,4 +434,6 @@ export function InteractiveCharts({ severityData, timelineData, mttrData, equipm
       </Card>
     </div>
   )
-}
+})
+
+export { InteractiveChartsComponent as InteractiveCharts }

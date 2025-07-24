@@ -1,4 +1,4 @@
-import { ReactNode } from "react"
+import React, { ReactNode, memo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 
@@ -12,7 +12,7 @@ interface MetricCardProps {
   className?: string
 }
 
-export function MetricCard({ 
+export const MetricCard = memo(function MetricCard({ 
   title, 
   value, 
   change, 
@@ -61,4 +61,4 @@ export function MetricCard({
       </CardContent>
     </Card>
   )
-}
+})
