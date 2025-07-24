@@ -125,6 +125,8 @@ const ClickableChartsComponent = memo(function ClickableCharts({ occurrences }: 
 
   // 1. Status das Ocorrências (Donut Chart)
   const statusData = useMemo(() => {
+    console.log('ClickableCharts - Input occurrences:', occurrences.length)
+    
     const statusMap = {
       'a_iniciar': 'A Iniciar',
       'em_atuacao': 'Em Atuação', 
@@ -145,12 +147,15 @@ const ClickableChartsComponent = memo(function ClickableCharts({ occurrences }: 
       'Cancelada': 'hsl(var(--muted-foreground))'
     }
 
-    return Object.entries(statusCounts).map(([status, count]) => ({
+    const result = Object.entries(statusCounts).map(([status, count]) => ({
       name: status,
       value: count,
       fill: colors[status as keyof typeof colors] || 'hsl(var(--muted-foreground))',
       originalStatus: Object.keys(statusMap).find(key => statusMap[key as keyof typeof statusMap] === status) || status
     }))
+    
+    console.log('StatusData result:', result)
+    return result
   }, [occurrences])
 
   // 2. Top 5 Equipamentos com Mais Falhas (Bar Chart)
@@ -160,7 +165,7 @@ const ClickableChartsComponent = memo(function ClickableCharts({ occurrences }: 
       return acc
     }, {} as Record<string, number>)
 
-    return Object.entries(equipmentCounts)
+    const result = Object.entries(equipmentCounts)
       .sort(([, a], [, b]) => b - a)
       .slice(0, 5)
       .map(([equipment, count]) => ({
@@ -168,6 +173,9 @@ const ClickableChartsComponent = memo(function ClickableCharts({ occurrences }: 
         value: count,
         fill: 'hsl(var(--primary))'
       }))
+      
+    console.log('TopEquipmentData result:', result)
+    return result
   }, [occurrences])
 
   // 3. Timeline dos Últimos 7 Dias (Area Chart)
@@ -181,7 +189,7 @@ const ClickableChartsComponent = memo(function ClickableCharts({ occurrences }: 
       }
     })
 
-    return last7Days.map(({ date, fullDate }) => {
+    const result = last7Days.map(({ date, fullDate }) => {
       const dayOccurrences = occurrences.filter(occ => {
         const occDate = new Date(occ.createdAt)
         const targetDate = new Date(fullDate)
@@ -199,6 +207,9 @@ const ClickableChartsComponent = memo(function ClickableCharts({ occurrences }: 
         high: isNaN(high) ? 0 : high
       }
     })
+    
+    console.log('TimelineData result:', result)
+    return result
   }, [occurrences])
 
   // 4. Top 5 Agências com Mais Ocorrências (Bar Chart)
@@ -208,7 +219,7 @@ const ClickableChartsComponent = memo(function ClickableCharts({ occurrences }: 
       return acc
     }, {} as Record<string, number>)
 
-    return Object.entries(agencyCounts)
+    const result = Object.entries(agencyCounts)
       .sort(([, a], [, b]) => b - a)
       .slice(0, 5)
       .map(([agency, count]) => ({
@@ -216,6 +227,9 @@ const ClickableChartsComponent = memo(function ClickableCharts({ occurrences }: 
         value: count,
         fill: 'hsl(var(--warning))'
       }))
+      
+    console.log('TopAgenciesData result:', result)
+    return result
   }, [occurrences])
 
   // 5. Performance por Fornecedor (Gauge-style Bar Chart)
@@ -231,7 +245,7 @@ const ClickableChartsComponent = memo(function ClickableCharts({ occurrences }: 
       return acc
     }, {} as Record<string, { total: number, resolved: number }>)
 
-    return Object.entries(vendorData)
+    const result = Object.entries(vendorData)
       .filter(([, data]) => data.total > 0) // Filtrar vendors sem ocorrências
       .map(([vendor, data]) => {
         const performance = data.total > 0 ? Math.round((data.resolved / data.total) * 100) : 0
@@ -245,6 +259,9 @@ const ClickableChartsComponent = memo(function ClickableCharts({ occurrences }: 
       })
       .sort((a, b) => b.performance - a.performance)
       .slice(0, 5)
+    
+    console.log('VendorPerformanceData result:', result)
+    return result
   }, [occurrences])
 
   // 6. Reincidência por Equipamento (Scatter Plot)
@@ -260,7 +277,7 @@ const ClickableChartsComponent = memo(function ClickableCharts({ occurrences }: 
       return acc
     }, {} as Record<string, { total: number, reincident: number }>)
 
-    return Object.entries(equipmentData)
+    const result = Object.entries(equipmentData)
       .filter(([, data]) => data.total >= 3) // Apenas equipamentos com 3+ ocorrências
       .map(([equipment, data]) => {
         const reincidenceRate = data.total > 0 ? Math.round((data.reincident / data.total) * 100) : 0
@@ -273,6 +290,9 @@ const ClickableChartsComponent = memo(function ClickableCharts({ occurrences }: 
         }
       })
       .filter(item => item.total > 0 && item.reincidenceRate >= 0) // Filtrar dados inválidos
+    
+    console.log('ReincidenceData result:', result)
+    return result
   }, [occurrences])
 
   return (
