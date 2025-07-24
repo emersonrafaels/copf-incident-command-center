@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { AlertTriangle, Clock, RotateCcw, TrendingUp, Info, Calculator } from "lucide-react";
+import { AlertTriangle, Clock, RotateCcw, TrendingUp, Info, Calculator, ArrowUp, ArrowDown, Minus } from "lucide-react";
 
 interface CriticalityData {
   equipment: string;
@@ -13,6 +13,8 @@ interface CriticalityData {
   aging: number;
   slaBreached: boolean;
   slaBreach: number;
+  slaStatus: 'above' | 'below' | 'normal';
+  slaDifference: number;
   reincidencia: number;
   volumeAtipico: boolean;
   occurrenceCount: number;
@@ -99,6 +101,11 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
       // Calcular percentual de SLA vencido
       const slaBreachPercentage = occs.length > 0 ? Math.round((slaBreachedCount / occs.length) * 100) : 0;
 
+      // Definir percentual normal de SLA (baseline = 15%)
+      const normalSLAPercentage = 15;
+      const slaDifference = slaBreachPercentage - normalSLAPercentage;
+      const slaStatus = slaDifference > 0 ? 'above' : slaDifference < 0 ? 'below' : 'normal';
+
       // Calcular reincidência (ocorrências do mesmo equipamento nos últimos 30 dias)
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -158,6 +165,8 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
         aging: Math.round(avgAging),
         slaBreached,
         slaBreach: slaBreachPercentage,
+        slaStatus,
+        slaDifference: Math.abs(slaDifference),
         reincidencia,
         volumeAtipico,
         occurrenceCount: totalCount,
@@ -400,9 +409,22 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                               </div>
                             )}
                           {item.slaBreached && (
-                            <div className="flex items-center gap-1.5 bg-white/10 rounded-md px-2 py-1">
-                              <AlertTriangle className="h-3 w-3" />
-                              <span>{item.slaBreach}%</span>
+                            <div className={`flex items-center gap-1.5 bg-white/10 rounded-md px-2 py-1 ${
+                              item.slaStatus === 'above' ? 'bg-red-500/20' : 
+                              item.slaStatus === 'below' ? 'bg-green-500/20' : 'bg-white/10'
+                            }`}>
+                              {item.slaStatus === 'above' ? (
+                                <ArrowUp className="h-3 w-3 text-red-300" />
+                              ) : item.slaStatus === 'below' ? (
+                                <ArrowDown className="h-3 w-3 text-green-300" />
+                              ) : (
+                                <Minus className="h-3 w-3" />
+                              )}
+                              <span>
+                                {item.slaStatus === 'above' ? `+${item.slaDifference}%` : 
+                                 item.slaStatus === 'below' ? `-${item.slaDifference}%` : 
+                                 `${item.slaBreach}%`}
+                              </span>
                             </div>
                           )}
                           {item.volumeAtipico && (
