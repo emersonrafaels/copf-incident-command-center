@@ -381,19 +381,19 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                             {item.equipment}
                           </h4>
                           <p className="text-xs opacity-90">
-                            {Math.round(item.occurrenceCount)} ocorrência{item.occurrenceCount !== 1 ? 's' : ''}
+                            {item.occurrenceCount} ocorrência{item.occurrenceCount !== 1 ? 's' : ''}
                           </p>
                         </div>
 
                           <div className="grid grid-cols-2 gap-2 text-xs">
                             <div className="flex items-center gap-1.5 bg-white/10 rounded-md px-2 py-1">
                               <Clock className="h-3 w-3" />
-                              <span>{Math.round(item.aging)}d</span>
+                              <span>{item.aging}d</span>
                             </div>
                             {item.reincidencia > 1 && (
                               <div className="flex items-center gap-1.5 bg-white/10 rounded-md px-2 py-1">
                                 <RotateCcw className="h-3 w-3" />
-                                <span>{Math.round(item.reincidencia)}x</span>
+                                <span>{item.reincidencia}</span>
                               </div>
                             )}
                           {item.slaBreached && (
@@ -405,7 +405,7 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                           {item.volumeAtipico && (
                             <div className="flex items-center gap-1.5 bg-white/10 rounded-md px-2 py-1">
                               <TrendingUp className="h-3 w-3" />
-                              <span>Vol</span>
+                              <span>{item.reincidencia}</span>
                             </div>
                           )}
                         </div>
