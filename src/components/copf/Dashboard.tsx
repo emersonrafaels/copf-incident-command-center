@@ -15,6 +15,8 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Check } from "lucide-react";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useToast } from "@/hooks/use-toast";
 import { AlertTriangle, CheckCircle2, Clock, TrendingUp, MapPin, Users, Calendar, Download, RefreshCw, Filter, CalendarDays, Truck } from "lucide-react";
@@ -53,8 +55,13 @@ export function Dashboard() {
   const [transportadoraFilter, setTransportadoraFilter] = useState<string>('all');
   const [agenciaFilter, setAgenciaFilter] = useState<string[]>([]);
   const [ufFilter, setUfFilter] = useState<string[]>([]);
-  const [tipoAgenciaFilter, setTipoAgenciaFilter] = useState<string>('all');
-  const [pontoVipFilter, setPontoVipFilter] = useState<string>('all');
+  const [tipoAgenciaFilter, setTipoAgenciaFilter] = useState<string[]>([]);
+  const [pontoVipFilter, setPontoVipFilter] = useState<string[]>([]);
+  const [segmentFilterMulti, setSegmentFilterMulti] = useState<string[]>([]);
+  const [equipmentFilterMulti, setEquipmentFilterMulti] = useState<string[]>([]);
+  const [statusFilterMulti, setStatusFilterMulti] = useState<string[]>([]);
+  const [vendorFilterMulti, setVendorFilterMulti] = useState<string[]>([]);
+  const [transportadoraFilterMulti, setTransportadoraFilterMulti] = useState<string[]>([]);
   const handleExport = async () => {
     toast({
       title: "Exportação iniciada",
@@ -113,6 +120,13 @@ export function Dashboard() {
 
   // Filtrar ocorrências
   const filteredOccurrences = occurrences.filter(occurrence => {
+    // Filtros multiselect
+    if (segmentFilterMulti.length > 0 && !segmentFilterMulti.includes(occurrence.segment)) return false;
+    if (equipmentFilterMulti.length > 0 && !equipmentFilterMulti.includes(occurrence.equipment)) return false;
+    if (statusFilterMulti.length > 0 && !statusFilterMulti.includes(occurrence.status)) return false;
+    if (vendorFilterMulti.length > 0 && !vendorFilterMulti.includes(occurrence.vendor)) return false;
+    
+    // Filtros legados (para compatibilidade)
     if (segmentFilter !== 'all' && occurrence.segment !== segmentFilter) return false;
     if (equipmentFilter !== 'all' && occurrence.equipment !== equipmentFilter) return false;
     if (serialNumberFilter && !occurrence.serialNumber.toLowerCase().includes(serialNumberFilter.toLowerCase())) return false;
@@ -133,20 +147,18 @@ export function Dashboard() {
 
     // Simular tipo de agência baseado na agência
     const tipoAgencia = occurrence.agency.includes('Terceirizada') ? 'terceirizada' : 'convencional';
-    if (tipoAgenciaFilter !== 'all' && tipoAgencia !== tipoAgenciaFilter) return false;
+    if (tipoAgenciaFilter.length > 0 && !tipoAgenciaFilter.includes(tipoAgencia)) return false;
 
     // Simular ponto VIP (agências com número terminado em 0, 5 são VIP)
     const agencyNumber = occurrence.agency.match(/\d+/)?.[0] || '0';
     const isVip = agencyNumber.endsWith('0') || agencyNumber.endsWith('5');
-    if (pontoVipFilter !== 'all') {
-      const expectedVip = pontoVipFilter === 'sim';
-      if (isVip !== expectedVip) return false;
-    }
+    const pontoVipStatus = isVip ? 'sim' : 'nao';
+    if (pontoVipFilter.length > 0 && !pontoVipFilter.includes(pontoVipStatus)) return false;
 
     // Filtro de transportadora apenas para terceirizadas
-    if (transportadoraFilter !== 'all' && tipoAgencia === 'terceirizada') {
+    if (transportadoraFilterMulti.length > 0 && tipoAgencia === 'terceirizada') {
       const transportadora = occurrence.vendor.includes('Express') ? 'Express Logística' : occurrence.vendor.includes('Tech') ? 'TechTransporte' : 'LogiCorp';
-      if (transportadora !== transportadoraFilter) return false;
+      if (!transportadoraFilterMulti.includes(transportadora)) return false;
     }
 
     // Filtro de ocorrências vencidas
@@ -188,9 +200,10 @@ export function Dashboard() {
 
   // Filtrar fornecedores baseado na transportadora selecionada
   const getFilteredVendors = () => {
-    if (tipoAgenciaFilter !== 'terceirizada') return uniqueVendors;
-    if (transportadoraFilter === 'all') return uniqueVendors;
-    return transportadoraFornecedores[transportadoraFilter] || uniqueVendors;
+    if (!tipoAgenciaFilter.includes('terceirizada')) return uniqueVendors;
+    if (transportadoraFilterMulti.length === 0) return uniqueVendors;
+    const filteredVendors = transportadoraFilterMulti.flatMap(t => transportadoraFornecedores[t] || []);
+    return filteredVendors.length > 0 ? filteredVendors : uniqueVendors;
   };
   const availableVendors = getFilteredVendors();
 
@@ -212,7 +225,7 @@ export function Dashboard() {
   })));
 
   // Verificar tipo de agência atual (para mostrar filtros condicionais)
-  const tipoAgenciaAtual = tipoAgenciaFilter === 'terceirizada' ? 'terceirizada' : tipoAgenciaFilter === 'convencional' ? 'convencional' : 'all';
+  const tipoAgenciaAtual = tipoAgenciaFilter.includes('terceirizada') ? 'terceirizada' : tipoAgenciaFilter.includes('convencional') ? 'convencional' : 'all';
 
   // Resetar filtro de equipamento quando segmento mudar
   useEffect(() => {
@@ -222,7 +235,7 @@ export function Dashboard() {
   }, [segmentFilter]);
 
   // Verificar se há filtros ativos
-  const hasActiveFilters = segmentFilter !== 'all' || equipmentFilter !== 'all' || serialNumberFilter || statusFilter !== 'all' || overrideFilter || vendorFilter !== 'all' || transportadoraFilter !== 'all' || agenciaFilter.length > 0 || ufFilter.length > 0 || tipoAgenciaFilter !== 'all' || pontoVipFilter !== 'all';
+  const hasActiveFilters = segmentFilterMulti.length > 0 || equipmentFilterMulti.length > 0 || statusFilterMulti.length > 0 || vendorFilterMulti.length > 0 || transportadoraFilterMulti.length > 0 || segmentFilter !== 'all' || equipmentFilter !== 'all' || serialNumberFilter || statusFilter !== 'all' || overrideFilter || vendorFilter !== 'all' || transportadoraFilter !== 'all' || agenciaFilter.length > 0 || ufFilter.length > 0 || tipoAgenciaFilter.length > 0 || pontoVipFilter.length > 0;
 
   // Limpar todos os filtros
   const clearAllFilters = () => {
@@ -235,8 +248,13 @@ export function Dashboard() {
     setTransportadoraFilter('all');
     setAgenciaFilter([]);
     setUfFilter([]);
-    setTipoAgenciaFilter('all');
-    setPontoVipFilter('all');
+    setTipoAgenciaFilter([]);
+    setPontoVipFilter([]);
+    setSegmentFilterMulti([]);
+    setEquipmentFilterMulti([]);
+    setStatusFilterMulti([]);
+    setVendorFilterMulti([]);
+    setTransportadoraFilterMulti([]);
   };
   return <div className="space-y-8">
       {/* Page Header */}
@@ -317,8 +335,8 @@ export function Dashboard() {
                   {Object.values({
                 agencia: agenciaFilter.length > 0,
                 uf: ufFilter.length > 0,
-                tipoAgencia: tipoAgenciaFilter !== 'all',
-                pontoVip: pontoVipFilter !== 'all',
+                 tipoAgencia: tipoAgenciaFilter.length > 0,
+                pontoVip: pontoVipFilter.length > 0,
                 segmento: segmentFilter !== 'all',
                 equipamento: equipmentFilter !== 'all',
                 serie: serialNumberFilter !== '',
@@ -329,8 +347,8 @@ export function Dashboard() {
               }).filter(Boolean).length} filtro{Object.values({
                 agencia: agenciaFilter.length > 0,
                 uf: ufFilter.length > 0,
-                tipoAgencia: tipoAgenciaFilter !== 'all',
-                pontoVip: pontoVipFilter !== 'all',
+                 tipoAgencia: tipoAgenciaFilter.length > 0,
+                pontoVip: pontoVipFilter.length > 0,
                 segmento: segmentFilter !== 'all',
                 equipamento: equipmentFilter !== 'all',
                 serie: serialNumberFilter !== '',
@@ -341,8 +359,8 @@ export function Dashboard() {
               }).filter(Boolean).length !== 1 ? 's' : ''} ativo{Object.values({
                 agencia: agenciaFilter.length > 0,
                 uf: ufFilter.length > 0,
-                tipoAgencia: tipoAgenciaFilter !== 'all',
-                pontoVip: pontoVipFilter !== 'all',
+                 tipoAgencia: tipoAgenciaFilter.length > 0,
+                pontoVip: pontoVipFilter.length > 0,
                 segmento: segmentFilter !== 'all',
                 equipamento: equipmentFilter !== 'all',
                 serie: serialNumberFilter !== '',
@@ -464,16 +482,47 @@ export function Dashboard() {
                   <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
                   Tipo da Agência
                 </Label>
-                <Select value={tipoAgenciaFilter} onValueChange={setTipoAgenciaFilter}>
-                  <SelectTrigger className="h-10 hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
-                    <SelectValue placeholder="Todos os tipos" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background/95 backdrop-blur-sm border border-border/80">
-                    <SelectItem value="all">Todos os tipos</SelectItem>
-                    <SelectItem value="convencional">Convencional</SelectItem>
-                    <SelectItem value="terceirizada">Ponto Terceirizado</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                      {tipoAgenciaFilter.length > 0 ? <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                            {tipoAgenciaFilter.length}
+                          </Badge>
+                          <span className="text-sm">
+                            {tipoAgenciaFilter.length === 1 ? tipoAgenciaFilter[0] : `${tipoAgenciaFilter.length} tipos`}
+                          </span>
+                        </div> : "Todos os tipos"}
+                      <div className="w-4 h-4 opacity-50">⌄</div>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                    <Command>
+                      <CommandInput placeholder="Buscar tipo..." className="h-9" />
+                      <CommandEmpty>Nenhum tipo encontrado.</CommandEmpty>
+                      <CommandList>
+                        <CommandGroup>
+                          {[
+                            { value: 'convencional', label: 'Convencional' },
+                            { value: 'terceirizada', label: 'Ponto Terceirizado' }
+                          ].map(tipo => (
+                            <CommandItem key={tipo.value} onSelect={() => {
+                              const isSelected = tipoAgenciaFilter.includes(tipo.value);
+                              if (isSelected) {
+                                setTipoAgenciaFilter(tipoAgenciaFilter.filter(t => t !== tipo.value));
+                              } else {
+                                setTipoAgenciaFilter([...tipoAgenciaFilter, tipo.value]);
+                              }
+                            }}>
+                              <Check className={cn("mr-2 h-4 w-4", tipoAgenciaFilter.includes(tipo.value) ? "opacity-100" : "opacity-0")} />
+                              {tipo.label}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
 
               <div className="group space-y-3">
@@ -481,16 +530,47 @@ export function Dashboard() {
                   <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
                   Ponto VIP
                 </Label>
-                <Select value={pontoVipFilter} onValueChange={setPontoVipFilter}>
-                  <SelectTrigger className="h-10 hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
-                    <SelectValue placeholder="Todos" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background/95 backdrop-blur-sm border border-border/80">
-                    <SelectItem value="all">Todos</SelectItem>
-                    <SelectItem value="sim">Sim</SelectItem>
-                    <SelectItem value="nao">Não</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                      {pontoVipFilter.length > 0 ? <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                            {pontoVipFilter.length}
+                          </Badge>
+                          <span className="text-sm">
+                            {pontoVipFilter.length === 1 ? (pontoVipFilter[0] === 'sim' ? 'VIP' : 'Não VIP') : `${pontoVipFilter.length} tipos`}
+                          </span>
+                        </div> : "Todos"}
+                      <div className="w-4 h-4 opacity-50">⌄</div>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                    <Command>
+                      <CommandInput placeholder="Buscar tipo..." className="h-9" />
+                      <CommandEmpty>Nenhum tipo encontrado.</CommandEmpty>
+                      <CommandList>
+                        <CommandGroup>
+                          {[
+                            { value: 'sim', label: 'VIP' },
+                            { value: 'nao', label: 'Não VIP' }
+                          ].map(vip => (
+                            <CommandItem key={vip.value} onSelect={() => {
+                              const isSelected = pontoVipFilter.includes(vip.value);
+                              if (isSelected) {
+                                setPontoVipFilter(pontoVipFilter.filter(v => v !== vip.value));
+                              } else {
+                                setPontoVipFilter([...pontoVipFilter, vip.value]);
+                              }
+                            }}>
+                              <Check className={cn("mr-2 h-4 w-4", pontoVipFilter.includes(vip.value) ? "opacity-100" : "opacity-0")} />
+                              {vip.label}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
           </div>
@@ -509,32 +589,89 @@ export function Dashboard() {
                   <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
                   Segmento
                 </Label>
-                <Select value={segmentFilter} onValueChange={setSegmentFilter}>
-                  <SelectTrigger className="h-10 hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
-                    <SelectValue placeholder="Todos os segmentos" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background/95 backdrop-blur-sm border border-border/80">
-                    <SelectItem value="all">Todos os segmentos</SelectItem>
-                    <SelectItem value="AA">Segmento AA</SelectItem>
-                    <SelectItem value="AB">Segmento AB</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                      {segmentFilterMulti.length > 0 ? <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                            {segmentFilterMulti.length}
+                          </Badge>
+                          <span className="text-sm">
+                            {segmentFilterMulti.length === 1 ? `Segmento ${segmentFilterMulti[0]}` : `${segmentFilterMulti.length} segmentos`}
+                          </span>
+                        </div> : "Todos os segmentos"}
+                      <div className="w-4 h-4 opacity-50">⌄</div>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                    <Command>
+                      <CommandInput placeholder="Buscar segmento..." className="h-9" />
+                      <CommandEmpty>Nenhum segmento encontrado.</CommandEmpty>
+                      <CommandList>
+                        <CommandGroup>
+                          {['AA', 'AB'].map(segment => (
+                            <CommandItem key={segment} onSelect={() => {
+                              const isSelected = segmentFilterMulti.includes(segment);
+                              if (isSelected) {
+                                setSegmentFilterMulti(segmentFilterMulti.filter(s => s !== segment));
+                              } else {
+                                setSegmentFilterMulti([...segmentFilterMulti, segment]);
+                              }
+                            }}>
+                              <Check className={cn("mr-2 h-4 w-4", segmentFilterMulti.includes(segment) ? "opacity-100" : "opacity-0")} />
+                              Segmento {segment}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
               
-              <div className="group space-y-3">
+               <div className="group space-y-3">
                 <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
                   Equipamento
                 </Label>
-                <Select value={equipmentFilter} onValueChange={setEquipmentFilter}>
-                  <SelectTrigger className="h-10 hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
-                    <SelectValue placeholder="Todos os equipamentos" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background/95 backdrop-blur-sm border border-border/80">
-                    <SelectItem value="all">Todos os equipamentos</SelectItem>
-                    {uniqueEquipments.map(equipment => <SelectItem key={equipment} value={equipment}>{equipment}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                      {equipmentFilterMulti.length > 0 ? <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                            {equipmentFilterMulti.length}
+                          </Badge>
+                          <span className="text-sm">
+                            {equipmentFilterMulti.length === 1 ? equipmentFilterMulti[0] : `${equipmentFilterMulti.length} equipamentos`}
+                          </span>
+                        </div> : "Todos os equipamentos"}
+                      <div className="w-4 h-4 opacity-50">⌄</div>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                    <Command>
+                      <CommandInput placeholder="Buscar equipamento..." className="h-9" />
+                      <CommandEmpty>Nenhum equipamento encontrado.</CommandEmpty>
+                      <CommandList>
+                        <CommandGroup className="max-h-64 overflow-y-auto">
+                          {uniqueEquipments.map(equipment => (
+                            <CommandItem key={equipment} onSelect={() => {
+                              const isSelected = equipmentFilterMulti.includes(equipment);
+                              if (isSelected) {
+                                setEquipmentFilterMulti(equipmentFilterMulti.filter(e => e !== equipment));
+                              } else {
+                                setEquipmentFilterMulti([...equipmentFilterMulti, equipment]);
+                              }
+                            }}>
+                              <Check className={cn("mr-2 h-4 w-4", equipmentFilterMulti.includes(equipment) ? "opacity-100" : "opacity-0")} />
+                              {equipment}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
               
               <div className="group space-y-3">
@@ -550,23 +687,56 @@ export function Dashboard() {
                 </div>
               </div>
               
-              <div className="group space-y-3">
+               <div className="group space-y-3">
                 <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
                   Status
                 </Label>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="h-10 hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
-                    <SelectValue placeholder="Todos os status" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background/95 backdrop-blur-sm border border-border/80">
-                    <SelectItem value="all">Todos os status</SelectItem>
-                    <SelectItem value="open">🔴 Aberta</SelectItem>
-                    <SelectItem value="in-progress">🟡 Em Andamento</SelectItem>
-                    <SelectItem value="pending">🟠 Pendente</SelectItem>
-                    <SelectItem value="resolved">🟢 Resolvida</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                      {statusFilterMulti.length > 0 ? <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                            {statusFilterMulti.length}
+                          </Badge>
+                          <span className="text-sm">
+                            {statusFilterMulti.length === 1 ? 
+                              ({'open': 'Aberta', 'in-progress': 'Em Andamento', 'pending': 'Pendente', 'resolved': 'Resolvida'}[statusFilterMulti[0]] || statusFilterMulti[0]) 
+                              : `${statusFilterMulti.length} status`}
+                          </span>
+                        </div> : "Todos os status"}
+                      <div className="w-4 h-4 opacity-50">⌄</div>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                    <Command>
+                      <CommandInput placeholder="Buscar status..." className="h-9" />
+                      <CommandEmpty>Nenhum status encontrado.</CommandEmpty>
+                      <CommandList>
+                        <CommandGroup>
+                          {[
+                            { value: 'open', label: '🔴 Aberta' },
+                            { value: 'in-progress', label: '🟡 Em Andamento' },
+                            { value: 'pending', label: '🟠 Pendente' },
+                            { value: 'resolved', label: '🟢 Resolvida' }
+                          ].map(status => (
+                            <CommandItem key={status.value} onSelect={() => {
+                              const isSelected = statusFilterMulti.includes(status.value);
+                              if (isSelected) {
+                                setStatusFilterMulti(statusFilterMulti.filter(s => s !== status.value));
+                              } else {
+                                setStatusFilterMulti([...statusFilterMulti, status.value]);
+                              }
+                            }}>
+                              <Check className={cn("mr-2 h-4 w-4", statusFilterMulti.includes(status.value) ? "opacity-100" : "opacity-0")} />
+                              {status.label}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
           </div>
@@ -585,41 +755,97 @@ export function Dashboard() {
                     <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
                     Transportadora
                   </Label>
-                  <Select value={transportadoraFilter} onValueChange={value => {
-                setTransportadoraFilter(value);
-                // Resetar filtro de fornecedor quando mudar transportadora
-                if (value !== 'all') {
-                  setVendorFilter('all');
-                }
-              }}>
-                    <SelectTrigger className="h-10 hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
-                      <Truck className="h-4 w-4 mr-2 text-primary" />
-                      <SelectValue placeholder="Todas as transportadoras" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-background/95 backdrop-blur-sm border border-border/80">
-                      <SelectItem value="all">Todas as transportadoras</SelectItem>
-                      {uniqueTransportadoras.map(transportadora => <SelectItem key={transportadora} value={transportadora}>{transportadora}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                        <div className="flex items-center gap-2">
+                          <Truck className="h-4 w-4 text-primary" />
+                          {transportadoraFilterMulti.length > 0 ? <div className="flex items-center gap-2">
+                              <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                                {transportadoraFilterMulti.length}
+                              </Badge>
+                              <span className="text-sm">
+                                {transportadoraFilterMulti.length === 1 ? transportadoraFilterMulti[0] : `${transportadoraFilterMulti.length} transportadoras`}
+                              </span>
+                            </div> : "Todas as transportadoras"}
+                        </div>
+                        <div className="w-4 h-4 opacity-50">⌄</div>
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                      <Command>
+                        <CommandInput placeholder="Buscar transportadora..." className="h-9" />
+                        <CommandEmpty>Nenhuma transportadora encontrada.</CommandEmpty>
+                        <CommandList>
+                          <CommandGroup>
+                            {uniqueTransportadoras.map(transportadora => (
+                              <CommandItem key={transportadora} onSelect={() => {
+                                const isSelected = transportadoraFilterMulti.includes(transportadora);
+                                if (isSelected) {
+                                  setTransportadoraFilterMulti(transportadoraFilterMulti.filter(t => t !== transportadora));
+                                } else {
+                                  setTransportadoraFilterMulti([...transportadoraFilterMulti, transportadora]);
+                                }
+                                // Resetar filtro de fornecedor quando mudar transportadora
+                                setVendorFilterMulti([]);
+                              }}>
+                                <Check className={cn("mr-2 h-4 w-4", transportadoraFilterMulti.includes(transportadora) ? "opacity-100" : "opacity-0")} />
+                                {transportadora}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>}
 
               <div className="group space-y-3">
                 <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
                   Fornecedor
-                  {tipoAgenciaAtual === 'terceirizada' && transportadoraFilter !== 'all' && <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
-                      {transportadoraFilter}
+                   {tipoAgenciaAtual === 'terceirizada' && transportadoraFilterMulti.length > 0 && <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                      {transportadoraFilterMulti.length} selecionada{transportadoraFilterMulti.length > 1 ? 's' : ''}
                     </Badge>}
                 </Label>
-                <Select value={vendorFilter} onValueChange={setVendorFilter}>
-                  <SelectTrigger className="h-10 hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
-                    <SelectValue placeholder="Todos os fornecedores" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background/95 backdrop-blur-sm border border-border/80">
-                    <SelectItem value="all">Todos os fornecedores</SelectItem>
-                    {availableVendors.map(vendor => <SelectItem key={vendor} value={vendor}>{vendor}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                      {vendorFilterMulti.length > 0 ? <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                            {vendorFilterMulti.length}
+                          </Badge>
+                          <span className="text-sm">
+                            {vendorFilterMulti.length === 1 ? vendorFilterMulti[0] : `${vendorFilterMulti.length} fornecedores`}
+                          </span>
+                        </div> : "Todos os fornecedores"}
+                      <div className="w-4 h-4 opacity-50">⌄</div>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                    <Command>
+                      <CommandInput placeholder="Buscar fornecedor..." className="h-9" />
+                      <CommandEmpty>Nenhum fornecedor encontrado.</CommandEmpty>
+                      <CommandList>
+                        <CommandGroup className="max-h-64 overflow-y-auto">
+                          {availableVendors.map(vendor => (
+                            <CommandItem key={vendor} onSelect={() => {
+                              const isSelected = vendorFilterMulti.includes(vendor);
+                              if (isSelected) {
+                                setVendorFilterMulti(vendorFilterMulti.filter(v => v !== vendor));
+                              } else {
+                                setVendorFilterMulti([...vendorFilterMulti, vendor]);
+                              }
+                            }}>
+                              <Check className={cn("mr-2 h-4 w-4", vendorFilterMulti.includes(vendor) ? "opacity-100" : "opacity-0")} />
+                              {vendor}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
           </div>
