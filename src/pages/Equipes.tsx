@@ -1,4 +1,5 @@
 import { COPFLayout } from "@/components/copf/COPFLayout";
+import { FilterSection } from "@/components/copf/FilterSection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -62,6 +63,9 @@ const Equipes = () => {
             Adicionar Usuário
           </Button>
         </div>
+
+        {/* Filtros */}
+        <FilterSection />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>

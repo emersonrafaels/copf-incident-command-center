@@ -1,11 +1,10 @@
 import { COPFLayout } from "@/components/copf/COPFLayout";
+import { FilterSection } from "@/components/copf/FilterSection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   DropdownMenu,
@@ -13,12 +12,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Search, Filter, Download, Eye, MessageSquare, Bot, Star, MoreHorizontal, Zap, Clock, X, Building, Package, Hash, AlertTriangle } from "lucide-react";
+import { Search, Download, Eye, MessageSquare, Bot, Star, Zap, Clock } from "lucide-react";
 import { StatusBadge } from "@/components/copf/StatusBadge";
 import { OccurrenceModal } from "@/components/copf/OccurrenceModal";
 import { useDashboardData } from "@/hooks/useDashboardData";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useFilters } from "@/contexts/FiltersContext";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import * as XLSX from 'xlsx';
 
@@ -29,21 +29,26 @@ const Ocorrencias = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'view' | 'communication' | 'priority_communication'>('view')
   const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all')
-  const [severityFilter, setSeverityFilter] = useState('all')
-  const [vendorPriorityFilter, setVendorPriorityFilter] = useState(false)
-  const [segmentFilter, setSegmentFilter] = useState('all')
-  const [equipmentFilter, setEquipmentFilter] = useState('all')
-  const [serialNumberFilter, setSerialNumberFilter] = useState('')
-  const [vendorFilter, setVendorFilter] = useState('all')
-  const [transportadoraFilter, setTransportadoraFilter] = useState('all')
-  const [agenciaFilter, setAgenciaFilter] = useState('')
-  const [ufFilter, setUfFilter] = useState('all')
-  const [tipoAgenciaFilter, setTipoAgenciaFilter] = useState('all')
-  const [pontoVipFilter, setPontoVipFilter] = useState('all')
   const [showBot, setShowBot] = useState(false)
   const [priorityModalOpen, setPriorityModalOpen] = useState(false)
   const [selectedPriorityOccurrence, setSelectedPriorityOccurrence] = useState(null)
+  
+  // Usar filtros do contexto
+  const {
+    agenciaFilter,
+    ufFilter,
+    tipoAgenciaFilter,
+    pontoVipFilter,
+    segmentFilterMulti,
+    equipmentFilterMulti,
+    statusFilterMulti,
+    vendorFilterMulti,
+    transportadoraFilterMulti,
+    serialNumberFilter,
+    overrideFilter,
+    vendorPriorityFilter,
+    hasActiveFilters
+  } = useFilters()
 
   // Filtrar ocorrências
   const filteredOccurrences = occurrences.filter(occurrence => {
@@ -52,111 +57,58 @@ const Ocorrencias = () => {
       occurrence.agency.toLowerCase().includes(searchTerm.toLowerCase()) ||
       occurrence.description.toLowerCase().includes(searchTerm.toLowerCase())
     
-    const matchesStatus = statusFilter === 'all' || occurrence.status === statusFilter
-    const matchesSeverity = severityFilter === 'all' || occurrence.severity === severityFilter
-    const matchesSegment = segmentFilter === 'all' || occurrence.segment === segmentFilter
-    const matchesEquipment = equipmentFilter === 'all' || occurrence.equipment === equipmentFilter
+    // Filtros multiselect
+    const matchesSegment = segmentFilterMulti.length === 0 || segmentFilterMulti.includes(occurrence.segment);
+    const matchesEquipment = equipmentFilterMulti.length === 0 || equipmentFilterMulti.includes(occurrence.equipment);
+    const matchesStatus = statusFilterMulti.length === 0 || statusFilterMulti.includes(occurrence.status);
+    const matchesVendor = vendorFilterMulti.length === 0 || vendorFilterMulti.includes(occurrence.vendor);
+    
+    // Filtro de transportadora
+    if (transportadoraFilterMulti.length > 0) {
+      const transportadora = occurrence.vendor.includes('Express') ? 'Express Logística' : 
+                           occurrence.vendor.includes('Tech') ? 'TechTransporte' : 'LogiCorp';
+      if (!transportadoraFilterMulti.includes(transportadora)) return false;
+    }
+    
+    // Filtro de série
     const matchesSerial = !serialNumberFilter || occurrence.serialNumber.toLowerCase().includes(serialNumberFilter.toLowerCase())
-    const matchesVendor = vendorFilter === 'all' || occurrence.vendor === vendorFilter
     
     // Filtro de agência por número
-    const matchesAgencia = !agenciaFilter || occurrence.agency.includes(agenciaFilter)
+    const matchesAgencia = agenciaFilter.length === 0 || agenciaFilter.some(agency => occurrence.agency.includes(agency))
     
     // Filtro de UF
-    const agencyUF = occurrence.agency.split(' - ')[1] || 'SP'; // Simular UF baseado na agência
-    const matchesUF = ufFilter === 'all' || agencyUF === ufFilter
+    const agencyUF = occurrence.agency.split(' - ')[1] || 'SP';
+    const matchesUF = ufFilter.length === 0 || ufFilter.includes(agencyUF)
     
     // Simular tipo de agência baseado na agência
     const tipoAgencia = occurrence.agency.includes('Terceirizada') ? 'terceirizada' : 'convencional'
-    const matchesTipoAgencia = tipoAgenciaFilter === 'all' || tipoAgencia === tipoAgenciaFilter
+    const matchesTipoAgencia = tipoAgenciaFilter.length === 0 || tipoAgenciaFilter.includes(tipoAgencia)
     
     // Simular ponto VIP (agências com número terminado em 0, 5 são VIP)
     const agencyNumber = occurrence.agency.match(/\d+/)?.[0] || '0'
     const isVip = agencyNumber.endsWith('0') || agencyNumber.endsWith('5')
-    const matchesPontoVip = pontoVipFilter === 'all' || 
-      (pontoVipFilter === 'sim' && isVip) || 
-      (pontoVipFilter === 'nao' && !isVip)
+    const pontoVipStatus = isVip ? 'sim' : 'nao'
+    const matchesPontoVip = pontoVipFilter.length === 0 || pontoVipFilter.includes(pontoVipStatus)
     
-    // Filtro de transportadora apenas para terceirizadas
-    const matchesTransportadora = transportadoraFilter === 'all' || 
-      (tipoAgencia === 'terceirizada' && 
-       (occurrence.vendor.includes('Express') ? 'Express Logística' : 
-        occurrence.vendor.includes('Tech') ? 'TechTransporte' : 'LogiCorp') === transportadoraFilter)
+    // Filtro de ocorrências vencidas
+    if (overrideFilter) {
+      const createdDate = new Date(occurrence.createdAt);
+      const hoursDiff = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60);
+      const slaLimit = occurrence.severity === 'critical' || occurrence.severity === 'high' ? 24 : 72;
+      const isOverdue = hoursDiff > slaLimit && occurrence.status !== 'resolved';
+      if (!isOverdue) return false;
+    }
     
-    // Simular lógica de priorização para fornecedor (críticas e altas são priorizadas)
-    const isVendorPriority = occurrence.severity === 'critical' || occurrence.severity === 'high'
-    const matchesVendorPriority = !vendorPriorityFilter || isVendorPriority
+    // Filtro de priorizadas com fornecedor
+    if (vendorPriorityFilter) {
+      const isHighPriority = occurrence.severity === 'critical' || occurrence.severity === 'high';
+      if (!isHighPriority) return false;
+    }
 
-    return matchesSearch && matchesStatus && matchesSeverity && matchesSegment && 
+    return matchesSearch && matchesStatus && matchesSegment && 
            matchesEquipment && matchesSerial && matchesVendor && matchesAgencia &&
-           matchesUF && matchesTipoAgencia && matchesPontoVip && matchesTransportadora &&
-           matchesVendorPriority
+           matchesUF && matchesTipoAgencia && matchesPontoVip
   })
-
-  // Mapeamento de equipamentos por segmento
-  const equipmentsBySegment = {
-    AA: ['ATM Saque', 'ATM Depósito', 'Cassete'],
-    AB: ['Notebook', 'Desktop', 'Leitor de Cheques/documentos', 'Leitor biométrico', 'PIN PAD', 'Scanner de Cheque', 'Impressora', 'Impressora térmica', 'Impressora multifuncional', 'Monitor LCD/LED', 'Teclado', 'Servidor', 'Televisão', 'Senheiro', 'TCR', 'Classificadora', 'Fragmentadora de Papel']
-  };
-
-  // Obter equipamentos únicos baseado no segmento selecionado
-  const getFilteredEquipments = () => {
-    if (segmentFilter === 'all') {
-      return Array.from(new Set(occurrences.map(o => o.equipment))).sort();
-    } else {
-      const segmentEquipments = equipmentsBySegment[segmentFilter as 'AA' | 'AB'] || [];
-      return occurrences
-        .filter(o => o.segment === segmentFilter && segmentEquipments.includes(o.equipment))
-        .map(o => o.equipment)
-        .filter((equipment, index, arr) => arr.indexOf(equipment) === index)
-        .sort();
-    }
-  };
-
-  const uniqueEquipments = getFilteredEquipments();
-  const uniqueVendors = Array.from(new Set(occurrences.map(o => o.vendor))).sort();
-  const uniqueTransportadoras = ['Express Logística', 'TechTransporte', 'LogiCorp'];
-  
-  // Estados brasileiros
-  const estadosBrasil = [
-    'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 
-    'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 
-    'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
-  ];
-
-  // Verificar tipo de agência atual (para mostrar filtros condicionais)
-  const tipoAgenciaAtual = tipoAgenciaFilter === 'terceirizada' ? 'terceirizada' : 
-                           tipoAgenciaFilter === 'convencional' ? 'convencional' : 'all';
-
-  // Resetar filtro de equipamento quando segmento mudar
-  useEffect(() => {
-    if (segmentFilter !== 'all') {
-      setEquipmentFilter('all');
-    }
-  }, [segmentFilter]);
-
-  // Verificar se há filtros ativos
-  const hasActiveFilters = searchTerm || statusFilter !== 'all' || severityFilter !== 'all' || 
-    segmentFilter !== 'all' || equipmentFilter !== 'all' || serialNumberFilter || vendorPriorityFilter ||
-    vendorFilter !== 'all' || transportadoraFilter !== 'all' || agenciaFilter ||
-    ufFilter !== 'all' || tipoAgenciaFilter !== 'all' || pontoVipFilter !== 'all'
-
-  // Limpar todos os filtros
-  const clearAllFilters = () => {
-    setSearchTerm('')
-    setStatusFilter('all')
-    setSeverityFilter('all')
-    setSegmentFilter('all')
-    setEquipmentFilter('all')
-    setSerialNumberFilter('')
-    setVendorPriorityFilter(false)
-    setVendorFilter('all')
-    setTransportadoraFilter('all')
-    setAgenciaFilter('')
-    setUfFilter('all')
-    setTipoAgenciaFilter('all')
-    setPontoVipFilter('all')
-  }
 
   const handleViewDetails = (occurrence) => {
     setSelectedOccurrence(occurrence)
@@ -300,95 +252,20 @@ const Ocorrencias = () => {
           </div>
         </div>
 
+        {/* Filtros */}
+        <FilterSection />
+
         <Card className="shadow-lg border-0 bg-gradient-to-r from-background to-accent/5">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2 text-lg">
-                <Filter className="h-5 w-5 text-primary" />
-                Filtros e Busca
+                <Search className="h-5 w-5 text-primary" />
+                Busca Específica
               </CardTitle>
-              {hasActiveFilters && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={clearAllFilters}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  <X className="h-4 w-4 mr-2" />
-                  Limpar Filtros
-                </Button>
-              )}
             </div>
-            {hasActiveFilters && (
-              <div className="flex flex-wrap gap-2 mt-2">
-                {searchTerm && (
-                  <Badge variant="secondary" className="text-xs">
-                    Busca: {searchTerm}
-                    <X 
-                      className="h-3 w-3 ml-1 cursor-pointer hover:bg-destructive/20 rounded-full" 
-                      onClick={() => setSearchTerm('')}
-                    />
-                  </Badge>
-                )}
-                {statusFilter !== 'all' && (
-                  <Badge variant="secondary" className="text-xs">
-                    Status: {getStatusLabel(statusFilter)}
-                    <X 
-                      className="h-3 w-3 ml-1 cursor-pointer hover:bg-destructive/20 rounded-full" 
-                      onClick={() => setStatusFilter('all')}
-                    />
-                  </Badge>
-                )}
-                {severityFilter !== 'all' && (
-                  <Badge variant="secondary" className="text-xs">
-                    Severidade: {getSeverityLabel(severityFilter)}
-                    <X 
-                      className="h-3 w-3 ml-1 cursor-pointer hover:bg-destructive/20 rounded-full" 
-                      onClick={() => setSeverityFilter('all')}
-                    />
-                  </Badge>
-                )}
-                {segmentFilter !== 'all' && (
-                  <Badge variant="secondary" className="text-xs">
-                    Segmento: {segmentFilter}
-                    <X 
-                      className="h-3 w-3 ml-1 cursor-pointer hover:bg-destructive/20 rounded-full" 
-                      onClick={() => setSegmentFilter('all')}
-                    />
-                  </Badge>
-                )}
-                {equipmentFilter !== 'all' && (
-                  <Badge variant="secondary" className="text-xs">
-                    Equipamento: {equipmentFilter}
-                    <X 
-                      className="h-3 w-3 ml-1 cursor-pointer hover:bg-destructive/20 rounded-full" 
-                      onClick={() => setEquipmentFilter('all')}
-                    />
-                  </Badge>
-                )}
-                {serialNumberFilter && (
-                  <Badge variant="secondary" className="text-xs">
-                    Nº Série: {serialNumberFilter}
-                    <X 
-                      className="h-3 w-3 ml-1 cursor-pointer hover:bg-destructive/20 rounded-full" 
-                      onClick={() => setSerialNumberFilter('')}
-                    />
-                  </Badge>
-                )}
-                {vendorPriorityFilter && (
-                  <Badge variant="secondary" className="text-xs">
-                    Priorizadas
-                    <X 
-                      className="h-3 w-3 ml-1 cursor-pointer hover:bg-destructive/20 rounded-full" 
-                      onClick={() => setVendorPriorityFilter(false)}
-                    />
-                  </Badge>
-                )}
-              </div>
-            )}
           </CardHeader>
           <CardContent>
-            <div className="space-y-6">
+            <div className="space-y-4">
               {/* Busca Principal */}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -398,194 +275,6 @@ const Ocorrencias = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 h-11 border-2 focus:border-primary/50 transition-colors"
                 />
-              </div>
-
-              {/* Filtros Agrupados */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-                {/* Agência e UF */}
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                    <Building className="h-4 w-4" />
-                    Agência & UF
-                  </label>
-                  <Input
-                    type="text"
-                    placeholder="0 a 9999"
-                    value={agenciaFilter}
-                    onChange={(e) => setAgenciaFilter(e.target.value)}
-                    className="h-10"
-                  />
-                  <Select value={ufFilter} onValueChange={setUfFilter}>
-                    <SelectTrigger className="h-10">
-                      <SelectValue placeholder="Selecionar UF" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos os Estados</SelectItem>
-                      {estadosBrasil.map(uf => (
-                        <SelectItem key={uf} value={uf}>{uf}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Tipo de Agência e VIP */}
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                    <Building className="h-4 w-4" />
-                    Tipo & VIP
-                  </label>
-                  <Select value={tipoAgenciaFilter} onValueChange={setTipoAgenciaFilter}>
-                    <SelectTrigger className="h-10">
-                      <SelectValue placeholder="Tipo de agência" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos os Tipos</SelectItem>
-                      <SelectItem value="convencional">Convencional</SelectItem>
-                      <SelectItem value="terceirizada">Ponto Terceirizado</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={pontoVipFilter} onValueChange={setPontoVipFilter}>
-                    <SelectTrigger className="h-10">
-                      <SelectValue placeholder="Ponto VIP" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos</SelectItem>
-                      <SelectItem value="sim">Sim</SelectItem>
-                      <SelectItem value="nao">Não</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Status e Severidade */}
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                    <AlertTriangle className="h-4 w-4" />
-                    Status & Severidade
-                  </label>
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="h-10">
-                      <SelectValue placeholder="Selecionar status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos os Status</SelectItem>
-                      <SelectItem value="active">Abertas</SelectItem>
-                      <SelectItem value="pending">Em Andamento</SelectItem>
-                      <SelectItem value="resolved">Resolvidas</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={severityFilter} onValueChange={setSeverityFilter}>
-                    <SelectTrigger className="h-10">
-                      <SelectValue placeholder="Selecionar severidade" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todas as Severidades</SelectItem>
-                      <SelectItem value="critical">Crítica</SelectItem>
-                      <SelectItem value="high">Alta</SelectItem>
-                      <SelectItem value="medium">Média</SelectItem>
-                      <SelectItem value="low">Baixa</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Segmento e Equipamento */}
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                    <Package className="h-4 w-4" />
-                    Segmento & Equipamento
-                  </label>
-                  <Select value={segmentFilter} onValueChange={setSegmentFilter}>
-                    <SelectTrigger className="h-10">
-                      <SelectValue placeholder="Selecionar segmento" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos os Segmentos</SelectItem>
-                      <SelectItem value="AA">Segmento AA</SelectItem>
-                      <SelectItem value="AB">Segmento AB</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={equipmentFilter} onValueChange={setEquipmentFilter}>
-                    <SelectTrigger className="h-10">
-                      <SelectValue placeholder="Selecionar equipamento" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos os Equipamentos</SelectItem>
-                      {uniqueEquipments.map(equipment => (
-                        <SelectItem key={equipment} value={equipment}>{equipment}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Fornecedor e Transportadora */}
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                    <Package className="h-4 w-4" />
-                    Fornecedor{tipoAgenciaAtual === 'terceirizada' ? ' & Transportadora' : ''}
-                  </label>
-                  <Select value={vendorFilter} onValueChange={setVendorFilter}>
-                    <SelectTrigger className="h-10">
-                      <SelectValue placeholder="Selecionar fornecedor" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos os Fornecedores</SelectItem>
-                      {uniqueVendors.map(vendor => (
-                        <SelectItem key={vendor} value={vendor}>{vendor}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {tipoAgenciaAtual === 'terceirizada' && (
-                    <Select value={transportadoraFilter} onValueChange={setTransportadoraFilter}>
-                      <SelectTrigger className="h-10">
-                        <SelectValue placeholder="Selecionar transportadora" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Todas as Transportadoras</SelectItem>
-                        {uniqueTransportadoras.map(transportadora => (
-                          <SelectItem key={transportadora} value={transportadora}>{transportadora}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                </div>
-              </div>
-
-              {/* Número de Série e Opções Especiais */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                    <Hash className="h-4 w-4" />
-                    Número de Série
-                  </label>
-                  <div className="relative">
-                    <Package className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Ex: ATM001-SP-001"
-                      value={serialNumberFilter}
-                      onChange={(e) => setSerialNumberFilter(e.target.value)}
-                      className="pl-10 h-10"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                    <Star className="h-4 w-4" />
-                    Opções Especiais
-                  </label>
-                  <div className="flex items-center space-x-3 p-3 border rounded-lg bg-accent/20 hover:bg-accent/30 transition-colors">
-                    <Checkbox 
-                      id="vendor-priority"
-                      checked={vendorPriorityFilter}
-                      onCheckedChange={(checked) => setVendorPriorityFilter(checked === true)}
-                    />
-                    <label 
-                      htmlFor="vendor-priority" 
-                      className="text-sm font-medium leading-none cursor-pointer flex-1"
-                    >
-                      Priorizadas para Fornecedor
-                    </label>
-                  </div>
-                </div>
               </div>
             </div>
           </CardContent>
@@ -671,85 +360,85 @@ const Ocorrencias = () => {
               <ScrollArea className="h-[600px]">
                 <Table>
                   <TableHeader>
-                  <TableRow>
-                    <TableHead>ID</TableHead>
-                    <TableHead>Agência</TableHead>
-                    <TableHead>Segmento</TableHead>
-                    <TableHead>Equipamento</TableHead>
-                    <TableHead>Nº Série</TableHead>
-                    <TableHead>Severidade</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Data/Hora</TableHead>
-                    <TableHead>Fornecedor</TableHead>
-                    <TableHead>Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredOccurrences.map((occurrence) => (
-                    <TableRow key={occurrence.id}>
-                      <TableCell className="font-medium">{occurrence.id}</TableCell>
-                      <TableCell className="max-w-[200px] truncate">{occurrence.agency}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{occurrence.segment}</Badge>
-                      </TableCell>
-                      <TableCell className="max-w-[150px] truncate">{occurrence.equipment}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{occurrence.serialNumber}</TableCell>
-                      <TableCell>
-                        <Badge variant={getSeverityVariant(occurrence.severity)}>
-                          {getSeverityLabel(occurrence.severity)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <StatusBadge status={occurrence.status} />
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {new Date(occurrence.createdAt).toLocaleString('pt-BR')}
-                      </TableCell>
-                      <TableCell className="text-sm">{occurrence.vendor}</TableCell>
-                       <TableCell>
-                         <div className="flex gap-1">
-                           <Button 
-                             variant="ghost" 
-                             size="sm"
-                             onClick={() => handleViewDetails(occurrence)}
-                             title="Visualizar detalhes"
-                           >
-                             <Eye className="h-4 w-4" />
-                           </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="outline" size="sm" className="h-8 px-3" title="Ações da ocorrência">
-                                    <MessageSquare className="h-4 w-4 mr-1" />
-                                    <span className="text-xs">Ações</span>
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-48">
-                                  <DropdownMenuItem 
-                                    onClick={() => handlePrioritize(occurrence, 'priority_only')}
-                                  >
-                                    <Zap className="mr-2 h-4 w-4" />
-                                    Apenas Priorizar
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem 
-                                    onClick={() => handlePrioritize(occurrence, 'priority_with_message')}
-                                  >
-                                    <MessageSquare className="mr-2 h-4 w-4" />
-                                    Priorizar + Mensagem
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem 
-                                    onClick={() => handleSendMessage(occurrence)}
-                                  >
-                                    <MessageSquare className="mr-2 h-4 w-4" />
-                                    Apenas Mensagem
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                         </div>
-                       </TableCell>
+                    <TableRow>
+                      <TableHead>ID</TableHead>
+                      <TableHead>Agência</TableHead>
+                      <TableHead>Segmento</TableHead>
+                      <TableHead>Equipamento</TableHead>
+                      <TableHead>Nº Série</TableHead>
+                      <TableHead>Severidade</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Data/Hora</TableHead>
+                      <TableHead>Fornecedor</TableHead>
+                      <TableHead>Ações</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredOccurrences.map((occurrence) => (
+                      <TableRow key={occurrence.id}>
+                        <TableCell className="font-medium">{occurrence.id}</TableCell>
+                        <TableCell className="max-w-[200px] truncate">{occurrence.agency}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{occurrence.segment}</Badge>
+                        </TableCell>
+                        <TableCell className="max-w-[150px] truncate">{occurrence.equipment}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{occurrence.serialNumber}</TableCell>
+                        <TableCell>
+                          <Badge variant={getSeverityVariant(occurrence.severity)}>
+                            {getSeverityLabel(occurrence.severity)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <StatusBadge status={occurrence.status} />
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {new Date(occurrence.createdAt).toLocaleString('pt-BR')}
+                        </TableCell>
+                        <TableCell className="text-sm">{occurrence.vendor}</TableCell>
+                        <TableCell>
+                          <div className="flex gap-1">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleViewDetails(occurrence)}
+                              title="Visualizar detalhes"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="outline" size="sm" className="h-8 px-3" title="Ações da ocorrência">
+                                  <MessageSquare className="h-4 w-4 mr-1" />
+                                  <span className="text-xs">Ações</span>
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-48">
+                                <DropdownMenuItem 
+                                  onClick={() => handlePrioritize(occurrence, 'priority_only')}
+                                >
+                                  <Zap className="mr-2 h-4 w-4" />
+                                  Apenas Priorizar
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={() => handlePrioritize(occurrence, 'priority_with_message')}
+                                >
+                                  <MessageSquare className="mr-2 h-4 w-4" />
+                                  Priorizar + Mensagem
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={() => handleSendMessage(occurrence)}
+                                >
+                                  <MessageSquare className="mr-2 h-4 w-4" />
+                                  Apenas Mensagem
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </ScrollArea>
             )}
           </CardContent>

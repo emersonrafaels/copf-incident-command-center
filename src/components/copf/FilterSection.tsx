@@ -356,7 +356,7 @@ export function FilterSection({ className }: FilterSectionProps) {
                 </PopoverTrigger>
                 <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
                   <Command>
-                    <CommandInput placeholder="Buscar tipo..." className="h-9" />
+                    <CommandInput placeholder="Buscar tipo VIP..." className="h-9" />
                     <CommandEmpty>Nenhum tipo encontrado.</CommandEmpty>
                     <CommandList>
                       <CommandGroup>
@@ -367,7 +367,7 @@ export function FilterSection({ className }: FilterSectionProps) {
                           <CommandItem key={vip.value} onSelect={() => {
                             const isSelected = pontoVipFilter.includes(vip.value);
                             if (isSelected) {
-                              updateFilter('pontoVipFilter', pontoVipFilter.filter(v => v !== vip.value));
+                              updateFilter('pontoVipFilter', pontoVipFilter.filter(p => p !== vip.value));
                             } else {
                               updateFilter('pontoVipFilter', [...pontoVipFilter, vip.value]);
                             }
@@ -388,28 +388,28 @@ export function FilterSection({ className }: FilterSectionProps) {
         {/* Filtros de Equipamento */}
         <div className="space-y-4">
           <div className="flex items-center gap-2 pb-2 border-b border-border/50">
-            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
-              <div className="w-2 h-2 rounded-full bg-primary"></div>
+            <div className="w-6 h-6 rounded-full bg-secondary/10 flex items-center justify-center">
+              <div className="w-2 h-2 rounded-full bg-secondary"></div>
             </div>
-            <h4 className="text-base font-semibold text-foreground">Equipamento</h4>
+            <h4 className="text-base font-semibold text-foreground">Equipamentos</h4>
           </div>
-          <div className="responsive-grid responsive-grid-4">
+          <div className="responsive-grid responsive-grid-3">
             {/* Segmento */}
             <div className="group space-y-3">
               <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                <div className="w-1 h-4 bg-secondary/60 rounded-full"></div>
                 Segmento
               </Label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                  <Button variant="outline" className="w-full h-10 justify-between hover:bg-secondary/5 hover:border-secondary/30 transition-all duration-200 group-hover:shadow-sm">
                     {segmentFilterMulti.length > 0 ? (
                       <div className="flex items-center gap-2">
-                        <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                        <Badge variant="secondary" className="h-5 text-xs bg-secondary/10 text-secondary">
                           {segmentFilterMulti.length}
                         </Badge>
                         <span className="text-sm">
-                          {segmentFilterMulti.length === 1 ? `Segmento ${segmentFilterMulti[0]}` : `${segmentFilterMulti.length} segmentos`}
+                          {segmentFilterMulti.length === 1 ? segmentFilterMulti[0] : `${segmentFilterMulti.length} segmentos`}
                         </span>
                       </div>
                     ) : "Todos os segmentos"}
@@ -422,17 +422,20 @@ export function FilterSection({ className }: FilterSectionProps) {
                     <CommandEmpty>Nenhum segmento encontrado.</CommandEmpty>
                     <CommandList>
                       <CommandGroup>
-                        {['AA', 'AB'].map(segment => (
-                          <CommandItem key={segment} onSelect={() => {
-                            const isSelected = segmentFilterMulti.includes(segment);
+                        {[
+                          { value: 'AA', label: 'Segmento AA' },
+                          { value: 'AB', label: 'Segmento AB' }
+                        ].map(segment => (
+                          <CommandItem key={segment.value} onSelect={() => {
+                            const isSelected = segmentFilterMulti.includes(segment.value);
                             if (isSelected) {
-                              updateFilter('segmentFilterMulti', segmentFilterMulti.filter(s => s !== segment));
+                              updateFilter('segmentFilterMulti', segmentFilterMulti.filter(s => s !== segment.value));
                             } else {
-                              updateFilter('segmentFilterMulti', [...segmentFilterMulti, segment]);
+                              updateFilter('segmentFilterMulti', [...segmentFilterMulti, segment.value]);
                             }
                           }}>
-                            <Check className={cn("mr-2 h-4 w-4", segmentFilterMulti.includes(segment) ? "opacity-100" : "opacity-0")} />
-                            Segmento {segment}
+                            <Check className={cn("mr-2 h-4 w-4", segmentFilterMulti.includes(segment.value) ? "opacity-100" : "opacity-0")} />
+                            {segment.label}
                           </CommandItem>
                         ))}
                       </CommandGroup>
@@ -445,15 +448,20 @@ export function FilterSection({ className }: FilterSectionProps) {
             {/* Equipamento */}
             <div className="group space-y-3">
               <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                <div className="w-1 h-4 bg-secondary/60 rounded-full"></div>
                 Equipamento
+                {segmentFilterMulti.length > 0 && (
+                  <Badge variant="secondary" className="h-5 text-xs bg-secondary/10 text-secondary">
+                    Filtrado por segmento
+                  </Badge>
+                )}
               </Label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                  <Button variant="outline" className="w-full h-10 justify-between hover:bg-secondary/5 hover:border-secondary/30 transition-all duration-200 group-hover:shadow-sm">
                     {equipmentFilterMulti.length > 0 ? (
                       <div className="flex items-center gap-2">
-                        <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                        <Badge variant="secondary" className="h-5 text-xs bg-secondary/10 text-secondary">
                           {equipmentFilterMulti.length}
                         </Badge>
                         <span className="text-sm">
@@ -490,44 +498,22 @@ export function FilterSection({ className }: FilterSectionProps) {
               </Popover>
             </div>
 
-            {/* Número de Série */}
-            <div className="group space-y-3">
-              <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
-                Número de Série
-              </Label>
-              <div className="relative">
-                <Input
-                  type="text"
-                  placeholder="Buscar por série..."
-                  value={serialNumberFilter}
-                  onChange={e => updateFilter('serialNumberFilter', e.target.value)}
-                  className="h-10 pl-10 hover:border-primary/30 focus:border-primary transition-colors"
-                />
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground">
-                  🔍
-                </div>
-              </div>
-            </div>
-
             {/* Status */}
             <div className="group space-y-3">
               <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                <div className="w-1 h-4 bg-secondary/60 rounded-full"></div>
                 Status
               </Label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                  <Button variant="outline" className="w-full h-10 justify-between hover:bg-secondary/5 hover:border-secondary/30 transition-all duration-200 group-hover:shadow-sm">
                     {statusFilterMulti.length > 0 ? (
                       <div className="flex items-center gap-2">
-                        <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                        <Badge variant="secondary" className="h-5 text-xs bg-secondary/10 text-secondary">
                           {statusFilterMulti.length}
                         </Badge>
                         <span className="text-sm">
-                          {statusFilterMulti.length === 1 ? 
-                            ({'open': 'Aberta', 'in-progress': 'Em Andamento', 'pending': 'Pendente', 'resolved': 'Resolvida'}[statusFilterMulti[0]] || statusFilterMulti[0]) 
-                            : `${statusFilterMulti.length} status`}
+                          {statusFilterMulti.length === 1 ? statusFilterMulti[0] : `${statusFilterMulti.length} status`}
                         </span>
                       </div>
                     ) : "Todos os status"}
@@ -541,10 +527,9 @@ export function FilterSection({ className }: FilterSectionProps) {
                     <CommandList>
                       <CommandGroup>
                         {[
-                          { value: 'open', label: '🔴 Aberta' },
-                          { value: 'in-progress', label: '🟡 Em Andamento' },
-                          { value: 'pending', label: '🟠 Pendente' },
-                          { value: 'resolved', label: '🟢 Resolvida' }
+                          { value: 'active', label: 'Ativo' },
+                          { value: 'pending', label: 'Pendente' },
+                          { value: 'resolved', label: 'Resolvido' }
                         ].map(status => (
                           <CommandItem key={status.value} onSelect={() => {
                             const isSelected = statusFilterMulti.includes(status.value);
@@ -570,34 +555,32 @@ export function FilterSection({ className }: FilterSectionProps) {
         {/* Filtros de Fornecedor */}
         <div className="space-y-4">
           <div className="flex items-center gap-2 pb-2 border-b border-border/50">
-            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
-              <div className="w-2 h-2 rounded-full bg-primary"></div>
+            <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center">
+              <Truck className="h-3 w-3 text-accent" />
             </div>
-            <h4 className="text-base font-semibold text-foreground">Fornecedor</h4>
+            <h4 className="text-base font-semibold text-foreground">Fornecedores</h4>
           </div>
           <div className="responsive-grid responsive-grid-2">
+            {/* Transportadora (aparece primeiro se Ponto Terceirizado) */}
             {tipoAgenciaAtual === 'terceirizada' && (
               <div className="group space-y-3">
                 <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                  <Truck className="h-3 w-3 text-accent" />
                   Transportadora
                 </Label>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
-                      <div className="flex items-center gap-2">
-                        <Truck className="h-4 w-4 text-primary" />
-                        {transportadoraFilterMulti.length > 0 ? (
-                          <div className="flex items-center gap-2">
-                            <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
-                              {transportadoraFilterMulti.length}
-                            </Badge>
-                            <span className="text-sm">
-                              {transportadoraFilterMulti.length === 1 ? transportadoraFilterMulti[0] : `${transportadoraFilterMulti.length} transportadoras`}
-                            </span>
-                          </div>
-                        ) : "Todas as transportadoras"}
-                      </div>
+                    <Button variant="outline" className="w-full h-10 justify-between hover:bg-accent/5 hover:border-accent/30 transition-all duration-200 group-hover:shadow-sm">
+                      {transportadoraFilterMulti.length > 0 ? (
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="h-5 text-xs bg-accent/10 text-accent">
+                            {transportadoraFilterMulti.length}
+                          </Badge>
+                          <span className="text-sm">
+                            {transportadoraFilterMulti.length === 1 ? transportadoraFilterMulti[0] : `${transportadoraFilterMulti.length} transportadoras`}
+                          </span>
+                        </div>
+                      ) : "Todas as transportadoras"}
                       <div className="w-4 h-4 opacity-50">⌄</div>
                     </Button>
                   </PopoverTrigger>
@@ -615,8 +598,6 @@ export function FilterSection({ className }: FilterSectionProps) {
                               } else {
                                 updateFilter('transportadoraFilterMulti', [...transportadoraFilterMulti, transportadora]);
                               }
-                              // Resetar filtro de fornecedor quando mudar transportadora
-                              updateFilter('vendorFilterMulti', []);
                             }}>
                               <Check className={cn("mr-2 h-4 w-4", transportadoraFilterMulti.includes(transportadora) ? "opacity-100" : "opacity-0")} />
                               {transportadora}
@@ -630,22 +611,23 @@ export function FilterSection({ className }: FilterSectionProps) {
               </div>
             )}
 
+            {/* Fornecedor */}
             <div className="group space-y-3">
               <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                <div className="w-1 h-4 bg-accent/60 rounded-full"></div>
                 Fornecedor
-                {tipoAgenciaAtual === 'terceirizada' && transportadoraFilterMulti.length > 0 && (
-                  <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
-                    {transportadoraFilterMulti.length} selecionada{transportadoraFilterMulti.length > 1 ? 's' : ''}
+                {transportadoraFilterMulti.length > 0 && (
+                  <Badge variant="secondary" className="h-5 text-xs bg-accent/10 text-accent">
+                    Filtrado por transportadora
                   </Badge>
                 )}
               </Label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                  <Button variant="outline" className="w-full h-10 justify-between hover:bg-accent/5 hover:border-accent/30 transition-all duration-200 group-hover:shadow-sm">
                     {vendorFilterMulti.length > 0 ? (
                       <div className="flex items-center gap-2">
-                        <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                        <Badge variant="secondary" className="h-5 text-xs bg-accent/10 text-accent">
                           {vendorFilterMulti.length}
                         </Badge>
                         <span className="text-sm">
@@ -686,82 +668,70 @@ export function FilterSection({ className }: FilterSectionProps) {
 
         {/* Filtros Especiais */}
         <Collapsible open={isSpecialFiltersOpen} onOpenChange={setIsSpecialFiltersOpen}>
-          <CollapsibleTrigger asChild>
-            <Button
-              variant="ghost"
-              className="w-full justify-between p-0 pb-2 border-b border-border/50 hover:bg-transparent"
-            >
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
-                  <div className="w-2 h-2 rounded-full bg-primary"></div>
-                </div>
-                <h4 className="text-base font-semibold text-foreground">Filtros Especiais</h4>
-              </div>
-              {isSpecialFiltersOpen ? (
-                <ChevronUp className="h-4 w-4 text-muted-foreground" />
-              ) : (
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
-              )}
-            </Button>
-          </CollapsibleTrigger>
-          <CollapsibleContent className="space-y-4 pt-4">
-            <div className="space-y-4">
-              {/* Ocorrências Vencidas */}
-              <div className="p-4 rounded-lg bg-muted/30 border border-border/50">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <Switch
-                      id="override-filter"
-                      checked={overrideFilter}
-                      onCheckedChange={(checked) => updateFilter('overrideFilter', checked)}
-                      className="data-[state=checked]:bg-primary"
-                    />
-                    <div>
-                      <Label htmlFor="override-filter" className="text-sm font-medium cursor-pointer">
-                        Ocorrências Vencidas
-                      </Label>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Mostrar apenas ocorrências que já passaram do prazo
-                      </p>
-                    </div>
+          <div className="space-y-4">
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" className="w-full justify-between p-0 h-auto">
+                <div className="flex items-center gap-2 pb-2 border-b border-border/50">
+                  <div className="w-6 h-6 rounded-full bg-warning/10 flex items-center justify-center">
+                    <div className="w-2 h-2 rounded-full bg-warning"></div>
                   </div>
-                  {overrideFilter && (
-                    <Badge variant="secondary" className="bg-warning/10 text-warning border-warning/20">
-                      Ativo
-                    </Badge>
-                  )}
+                  <h4 className="text-base font-semibold text-foreground">Filtros Especiais</h4>
                 </div>
-              </div>
+                {isSpecialFiltersOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-4">
+              <div className="responsive-grid responsive-grid-2">
+                {/* Ocorrências Vencidas */}
+                <div className="flex items-center space-x-2 p-3 border border-border/50 rounded-lg bg-background/50 hover:bg-accent/10 transition-colors">
+                  <Switch
+                    id="override-filter"
+                    checked={overrideFilter}
+                    onCheckedChange={(checked) => updateFilter('overrideFilter', checked)}
+                    className="data-[state=checked]:bg-primary"
+                  />
+                  <Label htmlFor="override-filter" className="text-sm cursor-pointer select-none">
+                    Ocorrências Vencidas
+                  </Label>
+                </div>
 
-              {/* Priorizadas com o Fornecedor */}
-              <div className="p-4 rounded-lg bg-muted/30 border border-border/50">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <Switch
-                      id="vendor-priority-filter"
-                      checked={vendorPriorityFilter}
-                      onCheckedChange={(checked) => updateFilter('vendorPriorityFilter', checked)}
-                      className="data-[state=checked]:bg-primary"
-                    />
-                    <div>
-                      <Label htmlFor="vendor-priority-filter" className="text-sm font-medium cursor-pointer">
-                        Priorizadas com o Fornecedor
-                      </Label>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Mostrar apenas ocorrências priorizadas para comunicação com fornecedor
-                      </p>
-                    </div>
-                  </div>
-                  {vendorPriorityFilter && (
-                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
-                      Ativo
-                    </Badge>
-                  )}
+                {/* Priorizadas com o Fornecedor */}
+                <div className="flex items-center space-x-2 p-3 border border-border/50 rounded-lg bg-background/50 hover:bg-accent/10 transition-colors">
+                  <Switch
+                    id="vendor-priority-filter"
+                    checked={vendorPriorityFilter}
+                    onCheckedChange={(checked) => updateFilter('vendorPriorityFilter', checked)}
+                    className="data-[state=checked]:bg-primary"
+                  />
+                  <Label htmlFor="vendor-priority-filter" className="text-sm cursor-pointer select-none">
+                    Priorizadas com o Fornecedor
+                  </Label>
                 </div>
               </div>
-            </div>
-          </CollapsibleContent>
+            </CollapsibleContent>
+          </div>
         </Collapsible>
+
+        {/* Número de Série */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 pb-2 border-b border-border/50">
+            <div className="w-6 h-6 rounded-full bg-muted/50 flex items-center justify-center">
+              <div className="w-2 h-2 rounded-full bg-muted-foreground"></div>
+            </div>
+            <h4 className="text-base font-semibold text-foreground">Outros Filtros</h4>
+          </div>
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-muted-foreground">
+              Número de Série
+            </Label>
+            <Input
+              placeholder="Ex: ATM001-SP-001"
+              value={serialNumberFilter}
+              onChange={(e) => updateFilter('serialNumberFilter', e.target.value)}
+              className="h-10"
+            />
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

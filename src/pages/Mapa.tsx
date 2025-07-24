@@ -1,4 +1,5 @@
 import { COPFLayout } from "@/components/copf/COPFLayout";
+import { FilterSection } from "@/components/copf/FilterSection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -31,6 +32,9 @@ const Mapa = () => {
           <h1 className="text-2xl font-bold text-foreground">Mapa de Calor</h1>
           <p className="text-muted-foreground">Visualização geográfica da concentração de ocorrências</p>
         </div>
+
+        {/* Filtros */}
+        <FilterSection />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">

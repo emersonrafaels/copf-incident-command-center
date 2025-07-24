@@ -1,4 +1,5 @@
 import { COPFLayout } from "@/components/copf/COPFLayout";
+import { FilterSection } from "@/components/copf/FilterSection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -79,6 +80,9 @@ const Relatorios = () => {
             </Button>
           </div>
         </div>
+
+        {/* Filtros */}
+        <FilterSection />
 
         <Tabs defaultValue="overview" className="space-y-8">
           <TabsList className="grid w-full grid-cols-5 h-12 bg-muted/50 p-1">
