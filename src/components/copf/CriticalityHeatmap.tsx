@@ -190,11 +190,11 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
   };
 
   const getCriticalityLabel = (score: number) => {
-    if (score >= 80) return 'CRÍTICO';
-    if (score >= 60) return 'ALTO';
-    if (score >= 40) return 'MÉDIO';
-    if (score >= 20) return 'BAIXO';
-    return 'MÍNIMO';
+    if (score >= 80) return 'Crítico';
+    if (score >= 60) return 'Alto';
+    if (score >= 40) return 'Médio';
+    if (score >= 20) return 'Baixo';
+    return 'Mínimo';
   };
 
   // Componente do Modal Explicativo
