@@ -14,6 +14,7 @@ interface CriticalityData {
   reincidencia: number;
   volumeAtipico: boolean;
   occurrenceCount: number;
+  agenciesWithSLABreach: number;
 }
 
 interface CriticalityHeatmapProps {
@@ -126,6 +127,20 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
       // Peso por percentual de agências com SLA estourado (máximo 30 pontos)
       criticalityScore += Math.min(percentualAgenciasSLA * 0.3, 30);
 
+      // Calcular agências com SLA estourado para este equipamento específico
+      const equipmentAgencies = new Set(occs.map((occ: any) => occ.agency));
+      let equipmentAgenciesWithSLA = 0;
+      
+      equipmentAgencies.forEach(agency => {
+        const agencyOccs = occs.filter((occ: any) => occ.agency === agency);
+        const hasSLABreach = agencyOccs.some((occ: any) => {
+          const hours = (Date.now() - new Date(occ.createdAt).getTime()) / (1000 * 60 * 60);
+          const slaLimit = (occ.severity === 'critical' || occ.severity === 'high') ? 24 : 72;
+          return hours > slaLimit && occ.status !== 'encerrada';
+        });
+        if (hasSLABreach) equipmentAgenciesWithSLA++;
+      });
+
       criticalityData.push({
         equipment,
         segment,
@@ -134,7 +149,8 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
         slaBreached,
         reincidencia,
         volumeAtipico,
-        occurrenceCount: totalCount
+        occurrenceCount: totalCount,
+        agenciesWithSLABreach: equipmentAgenciesWithSLA
       });
     });
 
@@ -400,8 +416,8 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                         <div>Criticidade: <span className="font-semibold">{getCriticalityLabel(item.criticalityScore)} ({item.criticalityScore})</span></div>
                         <div>Aging médio: <span className="font-semibold">{item.aging} dias</span></div>
                         <div>Reincidência: <span className="font-semibold">{item.reincidencia} ocorrências</span></div>
-                        <div>SLA: <span className={`font-semibold ${item.slaBreached ? 'text-destructive' : 'text-success'}`}>
-                          {item.slaBreached ? 'Quebrado' : 'Dentro do prazo'}
+                        <div>Quantidade de Agências com SLA Vencido: <span className="font-semibold text-destructive">
+                          {item.agenciesWithSLABreach}
                         </span></div>
                         <div>Volume: <span className={`font-semibold ${item.volumeAtipico ? 'text-warning' : 'text-success'}`}>
                           {item.volumeAtipico ? 'Atípico' : 'Normal'}
