@@ -123,9 +123,14 @@ const ClickableChartsComponent = memo(function ClickableCharts({ occurrences }: 
     }, 100)
   }
 
-  // 1. Status das Ocorrências (Donut Chart)
+  // 1. Status das Ocorrências (Donut Chart) - Com validação completa
   const statusData = useMemo(() => {
-    console.log('ClickableCharts - Input occurrences:', occurrences.length)
+    console.log('ClickableCharts - Processing status data, occurrences:', occurrences?.length || 0)
+    
+    if (!Array.isArray(occurrences) || occurrences.length === 0) {
+      console.log('No occurrences for status data')
+      return [{ name: 'Sem dados', value: 1, fill: 'hsl(var(--muted))' }]
+    }
     
     const statusMap = {
       'a_iniciar': 'A Iniciar',
@@ -135,7 +140,7 @@ const ClickableChartsComponent = memo(function ClickableCharts({ occurrences }: 
     }
     
     const statusCounts = occurrences.reduce((acc, occ) => {
-      const status = statusMap[occ.status as keyof typeof statusMap] || occ.status
+      const status = statusMap[occ?.status as keyof typeof statusMap] || 'Outros'
       acc[status] = (acc[status] || 0) + 1
       return acc
     }, {} as Record<string, number>)
@@ -144,38 +149,45 @@ const ClickableChartsComponent = memo(function ClickableCharts({ occurrences }: 
       'A Iniciar': 'hsl(var(--warning))',
       'Em Atuação': 'hsl(var(--primary))',
       'Encerrada': 'hsl(var(--success))',
-      'Cancelada': 'hsl(var(--muted-foreground))'
+      'Cancelada': 'hsl(var(--muted-foreground))',
+      'Outros': 'hsl(var(--muted))'
     }
 
     const result = Object.entries(statusCounts).map(([status, count]) => ({
       name: status,
-      value: count,
-      fill: colors[status as keyof typeof colors] || 'hsl(var(--muted-foreground))',
+      value: Math.max(count || 0, 0), // Garantir valor positivo
+      fill: colors[status as keyof typeof colors] || 'hsl(var(--muted))',
       originalStatus: Object.keys(statusMap).find(key => statusMap[key as keyof typeof statusMap] === status) || status
     }))
     
     console.log('StatusData result:', result)
-    return result
+    return result.length > 0 ? result : [{ name: 'Sem dados', value: 1, fill: 'hsl(var(--muted))' }]
   }, [occurrences])
 
-  // 2. Top 5 Equipamentos com Mais Falhas (Bar Chart)
+  // 2. Top 5 Equipamentos - Com validação completa
   const topEquipmentData = useMemo(() => {
+    if (!Array.isArray(occurrences) || occurrences.length === 0) {
+      console.log('No occurrences for equipment data')
+      return [{ name: 'Sem dados', value: 1, fill: 'hsl(var(--muted))' }]
+    }
+    
     const equipmentCounts = occurrences.reduce((acc, occ) => {
-      acc[occ.equipment] = (acc[occ.equipment] || 0) + 1
+      const equipment = occ?.equipment || 'Desconhecido'
+      acc[equipment] = (acc[equipment] || 0) + 1
       return acc
     }, {} as Record<string, number>)
 
     const result = Object.entries(equipmentCounts)
-      .sort(([, a], [, b]) => b - a)
+      .sort(([, a], [, b]) => (b || 0) - (a || 0))
       .slice(0, 5)
       .map(([equipment, count]) => ({
         name: equipment,
-        value: count,
+        value: Math.max(count || 0, 0),
         fill: 'hsl(var(--primary))'
       }))
       
     console.log('TopEquipmentData result:', result)
-    return result
+    return result.length > 0 ? result : [{ name: 'Sem dados', value: 1, fill: 'hsl(var(--muted))' }]
   }, [occurrences])
 
   // 3. Timeline dos Últimos 7 Dias (Area Chart)
@@ -294,6 +306,31 @@ const ClickableChartsComponent = memo(function ClickableCharts({ occurrences }: 
     console.log('ReincidenceData result:', result)
     return result
   }, [occurrences])
+
+  // Validação global dos dados para evitar NaN
+  const validOccurrences = useMemo(() => {
+    console.log('Raw occurrences received:', occurrences?.length || 0)
+    return Array.isArray(occurrences) ? occurrences : []
+  }, [occurrences])
+
+  // Renderização condicional - só renderizar se há dados válidos
+  if (!Array.isArray(occurrences) || occurrences.length === 0) {
+    console.log('No valid occurrences data - rendering placeholder')
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Carregando dados...</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[250px] flex items-center justify-center text-muted-foreground">
+              Aguardando dados das ocorrências
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
