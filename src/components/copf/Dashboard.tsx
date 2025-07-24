@@ -195,6 +195,29 @@ export function Dashboard() {
   const uniqueVendors = Array.from(new Set(occurrences.map(o => o.vendor))).sort();
   const uniqueTransportadoras = ['Express Logística', 'TechTransporte', 'LogiCorp'];
   
+  // Gerar agências únicas baseadas nas ocorrências
+  const uniqueAgencies = Array.from(new Set(occurrences.map(o => o.agency.match(/\d+/)?.[0] || ''))).filter(Boolean).sort();
+  
+  // Filtrar UFs baseadas nas agências selecionadas
+  const getFilteredUFs = () => {
+    if (agenciaFilter.length === 0) return estadosBrasil;
+    
+    // Simular UFs baseadas nas agências selecionadas
+    const ufsFromAgencies = agenciaFilter.map(agencyNumber => {
+      // Lógica simplificada: agências 0-999 = SP, 1000-1999 = RJ, etc.
+      const num = parseInt(agencyNumber);
+      if (num <= 999) return 'SP';
+      if (num <= 1999) return 'RJ';
+      if (num <= 2999) return 'MG';
+      if (num <= 3999) return 'RS';
+      return 'PR';
+    });
+    
+    return Array.from(new Set(ufsFromAgencies));
+  };
+  
+  const availableUFs = getFilteredUFs();
+  
   // Estados brasileiros
   const estadosBrasil = [
     'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 
@@ -216,7 +239,7 @@ export function Dashboard() {
   // Verificar se há filtros ativos
   const hasActiveFilters = segmentFilter !== 'all' || equipmentFilter !== 'all' || 
     serialNumberFilter || statusFilter !== 'all' || overrideFilter || 
-    vendorFilter !== 'all' || transportadoraFilter !== 'all' || agenciaFilter ||
+    vendorFilter !== 'all' || transportadoraFilter !== 'all' || agenciaFilter.length > 0 ||
     ufFilter.length > 0 || tipoAgenciaFilter !== 'all' || pontoVipFilter !== 'all';
 
   // Limpar todos os filtros
@@ -228,7 +251,7 @@ export function Dashboard() {
     setOverrideFilter(false);
     setVendorFilter('all');
     setTransportadoraFilter('all');
-    setAgenciaFilter('');
+    setAgenciaFilter([]);
     setUfFilter([]);
     setTipoAgenciaFilter('all');
     setPontoVipFilter('all');
@@ -348,13 +371,46 @@ export function Dashboard() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="flex flex-col gap-2">
                   <Label className="text-sm font-medium text-muted-foreground">Agência</Label>
-                  <Input
-                    type="text"
-                    placeholder="0 a 9999"
-                    value={agenciaFilter}
-                    onChange={(e) => setAgenciaFilter(e.target.value)}
-                    className="h-9"
-                  />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full h-9 justify-between"
+                      >
+                        {agenciaFilter.length > 0 
+                          ? `${agenciaFilter.length} agência${agenciaFilter.length > 1 ? 's' : ''} selecionada${agenciaFilter.length > 1 ? 's' : ''}`
+                          : "Todas as agências"
+                        }
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-60 p-0 bg-background border border-border z-50" align="start">
+                      <div className="p-3">
+                        <div className="space-y-1 max-h-48 overflow-y-auto">
+                          {uniqueAgencies.map((agency) => (
+                            <div key={agency} className="flex items-center space-x-2">
+                              <Checkbox
+                                id={`agency-${agency}`}
+                                checked={agenciaFilter.includes(agency)}
+                                onCheckedChange={(checked) => {
+                                  if (checked) {
+                                    setAgenciaFilter([...agenciaFilter, agency]);
+                                  } else {
+                                    setAgenciaFilter(agenciaFilter.filter(a => a !== agency));
+                                  }
+                                }}
+                              />
+                              <Label
+                                htmlFor={`agency-${agency}`}
+                                className="text-sm cursor-pointer"
+                              >
+                                {agency}
+                              </Label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 </div>
 
                 <div className="flex flex-col gap-2">
@@ -374,7 +430,7 @@ export function Dashboard() {
                     <PopoverContent className="w-60 p-0 bg-background border border-border z-50" align="start">
                       <div className="p-3">
                         <div className="space-y-1">
-                          {estadosBrasil.map((uf) => (
+                          {availableUFs.map((uf) => (
                             <div key={uf} className="flex items-center space-x-2">
                               <Checkbox
                                 id={`uf-${uf}`}
