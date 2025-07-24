@@ -628,7 +628,7 @@ export function FilterSection({ className }: FilterSectionProps) {
                     <div className="w-1 h-4 bg-accent/60 rounded-full"></div>
                     Fornecedor
                     {transportadoraFilterMulti.length > 0 && (
-                      <Badge variant="secondary" className="h-5 text-xs bg-accent/10 text-accent">
+                      <Badge variant="secondary" className="h-5 text-xs bg-primary/15 text-primary border border-primary/20">
                         Filtrado por transportadora
                       </Badge>
                     )}
