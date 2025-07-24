@@ -539,12 +539,10 @@ export function Dashboard() {
               description="Tempo médio de resolução" 
             />
             <MetricCard 
-              title="Agências Afetadas" 
-              value={metrics.affectedAgencies} 
-              change="2 novas esta semana" 
-              changeType="neutral" 
+              title="Total de Agências" 
+              value={2360} 
+              description="Distribuídas no Brasil" 
               icon={<MapPin className="h-5 w-5" />} 
-              description="De 234 totais" 
             />
           </div>
         )}
