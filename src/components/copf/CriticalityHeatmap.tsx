@@ -1,7 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { AlertTriangle, Clock, RotateCcw, TrendingUp } from "lucide-react";
+import { AlertTriangle, Clock, RotateCcw, TrendingUp, Info, Calculator } from "lucide-react";
 
 interface CriticalityData {
   equipment: string;
@@ -115,65 +117,203 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
     return 'Mínimo';
   };
 
+  // Componente do Modal Explicativo
+  const CriticalityExplanationModal = () => (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm" className="ml-auto">
+          <Calculator className="h-4 w-4 mr-2" />
+          Como é calculado?
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Info className="h-5 w-5 text-primary" />
+            Cálculo de Criticidade por Equipamento
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-6">
+          <div className="bg-muted/50 p-4 rounded-lg">
+            <h4 className="font-semibold mb-2">Fórmula de Criticidade</h4>
+            <p className="text-sm text-muted-foreground">
+              Score = Aging (max 25) + SLA Quebrado (25) + Reincidência (max 25) + Volume Atípico (25)
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-3">
+              <div className="border rounded-lg p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <Clock className="h-4 w-4 text-primary" />
+                  <h5 className="font-medium">Aging (0-25 pontos)</h5>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Média de dias desde a criação das ocorrências abertas. Máximo de 25 pontos ({'>'}=12.5 dias).
+                </p>
+              </div>
+              
+              <div className="border rounded-lg p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertTriangle className="h-4 w-4 text-warning" />
+                  <h5 className="font-medium">SLA Quebrado (0-25 pontos)</h5>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  25 pontos se houver ocorrência crítica/alta {'>'}24h ou média/baixa {'>'}72h sem resolução.
+                </p>
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <div className="border rounded-lg p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <RotateCcw className="h-4 w-4 text-destructive" />
+                  <h5 className="font-medium">Reincidência (0-25 pontos)</h5>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Número de ocorrências nos últimos 30 dias × 3. Máximo de 25 pontos ({'>'}=8 ocorrências).
+                </p>
+              </div>
+              
+              <div className="border rounded-lg p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <TrendingUp className="h-4 w-4 text-success" />
+                  <h5 className="font-medium">Volume Atípico (0-25 pontos)</h5>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  25 pontos se houver mais de 5 ocorrências nos últimos 30 dias.
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="border-t pt-4">
+            <h4 className="font-semibold mb-2">Níveis de Criticidade</h4>
+            <div className="grid grid-cols-5 gap-2 text-xs">
+              <div className="text-center">
+                <div className="w-full h-3 bg-destructive rounded mb-1"></div>
+                <span className="font-medium">Crítico</span>
+                <div className="text-muted-foreground">80-100</div>
+              </div>
+              <div className="text-center">
+                <div className="w-full h-3 bg-warning rounded mb-1"></div>
+                <span className="font-medium">Alto</span>
+                <div className="text-muted-foreground">60-79</div>
+              </div>
+              <div className="text-center">
+                <div className="w-full h-3 bg-yellow-500 rounded mb-1"></div>
+                <span className="font-medium">Médio</span>
+                <div className="text-muted-foreground">40-59</div>
+              </div>
+              <div className="text-center">
+                <div className="w-full h-3 bg-blue-500 rounded mb-1"></div>
+                <span className="font-medium">Baixo</span>
+                <div className="text-muted-foreground">20-39</div>
+              </div>
+              <div className="text-center">
+                <div className="w-full h-3 bg-success rounded mb-1"></div>
+                <span className="font-medium">Mínimo</span>
+                <div className="text-muted-foreground">0-19</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+
   return (
-    <Card className="animate-fade-in">
+    <Card className="animate-fade-in border-border/50 bg-gradient-to-br from-card to-muted/20">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <AlertTriangle className="h-5 w-5 text-warning" />
-          Mapa de Criticidade por Equipamento
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-warning/10">
+              <AlertTriangle className="h-5 w-5 text-warning" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold">Mapa de Criticidade por Equipamento</h3>
+              <p className="text-sm text-muted-foreground">
+                Análise baseada em aging, SLA, reincidência e volume atípico
+              </p>
+            </div>
+          </div>
+          <CriticalityExplanationModal />
         </CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Baseado em aging, SLA, reincidência e volume atípico
-        </p>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {/* Legenda */}
-          <div className="flex flex-wrap gap-2 text-xs">
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 bg-destructive rounded"></div>
-              <span>Crítico (80-100)</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 bg-warning rounded"></div>
-              <span>Alto (60-79)</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 bg-yellow-500 rounded"></div>
-              <span>Médio (40-59)</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 bg-blue-500 rounded"></div>
-              <span>Baixo (20-39)</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 bg-success rounded"></div>
-              <span>Mínimo (0-19)</span>
+        <div className="space-y-6">
+          {/* Legenda Melhorada */}
+          <div className="bg-muted/30 p-4 rounded-lg border border-border/50">
+            <h4 className="font-medium mb-3 text-sm">Níveis de Criticidade</h4>
+            <div className="grid grid-cols-5 gap-3 text-xs">
+              <div className="text-center space-y-2">
+                <div className="w-full h-4 bg-destructive rounded-md shadow-sm"></div>
+                <div>
+                  <div className="font-semibold text-destructive">Crítico</div>
+                  <div className="text-muted-foreground">80-100</div>
+                </div>
+              </div>
+              <div className="text-center space-y-2">
+                <div className="w-full h-4 bg-warning rounded-md shadow-sm"></div>
+                <div>
+                  <div className="font-semibold text-warning">Alto</div>
+                  <div className="text-muted-foreground">60-79</div>
+                </div>
+              </div>
+              <div className="text-center space-y-2">
+                <div className="w-full h-4 bg-yellow-500 rounded-md shadow-sm"></div>
+                <div>
+                  <div className="font-semibold text-yellow-600">Médio</div>
+                  <div className="text-muted-foreground">40-59</div>
+                </div>
+              </div>
+              <div className="text-center space-y-2">
+                <div className="w-full h-4 bg-blue-500 rounded-md shadow-sm"></div>
+                <div>
+                  <div className="font-semibold text-blue-600">Baixo</div>
+                  <div className="text-muted-foreground">20-39</div>
+                </div>
+              </div>
+              <div className="text-center space-y-2">
+                <div className="w-full h-4 bg-success rounded-md shadow-sm"></div>
+                <div>
+                  <div className="font-semibold text-success">Mínimo</div>
+                  <div className="text-muted-foreground">0-19</div>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Grade de Heatmap */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+          {/* Grade de Heatmap Melhorada */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {criticalityData.slice(0, 16).map((item, index) => (
               <TooltipProvider key={`${item.equipment}-${item.segment}`}>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div 
-                      className={`p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-lg animate-fade-in ${getCriticalityColor(item.criticalityScore)} text-white`}
-                      style={{ animationDelay: `${index * 50}ms` }}
+                      className={`group relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg animate-fade-in ${getCriticalityColor(item.criticalityScore)} text-white overflow-hidden`}
+                      style={{ animationDelay: `${index * 75}ms` }}
                     >
-                      <div className="space-y-2">
+                      {/* Background gradient overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-50"></div>
+                      
+                      <div className="relative space-y-3">
                         <div className="flex items-center justify-between">
-                          <Badge variant="secondary" className="text-xs bg-white/20 text-white border-white/30">
+                          <Badge variant="secondary" className="text-xs bg-white/20 text-white border-white/30 backdrop-blur-sm">
                             {item.segment}
                           </Badge>
-                          <span className="text-xs font-bold">
-                            {item.criticalityScore}
-                          </span>
+                          <div className="text-right">
+                            <div className="text-lg font-bold leading-none">
+                              {item.criticalityScore}
+                            </div>
+                            <div className="text-xs opacity-75">
+                              {getCriticalityLabel(item.criticalityScore)}
+                            </div>
+                          </div>
                         </div>
                         
                         <div>
-                          <h4 className="font-semibold text-sm truncate" title={item.equipment}>
+                          <h4 className="font-semibold text-sm truncate mb-1" title={item.equipment}>
                             {item.equipment}
                           </h4>
                           <p className="text-xs opacity-90">
@@ -181,34 +321,37 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                           </p>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-1 text-xs">
-                          <div className="flex items-center gap-1">
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div className="flex items-center gap-1.5 bg-white/10 rounded-md px-2 py-1">
                             <Clock className="h-3 w-3" />
                             <span>{item.aging}d</span>
                           </div>
                           {item.reincidencia > 1 && (
-                            <div className="flex items-center gap-1">
+                            <div className="flex items-center gap-1.5 bg-white/10 rounded-md px-2 py-1">
                               <RotateCcw className="h-3 w-3" />
                               <span>{item.reincidencia}x</span>
                             </div>
                           )}
                           {item.slaBreached && (
-                            <div className="flex items-center gap-1">
+                            <div className="flex items-center gap-1.5 bg-white/10 rounded-md px-2 py-1">
                               <AlertTriangle className="h-3 w-3" />
                               <span>SLA</span>
                             </div>
                           )}
                           {item.volumeAtipico && (
-                            <div className="flex items-center gap-1">
+                            <div className="flex items-center gap-1.5 bg-white/10 rounded-md px-2 py-1">
                               <TrendingUp className="h-3 w-3" />
                               <span>Vol</span>
                             </div>
                           )}
                         </div>
                       </div>
+                      
+                      {/* Hover indicator */}
+                      <div className="absolute inset-0 border-2 border-white/0 rounded-xl transition-all duration-300 group-hover:border-white/30"></div>
                     </div>
                   </TooltipTrigger>
-                  <TooltipContent className="max-w-xs">
+                  <TooltipContent className="max-w-xs bg-background/95 backdrop-blur-sm border border-border/80">
                     <div className="space-y-2">
                       <div className="font-semibold">{item.equipment} ({item.segment})</div>
                       <div className="space-y-1 text-sm">
@@ -230,9 +373,12 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
           </div>
 
           {criticalityData.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              <AlertTriangle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>Nenhum equipamento com dados suficientes para análise de criticidade</p>
+            <div className="text-center py-12 text-muted-foreground">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted/50 flex items-center justify-center">
+                <AlertTriangle className="h-8 w-8 opacity-50" />
+              </div>
+              <h4 className="font-medium mb-2">Sem dados suficientes</h4>
+              <p className="text-sm">Nenhum equipamento com dados suficientes para análise de criticidade</p>
             </div>
           )}
         </div>

@@ -73,6 +73,39 @@ export function InteractiveCharts({ severityData, timelineData, mttrData, equipm
     ][index % 6]
   })).sort((a, b) => b.value - a.value).slice(0, 6); // Top 6 equipamentos
 
+  // Função para gerar dados de timeline por agência
+  const generateAgencyTimeline = (occurrences: any[]) => {
+    const last7Days = Array.from({ length: 7 }, (_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (6 - i));
+      return date.toISOString().split('T')[0];
+    });
+
+    // Agrupar agências mais comuns
+    const agencyCounts = occurrences.reduce((acc: any, occ) => {
+      const agencyNumber = occ.agency.match(/\d+/)?.[0] || '';
+      const agencyName = `Agencia_${agencyNumber.padStart(3, '0')}`;
+      acc[agencyName] = (acc[agencyName] || 0) + 1;
+      return acc;
+    }, {});
+
+    const topAgencies = Object.entries(agencyCounts)
+      .sort(([, a], [, b]) => (b as number) - (a as number))
+      .slice(0, 5)
+      .map(([name]) => name);
+
+    return last7Days.map(date => {
+      const dayData: any = { date: new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) };
+      
+      topAgencies.forEach(agency => {
+        // Simular dados históricos para demonstração
+        dayData[agency] = Math.floor(Math.random() * 10) + 1;
+      });
+      
+      return dayData;
+    });
+  };
+
   // Função para gerar dados de timeline por equipamento
   const generateEquipmentTimeline = (occurrences: any[]) => {
     const last7Days = Array.from({ length: 7 }, (_, i) => {
@@ -151,13 +184,90 @@ export function InteractiveCharts({ severityData, timelineData, mttrData, equipm
         </CardContent>
       </Card>
 
-      {/* Timeline de Ocorrências por Equipamento - Line Chart */}
+      {/* Top Agências - Linha Histórica */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5" />
-            Timeline de Ocorrências por Equipamento
+            Top Agências - Histórico de Ocorrências
           </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Agências com mais ocorrências nos últimos 7 dias
+          </p>
+        </CardHeader>
+        <CardContent>
+          <ChartContainer config={chartConfig} className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={generateAgencyTimeline(occurrences)}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis 
+                  dataKey="date" 
+                  stroke="hsl(var(--muted-foreground))"
+                  fontSize={12}
+                />
+                <YAxis 
+                  stroke="hsl(var(--muted-foreground))"
+                  fontSize={12}
+                />
+                <Tooltip 
+                  content={<ChartTooltipContent />}
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--popover))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: 'var(--radius)'
+                  }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="Agencia_001" 
+                  stroke="hsl(var(--primary))" 
+                  strokeWidth={2}
+                  dot={{ fill: 'hsl(var(--primary))' }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="Agencia_002" 
+                  stroke="hsl(var(--warning))" 
+                  strokeWidth={2}
+                  dot={{ fill: 'hsl(var(--warning))' }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="Agencia_003" 
+                  stroke="hsl(var(--success))" 
+                  strokeWidth={2}
+                  dot={{ fill: 'hsl(var(--success))' }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="Agencia_004" 
+                  stroke="hsl(var(--destructive))" 
+                  strokeWidth={2}
+                  dot={{ fill: 'hsl(var(--destructive))' }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="Agencia_005" 
+                  stroke="hsl(var(--muted-foreground))" 
+                  strokeWidth={2}
+                  dot={{ fill: 'hsl(var(--muted-foreground))' }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </ChartContainer>
+        </CardContent>
+      </Card>
+
+      {/* Top Equipamentos - Linha Histórica */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" />
+            Top Equipamentos - Histórico de Ocorrências
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Equipamentos com mais ocorrências nos últimos 7 dias
+          </p>
         </CardHeader>
         <CardContent>
           <ChartContainer config={chartConfig} className="h-[300px]">
@@ -181,7 +291,6 @@ export function InteractiveCharts({ severityData, timelineData, mttrData, equipm
                     borderRadius: 'var(--radius)'
                   }}
                 />
-                {/* Linhas dinâmicas para os equipamentos com mais ocorrências */}
                 <Line 
                   type="monotone" 
                   dataKey="ATM" 
@@ -198,17 +307,24 @@ export function InteractiveCharts({ severityData, timelineData, mttrData, equipm
                 />
                 <Line 
                   type="monotone" 
-                  dataKey="Impressora" 
+                  dataKey="Notebook" 
                   stroke="hsl(var(--success))" 
                   strokeWidth={2}
                   dot={{ fill: 'hsl(var(--success))' }}
                 />
                 <Line 
                   type="monotone" 
-                  dataKey="Scanner" 
+                  dataKey="Impressora" 
                   stroke="hsl(var(--destructive))" 
                   strokeWidth={2}
                   dot={{ fill: 'hsl(var(--destructive))' }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="Scanner" 
+                  stroke="hsl(var(--muted-foreground))" 
+                  strokeWidth={2}
+                  dot={{ fill: 'hsl(var(--muted-foreground))' }}
                 />
               </LineChart>
             </ResponsiveContainer>

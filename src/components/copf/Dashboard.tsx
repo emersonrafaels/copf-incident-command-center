@@ -193,7 +193,24 @@ export function Dashboard() {
 
   const uniqueEquipments = getFilteredEquipments();
   const uniqueVendors = Array.from(new Set(occurrences.map(o => o.vendor))).sort();
-  const uniqueTransportadoras = ['Express Logística', 'TechTransporte', 'LogiCorp'];
+  
+  // Dados de transportadoras e seus fornecedores
+  const transportadoraFornecedores = {
+    'Express Logística': ['Fornecedor A', 'Fornecedor B', 'Fornecedor C'],
+    'TechTransporte': ['Fornecedor D', 'Fornecedor E'],
+    'LogiCorp': ['Fornecedor F', 'Fornecedor G', 'Fornecedor H']
+  };
+  
+  const uniqueTransportadoras = Object.keys(transportadoraFornecedores);
+  
+  // Filtrar fornecedores baseado na transportadora selecionada
+  const getFilteredVendors = () => {
+    if (tipoAgenciaFilter !== 'terceirizada') return uniqueVendors;
+    if (transportadoraFilter === 'all') return uniqueVendors;
+    return transportadoraFornecedores[transportadoraFilter] || uniqueVendors;
+  };
+  
+  const availableVendors = getFilteredVendors();
   
   // Gerar agências únicas baseadas nas ocorrências
   const uniqueAgencies = Array.from(new Set(occurrences.map(o => o.agency.match(/\d+/)?.[0] || ''))).filter(Boolean).sort();
@@ -669,31 +686,19 @@ export function Dashboard() {
               <h4 className="text-base font-semibold text-foreground">Fornecedor</h4>
             </div>
             <div className="responsive-grid responsive-grid-2">
-              <div className="group space-y-3">
-                <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
-                  Fornecedor
-                </Label>
-                <Select value={vendorFilter} onValueChange={setVendorFilter}>
-                  <SelectTrigger className="h-10 hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
-                    <SelectValue placeholder="Todos os fornecedores" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background/95 backdrop-blur-sm border border-border/80">
-                    <SelectItem value="all">Todos os fornecedores</SelectItem>
-                    {uniqueVendors.map(vendor => (
-                      <SelectItem key={vendor} value={vendor}>{vendor}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
               {tipoAgenciaAtual === 'terceirizada' && (
                 <div className="group space-y-3">
                   <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                     <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
                     Transportadora
                   </Label>
-                  <Select value={transportadoraFilter} onValueChange={setTransportadoraFilter}>
+                  <Select value={transportadoraFilter} onValueChange={(value) => {
+                    setTransportadoraFilter(value);
+                    // Resetar filtro de fornecedor quando mudar transportadora
+                    if (value !== 'all') {
+                      setVendorFilter('all');
+                    }
+                  }}>
                     <SelectTrigger className="h-10 hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
                       <Truck className="h-4 w-4 mr-2 text-primary" />
                       <SelectValue placeholder="Todas as transportadoras" />
@@ -707,6 +712,29 @@ export function Dashboard() {
                   </Select>
                 </div>
               )}
+
+              <div className="group space-y-3">
+                <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                  Fornecedor
+                  {tipoAgenciaAtual === 'terceirizada' && transportadoraFilter !== 'all' && (
+                    <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                      {transportadoraFilter}
+                    </Badge>
+                  )}
+                </Label>
+                <Select value={vendorFilter} onValueChange={setVendorFilter}>
+                  <SelectTrigger className="h-10 hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                    <SelectValue placeholder="Todos os fornecedores" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background/95 backdrop-blur-sm border border-border/80">
+                    <SelectItem value="all">Todos os fornecedores</SelectItem>
+                    {availableVendors.map(vendor => (
+                      <SelectItem key={vendor} value={vendor}>{vendor}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 
