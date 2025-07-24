@@ -192,7 +192,9 @@ export function OccurrenceModal({
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  <StatusBadge status={occurrence.severity} />
+                  <Badge variant={getSeverityVariant(occurrence.severity)}>
+                    {getSeverityLabel(occurrence.severity)}
+                  </Badge>
                   <StatusBadge status={occurrence.status} />
                 </div>
               </div>

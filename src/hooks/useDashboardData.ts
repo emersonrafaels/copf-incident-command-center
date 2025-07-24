@@ -8,7 +8,7 @@ export interface OccurrenceData {
   serialNumber: string
   description: string
   severity: 'critical' | 'high' | 'medium' | 'low'
-  status: 'active' | 'pending' | 'resolved'
+  status: 'pending' | 'resolved'
   createdAt: string
   assignedTo: string
   vendor: string
@@ -64,7 +64,7 @@ export function useDashboardData() {
         serialNumber: "ATM001-SP-001",
         description: "ATM não está dispensando cédulas - erro de hardware na gaveta",
         severity: "critical",
-        status: "active",
+        status: "pending",
         createdAt: "2024-01-15T08:30:00",
         assignedTo: "João Silva - NOC",
         vendor: "Diebold Nixdorf"
@@ -90,7 +90,7 @@ export function useDashboardData() {
         serialNumber: "SRV003-SP-032",
         description: "Perda total de conectividade - link primário inoperante",
         severity: "high",
-        status: "active",
+        status: "pending",
         createdAt: "2024-01-14T14:20:00",
         assignedTo: "Carlos Oliveira - Redes",
         vendor: "Dell Technologies"
@@ -138,7 +138,7 @@ export function useDashboardData() {
         serialNumber: `${segment}${String(i + 6).padStart(3, '0')}-SP-${agencyNum}`,
         description: ['Erro de hardware', 'Falha de conectividade', 'Problema de temperatura', 'Defeito no leitor'][Math.floor(Math.random() * 4)],
         severity: ['critical', 'high', 'medium', 'low'][Math.floor(Math.random() * 4)] as ('critical' | 'high' | 'medium' | 'low'),
-        status: ['active', 'pending', 'resolved'][Math.floor(Math.random() * 3)] as ('active' | 'pending' | 'resolved'),
+        status: ['pending', 'resolved'][Math.floor(Math.random() * 2)] as ('pending' | 'resolved'),
         createdAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
         assignedTo: ['João Silva', 'Maria Santos', 'Carlos Oliveira', 'Ana Costa', 'Roberto Lima'][Math.floor(Math.random() * 5)],
         vendor: ['Diebold Nixdorf', 'NCR Corporation', 'Dell Technologies', 'Gertec', 'Bematech'][Math.floor(Math.random() * 5)]
@@ -218,7 +218,6 @@ export function useDashboardData() {
   const metrics = {
     totalOccurrences: occurrences.length,
     resolvedOccurrences: occurrences.filter(o => o.status === 'resolved').length,
-    activeOccurrences: occurrences.filter(o => o.status === 'active').length,
     pendingOccurrences: occurrences.filter(o => o.status === 'pending').length,
     avgMTTR: '4.2h',
     affectedAgencies: new Set(occurrences.map(o => o.agency)).size,
