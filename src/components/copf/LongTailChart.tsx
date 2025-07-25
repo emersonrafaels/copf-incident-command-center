@@ -514,23 +514,6 @@ export const LongTailChart = memo(function LongTailChart({
               <div>
                 <h4 className="font-semibold text-foreground mb-3">Resumo Executivo</h4>
                 <div className="space-y-3 text-sm text-muted-foreground leading-relaxed">
-                  {/* Overview geral */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    <div className="text-center p-3 bg-card/50 rounded-lg">
-                      <div className="text-xl font-bold text-foreground">{formatHours(timeRangeAnalysis.metrics.tempoMediano)}</div>
-                      <div className="text-xs text-muted-foreground">Tempo Mediano</div>
-                    </div>
-                    <div className="text-center p-3 bg-card/50 rounded-lg">
-                      <div className="text-xl font-bold text-success">{timeRangeAnalysis.metrics.percentualExcelencia}%</div>
-                      <div className="text-xs text-muted-foreground">Meta de Excelência</div>
-                    </div>
-                    <div className="text-center p-3 bg-card/50 rounded-lg">
-                      <div className="text-xl font-bold text-destructive">{timeRangeAnalysis.metrics.agingCritico}</div>
-                      <div className="text-xs text-muted-foreground">Aging Crítico</div>
-                    </div>
-                  </div>
-                  
-                  {/* Análise textual */}
                   <p>
                     <span className="font-medium text-foreground">{timeRangeAnalysis.metrics.total}</span> ocorrências em aberto com tempo mediano de{" "}
                     <span className="font-medium text-foreground">{formatHours(timeRangeAnalysis.metrics.tempoMediano)}</span>, indicando que 50% das ocorrências são resolvidas em até esse tempo.
