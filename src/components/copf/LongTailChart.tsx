@@ -626,12 +626,12 @@ export const LongTailChart = memo(function LongTailChart({
 
       {/* Cards de Análise em Grid */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        {/* Card de Análise Operacional colapsável */}
+        {/* Card de Análise Operacional e Resumo Executivo - colapsável */}
         <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
           <Collapsible open={!isAnalysisCollapsed} onOpenChange={setIsAnalysisCollapsed}>
-            <CollapsibleTrigger asChild>
-              <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 cursor-pointer hover:bg-primary/5 transition-all duration-200 hover-scale">
-                <CardHeader className="pb-3">
+            <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+              <CollapsibleTrigger asChild>
+                <CardHeader className="pb-3 cursor-pointer hover:bg-primary/5 transition-colors">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="p-2.5 rounded-xl bg-primary/10">
@@ -639,7 +639,7 @@ export const LongTailChart = memo(function LongTailChart({
                       </div>
                       <div>
                         <CardTitle className="text-lg font-semibold">Análise de Performance</CardTitle>
-                        <p className="text-sm text-muted-foreground">Insights detalhados sobre aging</p>
+                        <p className="text-sm text-muted-foreground">Resumo executivo e insights detalhados</p>
                       </div>
                     </div>
                     <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -651,12 +651,10 @@ export const LongTailChart = memo(function LongTailChart({
                     </Button>
                   </div>
                 </CardHeader>
-              </Card>
-            </CollapsibleTrigger>
-            
-            <CollapsibleContent className="animate-accordion-down">
-              <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 mt-3">
-                <CardContent className="space-y-4 pt-6">
+              </CollapsibleTrigger>
+              
+              <CollapsibleContent className="animate-accordion-down">
+                <CardContent className="space-y-4 pt-0">
                   {/* Resumo Executivo expandido */}
                   <div className="p-4 bg-primary/8 rounded-xl border border-primary/15">
                     <div className="flex items-start gap-3">
@@ -666,14 +664,14 @@ export const LongTailChart = memo(function LongTailChart({
                         <div className="space-y-3 text-sm text-muted-foreground leading-relaxed">
                           <p>
                             <span className="font-medium text-foreground">{timeRangeAnalysis.metrics.total}</span> ocorrências em aberto com tempo mediano de{" "}
-                            <span className="font-medium text-foreground">{formatHours(timeRangeAnalysis.metrics.tempoMediano)}</span>.
+                            <span className="font-medium text-foreground">{formatHours(timeRangeAnalysis.metrics.tempoMediano)}</span>, indicando que 50% das ocorrências são resolvidas em até esse tempo.
                           </p>
                           <p>
-                            <span className="font-medium text-success">{timeRangeAnalysis.metrics.percentualExcelencia}%</span> dentro da meta de excelência (≤ {formatHours(timeRangeAnalysis.metrics.metaExcelencia)}).
+                            <span className="font-medium text-success">{timeRangeAnalysis.metrics.percentualExcelencia}%</span> das ocorrências estão dentro da meta de excelência (≤ {formatHours(timeRangeAnalysis.metrics.metaExcelencia)}), demonstrando {timeRangeAnalysis.metrics.percentualExcelencia >= 70 ? 'boa' : 'baixa'} performance operacional.
                           </p>
                           {timeRangeAnalysis.metrics.agingCritico > 0 && (
                             <p className="text-destructive font-medium">
-                              ⚠️ <span className="font-bold">{timeRangeAnalysis.metrics.agingCritico}</span> ocorrências com aging crítico ({">"} 5 dias).
+                              ⚠️ Atenção: <span className="font-bold">{timeRangeAnalysis.metrics.agingCritico}</span> ocorrências ({timeRangeAnalysis.metrics.percentualCritico}%) com aging crítico ({">"} 5 dias) requerem ação imediata.
                             </p>
                           )}
                         </div>
@@ -695,17 +693,17 @@ export const LongTailChart = memo(function LongTailChart({
                     </div>
                   </div>
                 </CardContent>
-              </Card>
-            </CollapsibleContent>
+              </CollapsibleContent>
+            </Card>
           </Collapsible>
         </div>
 
         {/* Como usar esta análise - colapsável */}
         <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
           <Collapsible open={!isGuideCollapsed} onOpenChange={setIsGuideCollapsed}>
-            <CollapsibleTrigger asChild>
-              <Card className="bg-gradient-to-r from-info/5 to-info/10 border-info/20 cursor-pointer hover:bg-info/5 transition-all duration-200 hover-scale">
-                <CardHeader>
+            <Card className="bg-gradient-to-r from-info/5 to-info/10 border-info/20">
+              <CollapsibleTrigger asChild>
+                <CardHeader className="cursor-pointer hover:bg-info/5 transition-colors">
                   <div className="flex items-center justify-between">
                     <div className="flex items-start gap-3">
                       <div className="p-2.5 rounded-xl bg-info/10">
@@ -728,12 +726,10 @@ export const LongTailChart = memo(function LongTailChart({
                     </Button>
                   </div>
                 </CardHeader>
-              </Card>
-            </CollapsibleTrigger>
-            
-            <CollapsibleContent className="animate-accordion-down">
-              <Card className="bg-gradient-to-r from-info/5 to-info/10 border-info/20 mt-3">
-                <CardContent className="pt-6">
+              </CollapsibleTrigger>
+              
+              <CollapsibleContent className="animate-accordion-down">
+                <CardContent className="pt-0">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-3">
                       <div className="flex items-start gap-3 p-3 bg-card/50 rounded-lg hover:bg-card/70 transition-colors">
@@ -772,8 +768,8 @@ export const LongTailChart = memo(function LongTailChart({
                     </div>
                   </div>
                 </CardContent>
-              </Card>
-            </CollapsibleContent>
+              </CollapsibleContent>
+            </Card>
           </Collapsible>
         </div>
       </div>
