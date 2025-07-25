@@ -447,27 +447,8 @@ export function Dashboard() {
       </div>
 
       {/* Dashboard Content Wrapper for PDF Export */}
-      <div id="dashboard-content">
-        {/* KPI Cards */}
-        {isLoading ? <div className="responsive-grid responsive-grid-4">
-            {Array.from({
-          length: 4
-        }).map((_, i) => <Card key={i} className="animate-pulse">
-                <CardHeader className="pb-2">
-                  <Skeleton className="h-4 w-32" />
-                </CardHeader>
-                <CardContent>
-                  <Skeleton className="h-8 w-20 mb-2" />
-                  <Skeleton className="h-3 w-28" />
-                </CardContent>
-              </Card>)}
-          </div> : <div className="responsive-grid responsive-grid-4 mb-6">
-            <MetricCard title="Total de Ocorrências" value={metrics.totalOccurrences} change="+12% vs mês anterior" changeType="negative" icon={<AlertTriangle className="h-5 w-5" />} description={`${filterPeriod === '30-days' ? 'Últimos 30 dias' : 'Últimos 90 dias'}`} />
-            <MetricCard title="Ocorrências Resolvidas" value={metrics.resolvedOccurrences} change="+8% vs mês anterior" changeType="positive" icon={<CheckCircle2 className="h-5 w-5" />} description={`${metrics.resolutionRate}% taxa de resolução`} />
-            <MetricCard title="MTTR Médio" value={metrics.avgMTTR} change="-15min vs mês anterior" changeType="positive" icon={<Clock className="h-5 w-5" />} description="Tempo médio de resolução" />
-            <MetricCard title="Agências Afetadas" value={20} change="2 novas esta semana" changeType="neutral" icon={<MapPin className="h-5 w-5" />} description="De 2360 totais" />
-          </div>}
-
+      <div id="dashboard-content" className="hidden">
+        {/* This content is only for PDF export - hidden from view */}
       </div>
 
       {/* Occurrence Details Modal */}
