@@ -272,7 +272,8 @@ export const LongTailChart = memo(function LongTailChart({
         </CardContent>
       </Card>;
   }
-  return <div className="space-y-8">
+  return (
+    <div className="space-y-6">
       {/* Card principal com design aprimorado */}
       <Card className="bg-gradient-subtle border-0 shadow-elegant">
         <CardHeader className="pb-4">
@@ -371,15 +372,15 @@ export const LongTailChart = memo(function LongTailChart({
           </div>
         </CardHeader>
         
-        <CardContent className="p-3">
+        <CardContent className="p-6">
           <ChartContainer config={chartConfig} className="h-[420px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={timeRangeAnalysis.data} margin={{
-              top: 30,
-              right: 30,
-              left: 40,
-              bottom: 100
-            }}>
+                top: 30,
+                right: 30,
+                left: 40,
+                bottom: 100
+              }}>
                 <defs>
                   <linearGradient id="barGradient1" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#22c55e" stopOpacity={0.8} />
@@ -440,7 +441,7 @@ export const LongTailChart = memo(function LongTailChart({
                   }}
                 />
                 
-                 <ChartTooltipContent 
+                <ChartTooltipContent 
                   formatter={(value, name) => [
                     `${value} ocorrências`, 
                     'Quantidade'
@@ -518,17 +519,23 @@ export const LongTailChart = memo(function LongTailChart({
               </BarChart>
             </ResponsiveContainer>
           </ChartContainer>
-          
-          {/* Como usar esta análise - movido para logo abaixo do gráfico */}
-          <div className="mt-6 p-4 bg-info/5 border border-info/20 rounded-lg">
-            <div className="flex items-start gap-3">
-              <Info className="h-5 w-5 text-info mt-0.5 flex-shrink-0" />
-              <div>
-                <h4 className="font-semibold text-foreground mb-2">Como usar esta análise</h4>
+        </CardContent>
+      </Card>
+
+      {/* Como usar esta análise */}
+      <Card className="bg-muted/30 border-muted/50">
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            <Info className="h-5 w-5 text-info mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <h4 className="font-semibold text-foreground mb-3">Como usar esta análise</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2 text-sm text-muted-foreground">
                   <p>• <strong>Clique nas barras</strong> para filtrar ocorrências por faixa de tempo específica</p>
                   <p>• <strong>Tempo Mediano:</strong> Indica o ponto médio do aging atual - metade das ocorrências está abaixo deste valor</p>
                   <p>• <strong>Meta de Excelência:</strong> Objetivo de resolver em até 12h (alta performance)</p>
+                </div>
+                <div className="space-y-2 text-sm text-muted-foreground">
                   <p>• <strong>SLA Padrão:</strong> Limite máximo aceitável de 24h para resolução</p>
                   <p>• <strong>Aging Crítico:</strong> Ocorrências acima de 5 dias requerem ação imediata</p>
                   <p>• <strong>Cores das barras:</strong> Verde (dentro da meta), Laranja (acima da meta), Vermelho (crítico)</p>
@@ -539,7 +546,7 @@ export const LongTailChart = memo(function LongTailChart({
         </CardContent>
       </Card>
 
-      {/* Card de Análise Operacional com insights detalhados */}
+      {/* Card de Análise Operacional */}
       <OperationalNarrativeCard 
         title="Análise de Aging" 
         insight={timeRangeAnalysis.insight} 
@@ -551,5 +558,6 @@ export const LongTailChart = memo(function LongTailChart({
           label: "Ocorrências Críticas"
         }}
       />
-    </div>;
+    </div>
+  );
 });
