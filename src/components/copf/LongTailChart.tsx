@@ -534,13 +534,20 @@ export const LongTailChart = memo(function LongTailChart({
               <TrendingUp className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
               <div>
                 <h4 className="font-semibold text-foreground mb-2">Resumo Executivo</h4>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {timeRangeAnalysis.metrics.total} ocorrências em aberto com tempo mediano de {formatHours(timeRangeAnalysis.metrics.tempoMediano)}. 
-                  {timeRangeAnalysis.metrics.percentualExcelencia}% das ocorrências estão dentro da meta de excelência. 
+                <div className="space-y-2 text-sm text-muted-foreground leading-relaxed">
+                  <p>
+                    <span className="font-medium text-foreground">{timeRangeAnalysis.metrics.total}</span> ocorrências em aberto com tempo mediano de{" "}
+                    <span className="font-medium text-foreground">{formatHours(timeRangeAnalysis.metrics.tempoMediano)}</span>.
+                  </p>
+                  <p>
+                    <span className="font-medium text-success">{timeRangeAnalysis.metrics.percentualExcelencia}%</span> das ocorrências estão dentro da meta de excelência.
+                  </p>
                   {timeRangeAnalysis.metrics.agingCritico > 0 && (
-                    ` Atenção: ${timeRangeAnalysis.metrics.agingCritico} ocorrências com aging crítico requerem ação imediata.`
+                    <p className="text-destructive font-medium">
+                      ⚠️ Atenção: <span className="font-bold">{timeRangeAnalysis.metrics.agingCritico}</span> ocorrências com aging crítico requerem ação imediata.
+                    </p>
                   )}
-                </p>
+                </div>
                 {timeRangeAnalysis.actionSuggestion && (
                   <div className="mt-3 p-3 bg-primary/10 rounded border border-primary/20">
                     <div className="flex items-center gap-2 mb-1">
