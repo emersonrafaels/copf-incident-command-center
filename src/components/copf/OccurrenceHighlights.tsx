@@ -81,14 +81,14 @@ export function OccurrenceHighlights({
 
     // Ocorrências que vencem hoje
     const dueToday = occurrences.filter(occ => {
-      if (occ.status === 'encerrado' || occ.status === 'cancelado') return false;
+      if (occ.status === 'encerrada' || occ.status === 'cancelada') return false;
       const sla = calculateSLA(occ);
       return isToday(sla.endDate);
     }).slice(0, 3); // Limitar a 3 cards
 
     // Ocorrências críticas vencendo (próximas 4 horas ou vencidas)
     const criticalDue = occurrences.filter(occ => {
-      if (occ.status === 'encerrado' || occ.status === 'cancelado') return false;
+      if (occ.status === 'encerrada' || occ.status === 'cancelada') return false;
       if (occ.severity !== 'critical' && occ.severity !== 'high') return false;
       const sla = calculateSLA(occ);
       return sla.hoursRemaining <= 4; // Vence em 4h ou já venceu
@@ -112,11 +112,11 @@ export function OccurrenceHighlights({
         navigate('/ocorrencias');
       } else if (type === 'due') {
         // Filtrar por status não resolvido
-        updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento']);
+        updateFilter('statusFilterMulti', ['a_iniciar', 'em_atuacao']);
         navigate('/ocorrencias');
       } else if (type === 'critical') {
         // Filtrar por severidade crítica/alta e status não resolvido
-        updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento']);
+        updateFilter('statusFilterMulti', ['a_iniciar', 'em_atuacao']);
         navigate('/ocorrencias');
       }
     }, 100);
@@ -152,10 +152,7 @@ export function OccurrenceHighlights({
             
           </div>
         </div>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/30 px-3 py-1 rounded-full">
-          <div className="w-2 h-2 bg-success rounded-full animate-pulse"></div>
-          Atualizado agora
-        </div>
+        
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
