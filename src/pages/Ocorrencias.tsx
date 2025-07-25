@@ -241,6 +241,63 @@ const Ocorrencias = () => {
         return status;
     }
   };
+
+  const getSlaStatus = (occurrence: any) => {
+    const createdDate = new Date(occurrence.createdAt);
+    const hoursDiff = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60);
+    const slaLimit = occurrence.severity === 'critical' || occurrence.severity === 'high' ? 24 : 72;
+    
+    if (occurrence.status === 'resolved' || occurrence.status === 'encerrada') {
+      return 'Dentro do SLA';
+    }
+    
+    if (hoursDiff > slaLimit) {
+      return 'Vencido';
+    } else if (hoursDiff > slaLimit * 0.8) {
+      return 'Crítico';
+    } else {
+      return 'No Prazo';
+    }
+  };
+
+  const getSlaStatusVariant = (slaStatus: string) => {
+    switch (slaStatus) {
+      case 'Vencido':
+        return 'destructive';
+      case 'Crítico':
+        return 'secondary';
+      case 'No Prazo':
+        return 'default';
+      default:
+        return 'outline';
+    }
+  };
+
+  const getRemainingTime = (occurrence: any) => {
+    const createdDate = new Date(occurrence.createdAt);
+    const hoursDiff = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60);
+    const slaLimit = occurrence.severity === 'critical' || occurrence.severity === 'high' ? 24 : 72;
+    
+    if (occurrence.status === 'resolved' || occurrence.status === 'encerrada') {
+      return 'Concluída';
+    }
+    
+    const remainingHours = slaLimit - hoursDiff;
+    
+    if (remainingHours <= 0) {
+      const overdueHours = Math.abs(remainingHours);
+      if (overdueHours < 1) {
+        return `${Math.floor(overdueHours * 60)}min vencido`;
+      }
+      return `${Math.floor(overdueHours)}h vencido`;
+    }
+    
+    if (remainingHours < 1) {
+      return `${Math.floor(remainingHours * 60)}min`;
+    }
+    
+    return `${Math.floor(remainingHours)}h`;
+  };
   return <COPFLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -341,21 +398,23 @@ const Ocorrencias = () => {
             {isLoading ? <div className="text-center py-8">
                 <p className="text-muted-foreground">Carregando ocorrências...</p>
               </div> : <ScrollArea className="h-[600px]">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>ID</TableHead>
-                      <TableHead>Agência</TableHead>
-                      <TableHead>Segmento</TableHead>
-                      <TableHead>Equipamento</TableHead>
-                      <TableHead>Nº Série</TableHead>
-                      <TableHead>Severidade</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Data/Hora Abertura</TableHead>
-                      <TableHead>Fornecedor</TableHead>
-                      <TableHead>Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>ID</TableHead>
+                        <TableHead>Agência</TableHead>
+                        <TableHead>Segmento</TableHead>
+                        <TableHead>Equipamento</TableHead>
+                        <TableHead>Nº Série</TableHead>
+                        <TableHead>Severidade</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Status SLA</TableHead>
+                        <TableHead>Tempo Restante</TableHead>
+                        <TableHead>Data/Hora Abertura</TableHead>
+                        <TableHead>Fornecedor</TableHead>
+                        <TableHead>Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
                   <TableBody>
                     {filteredOccurrences.map(occurrence => <TableRow key={occurrence.id}>
                         <TableCell className="font-medium">{occurrence.id}</TableCell>
@@ -372,6 +431,14 @@ const Ocorrencias = () => {
                         </TableCell>
                         <TableCell>
                           <StatusBadge status={occurrence.status} />
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={getSlaStatusVariant(getSlaStatus(occurrence))}>
+                            {getSlaStatus(occurrence)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm font-medium">
+                          {getRemainingTime(occurrence)}
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {new Date(occurrence.createdAt).toLocaleString('pt-BR')}
