@@ -207,51 +207,44 @@ export const LongTailChart = memo(function LongTailChart({
         <div className="h-px bg-border flex-1 ml-4" />
       </div>
 
-      {/* Métricas principais no topo */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-primary">{timeRangeAnalysis.metrics.total}</div>
-            <div className="text-sm text-muted-foreground">Total de Ocorrências</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-success">{timeRangeAnalysis.metrics.p50}h</div>
-            <div className="text-sm text-muted-foreground">Mediana (P50)</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-warning">{timeRangeAnalysis.metrics.p90}h</div>
-            <div className="text-sm text-muted-foreground">P90 (Meta)</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-destructive">{timeRangeAnalysis.metrics.outliers}</div>
-            <div className="text-sm text-muted-foreground">Outliers (&gt;P90)</div>
-          </CardContent>
-        </Card>
+      {/* Métricas principais no topo - Compactas */}
+      <div className="flex flex-wrap items-center gap-4 p-4 bg-muted/30 rounded-lg">
+        <Badge variant="outline" className="px-3 py-2">
+          <span className="text-sm font-semibold text-primary">{timeRangeAnalysis.metrics.total}</span>
+          <span className="text-xs text-muted-foreground ml-1">Total</span>
+        </Badge>
+        <Badge variant="outline" className="px-3 py-2">
+          <span className="text-sm font-semibold text-green-600">{timeRangeAnalysis.metrics.p50}h</span>
+          <span className="text-xs text-muted-foreground ml-1">P50</span>
+        </Badge>
+        <Badge variant="outline" className="px-3 py-2">
+          <span className="text-sm font-semibold text-orange-600">{timeRangeAnalysis.metrics.p90}h</span>
+          <span className="text-xs text-muted-foreground ml-1">P90 Meta</span>
+        </Badge>
+        <Badge variant="outline" className="px-3 py-2">
+          <span className="text-sm font-semibold text-red-600">{timeRangeAnalysis.metrics.outliers}</span>
+          <span className="text-xs text-muted-foreground ml-1">Outliers</span>
+        </Badge>
+        <div className="flex-1" />
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={handleFilterOutliers}
+          className="flex items-center gap-1"
+        >
+          <AlertTriangle className="h-3 w-3" />
+          Ver Outliers Críticos
+          <ArrowRight className="h-3 w-3" />
+        </Button>
       </div>
 
       {/* Gráfico principal */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardHeader className="pb-2">
           <CardTitle className="text-base font-medium flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             Distribuição por Faixas de Tempo Aberto
           </CardTitle>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={handleFilterOutliers}
-            className="flex items-center gap-1"
-          >
-            <AlertTriangle className="h-3 w-3" />
-            Aplicar Filtros
-            <ArrowRight className="h-3 w-3" />
-          </Button>
         </CardHeader>
         <CardContent>
           <ChartContainer config={chartConfig} className="h-[400px]">

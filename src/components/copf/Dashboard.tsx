@@ -5,6 +5,7 @@ import { LongTailChart } from "./LongTailChart";
 import { OccurrenceModal } from "./OccurrenceModal";
 import { CriticalityHeatmap } from "./CriticalityHeatmap";
 import { FilterSection } from "./FilterSection";
+import { OccurrenceHighlights } from "./OccurrenceHighlights";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +22,7 @@ import { Check } from "lucide-react";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useToast } from "@/hooks/use-toast";
 import { useFilters } from "@/contexts/FiltersContext";
-import { AlertTriangle, CheckCircle2, Clock, TrendingUp, MapPin, Users, Calendar, Download, RefreshCw, Filter, CalendarDays, Truck } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Clock, TrendingUp, MapPin, Users, Calendar, Download, RefreshCw, CalendarDays, Truck } from "lucide-react";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { format } from "date-fns";
@@ -46,7 +47,6 @@ export function Dashboard() {
     to?: Date;
   }>({});
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [occurrenceFilter, setOccurrenceFilter] = useState('all'); // all, today, slaToday
 
   // Usar filtros do contexto
   const filters = useFilters();
@@ -178,25 +178,8 @@ export function Dashboard() {
     return true;
     });
 
-    // Aplicar filtros específicos da tabela de ocorrências
-    if (occurrenceFilter === 'today') {
-      const today = new Date().toDateString();
-      filtered = filtered.filter(occ => 
-        new Date(occ.createdAt).toDateString() === today
-      );
-    } else if (occurrenceFilter === 'slaToday') {
-      const today = new Date();
-      filtered = filtered.filter(occ => {
-        const createdDate = new Date(occ.createdAt);
-        const hoursDiff = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60);
-        const slaLimit = occ.severity === 'critical' || occ.severity === 'high' ? 24 : 72;
-        const slaExpiryDate = new Date(createdDate.getTime() + (slaLimit * 60 * 60 * 1000));
-        return slaExpiryDate.toDateString() === today.toDateString() && occ.status !== 'encerrada';
-      });
-    }
-
     return filtered;
-  }, [occurrences, segmentFilterMulti, equipmentFilterMulti, statusFilterMulti, vendorFilterMulti, transportadoraFilterMulti, serialNumberFilter, agenciaFilter, ufFilter, tipoAgenciaFilter, pontoVipFilter, overrideFilter, vendorPriorityFilter, occurrenceFilter]);
+  }, [occurrences, segmentFilterMulti, equipmentFilterMulti, statusFilterMulti, vendorFilterMulti, transportadoraFilterMulti, serialNumberFilter, agenciaFilter, ufFilter, tipoAgenciaFilter, pontoVipFilter, overrideFilter, vendorPriorityFilter]);
 
   // Mapeamento de equipamentos por segmento
   const equipmentsBySegment = {
@@ -347,159 +330,20 @@ export function Dashboard() {
         />
       </div>
 
-      {/* Long Tail Analysis */}
-      <LongTailChart occurrences={filteredOccurrences} />
-
       {/* Mapa de Criticidade */}
       <div className="space-y-6">
         <h2 className="text-responsive-2xl font-bold text-foreground">Mapa de Criticidade por Equipamento</h2>
         <CriticalityHeatmap occurrences={filteredOccurrences} />
       </div>
 
+      {/* Long Tail Analysis */}
+      <LongTailChart occurrences={filteredOccurrences} />
 
-      {/* Lista de Ocorrências Recentes */}
-      <Card className="animate-fade-in">
-        <CardHeader className="flex-row items-center justify-between space-y-0 pb-4">
-          <CardTitle className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <MapPin className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold">Ocorrências Recentes</h3>
-              <p className="text-sm text-muted-foreground">
-                {filteredOccurrences.length} ocorrência{filteredOccurrences.length !== 1 ? 's' : ''} encontrada{filteredOccurrences.length !== 1 ? 's' : ''}
-              </p>
-            </div>
-          </CardTitle>
-          <div className="flex gap-2">
-            <Select value={occurrenceFilter} onValueChange={setOccurrenceFilter}>
-              <SelectTrigger className="w-auto min-w-[200px]">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas as ocorrências</SelectItem>
-                <SelectItem value="today">Entraram hoje</SelectItem>
-                <SelectItem value="slaToday">SLA vence hoje</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardHeader>
-        <CardContent className="pt-0">
-          {isLoading ? (
-            <div className="space-y-4">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="flex items-center space-x-4 p-4 border border-border/50 rounded-lg">
-                  <Skeleton className="h-12 w-12 rounded-full" />
-                  <div className="space-y-2 flex-1">
-                    <Skeleton className="h-4 w-[250px]" />
-                    <Skeleton className="h-4 w-[200px]" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : filteredOccurrences.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
-                <AlertTriangle className="h-12 w-12 text-muted-foreground" />
-              </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">Nenhuma ocorrência encontrada</h3>
-              <p className="text-muted-foreground mb-4">
-                {hasActiveFilters 
-                  ? "Tente ajustar os filtros para encontrar mais ocorrências" 
-                  : "Não há ocorrências registradas no momento"}
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {filteredOccurrences.slice(0, 10).map((occurrence) => (
-                <div
-                  key={occurrence.id}
-                  className="group flex items-center justify-between p-4 border border-border/50 rounded-lg hover:bg-accent/5 hover:border-primary/30 transition-all duration-200 cursor-pointer"
-                  onClick={() => handleOccurrenceClick(occurrence)}
-                >
-                  <div className="flex items-center space-x-4 flex-1">
-                    <div className="relative">
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                        occurrence.severity === 'critical' ? 'bg-destructive/10' :
-                        occurrence.severity === 'high' ? 'bg-warning/10' :
-                        occurrence.severity === 'medium' ? 'bg-primary/10' : 'bg-muted'
-                      }`}>
-                        <AlertTriangle className={`h-6 w-6 ${
-                          occurrence.severity === 'critical' ? 'text-destructive' :
-                          occurrence.severity === 'high' ? 'text-warning' :
-                          occurrence.severity === 'medium' ? 'text-primary' : 'text-muted-foreground'
-                        }`} />
-                      </div>
-                       <div className={`absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 border-background ${
-                        occurrence.status === 'encerrada' ? 'bg-success' :
-                        occurrence.status === 'em_atuacao' ? 'bg-warning' :
-                        occurrence.status === 'a_iniciar' ? 'bg-muted' : 'bg-destructive'
-                      }`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-1">
-                        <span className="font-medium text-foreground group-hover:text-primary transition-colors">
-                          {occurrence.id}
-                        </span>
-                        <StatusBadge status={occurrence.status} />
-                        <Badge 
-                          variant={
-                            occurrence.severity === 'critical' ? 'destructive' :
-                            occurrence.severity === 'high' ? 'default' :
-                            occurrence.severity === 'medium' ? 'secondary' : 'outline'
-                          }
-                          className="text-xs px-2 py-0.5"
-                        >
-                          {occurrence.severity === 'critical' ? 'Crítica' :
-                           occurrence.severity === 'high' ? 'Alta' :
-                           occurrence.severity === 'medium' ? 'Média' : 'Baixa'}
-                        </Badge>
-                      </div>
-                      <div className="text-sm text-muted-foreground mb-1">
-                        <span className="font-medium">{occurrence.agency}</span> - {occurrence.equipment}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {occurrence.description.length > 80 
-                          ? `${occurrence.description.substring(0, 80)}...` 
-                          : occurrence.description}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3 ml-4">
-                    <div className="text-right">
-                      <div className="text-sm font-medium text-foreground">
-                        {occurrence.vendor}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {new Date(occurrence.createdAt).toLocaleString('pt-BR')}
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleOccurrenceClick(occurrence);
-                      }}
-                    >
-                      Ver detalhes
-                    </Button>
-                  </div>
-                </div>
-              ))}
-              {filteredOccurrences.length > 10 && (
-                <div className="text-center pt-4">
-                  <p className="text-sm text-muted-foreground">
-                    Mostrando 10 de {filteredOccurrences.length} ocorrências.
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {/* Highlights Operacionais */}
+      <OccurrenceHighlights 
+        occurrences={filteredOccurrences} 
+        onOccurrenceClick={handleOccurrenceClick}
+      />
 
       {/* Dashboard Content Wrapper for PDF Export */}
       <div id="dashboard-content">
