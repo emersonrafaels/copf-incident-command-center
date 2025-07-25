@@ -52,7 +52,8 @@ export const MetricCard = memo(function MetricCard({
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold text-foreground mb-1">
-          {isNaN(Number(value)) ? "—" : Number(value).toLocaleString()}
+          {typeof value === 'string' && value.includes('(') ? value : 
+           isNaN(Number(value)) ? value : Number(value).toLocaleString()}
         </div>
         <div className="flex items-center justify-between">
           {change && (
