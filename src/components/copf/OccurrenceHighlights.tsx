@@ -100,9 +100,9 @@ export function OccurrenceHighlights({
     });
 
     return {
-      enteredToday: enteredToday.slice(0, 3),
-      dueToday: dueToday.slice(0, 3),
-      overdueOccurrences: overdueOccurrences.slice(0, 5),
+      enteredToday,
+      dueToday,
+      overdueOccurrences,
       counts: {
         enteredToday: enteredToday.length,
         dueToday: dueToday.length,
