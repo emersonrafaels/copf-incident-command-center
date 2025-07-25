@@ -113,8 +113,13 @@ export function useDashboardData() {
     // Gerar ocorrências baseadas na estrutura hierárquica
     hierarchyStructure.forEach((structure, groupIndex) => {
       structure.agencias.forEach((agencyNum, agencyIndex) => {
-        // Gerar 4-7 ocorrências por agência para garantir mais dados
-        const occurrenceCount = Math.floor(Math.random() * 4) + 4;
+        // Aumentar 50% das ocorrências para agências terceirizadas
+        let occurrenceCount;
+        if (structure.tipo === 'terceirizada') {
+          occurrenceCount = Math.floor(Math.random() * 5) + 6; // 6-10 ocorrências (50% mais)
+        } else {
+          occurrenceCount = Math.floor(Math.random() * 4) + 4; // 4-7 ocorrências (padrão)
+        }
         
         for (let i = 0; i < occurrenceCount; i++) {
           // Alternar entre segmentos AA e AB para distribuição equilibrada
