@@ -628,7 +628,7 @@ export const LongTailChart = memo(function LongTailChart({
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* Card de Análise Operacional e Resumo Executivo - colapsável */}
         <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
-          <Collapsible open={!isAnalysisCollapsed} onOpenChange={setIsAnalysisCollapsed}>
+          <Collapsible open={!isAnalysisCollapsed} onOpenChange={(open) => setIsAnalysisCollapsed(!open)}>
             <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
               <CollapsibleTrigger asChild>
                 <CardHeader className="pb-3 cursor-pointer hover:bg-primary/5 transition-colors">
@@ -700,7 +700,7 @@ export const LongTailChart = memo(function LongTailChart({
 
         {/* Como usar esta análise - colapsável */}
         <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
-          <Collapsible open={!isGuideCollapsed} onOpenChange={setIsGuideCollapsed}>
+          <Collapsible open={!isGuideCollapsed} onOpenChange={(open) => setIsGuideCollapsed(!open)}>
             <Card className="bg-gradient-to-r from-info/5 to-info/10 border-info/20">
               <CollapsibleTrigger asChild>
                 <CardHeader className="cursor-pointer hover:bg-info/5 transition-colors">
