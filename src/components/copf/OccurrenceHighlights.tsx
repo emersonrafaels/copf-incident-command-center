@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { StatusBadge } from './StatusBadge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Clock, AlertTriangle, TrendingUp, ArrowRight, Calendar, Timer, AlertCircle } from 'lucide-react';
 import { OccurrenceData } from '@/hooks/useDashboardData';
 import { useFilters } from '@/contexts/FiltersContext';
@@ -179,23 +180,27 @@ export function OccurrenceHighlights({
               </Button>
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            {highlights.enteredToday.length === 0 ? <p className="text-sm text-muted-foreground py-4 text-center">
-                Nenhuma ocorrência registrada hoje
-              </p> : highlights.enteredToday.map(occ => <div key={occ.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => onOccurrenceClick(occ)}>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-medium">{occ.equipment}</span>
-                      <StatusBadge status={occ.status} />
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {occ.agency} • {format(new Date(occ.createdAt), 'HH:mm')}
-                    </p>
-                  </div>
-                  <Badge variant={getSeverityVariant(occ.severity)} className="text-xs">
-                    {getSeverityLabel(occ.severity)}
-                  </Badge>
-                </div>)}
+          <CardContent className="p-0">
+            <ScrollArea className="h-[200px] px-6">
+              <div className="space-y-3 py-6">
+                {highlights.enteredToday.length === 0 ? <p className="text-sm text-muted-foreground py-4 text-center">
+                    Nenhuma ocorrência registrada hoje
+                  </p> : highlights.enteredToday.map(occ => <div key={occ.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => onOccurrenceClick(occ)}>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm font-medium">{occ.equipment}</span>
+                          <StatusBadge status={occ.status} />
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {occ.agency} • {format(new Date(occ.createdAt), 'HH:mm')}
+                        </p>
+                      </div>
+                      <Badge variant={getSeverityVariant(occ.severity)} className="text-xs">
+                        {getSeverityLabel(occ.severity)}
+                      </Badge>
+                    </div>)}
+              </div>
+            </ScrollArea>
           </CardContent>
         </Card>
 
@@ -220,21 +225,25 @@ export function OccurrenceHighlights({
               </Button>
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            {highlights.dueToday.length === 0 ? <p className="text-sm text-muted-foreground py-4 text-center">
-                Nenhuma ocorrência vence hoje
-              </p> : highlights.dueToday.map(occ => <div key={occ.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => onOccurrenceClick(occ)}>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-medium">{occ.equipment}</span>
-                      <StatusBadge status={occ.status} />
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {occ.agency} • SLA vence hoje
-                    </p>
-                  </div>
-                  {renderTimeRemaining(occ)}
-                </div>)}
+          <CardContent className="p-0">
+            <ScrollArea className="h-[200px] px-6">
+              <div className="space-y-3 py-6">
+                {highlights.dueToday.length === 0 ? <p className="text-sm text-muted-foreground py-4 text-center">
+                    Nenhuma ocorrência vence hoje
+                  </p> : highlights.dueToday.map(occ => <div key={occ.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => onOccurrenceClick(occ)}>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm font-medium">{occ.equipment}</span>
+                          <StatusBadge status={occ.status} />
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {occ.agency} • SLA vence hoje
+                        </p>
+                      </div>
+                      {renderTimeRemaining(occ)}
+                    </div>)}
+              </div>
+            </ScrollArea>
           </CardContent>
         </Card>
       </div>
@@ -260,34 +269,38 @@ export function OccurrenceHighlights({
             </Button>
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          {highlights.criticalDue.length === 0 ? <p className="text-sm text-muted-foreground py-4 text-center">
-              Nenhuma ocorrência crítica próxima do vencimento
-            </p> : <div className="space-y-3">
-              {highlights.criticalDue.map(occ => {
-            const sla = calculateSLA(occ);
-            return <div key={occ.id} className="flex items-center justify-between p-3 bg-red-50/50 border border-red-100 rounded-lg cursor-pointer hover:bg-red-50 transition-colors" onClick={() => onOccurrenceClick(occ)}>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-sm font-medium">{occ.equipment}</span>
-                        <StatusBadge status={occ.status} />
-                        <Badge variant={getSeverityVariant(occ.severity)} className="text-xs">
-                          {getSeverityLabel(occ.severity)}
-                        </Badge>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {occ.agency} • Criada em {format(new Date(occ.createdAt), 'dd/MM HH:mm')}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      {renderTimeRemaining(occ)}
-                      <p className="text-xs text-muted-foreground mt-1">
-                        SLA: {format(sla.endDate, 'dd/MM HH:mm')}
-                      </p>
-                    </div>
-                  </div>;
-          })}
-            </div>}
+        <CardContent className="p-0">
+          <ScrollArea className="h-[300px] px-6">
+            <div className="py-6">
+              {highlights.criticalDue.length === 0 ? <p className="text-sm text-muted-foreground py-4 text-center">
+                  Nenhuma ocorrência crítica próxima do vencimento
+                </p> : <div className="space-y-3">
+                  {highlights.criticalDue.map(occ => {
+                const sla = calculateSLA(occ);
+                return <div key={occ.id} className="flex items-center justify-between p-3 bg-red-50/50 border border-red-100 rounded-lg cursor-pointer hover:bg-red-50 transition-colors" onClick={() => onOccurrenceClick(occ)}>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-sm font-medium">{occ.equipment}</span>
+                            <StatusBadge status={occ.status} />
+                            <Badge variant={getSeverityVariant(occ.severity)} className="text-xs">
+                              {getSeverityLabel(occ.severity)}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            {occ.agency} • Criada em {format(new Date(occ.createdAt), 'dd/MM HH:mm')}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          {renderTimeRemaining(occ)}
+                          <p className="text-xs text-muted-foreground mt-1">
+                            SLA: {format(sla.endDate, 'dd/MM HH:mm')}
+                          </p>
+                        </div>
+                      </div>;
+              })}
+                </div>}
+            </div>
+          </ScrollArea>
         </CardContent>
       </Card>
     </div>;
