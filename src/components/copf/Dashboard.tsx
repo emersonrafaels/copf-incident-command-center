@@ -455,6 +455,13 @@ export function Dashboard() {
                 const agencyNumber = agency.match(/\d+/)?.[0] || '0';
                 return agencyNumber.endsWith('0') || agencyNumber.endsWith('5');
               });
+              console.log('DEBUG - Agências afetadas:', {
+                filteredOccurrences: filteredOccurrences.length,
+                affectedAgencies: affectedAgencies.size,
+                vipAgencies: vipAgencies.length,
+                agencies: Array.from(affectedAgencies),
+                vipList: vipAgencies
+              });
               return `${affectedAgencies.size} (${vipAgencies.length} VIPs)`;
             })()} 
             icon={<MapPin className="h-4 w-4" />} 
@@ -467,7 +474,14 @@ export function Dashboard() {
           {/* 6. MTTR */}
           <MetricCard 
             title="MTTR" 
-            value={metrics?.avgMTTR || "4.2h"} 
+            value={(() => {
+              console.log('DEBUG - MTTR:', {
+                metrics: metrics,
+                avgMTTR: metrics?.avgMTTR,
+                fallback: "4.2h"
+              });
+              return metrics?.avgMTTR || "4.2h";
+            })()} 
             icon={<Clock className="h-4 w-4" />} 
             change="-0.3h desde ontem" 
             changeType="positive" 
