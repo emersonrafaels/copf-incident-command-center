@@ -8,8 +8,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { OperationalNarrativeCard } from './OperationalNarrativeCard';
-import { BarChart3, Clock, AlertTriangle, ArrowRight, TrendingUp, Info, BookOpen, Target, Zap, Users, Settings, CheckCircle2, AlertCircle } from 'lucide-react';
+import { BarChart3, Clock, AlertTriangle, ArrowRight, TrendingUp, Info, BookOpen, Target, Zap, Users, Settings, CheckCircle2, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { useFilters } from '@/contexts/FiltersContext';
 import { toast } from 'sonner';
 import { OccurrenceData } from '@/hooks/useDashboardData';
@@ -97,6 +98,7 @@ export const LongTailChart = memo(function LongTailChart({
 }: LongTailChartProps) {
   const navigate = useNavigate();
   const [showMethodologyModal, setShowMethodologyModal] = useState(false);
+  const [isAnalysisCollapsed, setIsAnalysisCollapsed] = useState(false);
   const {
     updateFilter,
     clearAllFilters
@@ -609,58 +611,74 @@ export const LongTailChart = memo(function LongTailChart({
         </CardContent>
       </Card>
 
-      {/* Card de Análise Operacional aprimorado */}
-      <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
-        <CardHeader className="pb-3">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Clock className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <CardTitle className="text-lg font-semibold">Análise de Performance - Aging</CardTitle>
-              <p className="text-sm text-muted-foreground">Insights detalhados sobre tempo de resolução</p>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Resumo Executivo expandido */}
-          <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
-            <div className="flex items-start gap-3">
-              <TrendingUp className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-              <div>
-                <h4 className="font-semibold text-foreground mb-3">Resumo Executivo</h4>
-                <div className="space-y-3 text-sm text-muted-foreground leading-relaxed">
-                  <p>
-                    <span className="font-medium text-foreground">{timeRangeAnalysis.metrics.total}</span> ocorrências em aberto com tempo mediano de{" "}
-                    <span className="font-medium text-foreground">{formatHours(timeRangeAnalysis.metrics.tempoMediano)}</span>, indicando que 50% das ocorrências são resolvidas em até esse tempo.
-                  </p>
-                  <p>
-                    <span className="font-medium text-success">{timeRangeAnalysis.metrics.percentualExcelencia}%</span> das ocorrências estão dentro da meta de excelência (≤ {formatHours(timeRangeAnalysis.metrics.metaExcelencia)}), demonstrando {timeRangeAnalysis.metrics.percentualExcelencia >= 70 ? 'boa' : 'baixa'} performance operacional.
-                  </p>
-                  {timeRangeAnalysis.metrics.agingCritico > 0 && (
-                    <p className="text-destructive font-medium">
-                      ⚠️ Atenção: <span className="font-bold">{timeRangeAnalysis.metrics.agingCritico}</span> ocorrências ({timeRangeAnalysis.metrics.percentualCritico}%) com aging crítico ({">"}5 dias) requerem ação imediata.
-                    </p>
-                  )}
+      {/* Card de Análise Operacional colapsável */}
+      <Collapsible open={!isAnalysisCollapsed} onOpenChange={setIsAnalysisCollapsed}>
+        <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+          <CollapsibleTrigger asChild>
+            <CardHeader className="pb-3 cursor-pointer hover:bg-primary/5 transition-colors">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <Clock className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-semibold">Análise de Performance - Aging</CardTitle>
+                    <p className="text-sm text-muted-foreground">Insights detalhados sobre tempo de resolução</p>
+                  </div>
                 </div>
-                
-                {/* Botão para abrir modal de metodologia */}
-                <div className="mt-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowMethodologyModal(true)}
-                    className="flex items-center gap-2 text-primary border-primary/20 hover:bg-primary/5"
-                  >
-                    <BookOpen className="h-4 w-4" />
-                    <span>Metodologia e Recomendações</span>
-                  </Button>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  {isAnalysisCollapsed ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronUp className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            </CardHeader>
+          </CollapsibleTrigger>
+          
+          <CollapsibleContent>
+            <CardContent className="space-y-4">
+              {/* Resumo Executivo expandido */}
+              <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
+                <div className="flex items-start gap-3">
+                  <TrendingUp className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-semibold text-foreground mb-3">Resumo Executivo</h4>
+                    <div className="space-y-3 text-sm text-muted-foreground leading-relaxed">
+                      <p>
+                        <span className="font-medium text-foreground">{timeRangeAnalysis.metrics.total}</span> ocorrências em aberto com tempo mediano de{" "}
+                        <span className="font-medium text-foreground">{formatHours(timeRangeAnalysis.metrics.tempoMediano)}</span>, indicando que 50% das ocorrências são resolvidas em até esse tempo.
+                      </p>
+                      <p>
+                        <span className="font-medium text-success">{timeRangeAnalysis.metrics.percentualExcelencia}%</span> das ocorrências estão dentro da meta de excelência (≤ {formatHours(timeRangeAnalysis.metrics.metaExcelencia)}), demonstrando {timeRangeAnalysis.metrics.percentualExcelencia >= 70 ? 'boa' : 'baixa'} performance operacional.
+                      </p>
+                      {timeRangeAnalysis.metrics.agingCritico > 0 && (
+                        <p className="text-destructive font-medium">
+                          ⚠️ Atenção: <span className="font-bold">{timeRangeAnalysis.metrics.agingCritico}</span> ocorrências ({timeRangeAnalysis.metrics.percentualCritico}%) com aging crítico ({">"}5 dias) requerem ação imediata.
+                        </p>
+                      )}
+                    </div>
+                    
+                    {/* Botão para abrir modal de metodologia */}
+                    <div className="mt-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowMethodologyModal(true)}
+                        className="flex items-center gap-2 text-primary border-primary/20 hover:bg-primary/5"
+                      >
+                        <BookOpen className="h-4 w-4" />
+                        <span>Metodologia e Recomendações</span>
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
 
       {/* Como usar esta análise - Redesenhado */}
       <Card className="bg-gradient-to-r from-info/5 to-info/10 border-info/20">
