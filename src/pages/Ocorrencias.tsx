@@ -39,6 +39,11 @@ const Ocorrencias = () => {
   // Extrair parâmetros de aging da URL
   const agingMin = searchParams.get('aging_min');
   const agingMax = searchParams.get('aging_max');
+  
+  // Extrair parâmetros dos highlights
+  const createdDate = searchParams.get('created_date');
+  const slaDate = searchParams.get('sla_date');
+  const slaStatus = searchParams.get('sla_status');
 
   // Usar filtros do contexto
   const {
@@ -121,6 +126,36 @@ const Ocorrencias = () => {
       if (agingMax !== null) {
         const maxHours = parseFloat(agingMax);
         if (agingMax !== '999999' && agingHours >= maxHours) return false;
+      }
+    }
+
+    // Filtros dos highlights
+    // Filtro por data de criação (entraram hoje)
+    if (createdDate) {
+      const filterDate = new Date(createdDate);
+      const occCreatedDate = new Date(occurrence.createdAt);
+      const isSameDay = filterDate.toDateString() === occCreatedDate.toDateString();
+      if (!isSameDay) return false;
+    }
+
+    // Filtro por SLA status (vencem hoje ou vencidas)
+    if (slaStatus) {
+      const occCreatedDate = new Date(occurrence.createdAt);
+      const hoursDiff = (Date.now() - occCreatedDate.getTime()) / (1000 * 60 * 60);
+      const slaLimit = occurrence.severity === 'critical' || occurrence.severity === 'high' ? 24 : 72;
+      const slaEndDate = new Date(occCreatedDate.getTime() + slaLimit * 60 * 60 * 1000);
+
+      if (slaStatus === 'due_today') {
+        // Vencem hoje - em andamento e vencem hoje
+        const isDueToday = slaEndDate.toDateString() === new Date().toDateString();
+        const isNotCompleted = occurrence.status !== 'encerrado' && occurrence.status !== 'cancelado';
+        const isNotOverdue = hoursDiff <= slaLimit;
+        if (!(isDueToday && isNotCompleted && isNotOverdue)) return false;
+      } else if (slaStatus === 'overdue') {
+        // Vencidas - não encerradas e vencidas
+        const isNotCompleted = occurrence.status !== 'encerrado' && occurrence.status !== 'cancelado';
+        const isOverdue = hoursDiff > slaLimit;
+        if (!(isNotCompleted && isOverdue)) return false;
       }
     }
 
