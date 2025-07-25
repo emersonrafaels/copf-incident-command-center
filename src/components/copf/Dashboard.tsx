@@ -38,7 +38,9 @@ export function Dashboard() {
     metrics,
     refreshData
   } = useDashboardData();
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const [selectedOccurrence, setSelectedOccurrence] = useState<any>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [filterPeriod, setFilterPeriod] = useState('30-days');
@@ -115,7 +117,6 @@ export function Dashboard() {
   };
   const handleRefresh = () => {
     refreshData();
-    window.dispatchEvent(new CustomEvent('dashboard-refresh'));
     toast({
       title: "Dados atualizados",
       description: "Dashboard atualizado com as informações mais recentes."
@@ -125,60 +126,57 @@ export function Dashboard() {
   // Filtrar ocorrências - Memoizado para performance
   const filteredOccurrences = useMemo(() => {
     let filtered = occurrences.filter(occurrence => {
-    // Filtros multiselect
-    if (segmentFilterMulti.length > 0 && !segmentFilterMulti.includes(occurrence.segment)) return false;
-    if (equipmentFilterMulti.length > 0 && !equipmentFilterMulti.includes(occurrence.equipment)) return false;
-    if (statusFilterMulti.length > 0 && !statusFilterMulti.includes(occurrence.status)) return false;
-    if (vendorFilterMulti.length > 0 && !vendorFilterMulti.includes(occurrence.vendor)) return false;
-    if (transportadoraFilterMulti.length > 0) {
-      const transportadora = occurrence.vendor.includes('Express') ? 'Express Logística' : 
-                           occurrence.vendor.includes('Tech') ? 'TechTransporte' : 'LogiCorp';
-      if (!transportadoraFilterMulti.includes(transportadora)) return false;
-    }
+      // Filtros multiselect
+      if (segmentFilterMulti.length > 0 && !segmentFilterMulti.includes(occurrence.segment)) return false;
+      if (equipmentFilterMulti.length > 0 && !equipmentFilterMulti.includes(occurrence.equipment)) return false;
+      if (statusFilterMulti.length > 0 && !statusFilterMulti.includes(occurrence.status)) return false;
+      if (vendorFilterMulti.length > 0 && !vendorFilterMulti.includes(occurrence.vendor)) return false;
+      if (transportadoraFilterMulti.length > 0) {
+        const transportadora = occurrence.vendor.includes('Express') ? 'Express Logística' : occurrence.vendor.includes('Tech') ? 'TechTransporte' : 'LogiCorp';
+        if (!transportadoraFilterMulti.includes(transportadora)) return false;
+      }
 
-    // Filtro de série
-    if (serialNumberFilter && !occurrence.serialNumber.toLowerCase().includes(serialNumberFilter.toLowerCase())) return false;
+      // Filtro de série
+      if (serialNumberFilter && !occurrence.serialNumber.toLowerCase().includes(serialNumberFilter.toLowerCase())) return false;
 
-    // Filtro de agência por número
-    if (agenciaFilter.length > 0) {
-      const agencyNumber = occurrence.agency.match(/\d+/)?.[0] || '';
-      if (!agenciaFilter.includes(agencyNumber)) return false;
-    }
+      // Filtro de agência por número
+      if (agenciaFilter.length > 0) {
+        const agencyNumber = occurrence.agency.match(/\d+/)?.[0] || '';
+        if (!agenciaFilter.includes(agencyNumber)) return false;
+      }
 
-    // Filtro de UF
-    if (ufFilter.length > 0) {
-      const agencyUF = occurrence.agency.split(' - ')[1] || 'SP';
-      if (!ufFilter.includes(agencyUF)) return false;
-    }
+      // Filtro de UF
+      if (ufFilter.length > 0) {
+        const agencyUF = occurrence.agency.split(' - ')[1] || 'SP';
+        if (!ufFilter.includes(agencyUF)) return false;
+      }
 
-    // Simular tipo de agência baseado na agência
-    const tipoAgencia = occurrence.agency.includes('Terceirizada') ? 'terceirizada' : 'convencional';
-    if (tipoAgenciaFilter.length > 0 && !tipoAgenciaFilter.includes(tipoAgencia)) return false;
+      // Simular tipo de agência baseado na agência
+      const tipoAgencia = occurrence.agency.includes('Terceirizada') ? 'terceirizada' : 'convencional';
+      if (tipoAgenciaFilter.length > 0 && !tipoAgenciaFilter.includes(tipoAgencia)) return false;
 
-    // Simular ponto VIP (agências com número terminado em 0, 5 são VIP)
-    const agencyNumber = occurrence.agency.match(/\d+/)?.[0] || '0';
-    const isVip = agencyNumber.endsWith('0') || agencyNumber.endsWith('5');
-    const pontoVipStatus = isVip ? 'sim' : 'nao';
-    if (pontoVipFilter.length > 0 && !pontoVipFilter.includes(pontoVipStatus)) return false;
+      // Simular ponto VIP (agências com número terminado em 0, 5 são VIP)
+      const agencyNumber = occurrence.agency.match(/\d+/)?.[0] || '0';
+      const isVip = agencyNumber.endsWith('0') || agencyNumber.endsWith('5');
+      const pontoVipStatus = isVip ? 'sim' : 'nao';
+      if (pontoVipFilter.length > 0 && !pontoVipFilter.includes(pontoVipStatus)) return false;
 
-    // Filtro de ocorrências vencidas
-    if (overrideFilter) {
-      const createdDate = new Date(occurrence.createdAt);
-      const hoursDiff = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60);
-      const slaLimit = occurrence.severity === 'critical' || occurrence.severity === 'high' ? 24 : 72;
-      const isOverdue = hoursDiff > slaLimit && occurrence.status !== 'encerrada';
-      if (!isOverdue) return false;
-    }
+      // Filtro de ocorrências vencidas
+      if (overrideFilter) {
+        const createdDate = new Date(occurrence.createdAt);
+        const hoursDiff = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60);
+        const slaLimit = occurrence.severity === 'critical' || occurrence.severity === 'high' ? 24 : 72;
+        const isOverdue = hoursDiff > slaLimit && occurrence.status !== 'encerrada';
+        if (!isOverdue) return false;
+      }
 
-    // Filtro de priorizadas com fornecedor
-    if (vendorPriorityFilter) {
-      const isHighPriority = occurrence.severity === 'critical' || occurrence.severity === 'high';
-      if (!isHighPriority) return false;
-    }
-
-    return true;
+      // Filtro de priorizadas com fornecedor
+      if (vendorPriorityFilter) {
+        const isHighPriority = occurrence.severity === 'critical' || occurrence.severity === 'high';
+        if (!isHighPriority) return false;
+      }
+      return true;
     });
-
     return filtered;
   }, [occurrences, segmentFilterMulti, equipmentFilterMulti, statusFilterMulti, vendorFilterMulti, transportadoraFilterMulti, serialNumberFilter, agenciaFilter, ufFilter, tipoAgenciaFilter, pontoVipFilter, overrideFilter, vendorPriorityFilter]);
 
@@ -236,7 +234,6 @@ export function Dashboard() {
 
   // Verificar tipo de agência atual (para mostrar filtros condicionais)
   const tipoAgenciaAtual = tipoAgenciaFilter.includes('terceirizada') ? 'terceirizada' : tipoAgenciaFilter.includes('convencional') ? 'convencional' : 'all';
-
   return <div className="space-y-8 animate-fade-in">
       {/* Hero Header */}
       <div className="relative">
@@ -263,7 +260,7 @@ export function Dashboard() {
               {/* Status Badges */}
               <div className="flex flex-wrap items-center gap-3">
                 <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-success/10 border border-success/20">
-                  <div className="w-2 h-2 rounded-full bg-success animate-pulse"></div>
+                  
                   <span className="text-sm font-medium text-success-foreground">
                     {hasActiveFilters ? 'Visão Filtrada Ativa' : 'Monitoramento em Tempo Real'}
                   </span>
@@ -274,14 +271,12 @@ export function Dashboard() {
                     2.360 Pontos Monitorados
                   </span>
                 </div>
-                {hasActiveFilters && (
-                  <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-warning/10 border border-warning/20">
+                {hasActiveFilters && <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-warning/10 border border-warning/20">
                     <AlertTriangle className="h-4 w-4 text-warning" />
                     <span className="text-sm font-medium text-warning-foreground">
                       Filtros Aplicados
                     </span>
-                  </div>
-                )}
+                  </div>}
               </div>
             </div>
             {/* Action Controls */}
@@ -301,66 +296,35 @@ export function Dashboard() {
               </Select>
 
               {/* Seletor de data personalizado */}
-              {filterPeriod === 'custom' && (
-                <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
+              {filterPeriod === 'custom' && <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
                   <PopoverTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className={cn(
-                        "w-auto justify-start text-left font-normal shadow-card-default hover:shadow-card-hover transition-all",
-                        !customDateRange.from && "text-muted-foreground"
-                      )}
-                    >
+                    <Button variant="outline" size="sm" className={cn("w-auto justify-start text-left font-normal shadow-card-default hover:shadow-card-hover transition-all", !customDateRange.from && "text-muted-foreground")}>
                       <CalendarDays className="h-4 w-4 mr-2 text-primary" />
-                      {customDateRange.from ? customDateRange.to ? (
-                        <>
+                      {customDateRange.from ? customDateRange.to ? <>
                           {format(customDateRange.from, "dd/MM/yyyy")} -{" "}
                           {format(customDateRange.to, "dd/MM/yyyy")}
-                        </>
-                      ) : format(customDateRange.from, "dd/MM/yyyy") : (
-                        <span>Selecionar período</span>
-                      )}
+                        </> : format(customDateRange.from, "dd/MM/yyyy") : <span>Selecionar período</span>}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0 bg-card border-border/50 shadow-elegant" align="start">
-                    <CalendarComponent 
-                      initialFocus 
-                      mode="range" 
-                      defaultMonth={customDateRange.from} 
-                      selected={{
-                        from: customDateRange.from,
-                        to: customDateRange.to
-                      }} 
-                      onSelect={range => {
-                        setCustomDateRange(range || {});
-                        if (range?.from && range?.to) {
-                          setShowDatePicker(false);
-                        }
-                      }} 
-                      numberOfMonths={2} 
-                      className="pointer-events-auto" 
-                    />
+                    <CalendarComponent initialFocus mode="range" defaultMonth={customDateRange.from} selected={{
+                  from: customDateRange.from,
+                  to: customDateRange.to
+                }} onSelect={range => {
+                  setCustomDateRange(range || {});
+                  if (range?.from && range?.to) {
+                    setShowDatePicker(false);
+                  }
+                }} numberOfMonths={2} className="pointer-events-auto" />
                   </PopoverContent>
-                </Popover>
-              )}
+                </Popover>}
 
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleRefresh}
-                className="shadow-card-default hover:shadow-card-hover transition-all hover:border-primary/30"
-              >
+              <Button variant="outline" size="sm" onClick={handleRefresh} className="shadow-card-default hover:shadow-card-hover transition-all hover:border-primary/30">
                 <RefreshCw className="h-4 w-4 mr-2 text-primary" />
                 Atualizar
               </Button>
               
-              <Button 
-                variant="default" 
-                size="sm" 
-                onClick={handleExport}
-                className="bg-gradient-primary hover:scale-105 transition-all shadow-elegant"
-              >
+              <Button variant="default" size="sm" onClick={handleExport} className="bg-gradient-primary hover:scale-105 transition-all shadow-elegant">
                 <Download className="h-4 w-4 mr-2" />
                 Exportar PDF
               </Button>
@@ -370,12 +334,16 @@ export function Dashboard() {
       </div>
 
       {/* Filtros */}
-      <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
+      <div className="animate-fade-in" style={{
+      animationDelay: '0.1s'
+    }}>
         <FilterSection />
       </div>
 
       {/* Métricas principais */}
-      <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
+      <div className="animate-fade-in" style={{
+      animationDelay: '0.2s'
+    }}>
         <div className="mb-4">
           <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <div className="p-2 rounded-lg bg-gradient-primary">
@@ -387,39 +355,17 @@ export function Dashboard() {
         </div>
         
         <div className="responsive-grid responsive-grid-4">
-          <MetricCard
-            title="Total de Ocorrências"
-            value={filteredOccurrences.length.toString()}
-            icon={<AlertTriangle className="h-4 w-4" />}
-            change={`+${Math.round((filteredOccurrences.length / occurrences.length) * 100)}% do total`}
-            changeType="neutral"
-          />
-          <MetricCard
-            title="Ocorrências Críticas"
-            value={filteredOccurrences.filter(o => o.severity === 'critical').length.toString()}
-            icon={<CheckCircle2 className="h-4 w-4" />}
-            change={`${Math.round((filteredOccurrences.filter(o => o.severity === 'critical').length / filteredOccurrences.length) * 100)}% do filtrado`}
-            changeType="negative"
-          />
-          <MetricCard
-            title="Em Andamento"
-            value={filteredOccurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_atuacao').length.toString()}
-            icon={<Clock className="h-4 w-4" />}
-            change={`${Math.round((filteredOccurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_atuacao').length / filteredOccurrences.length) * 100)}% do filtrado`}
-            changeType="neutral"
-          />
-          <MetricCard
-            title="Resolvidas"
-            value={filteredOccurrences.filter(o => o.status === 'encerrada').length.toString()}
-            icon={<TrendingUp className="h-4 w-4" />}
-            change={`${Math.round((filteredOccurrences.filter(o => o.status === 'encerrada').length / filteredOccurrences.length) * 100)}% do filtrado`}
-            changeType="positive"
-          />
+          <MetricCard title="Total de Ocorrências" value={filteredOccurrences.length.toString()} icon={<AlertTriangle className="h-4 w-4" />} change={`+${Math.round(filteredOccurrences.length / occurrences.length * 100)}% do total`} changeType="neutral" />
+          <MetricCard title="Ocorrências Críticas" value={filteredOccurrences.filter(o => o.severity === 'critical').length.toString()} icon={<CheckCircle2 className="h-4 w-4" />} change={`${Math.round(filteredOccurrences.filter(o => o.severity === 'critical').length / filteredOccurrences.length * 100)}% do filtrado`} changeType="negative" />
+          <MetricCard title="Em Andamento" value={filteredOccurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_atuacao').length.toString()} icon={<Clock className="h-4 w-4" />} change={`${Math.round(filteredOccurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_atuacao').length / filteredOccurrences.length * 100)}% do filtrado`} changeType="neutral" />
+          <MetricCard title="Resolvidas" value={filteredOccurrences.filter(o => o.status === 'encerrada').length.toString()} icon={<TrendingUp className="h-4 w-4" />} change={`${Math.round(filteredOccurrences.filter(o => o.status === 'encerrada').length / filteredOccurrences.length * 100)}% do filtrado`} changeType="positive" />
         </div>
       </div>
 
       {/* Mapa de Criticidade */}
-      <div className="animate-fade-in space-y-6" style={{ animationDelay: '0.3s' }}>
+      <div className="animate-fade-in space-y-6" style={{
+      animationDelay: '0.3s'
+    }}>
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
@@ -435,16 +381,17 @@ export function Dashboard() {
       </div>
 
       {/* Long Tail Analysis */}
-      <div className="animate-fade-in" style={{ animationDelay: '0.4s' }}>
+      <div className="animate-fade-in" style={{
+      animationDelay: '0.4s'
+    }}>
         <LongTailChart occurrences={filteredOccurrences} />
       </div>
 
       {/* Highlights Operacionais */}
-      <div className="animate-fade-in" style={{ animationDelay: '0.5s' }}>
-        <OccurrenceHighlights 
-          occurrences={filteredOccurrences} 
-          onOccurrenceClick={handleOccurrenceClick}
-        />
+      <div className="animate-fade-in" style={{
+      animationDelay: '0.5s'
+    }}>
+        <OccurrenceHighlights occurrences={filteredOccurrences} onOccurrenceClick={handleOccurrenceClick} />
       </div>
 
       {/* Dashboard Content Wrapper for PDF Export */}
