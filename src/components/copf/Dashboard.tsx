@@ -236,114 +236,215 @@ export function Dashboard() {
   // Verificar tipo de agência atual (para mostrar filtros condicionais)
   const tipoAgenciaAtual = tipoAgenciaFilter.includes('terceirizada') ? 'terceirizada' : tipoAgenciaFilter.includes('convencional') ? 'convencional' : 'all';
 
-  return <div className="space-y-8">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-        <div>
-          <h1 className="text-responsive-3xl font-bold text-foreground">Ferramenta de Acompanhamento - COPF</h1>
-          <p className="text-responsive-base text-muted-foreground">
-            Itaú Unibanco | {hasActiveFilters ? 'Visão Filtrada' : 'Visão Geral do Parque'}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          {/* Filtro de Período */}
-          <Select value={filterPeriod} onValueChange={setFilterPeriod}>
-            <SelectTrigger className="w-auto min-w-[180px]">
-              <Calendar className="h-4 w-4 mr-2" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="30-days">Últimos 30 dias</SelectItem>
-              <SelectItem value="60-days">Últimos 60 dias</SelectItem>
-              <SelectItem value="90-days">Últimos 90 dias</SelectItem>
-              <SelectItem value="custom">Período personalizado</SelectItem>
-            </SelectContent>
-          </Select>
+  return <div className="space-y-8 animate-fade-in">
+      {/* Hero Header */}
+      <div className="relative">
+        {/* Background Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 rounded-3xl"></div>
+        
+        <div className="relative p-8 rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm shadow-elegant">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-xl bg-gradient-primary shadow-lg">
+                  <TrendingUp className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                    Dashboard COPF
+                  </h1>
+                  <p className="text-lg text-muted-foreground">
+                    Centro de Operações de Pontos Físicos
+                  </p>
+                </div>
+              </div>
+              
+              {/* Status Badges */}
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-success/10 border border-success/20">
+                  <div className="w-2 h-2 rounded-full bg-success animate-pulse"></div>
+                  <span className="text-sm font-medium text-success-foreground">
+                    {hasActiveFilters ? 'Visão Filtrada Ativa' : 'Monitoramento em Tempo Real'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
+                  <MapPin className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium text-primary-foreground">
+                    2.360 Pontos Monitorados
+                  </span>
+                </div>
+                {hasActiveFilters && (
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-warning/10 border border-warning/20">
+                    <AlertTriangle className="h-4 w-4 text-warning" />
+                    <span className="text-sm font-medium text-warning-foreground">
+                      Filtros Aplicados
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+            {/* Action Controls */}
+            <div className="flex flex-wrap gap-3">
+              {/* Filtro de Período */}
+              <Select value={filterPeriod} onValueChange={setFilterPeriod}>
+                <SelectTrigger className="w-auto min-w-[180px] bg-card border-border/50 hover:border-primary/30 transition-colors shadow-card-default">
+                  <Calendar className="h-4 w-4 mr-2 text-primary" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-card border-border/50">
+                  <SelectItem value="30-days">Últimos 30 dias</SelectItem>
+                  <SelectItem value="60-days">Últimos 60 dias</SelectItem>
+                  <SelectItem value="90-days">Últimos 90 dias</SelectItem>
+                  <SelectItem value="custom">Período personalizado</SelectItem>
+                </SelectContent>
+              </Select>
 
-          {/* Seletor de data personalizado */}
-          {filterPeriod === 'custom' && <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className={cn("w-auto justify-start text-left font-normal", !customDateRange.from && "text-muted-foreground")}>
-                  <CalendarDays className="h-4 w-4 mr-2" />
-                  {customDateRange.from ? customDateRange.to ? <>
-                        {format(customDateRange.from, "dd/MM/yyyy")} -{" "}
-                        {format(customDateRange.to, "dd/MM/yyyy")}
-                      </> : format(customDateRange.from, "dd/MM/yyyy") : <span>Selecionar período</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <CalendarComponent initialFocus mode="range" defaultMonth={customDateRange.from} selected={{
-              from: customDateRange.from,
-              to: customDateRange.to
-            }} onSelect={range => {
-              setCustomDateRange(range || {});
-              if (range?.from && range?.to) {
-                setShowDatePicker(false);
-              }
-            }} numberOfMonths={2} className="pointer-events-auto" />
-              </PopoverContent>
-            </Popover>}
+              {/* Seletor de data personalizado */}
+              {filterPeriod === 'custom' && (
+                <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
+                  <PopoverTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className={cn(
+                        "w-auto justify-start text-left font-normal shadow-card-default hover:shadow-card-hover transition-all",
+                        !customDateRange.from && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarDays className="h-4 w-4 mr-2 text-primary" />
+                      {customDateRange.from ? customDateRange.to ? (
+                        <>
+                          {format(customDateRange.from, "dd/MM/yyyy")} -{" "}
+                          {format(customDateRange.to, "dd/MM/yyyy")}
+                        </>
+                      ) : format(customDateRange.from, "dd/MM/yyyy") : (
+                        <span>Selecionar período</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 bg-card border-border/50 shadow-elegant" align="start">
+                    <CalendarComponent 
+                      initialFocus 
+                      mode="range" 
+                      defaultMonth={customDateRange.from} 
+                      selected={{
+                        from: customDateRange.from,
+                        to: customDateRange.to
+                      }} 
+                      onSelect={range => {
+                        setCustomDateRange(range || {});
+                        if (range?.from && range?.to) {
+                          setShowDatePicker(false);
+                        }
+                      }} 
+                      numberOfMonths={2} 
+                      className="pointer-events-auto" 
+                    />
+                  </PopoverContent>
+                </Popover>
+              )}
 
-          <Button variant="outline" size="sm" onClick={handleRefresh}>
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Atualizar
-          </Button>
-          <Button variant="corporate" size="sm" onClick={handleExport}>
-            <Download className="h-4 w-4 mr-2" />
-            Exportar PDF
-          </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleRefresh}
+                className="shadow-card-default hover:shadow-card-hover transition-all hover:border-primary/30"
+              >
+                <RefreshCw className="h-4 w-4 mr-2 text-primary" />
+                Atualizar
+              </Button>
+              
+              <Button 
+                variant="default" 
+                size="sm" 
+                onClick={handleExport}
+                className="bg-gradient-primary hover:scale-105 transition-all shadow-elegant"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Exportar PDF
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Filtros */}
-      <FilterSection />
+      <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
+        <FilterSection />
+      </div>
 
       {/* Métricas principais */}
-      <div className="responsive-grid responsive-grid-4">
-        <MetricCard
-          title="Total de Ocorrências"
-          value={filteredOccurrences.length.toString()}
-          icon={<AlertTriangle className="h-4 w-4" />}
-          change={`+${Math.round((filteredOccurrences.length / occurrences.length) * 100)}% do total`}
-          changeType="neutral"
-        />
-        <MetricCard
-          title="Ocorrências Críticas"
-          value={filteredOccurrences.filter(o => o.severity === 'critical').length.toString()}
-          icon={<CheckCircle2 className="h-4 w-4" />}
-          change={`${Math.round((filteredOccurrences.filter(o => o.severity === 'critical').length / filteredOccurrences.length) * 100)}% do filtrado`}
-          changeType="negative"
-        />
-        <MetricCard
-          title="Em Andamento"
-          value={filteredOccurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_atuacao').length.toString()}
-          icon={<Clock className="h-4 w-4" />}
-          change={`${Math.round((filteredOccurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_atuacao').length / filteredOccurrences.length) * 100)}% do filtrado`}
-          changeType="neutral"
-        />
-        <MetricCard
-          title="Resolvidas"
-          value={filteredOccurrences.filter(o => o.status === 'encerrada').length.toString()}
-          icon={<TrendingUp className="h-4 w-4" />}
-          change={`${Math.round((filteredOccurrences.filter(o => o.status === 'encerrada').length / filteredOccurrences.length) * 100)}% do filtrado`}
-          changeType="positive"
-        />
+      <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
+        <div className="mb-4">
+          <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-gradient-primary">
+              <TrendingUp className="h-5 w-5 text-white" />
+            </div>
+            Indicadores Principais
+          </h2>
+          <p className="text-muted-foreground mt-1">Visão geral do status operacional em tempo real</p>
+        </div>
+        
+        <div className="responsive-grid responsive-grid-4">
+          <MetricCard
+            title="Total de Ocorrências"
+            value={filteredOccurrences.length.toString()}
+            icon={<AlertTriangle className="h-4 w-4" />}
+            change={`+${Math.round((filteredOccurrences.length / occurrences.length) * 100)}% do total`}
+            changeType="neutral"
+          />
+          <MetricCard
+            title="Ocorrências Críticas"
+            value={filteredOccurrences.filter(o => o.severity === 'critical').length.toString()}
+            icon={<CheckCircle2 className="h-4 w-4" />}
+            change={`${Math.round((filteredOccurrences.filter(o => o.severity === 'critical').length / filteredOccurrences.length) * 100)}% do filtrado`}
+            changeType="negative"
+          />
+          <MetricCard
+            title="Em Andamento"
+            value={filteredOccurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_atuacao').length.toString()}
+            icon={<Clock className="h-4 w-4" />}
+            change={`${Math.round((filteredOccurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_atuacao').length / filteredOccurrences.length) * 100)}% do filtrado`}
+            changeType="neutral"
+          />
+          <MetricCard
+            title="Resolvidas"
+            value={filteredOccurrences.filter(o => o.status === 'encerrada').length.toString()}
+            icon={<TrendingUp className="h-4 w-4" />}
+            change={`${Math.round((filteredOccurrences.filter(o => o.status === 'encerrada').length / filteredOccurrences.length) * 100)}% do filtrado`}
+            changeType="positive"
+          />
+        </div>
       </div>
 
       {/* Mapa de Criticidade */}
-      <div className="space-y-6">
-        <h2 className="text-responsive-2xl font-bold text-foreground">Mapa de Criticidade por Equipamento</h2>
+      <div className="animate-fade-in space-y-6" style={{ animationDelay: '0.3s' }}>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-gradient-primary">
+                <MapPin className="h-5 w-5 text-white" />
+              </div>
+              Mapa de Criticidade por Equipamento
+            </h2>
+            <p className="text-muted-foreground mt-1">Distribuição de criticidade por tipo de equipamento</p>
+          </div>
+        </div>
         <CriticalityHeatmap occurrences={filteredOccurrences} />
       </div>
 
       {/* Long Tail Analysis */}
-      <LongTailChart occurrences={filteredOccurrences} />
+      <div className="animate-fade-in" style={{ animationDelay: '0.4s' }}>
+        <LongTailChart occurrences={filteredOccurrences} />
+      </div>
 
       {/* Highlights Operacionais */}
-      <OccurrenceHighlights 
-        occurrences={filteredOccurrences} 
-        onOccurrenceClick={handleOccurrenceClick}
-      />
+      <div className="animate-fade-in" style={{ animationDelay: '0.5s' }}>
+        <OccurrenceHighlights 
+          occurrences={filteredOccurrences} 
+          onOccurrenceClick={handleOccurrenceClick}
+        />
+      </div>
 
       {/* Dashboard Content Wrapper for PDF Export */}
       <div id="dashboard-content">

@@ -21,41 +21,69 @@ export function COPFLayout({
         
         <div className="flex-1 flex flex-col">
           {/* Header */}
-          <header className="h-14 sm:h-16 border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+          <header className="h-16 sm:h-18 border-b bg-gradient-to-r from-card/80 via-card/90 to-card/80 backdrop-blur-md sticky top-0 z-50 shadow-elegant">
             <div className="flex items-center justify-between h-full px-responsive">
-              <div className="flex items-center space-responsive-sm">
-                <SidebarTrigger />
+              <div className="flex items-center gap-4">
+                <SidebarTrigger className="hover:bg-primary/10 transition-colors" />
                 <div className="hidden sm:block min-w-0">
-                  <h1 className="text-responsive-lg font-semibold text-foreground truncate">Ferramenta de Acompanhamento - COPF</h1>
-                  <p className="text-responsive-sm text-muted-foreground truncate">Itaú Unibanco | Centro de Operações de Pontos Físicos</p>
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">C</span>
+                    </div>
+                    <div>
+                      <h1 className="text-responsive-lg font-bold text-foreground truncate bg-gradient-primary bg-clip-text text-transparent">
+                        COPF Dashboard
+                      </h1>
+                      <p className="text-responsive-sm text-muted-foreground truncate">
+                        Centro de Operações | Itaú Unibanco
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex items-center space-responsive-sm">
+              <div className="flex items-center gap-2">
+                {/* Status Indicator */}
+                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 border border-success/20">
+                  <div className="w-2 h-2 rounded-full bg-success animate-pulse"></div>
+                  <span className="text-xs font-medium text-success-foreground">Sistema Online</span>
+                </div>
+
                 {/* Notifications */}
-                <Button variant="ghost" size="icon" className="relative">
+                <Button variant="ghost" size="icon" className="relative hover:bg-primary/10 transition-all duration-200">
                   <Bell className="h-5 w-5" />
-                  <span className="absolute -top-1 -right-1 h-4 w-4 bg-destructive text-destructive-foreground rounded-full text-xs flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 h-5 w-5 bg-gradient-primary text-white rounded-full text-xs flex items-center justify-center font-bold shadow-lg">
                     3
                   </span>
                 </Button>
 
                 {/* Dark Mode Toggle */}
-                <Button variant="ghost" size="icon" onClick={toggleDarkMode} title="Alternar modo escuro">
-                  {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+                <Button variant="ghost" size="icon" onClick={toggleDarkMode} title="Alternar modo escuro" className="hover:bg-primary/10 transition-all duration-200">
+                  {isDarkMode ? <Sun className="h-5 w-5 text-warning" /> : <Moon className="h-5 w-5 text-primary" />}
                 </Button>
 
                 {/* User Profile */}
-                <Button variant="ghost" size="icon">
-                  <User className="h-5 w-5" />
+                <Button variant="ghost" size="icon" className="hover:bg-primary/10 transition-all duration-200">
+                  <div className="w-6 h-6 rounded-full bg-gradient-primary flex items-center justify-center">
+                    <User className="h-4 w-4 text-white" />
+                  </div>
                 </Button>
               </div>
             </div>
           </header>
 
           {/* Main Content */}
-          <main className="flex-1 p-responsive bg-gradient-subtle main-content">
-            {children}
+          <main className="flex-1 p-responsive bg-gradient-subtle main-content relative overflow-hidden">
+            {/* Background Pattern */}
+            <div className="absolute inset-0 opacity-5">
+              <div className="absolute inset-0" style={{
+                backgroundImage: `radial-gradient(circle at 1px 1px, hsl(var(--primary)) 1px, transparent 0)`,
+                backgroundSize: '20px 20px'
+              }}></div>
+            </div>
+            <div className="relative z-10">
+              {children}
+            </div>
           </main>
         </div>
       </div>
