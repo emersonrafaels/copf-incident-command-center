@@ -99,6 +99,7 @@ export const LongTailChart = memo(function LongTailChart({
   const navigate = useNavigate();
   const [showMethodologyModal, setShowMethodologyModal] = useState(false);
   const [isAnalysisCollapsed, setIsAnalysisCollapsed] = useState(false);
+  const [isGuideCollapsed, setIsGuideCollapsed] = useState(true);
   const {
     updateFilter,
     clearAllFilters
@@ -680,19 +681,37 @@ export const LongTailChart = memo(function LongTailChart({
         </Card>
       </Collapsible>
 
-      {/* Como usar esta análise - Redesenhado */}
-      <Card className="bg-gradient-to-r from-info/5 to-info/10 border-info/20">
-        <CardContent className="p-6">
-          <div className="flex items-start gap-4">
-            <div className="p-2 rounded-lg bg-info/10">
-              <Info className="h-6 w-6 text-info flex-shrink-0" />
-            </div>
-            <div className="flex-1">
-              <h4 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                Como interpretar esta análise
-                <Badge variant="outline" className="text-xs">Guia Interativo</Badge>
-              </h4>
-              
+      {/* Como usar esta análise - colapsável */}
+      <Collapsible open={!isGuideCollapsed} onOpenChange={setIsGuideCollapsed}>
+        <Card className="bg-gradient-to-r from-info/5 to-info/10 border-info/20">
+          <CollapsibleTrigger asChild>
+            <CardHeader className="cursor-pointer hover:bg-info/5 transition-colors">
+              <div className="flex items-center justify-between">
+                <div className="flex items-start gap-4">
+                  <div className="p-2 rounded-lg bg-info/10">
+                    <Info className="h-6 w-6 text-info flex-shrink-0" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-lg font-semibold text-foreground mb-1 flex items-center gap-2">
+                      Como interpretar esta análise
+                      <Badge variant="outline" className="text-xs">Guia Interativo</Badge>
+                    </h4>
+                    <p className="text-sm text-muted-foreground">Guia prático para entender e usar os insights do gráfico</p>
+                  </div>
+                </div>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  {isGuideCollapsed ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronUp className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            </CardHeader>
+          </CollapsibleTrigger>
+          
+          <CollapsibleContent>
+            <CardContent className="pt-0">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-3">
                   <div className="flex items-start gap-3 p-3 bg-card/50 rounded-lg">
@@ -738,10 +757,10 @@ export const LongTailChart = memo(function LongTailChart({
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
 
       {/* Modal de Metodologia e Recomendações */}
       <Dialog open={showMethodologyModal} onOpenChange={setShowMethodologyModal}>
