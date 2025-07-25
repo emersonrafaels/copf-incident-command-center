@@ -260,11 +260,18 @@ export function Dashboard() {
               {/* Status Badges */}
               <div className="flex flex-wrap items-center gap-3">
                 
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-primary/20 bg-neutral-500">
-                  <MapPin className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-medium text-primary-foreground">
-                    2.360 Pontos Monitorados
-                  </span>
+                <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl border border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-200">
+                  <div className="p-1.5 rounded-lg bg-primary/10">
+                    <MapPin className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold text-foreground">
+                      2.360 Pontos
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      Monitorados
+                    </span>
+                  </div>
                 </div>
                 {hasActiveFilters && <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-warning/10 border border-warning/20">
                     <AlertTriangle className="h-4 w-4 text-warning" />
