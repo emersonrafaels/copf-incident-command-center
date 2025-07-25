@@ -752,55 +752,65 @@ export function FilterSection({ className, showSerialNumber = false }: FilterSec
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <div className="responsive-grid responsive-grid-2">
-                    {/* Transportadora (aparece primeiro se Ponto Terceirizado) */}
-                    {tipoAgenciaAtual === 'terceirizada' && (
-                      <div className="group space-y-3">
-                        <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                          <Truck className="h-3 w-3 text-accent" />
-                          Transportadora
-                        </Label>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button variant="outline" className="w-full h-10 justify-between hover:bg-accent/5 hover:border-accent/30 transition-all duration-200 group-hover:shadow-sm">
-                              {transportadoraFilterMulti.length > 0 ? (
-                                <div className="flex items-center gap-2">
-                                  <Badge variant="secondary" className="h-5 text-xs bg-accent/10 text-accent">
-                                    {transportadoraFilterMulti.length}
-                                  </Badge>
-                                  <span className="text-sm">
-                                    {transportadoraFilterMulti.length === 1 ? transportadoraFilterMulti[0] : `${transportadoraFilterMulti.length} transportadoras`}
-                                  </span>
-                                </div>
-                              ) : "Todas as transportadoras"}
-                              <div className="w-4 h-4 opacity-50">⌄</div>
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
-                            <Command>
-                              <CommandInput placeholder="Buscar transportadora..." className="h-9" />
-                              <CommandEmpty>Nenhuma transportadora encontrada.</CommandEmpty>
-                              <CommandList>
-                                <CommandGroup>
-                                  {uniqueTransportadoras.map(transportadora => (
-                                    <CommandItem key={transportadora} onSelect={() => {
-                                      const isSelected = transportadoraFilterMulti.includes(transportadora);
-                                      if (isSelected) {
-                                        updateFilter('transportadoraFilterMulti', transportadoraFilterMulti.filter(t => t !== transportadora));
-                                      } else {
-                                        updateFilter('transportadoraFilterMulti', [...transportadoraFilterMulti, transportadora]);
-                                      }
-                                    }}>
-                                      <Check className={cn("mr-2 h-4 w-4", transportadoraFilterMulti.includes(transportadora) ? "opacity-100" : "opacity-0")} />
-                                      {transportadora}
-                                    </CommandItem>
-                                  ))}
-                                </CommandGroup>
-                              </CommandList>
-                            </Command>
-                          </PopoverContent>
-                        </Popover>
-                      </div>
-                    )}
+                    {/* Transportadora (sempre visível, mas desabilitada se não terceirizada) */}
+                    <div className="group space-y-3">
+                      <Label className={cn(
+                        "text-sm font-medium flex items-center gap-2",
+                        !tipoAgenciaFilter.includes('terceirizada') ? "text-muted-foreground/50" : "text-muted-foreground"
+                      )}>
+                        <Truck className="h-3 w-3 text-accent" />
+                        Transportadora
+                      </Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            disabled={!tipoAgenciaFilter.includes('terceirizada')}
+                            className={cn(
+                              "w-full h-10 justify-between transition-all duration-200 group-hover:shadow-sm",
+                              !tipoAgenciaFilter.includes('terceirizada') 
+                                ? "opacity-50 cursor-not-allowed bg-muted/50" 
+                                : "hover:bg-accent/5 hover:border-accent/30"
+                            )}
+                          >
+                            {transportadoraFilterMulti.length > 0 ? (
+                              <div className="flex items-center gap-2">
+                                <Badge variant="secondary" className="h-5 text-xs bg-accent/10 text-accent">
+                                  {transportadoraFilterMulti.length}
+                                </Badge>
+                                <span className="text-sm">
+                                  {transportadoraFilterMulti.length === 1 ? transportadoraFilterMulti[0] : `${transportadoraFilterMulti.length} transportadoras`}
+                                </span>
+                              </div>
+                            ) : "Todas as transportadoras"}
+                            <div className="w-4 h-4 opacity-50">⌄</div>
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                          <Command>
+                            <CommandInput placeholder="Buscar transportadora..." className="h-9" />
+                            <CommandEmpty>Nenhuma transportadora encontrada.</CommandEmpty>
+                            <CommandList>
+                              <CommandGroup>
+                                {uniqueTransportadoras.map(transportadora => (
+                                  <CommandItem key={transportadora} onSelect={() => {
+                                    const isSelected = transportadoraFilterMulti.includes(transportadora);
+                                    if (isSelected) {
+                                      updateFilter('transportadoraFilterMulti', transportadoraFilterMulti.filter(t => t !== transportadora));
+                                    } else {
+                                      updateFilter('transportadoraFilterMulti', [...transportadoraFilterMulti, transportadora]);
+                                    }
+                                  }}>
+                                    <Check className={cn("mr-2 h-4 w-4", transportadoraFilterMulti.includes(transportadora) ? "opacity-100" : "opacity-0")} />
+                                    {transportadora}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                    </div>
 
                     {/* Fornecedor */}
                     <div className="group space-y-3">
