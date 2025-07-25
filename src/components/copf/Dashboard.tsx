@@ -350,10 +350,31 @@ export function Dashboard() {
         </div>
         
         <div className="responsive-grid responsive-grid-4">
+          {/* 1. Storytelling: Visão Geral */}
           <MetricCard title="Total de Ocorrências" value={filteredOccurrences.length.toString()} icon={<AlertTriangle className="h-4 w-4" />} change={`+${Math.round(filteredOccurrences.length / occurrences.length * 100)}% do total`} changeType="neutral" />
-          <MetricCard title="Ocorrências Críticas" value={filteredOccurrences.filter(o => o.severity === 'critical').length.toString()} icon={<CheckCircle2 className="h-4 w-4" />} change={`${Math.round(filteredOccurrences.filter(o => o.severity === 'critical').length / filteredOccurrences.length * 100)}% do filtrado`} changeType="negative" />
+          
+          {/* 2. Storytelling: Situação Atual */}
           <MetricCard title="Em Andamento" value={filteredOccurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_andamento').length.toString()} icon={<Clock className="h-4 w-4" />} change={`${Math.round(filteredOccurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_andamento').length / filteredOccurrences.length * 100)}% do filtrado`} changeType="neutral" />
-          <MetricCard title="Resolvidas" value={filteredOccurrences.filter(o => o.status === 'encerrado').length.toString()} icon={<TrendingUp className="h-4 w-4" />} change={`${Math.round(filteredOccurrences.filter(o => o.status === 'encerrado').length / filteredOccurrences.length * 100)}% do filtrado`} changeType="positive" />
+          
+          {/* 3. Storytelling: Problemas Urgentes */}
+          <MetricCard 
+            title="SLA Vencido" 
+            value={filteredOccurrences.filter(o => {
+              const hoursDiff = (Date.now() - new Date(o.createdAt).getTime()) / (1000 * 60 * 60);
+              const slaLimit = o.severity === 'critical' || o.severity === 'high' ? 24 : 72;
+              return hoursDiff > slaLimit && o.status !== 'encerrado';
+            }).length.toString()} 
+            icon={<AlertTriangle className="h-4 w-4" />} 
+            change={`${Math.round(filteredOccurrences.filter(o => {
+              const hoursDiff = (Date.now() - new Date(o.createdAt).getTime()) / (1000 * 60 * 60);
+              const slaLimit = o.severity === 'critical' || o.severity === 'high' ? 24 : 72;
+              return hoursDiff > slaLimit && o.status !== 'encerrado';
+            }).length / filteredOccurrences.length * 100)}% do filtrado`} 
+            changeType="negative" 
+          />
+          
+          {/* 4. Storytelling: Resultados Positivos */}
+          <MetricCard title="Resolvidas" value={filteredOccurrences.filter(o => o.status === 'encerrado').length.toString()} icon={<CheckCircle2 className="h-4 w-4" />} change={`${Math.round(filteredOccurrences.filter(o => o.status === 'encerrado').length / filteredOccurrences.length * 100)}% do filtrado`} changeType="positive" />
         </div>
       </div>
 
