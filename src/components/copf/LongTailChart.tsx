@@ -404,6 +404,17 @@ export const LongTailChart = memo(function LongTailChart({
                     stroke: 'hsl(var(--border))',
                     strokeWidth: 1
                   }}
+                  label={{ 
+                    value: 'Faixas de Tempo de Aging', 
+                    position: 'insideBottom', 
+                    offset: -5,
+                    style: { 
+                      textAnchor: 'middle',
+                      fill: 'hsl(var(--foreground))',
+                      fontSize: '12px',
+                      fontWeight: 600
+                    }
+                  }}
                 />
                 <YAxis 
                   stroke="hsl(var(--muted-foreground))" 
@@ -419,6 +430,17 @@ export const LongTailChart = memo(function LongTailChart({
                   tickLine={{
                     stroke: 'hsl(var(--border))',
                     strokeWidth: 1
+                  }}
+                  label={{ 
+                    value: 'Quantidade de Ocorrências', 
+                    angle: -90, 
+                    position: 'insideLeft',
+                    style: { 
+                      textAnchor: 'middle',
+                      fill: 'hsl(var(--foreground))',
+                      fontSize: '12px',
+                      fontWeight: 600
+                    }
                   }}
                 />
                 
