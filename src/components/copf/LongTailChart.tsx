@@ -5,13 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { OperationalNarrativeCard } from './OperationalNarrativeCard';
-import { BarChart3, Clock, AlertTriangle, ArrowRight, TrendingUp } from 'lucide-react';
+import { BarChart3, Clock, AlertTriangle, ArrowRight, TrendingUp, Info } from 'lucide-react';
 import { useFilters } from '@/contexts/FiltersContext';
 import { toast } from 'sonner';
 import { OccurrenceData } from '@/hooks/useDashboardData';
 interface LongTailChartProps {
   occurrences: OccurrenceData[];
+  filteredOccurrences?: OccurrenceData[];
 }
 interface TimeRangeData {
   range: string;
@@ -87,7 +89,8 @@ const TIME_RANGES = [{
   label: '> 5 dias'
 }];
 export const LongTailChart = memo(function LongTailChart({
-  occurrences
+  occurrences,
+  filteredOccurrences
 }: LongTailChartProps) {
   const navigate = useNavigate();
   const {
@@ -97,37 +100,42 @@ export const LongTailChart = memo(function LongTailChart({
 
   // Processar dados por faixas de tempo
   const timeRangeAnalysis = useMemo(() => {
-    // Filtrar apenas ocorrências resolvidas
-    const resolvedOccurrences = occurrences.filter(occ => occ.status === 'encerrada' && occ.resolvedAt && occ.createdAt);
-    if (resolvedOccurrences.length === 0) {
+    // Usar ocorrências filtradas se disponível, senão usar todas
+    const sourceOccurrences = filteredOccurrences || occurrences;
+    
+    // Por padrão, analisar apenas ocorrências em aberto (não canceladas/encerradas)
+    const activeOccurrences = sourceOccurrences.filter(occ => 
+      occ.status === 'a_iniciar' || occ.status === 'em_atuacao'
+    );
+    if (activeOccurrences.length === 0) {
       return {
         data: [],
         metrics: {
           total: 0,
-          p50: 0,
-          p90: 0,
-          outliers: 0
+          tempoMediano: 0,
+          metaExcelencia: 0,
+          agingCritico: 0
         },
-        insight: "Aguardando ocorrências resolvidas para análise...",
-        priority: 'medium' as const
+        insight: "Nenhuma ocorrência em aberto para análise...",
+        priority: 'low' as const
       };
     }
 
-    // Calcular durações em horas
-    const durations = resolvedOccurrences.map(occ => {
+    // Calcular tempo em aberto em horas (aging)
+    const durations = activeOccurrences.map(occ => {
       const created = new Date(occ.createdAt);
-      const resolved = new Date(occ.resolvedAt!);
-      const durationHours = (resolved.getTime() - created.getTime()) / (1000 * 60 * 60);
+      const now = new Date();
+      const agingHours = (now.getTime() - created.getTime()) / (1000 * 60 * 60);
       return {
         ...occ,
-        durationHours
+        durationHours: agingHours
       };
     });
 
     // Calcular percentis para definir metas
     const sortedDurations = durations.map(d => d.durationHours).sort((a, b) => a - b);
-    const p50 = sortedDurations[Math.floor(sortedDurations.length * 0.5)] || 0;
-    const p90 = sortedDurations[Math.floor(sortedDurations.length * 0.9)] || 12.8;
+    const tempoMediano = sortedDurations[Math.floor(sortedDurations.length * 0.5)] || 0; // P50 = Tempo Mediano
+    const metaExcelencia = sortedDurations[Math.floor(sortedDurations.length * 0.85)] || 12.8; // P85 = Meta de Excelência
 
     // Agrupar por faixas de tempo
     const timeRangeData: TimeRangeData[] = TIME_RANGES.map(range => {
@@ -145,13 +153,13 @@ export const LongTailChart = memo(function LongTailChart({
       if (range.minHours >= 120) {
         // > 5 dias
         category = 'critical';
-        color = '#ef4444'; // Vermelho - outliers críticos
-      } else if (range.minHours >= p90) {
-        // Acima do P90
+        color = '#ef4444'; // Vermelho - aging crítico
+      } else if (range.minHours >= metaExcelencia) {
+        // Acima da Meta de Excelência (P85)
         category = 'above_target';
         color = '#f59e0b'; // Laranja - acima da meta
       } else if (range.minHours >= 12) {
-        // Entre 12h e P90
+        // Entre 12h e Meta de Excelência
         category = 'above_target';
         color = '#f97316'; // Laranja mais escuro
       }
@@ -166,47 +174,59 @@ export const LongTailChart = memo(function LongTailChart({
       };
     }).filter(item => item.count > 0); // Filtrar faixas vazias
 
-    // Contar outliers (> 5 dias)
-    const outliers = durations.filter(d => d.durationHours > 120).length;
-    const outliersPercentage = Math.round(outliers / durations.length * 100);
+    // Contar ocorrências acima do aging esperado (> 5 dias)
+    const agingCritico = durations.filter(d => d.durationHours > 120).length;
+    const agingPercentage = Math.round(agingCritico / durations.length * 100);
 
     // Gerar insight operacional
-    let insight = `${durations.length} ocorrências analisadas | P50: ${p50.toFixed(1)}h | P90: ${p90.toFixed(1)}h`;
+    let insight = `${durations.length} ocorrências em aberto | Tempo Mediano: ${tempoMediano.toFixed(1)}h | Meta de Excelência: ${metaExcelencia.toFixed(1)}h`;
     let priority: 'high' | 'medium' | 'low' = 'medium';
     let actionSuggestion = "";
-    if (outliersPercentage > 5) {
-      insight += ` | ${outliers} outliers críticos (${outliersPercentage}%)`;
+    if (agingPercentage > 5) {
+      insight += ` | ${agingCritico} acima do aging esperado (${agingPercentage}%)`;
       priority = 'high';
-      actionSuggestion = "Alto número de outliers detectado. Revisar processos operacionais urgentemente.";
-    } else if (outliers > 0) {
-      insight += ` | ${outliers} outliers identificados`;
-      actionSuggestion = "Investigar causas específicas dos casos que excedem 5 dias de resolução.";
+      actionSuggestion = "Alto número de ocorrências com aging crítico. Priorizar resolução imediata.";
+    } else if (agingCritico > 0) {
+      insight += ` | ${agingCritico} acima do aging esperado`;
+      actionSuggestion = "Investigar causas das ocorrências que excedem 5 dias em aberto.";
     } else {
-      insight += " | Distribuição saudável";
+      insight += " | Aging dentro do esperado";
       priority = 'low';
-      actionSuggestion = "Performance dentro do esperado. Manter monitoramento atual.";
+      actionSuggestion = "Performance de aging saudável. Manter monitoramento atual.";
     }
     return {
       data: timeRangeData,
       metrics: {
         total: durations.length,
-        p50: Number(p50.toFixed(1)),
-        p90: Number(p90.toFixed(1)),
-        outliers
+        tempoMediano: Number(tempoMediano.toFixed(1)),
+        metaExcelencia: Number(metaExcelencia.toFixed(1)),
+        agingCritico
       },
       insight,
       priority,
       actionSuggestion
     };
-  }, [occurrences]);
+  }, [occurrences, filteredOccurrences]);
 
-  // Handler para filtrar outliers
-  const handleFilterOutliers = () => {
+  // Handler para navegar para ocorrências com aging crítico
+  const handleFilterAgingCritico = () => {
     clearAllFilters();
     setTimeout(() => {
-      updateFilter('statusFilterMulti', ['encerrada']);
+      updateFilter('statusFilterMulti', ['a_iniciar', 'em_atuacao']);
+      updateFilter('overrideFilter', true); // Filtrar apenas vencidas (aging > SLA)
       navigate('/ocorrencias');
-      toast.success('Filtrando ocorrências com outliers críticos');
+      toast.success('Mostrando ocorrências acima do aging esperado (5 dias)');
+    }, 100);
+  };
+
+  // Handler para clique nas barras do gráfico
+  const handleBarClick = (data: TimeRangeData) => {
+    clearAllFilters();
+    setTimeout(() => {
+      updateFilter('statusFilterMulti', ['a_iniciar', 'em_atuacao']);
+      // Adicionar filtro customizado por range de horas
+      navigate(`/ocorrencias?aging_min=${data.minHours}&aging_max=${data.maxHours === Infinity ? 999999 : data.maxHours}`);
+      toast.success(`Filtrando ocorrências entre ${data.rangeLabel}`);
     }, 100);
   };
 
@@ -216,12 +236,12 @@ export const LongTailChart = memo(function LongTailChart({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5" />
-            Análise Long Tail - Tempos de Resolução
+            Análise Long Tail - Aging de Ocorrências
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-            Aguardando ocorrências resolvidas para análise...
+            Nenhuma ocorrência em aberto para análise...
           </div>
         </CardContent>
       </Card>;
@@ -237,44 +257,75 @@ export const LongTailChart = memo(function LongTailChart({
               </div>
               <div>
                 <CardTitle className="text-xl font-semibold text-foreground">
-                  Análise Long Tail - Tempos de Resolução
+                  Análise Long Tail - Aging de Ocorrências
                 </CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Distribuição de ocorrências por faixas de tempo aberto
+                  Distribuição de ocorrências em aberto por tempo de aging
                 </p>
               </div>
             </div>
-            <Button variant="premium" size="sm" onClick={handleFilterOutliers} className="flex items-center gap-2 shadow-card-hover">
+            <Button variant="premium" size="sm" onClick={handleFilterAgingCritico} className="flex items-center gap-2 shadow-card-hover">
               <AlertTriangle className="h-4 w-4" />
-              Ver Outliers Críticos
+              Ver Aging Crítico ({">"}5 dias)
             </Button>
           </div>
 
-          {/* Métricas em linha horizontal */}
+          {/* Métricas didáticas com tooltips explicativos */}
           <div className="flex flex-wrap items-center gap-3 mt-6 p-4 bg-card/50 rounded-lg border border-border/50">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-primary"></div>
-              <span className="text-sm text-muted-foreground">Total:</span>
-              <span className="text-lg font-bold text-foreground">{timeRangeAnalysis.metrics.total}</span>
-            </div>
-            <div className="w-px h-6 bg-border"></div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-success"></div>
-              <span className="text-sm text-muted-foreground">P50:</span>
-              <span className="text-lg font-bold text-success">{timeRangeAnalysis.metrics.p50}h</span>
-            </div>
-            <div className="w-px h-6 bg-border"></div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-warning"></div>
-              <span className="text-sm text-muted-foreground">Meta P90:</span>
-              <span className="text-lg font-bold text-warning">{timeRangeAnalysis.metrics.p90}h</span>
-            </div>
-            <div className="w-px h-6 bg-border"></div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-destructive"></div>
-              <span className="text-sm text-muted-foreground">Outliers:</span>
-              <span className="text-lg font-bold text-destructive">{timeRangeAnalysis.metrics.outliers}</span>
-            </div>
+            <TooltipProvider>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-primary"></div>
+                <span className="text-sm text-muted-foreground">Total em Aberto:</span>
+                <span className="text-lg font-bold text-foreground">{timeRangeAnalysis.metrics.total}</span>
+              </div>
+              <div className="w-px h-6 bg-border"></div>
+              
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-2 cursor-help">
+                    <div className="w-2 h-2 rounded-full bg-success"></div>
+                    <span className="text-sm text-muted-foreground">Tempo Mediano:</span>
+                    <span className="text-lg font-bold text-success">{timeRangeAnalysis.metrics.tempoMediano}h</span>
+                    <Info className="h-3 w-3 text-muted-foreground" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>50% das ocorrências estão em aberto há até {timeRangeAnalysis.metrics.tempoMediano}h</p>
+                </TooltipContent>
+              </Tooltip>
+              
+              <div className="w-px h-6 bg-border"></div>
+              
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-2 cursor-help">
+                    <div className="w-2 h-2 rounded-full bg-warning"></div>
+                    <span className="text-sm text-muted-foreground">Meta de Excelência:</span>
+                    <span className="text-lg font-bold text-warning">{timeRangeAnalysis.metrics.metaExcelencia}h</span>
+                    <Info className="h-3 w-3 text-muted-foreground" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>85% das ocorrências devem ser resolvidas em até {timeRangeAnalysis.metrics.metaExcelencia}h</p>
+                </TooltipContent>
+              </Tooltip>
+              
+              <div className="w-px h-6 bg-border"></div>
+              
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-2 cursor-help">
+                    <div className="w-2 h-2 rounded-full bg-destructive"></div>
+                    <span className="text-sm text-muted-foreground">Aging Crítico ({">"}5 dias):</span>
+                    <span className="text-lg font-bold text-destructive">{timeRangeAnalysis.metrics.agingCritico}</span>
+                    <Info className="h-3 w-3 text-muted-foreground" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Ocorrências em aberto há mais de 5 dias (120 horas)</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </CardHeader>
         
@@ -319,8 +370,18 @@ export const LongTailChart = memo(function LongTailChart({
                 boxShadow: 'var(--shadow-elegant)'
               }} />
                 
-                <Bar dataKey="count" radius={[6, 6, 0, 0]} className="cursor-pointer transition-all duration-200">
-                  {timeRangeAnalysis.data.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.category === 'within_target' ? 'url(#barGradient1)' : entry.category === 'above_target' ? 'url(#barGradient2)' : 'url(#barGradient3)'} />)}
+                <Bar 
+                  dataKey="count" 
+                  radius={[6, 6, 0, 0]} 
+                  className="cursor-pointer transition-all duration-200 hover:opacity-80"
+                  onClick={(data) => handleBarClick(data.payload)}
+                >
+                  {timeRangeAnalysis.data.map((entry, index) => (
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={entry.category === 'within_target' ? 'url(#barGradient1)' : entry.category === 'above_target' ? 'url(#barGradient2)' : 'url(#barGradient3)'} 
+                    />
+                  ))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -328,7 +389,44 @@ export const LongTailChart = memo(function LongTailChart({
         </CardContent>
       </Card>
 
-      {/* Insights e legendas - Layout aprimorado */}
+      {/* Card de Insights Operacionais */}
+      <OperationalNarrativeCard
+        title="Análise de Aging"
+        insight={timeRangeAnalysis.insight}
+        priority={timeRangeAnalysis.priority}
+        actionSuggestion={timeRangeAnalysis.actionSuggestion}
+        trend={timeRangeAnalysis.metrics.agingCritico > 0 ? 'up' : 'stable'}
+        metric={{
+          value: timeRangeAnalysis.metrics.agingCritico,
+          label: "Ocorrências Críticas"
+        }}
+      />
+
+      {/* Legendas e Instruções */}
+      <Card className="bg-muted/30 border-muted/50">
+        <CardContent className="p-4">
+          <div className="space-y-3">
+            <h4 className="font-semibold text-sm text-foreground">Como usar esta análise:</h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded bg-green-500"></div>
+                <span>Dentro do Padrão: Aging normal</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded bg-orange-500"></div>
+                <span>Atenção: Próximo ao vencimento</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded bg-red-500"></div>
+                <span>Crítico: Aging acima de 5 dias</span>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              💡 Clique nas barras do gráfico para filtrar ocorrências por faixa de tempo
+            </p>
+          </div>
+        </CardContent>
+      </Card>
       
     </div>;
 });

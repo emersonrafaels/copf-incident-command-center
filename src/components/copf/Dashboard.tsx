@@ -379,7 +379,7 @@ export function Dashboard() {
       <div className="animate-fade-in" style={{
       animationDelay: '0.4s'
     }}>
-        <LongTailChart occurrences={filteredOccurrences} />
+        <LongTailChart occurrences={occurrences} filteredOccurrences={filteredOccurrences} />
       </div>
 
       {/* Highlights Operacionais */}
