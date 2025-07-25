@@ -268,7 +268,7 @@ export function OccurrenceHighlights({ occurrences, onOccurrenceClick }: Occurre
                 <AlertTriangle className="h-4 w-4" />
               </div>
               <div>
-                <span className="text-base font-semibold">Críticas Vencendo</span>
+                <span className="text-base font-semibold">Críticas Vencendo/Vencidas</span>
                 <Badge variant="destructive" className="ml-2">
                   {highlights.criticalDue.length}
                 </Badge>
