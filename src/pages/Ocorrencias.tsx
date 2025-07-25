@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Search, Download, Eye, MessageSquare, Bot, Star, Zap, Clock } from "lucide-react";
+import { Search, Download, Eye, MessageSquare, Bot, Star, Zap, Clock, ChevronUp, ChevronDown } from "lucide-react";
 import { StatusBadge } from "@/components/copf/StatusBadge";
 import { OccurrenceModal } from "@/components/copf/OccurrenceModal";
 import { useDashboardData } from "@/hooks/useDashboardData";
@@ -31,6 +31,8 @@ const Ocorrencias = () => {
   const [showBot, setShowBot] = useState(false);
   const [priorityModalOpen, setPriorityModalOpen] = useState(false);
   const [selectedPriorityOccurrence, setSelectedPriorityOccurrence] = useState(null);
+  const [sortColumn, setSortColumn] = useState<string>('remainingTime');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   // Usar filtros do contexto
   const {
@@ -298,6 +300,84 @@ const Ocorrencias = () => {
     
     return `${Math.floor(remainingHours)}h`;
   };
+
+  // Função para converter valores em números para ordenação
+  const getSortValue = (occurrence: any, column: string) => {
+    switch (column) {
+      case 'id':
+        return occurrence.id.toLowerCase();
+      case 'agency':
+        return occurrence.agency.toLowerCase();
+      case 'segment':
+        return occurrence.segment.toLowerCase();
+      case 'equipment':
+        return occurrence.equipment.toLowerCase();
+      case 'serialNumber':
+        return occurrence.serialNumber.toLowerCase();
+      case 'severity':
+        const severityMap = { 'critical': 4, 'high': 3, 'medium': 2, 'low': 1 };
+        return severityMap[occurrence.severity] || 0;
+      case 'status':
+        return occurrence.status.toLowerCase();
+      case 'slaStatus':
+        const slaStatusMap = { 'Vencido': 3, 'Crítico': 2, 'No Prazo': 1, 'Dentro do SLA': 0 };
+        return slaStatusMap[getSlaStatus(occurrence)] || 0;
+      case 'remainingTime':
+        const createdDate = new Date(occurrence.createdAt);
+        const hoursDiff = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60);
+        const slaLimit = occurrence.severity === 'critical' || occurrence.severity === 'high' ? 24 : 72;
+        return slaLimit - hoursDiff; // Menor tempo restante = maior urgência
+      case 'createdAt':
+        return new Date(occurrence.createdAt).getTime();
+      case 'vendor':
+        return occurrence.vendor.toLowerCase();
+      default:
+        return '';
+    }
+  };
+
+  // Função para ordenar ocorrências
+  const sortOccurrences = (occurrences: any[]) => {
+    return [...occurrences].sort((a, b) => {
+      const aValue = getSortValue(a, sortColumn);
+      const bValue = getSortValue(b, sortColumn);
+      
+      // Ordenação primária
+      let result = 0;
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        result = aValue - bValue;
+      } else {
+        result = String(aValue).localeCompare(String(bValue));
+      }
+      
+      // Aplicar direção da ordenação
+      if (sortDirection === 'desc') {
+        result *= -1;
+      }
+      
+      // Se for ordenação por tempo restante, aplicar ordenação secundária por severidade
+      if (sortColumn === 'remainingTime' && result === 0) {
+        const aSeverity = getSortValue(a, 'severity');
+        const bSeverity = getSortValue(b, 'severity');
+        return bSeverity - aSeverity; // Severidade maior primeiro
+      }
+      
+      return result;
+    });
+  };
+
+  // Função para lidar com clique no cabeçalho
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
+
+  // Aplicar ordenação padrão: tempo restante (menor primeiro) + severidade crítica
+  const sortedOccurrences = sortOccurrences(filteredOccurrences);
   return <COPFLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -401,22 +481,132 @@ const Ocorrencias = () => {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>ID</TableHead>
-                        <TableHead>Agência</TableHead>
-                        <TableHead>Segmento</TableHead>
-                        <TableHead>Equipamento</TableHead>
-                        <TableHead>Nº Série</TableHead>
-                        <TableHead>Severidade</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Status SLA</TableHead>
-                        <TableHead>Tempo Restante</TableHead>
-                        <TableHead>Data/Hora Abertura</TableHead>
-                        <TableHead>Fornecedor</TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-accent/50 transition-colors"
+                          onClick={() => handleSort('id')}
+                        >
+                          <div className="flex items-center gap-1">
+                            ID
+                            {sortColumn === 'id' && (
+                              sortDirection === 'asc' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />
+                            )}
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-accent/50 transition-colors"
+                          onClick={() => handleSort('agency')}
+                        >
+                          <div className="flex items-center gap-1">
+                            Agência
+                            {sortColumn === 'agency' && (
+                              sortDirection === 'asc' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />
+                            )}
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-accent/50 transition-colors"
+                          onClick={() => handleSort('segment')}
+                        >
+                          <div className="flex items-center gap-1">
+                            Segmento
+                            {sortColumn === 'segment' && (
+                              sortDirection === 'asc' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />
+                            )}
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-accent/50 transition-colors"
+                          onClick={() => handleSort('equipment')}
+                        >
+                          <div className="flex items-center gap-1">
+                            Equipamento
+                            {sortColumn === 'equipment' && (
+                              sortDirection === 'asc' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />
+                            )}
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-accent/50 transition-colors"
+                          onClick={() => handleSort('serialNumber')}
+                        >
+                          <div className="flex items-center gap-1">
+                            Nº Série
+                            {sortColumn === 'serialNumber' && (
+                              sortDirection === 'asc' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />
+                            )}
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-accent/50 transition-colors"
+                          onClick={() => handleSort('severity')}
+                        >
+                          <div className="flex items-center gap-1">
+                            Severidade
+                            {sortColumn === 'severity' && (
+                              sortDirection === 'asc' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />
+                            )}
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-accent/50 transition-colors"
+                          onClick={() => handleSort('status')}
+                        >
+                          <div className="flex items-center gap-1">
+                            Status
+                            {sortColumn === 'status' && (
+                              sortDirection === 'asc' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />
+                            )}
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-accent/50 transition-colors"
+                          onClick={() => handleSort('slaStatus')}
+                        >
+                          <div className="flex items-center gap-1">
+                            Status SLA
+                            {sortColumn === 'slaStatus' && (
+                              sortDirection === 'asc' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />
+                            )}
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-accent/50 transition-colors bg-primary/5"
+                          onClick={() => handleSort('remainingTime')}
+                        >
+                          <div className="flex items-center gap-1 font-semibold">
+                            Tempo Restante
+                            {sortColumn === 'remainingTime' && (
+                              sortDirection === 'asc' ? <ChevronUp className="h-4 w-4 text-primary" /> : <ChevronDown className="h-4 w-4 text-primary" />
+                            )}
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-accent/50 transition-colors"
+                          onClick={() => handleSort('createdAt')}
+                        >
+                          <div className="flex items-center gap-1">
+                            Data/Hora Abertura
+                            {sortColumn === 'createdAt' && (
+                              sortDirection === 'asc' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />
+                            )}
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-accent/50 transition-colors"
+                          onClick={() => handleSort('vendor')}
+                        >
+                          <div className="flex items-center gap-1">
+                            Fornecedor
+                            {sortColumn === 'vendor' && (
+                              sortDirection === 'asc' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />
+                            )}
+                          </div>
+                        </TableHead>
                         <TableHead>Ações</TableHead>
                       </TableRow>
                     </TableHeader>
                   <TableBody>
-                    {filteredOccurrences.map(occurrence => <TableRow key={occurrence.id}>
+                    {sortedOccurrences.map(occurrence => <TableRow key={occurrence.id}>
                         <TableCell className="font-medium">{occurrence.id}</TableCell>
                         <TableCell className="max-w-[200px] truncate">{occurrence.agency}</TableCell>
                         <TableCell>
