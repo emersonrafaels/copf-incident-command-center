@@ -466,19 +466,28 @@ export const LongTailChart = memo(function LongTailChart({
             </ResponsiveContainer>
           </ChartContainer>
           
-          {/* Indicadores visuais abaixo do gráfico */}
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-6 p-3 bg-muted/20 rounded-lg">
-            <div className="flex items-center gap-2 text-xs">
-              <div className="w-3 h-3 rounded bg-green-500"></div>
-              <span className="text-muted-foreground">Meta de Excelência: ≤ {formatHours(timeRangeAnalysis.metrics.metaExcelencia)}</span>
+          {/* Indicadores visuais e dica de interatividade abaixo do gráfico */}
+          <div className="mt-4 space-y-3">
+            {/* Dica de interatividade */}
+            <div className="flex items-center justify-center gap-2 p-2 bg-primary/10 rounded-lg border border-primary/20">
+              <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+              <span className="text-sm font-medium text-primary">💡 Clique nas barras para filtrar ocorrências por faixa de tempo específica</span>
             </div>
-            <div className="flex items-center gap-2 text-xs">
-              <div className="w-3 h-3 rounded bg-orange-500"></div>
-              <span className="text-muted-foreground">Atenção: {formatHours(timeRangeAnalysis.metrics.metaExcelencia)} - 5d</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <div className="w-3 h-3 rounded bg-red-500"></div>
-              <span className="text-muted-foreground">Crítico: {">"}5 dias</span>
+            
+            {/* Legendas das cores */}
+            <div className="flex flex-wrap items-center justify-center gap-6 p-3 bg-muted/20 rounded-lg">
+              <div className="flex items-center gap-2 text-xs">
+                <div className="w-3 h-3 rounded bg-green-500"></div>
+                <span className="text-muted-foreground">Meta de Excelência: ≤ {formatHours(timeRangeAnalysis.metrics.metaExcelencia)}</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <div className="w-3 h-3 rounded bg-orange-500"></div>
+                <span className="text-muted-foreground">Atenção: {formatHours(timeRangeAnalysis.metrics.metaExcelencia)} - 5d</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <div className="w-3 h-3 rounded bg-red-500"></div>
+                <span className="text-muted-foreground">Crítico: {">"}5 dias</span>
+              </div>
             </div>
           </div>
         </CardContent>
@@ -578,14 +587,6 @@ export const LongTailChart = memo(function LongTailChart({
               
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-3">
-                  <div className="flex items-start gap-3 p-3 bg-card/50 rounded-lg">
-                    <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0"></div>
-                    <div>
-                      <p className="font-medium text-sm text-foreground">Interatividade</p>
-                      <p className="text-xs text-muted-foreground">Clique nas barras para filtrar ocorrências por faixa de tempo específica</p>
-                    </div>
-                  </div>
-                  
                   <div className="flex items-start gap-3 p-3 bg-card/50 rounded-lg">
                     <div className="w-2 h-2 rounded-full bg-muted-foreground mt-2 flex-shrink-0"></div>
                     <div>
