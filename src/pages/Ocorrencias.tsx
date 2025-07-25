@@ -6,12 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Search, Download, Eye, MessageSquare, Bot, Star, Zap, Clock } from "lucide-react";
 import { StatusBadge } from "@/components/copf/StatusBadge";
 import { OccurrenceModal } from "@/components/copf/OccurrenceModal";
@@ -21,18 +16,22 @@ import { useToast } from "@/hooks/use-toast";
 import { useFilters } from "@/contexts/FiltersContext";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import * as XLSX from 'xlsx';
-
 const Ocorrencias = () => {
-  const { occurrences, isLoading } = useDashboardData()
-  const { toast } = useToast()
-  const [selectedOccurrence, setSelectedOccurrence] = useState(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [modalMode, setModalMode] = useState<'view' | 'communication' | 'priority_communication'>('view')
-  const [searchTerm, setSearchTerm] = useState('')
-  const [showBot, setShowBot] = useState(false)
-  const [priorityModalOpen, setPriorityModalOpen] = useState(false)
-  const [selectedPriorityOccurrence, setSelectedPriorityOccurrence] = useState(null)
-  
+  const {
+    occurrences,
+    isLoading
+  } = useDashboardData();
+  const {
+    toast
+  } = useToast();
+  const [selectedOccurrence, setSelectedOccurrence] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'view' | 'communication' | 'priority_communication'>('view');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showBot, setShowBot] = useState(false);
+  const [priorityModalOpen, setPriorityModalOpen] = useState(false);
+  const [selectedPriorityOccurrence, setSelectedPriorityOccurrence] = useState(null);
+
   // Usar filtros do contexto
   const {
     agenciaFilter,
@@ -48,48 +47,44 @@ const Ocorrencias = () => {
     overrideFilter,
     vendorPriorityFilter,
     hasActiveFilters
-  } = useFilters()
+  } = useFilters();
 
   // Filtrar ocorrências
   const filteredOccurrences = occurrences.filter(occurrence => {
-    const matchesSearch = 
-      occurrence.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      occurrence.agency.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      occurrence.description.toLowerCase().includes(searchTerm.toLowerCase())
-    
+    const matchesSearch = occurrence.id.toLowerCase().includes(searchTerm.toLowerCase()) || occurrence.agency.toLowerCase().includes(searchTerm.toLowerCase()) || occurrence.description.toLowerCase().includes(searchTerm.toLowerCase());
+
     // Filtros multiselect
     const matchesSegment = segmentFilterMulti.length === 0 || segmentFilterMulti.includes(occurrence.segment);
     const matchesEquipment = equipmentFilterMulti.length === 0 || equipmentFilterMulti.includes(occurrence.equipment);
     const matchesStatus = statusFilterMulti.length === 0 || statusFilterMulti.includes(occurrence.status);
     const matchesVendor = vendorFilterMulti.length === 0 || vendorFilterMulti.includes(occurrence.vendor);
-    
+
     // Filtro de transportadora
     if (transportadoraFilterMulti.length > 0) {
-      const transportadora = occurrence.vendor.includes('Express') ? 'Express Logística' : 
-                           occurrence.vendor.includes('Tech') ? 'TechTransporte' : 'LogiCorp';
+      const transportadora = occurrence.vendor.includes('Express') ? 'Express Logística' : occurrence.vendor.includes('Tech') ? 'TechTransporte' : 'LogiCorp';
       if (!transportadoraFilterMulti.includes(transportadora)) return false;
     }
-    
+
     // Filtro de série
-    const matchesSerial = !serialNumberFilter || occurrence.serialNumber.toLowerCase().includes(serialNumberFilter.toLowerCase())
-    
+    const matchesSerial = !serialNumberFilter || occurrence.serialNumber.toLowerCase().includes(serialNumberFilter.toLowerCase());
+
     // Filtro de agência por número
-    const matchesAgencia = agenciaFilter.length === 0 || agenciaFilter.some(agency => occurrence.agency.includes(agency))
-    
+    const matchesAgencia = agenciaFilter.length === 0 || agenciaFilter.some(agency => occurrence.agency.includes(agency));
+
     // Filtro de UF
     const agencyUF = occurrence.agency.split(' - ')[1] || 'SP';
-    const matchesUF = ufFilter.length === 0 || ufFilter.includes(agencyUF)
-    
+    const matchesUF = ufFilter.length === 0 || ufFilter.includes(agencyUF);
+
     // Simular tipo de agência baseado na agência
-    const tipoAgencia = occurrence.agency.includes('Terceirizada') ? 'terceirizada' : 'convencional'
-    const matchesTipoAgencia = tipoAgenciaFilter.length === 0 || tipoAgenciaFilter.includes(tipoAgencia)
-    
+    const tipoAgencia = occurrence.agency.includes('Terceirizada') ? 'terceirizada' : 'convencional';
+    const matchesTipoAgencia = tipoAgenciaFilter.length === 0 || tipoAgenciaFilter.includes(tipoAgencia);
+
     // Simular ponto VIP (agências com número terminado em 0, 5 são VIP)
-    const agencyNumber = occurrence.agency.match(/\d+/)?.[0] || '0'
-    const isVip = agencyNumber.endsWith('0') || agencyNumber.endsWith('5')
-    const pontoVipStatus = isVip ? 'sim' : 'nao'
-    const matchesPontoVip = pontoVipFilter.length === 0 || pontoVipFilter.includes(pontoVipStatus)
-    
+    const agencyNumber = occurrence.agency.match(/\d+/)?.[0] || '0';
+    const isVip = agencyNumber.endsWith('0') || agencyNumber.endsWith('5');
+    const pontoVipStatus = isVip ? 'sim' : 'nao';
+    const matchesPontoVip = pontoVipFilter.length === 0 || pontoVipFilter.includes(pontoVipStatus);
+
     // Filtro de ocorrências vencidas
     if (overrideFilter) {
       const createdDate = new Date(occurrence.createdAt);
@@ -98,52 +93,44 @@ const Ocorrencias = () => {
       const isOverdue = hoursDiff > slaLimit && occurrence.status !== 'encerrada';
       if (!isOverdue) return false;
     }
-    
+
     // Filtro de priorizadas com fornecedor
     if (vendorPriorityFilter) {
       const isHighPriority = occurrence.severity === 'critical' || occurrence.severity === 'high';
       if (!isHighPriority) return false;
     }
-
-    return matchesSearch && matchesStatus && matchesSegment && 
-           matchesEquipment && matchesSerial && matchesVendor && matchesAgencia &&
-           matchesUF && matchesTipoAgencia && matchesPontoVip
-  })
-
-  const handleViewDetails = (occurrence) => {
-    setSelectedOccurrence(occurrence)
-    setModalMode('view')
-    setIsModalOpen(true)
-  }
-
-  const handleSendMessage = (occurrence) => {
-    setSelectedOccurrence(occurrence)
-    setModalMode('communication')
-    setIsModalOpen(true)
-  }
-
+    return matchesSearch && matchesStatus && matchesSegment && matchesEquipment && matchesSerial && matchesVendor && matchesAgencia && matchesUF && matchesTipoAgencia && matchesPontoVip;
+  });
+  const handleViewDetails = occurrence => {
+    setSelectedOccurrence(occurrence);
+    setModalMode('view');
+    setIsModalOpen(true);
+  };
+  const handleSendMessage = occurrence => {
+    setSelectedOccurrence(occurrence);
+    setModalMode('communication');
+    setIsModalOpen(true);
+  };
   const handlePrioritize = (occurrence, type: 'priority_only' | 'priority_with_message') => {
     if (type === 'priority_only') {
       // Abrir modal para escolher nível de priorização
-      setSelectedPriorityOccurrence(occurrence)
-      setPriorityModalOpen(true)
+      setSelectedPriorityOccurrence(occurrence);
+      setPriorityModalOpen(true);
     } else {
       // Abrir modal de comunicação para priorizar com mensagem
-      setSelectedOccurrence(occurrence)
-      setModalMode('priority_communication')
-      setIsModalOpen(true)
+      setSelectedOccurrence(occurrence);
+      setModalMode('priority_communication');
+      setIsModalOpen(true);
     }
-  }
-
+  };
   const handlePrioritySelect = (level: string) => {
     toast({
       title: "Ocorrência Priorizada",
-      description: `Ocorrência ${selectedPriorityOccurrence?.id} foi marcada como prioridade ${level}`,
-    })
-    setPriorityModalOpen(false)
-    setSelectedPriorityOccurrence(null)
-  }
-
+      description: `Ocorrência ${selectedPriorityOccurrence?.id} foi marcada como prioridade ${level}`
+    });
+    setPriorityModalOpen(false);
+    setSelectedPriorityOccurrence(null);
+  };
   const handleExportExcel = () => {
     // Preparar dados para exportação
     const exportData = filteredOccurrences.map(occurrence => ({
@@ -155,85 +142,106 @@ const Ocorrencias = () => {
       'Data/Hora': new Date(occurrence.createdAt).toLocaleString('pt-BR'),
       'Fornecedor': occurrence.vendor,
       'Descrição': occurrence.description
-    }))
+    }));
 
     // Criar workbook
-    const ws = XLSX.utils.json_to_sheet(exportData)
-    const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, ws, "Ocorrências")
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Ocorrências");
 
     // Ajustar largura das colunas
-    const wscols = [
-      { wch: 10 }, // ID
-      { wch: 30 }, // Agência
-      { wch: 20 }, // Equipamento
-      { wch: 15 }, // Severidade
-      { wch: 15 }, // Status
-      { wch: 20 }, // Data/Hora
-      { wch: 20 }, // Fornecedor
-      { wch: 50 }  // Descrição
-    ]
-    ws['!cols'] = wscols
+    const wscols = [{
+      wch: 10
+    },
+    // ID
+    {
+      wch: 30
+    },
+    // Agência
+    {
+      wch: 20
+    },
+    // Equipamento
+    {
+      wch: 15
+    },
+    // Severidade
+    {
+      wch: 15
+    },
+    // Status
+    {
+      wch: 20
+    },
+    // Data/Hora
+    {
+      wch: 20
+    },
+    // Fornecedor
+    {
+      wch: 50
+    } // Descrição
+    ];
+    ws['!cols'] = wscols;
 
     // Baixar arquivo
-    const fileName = `ocorrencias_${new Date().toISOString().split('T')[0]}.xlsx`
-    XLSX.writeFile(wb, fileName)
-
+    const fileName = `ocorrencias_${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(wb, fileName);
     toast({
       title: "Exportação Concluída",
-      description: `Arquivo ${fileName} foi baixado com sucesso.`,
-    })
-  }
-
+      description: `Arquivo ${fileName} foi baixado com sucesso.`
+    });
+  };
   const handleBotInteraction = (message: string) => {
     // Simular resposta do bot
-    const responses = [
-      "Analisando as ocorrências... Encontrei 3 ocorrências críticas que precisam de atenção imediata.",
-      "Com base no histórico, o fornecedor TechSol tem respondido 40% mais rápido que a média.",
-      "Recomendo priorizar as ocorrências da Agência Centro, que têm maior impacto nos clientes.",
-      "Identifiquei um padrão: 60% das falhas ocorrem entre 14h-16h. Sugestão: manutenção preventiva neste horário."
-    ]
-    
-    const randomResponse = responses[Math.floor(Math.random() * responses.length)]
-    
+    const responses = ["Analisando as ocorrências... Encontrei 3 ocorrências críticas que precisam de atenção imediata.", "Com base no histórico, o fornecedor TechSol tem respondido 40% mais rápido que a média.", "Recomendo priorizar as ocorrências da Agência Centro, que têm maior impacto nos clientes.", "Identifiquei um padrão: 60% das falhas ocorrem entre 14h-16h. Sugestão: manutenção preventiva neste horário."];
+    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
     setTimeout(() => {
       toast({
         title: "Assistente Virtual",
-        description: randomResponse,
-      })
-    }, 1000)
-  }
-
+        description: randomResponse
+      });
+    }, 1000);
+  };
   const getSeverityVariant = (severity: string) => {
     switch (severity) {
-      case 'critical': return 'destructive'
-      case 'high': return 'secondary'
-      case 'medium': return 'default'
-      default: return 'outline'
+      case 'critical':
+        return 'destructive';
+      case 'high':
+        return 'secondary';
+      case 'medium':
+        return 'default';
+      default:
+        return 'outline';
     }
-  }
-
+  };
   const getSeverityLabel = (severity: string) => {
     switch (severity) {
-      case 'critical': return 'Crítica'
-      case 'high': return 'Alta'
-      case 'medium': return 'Média'
-      case 'low': return 'Baixa'
-      default: return severity
+      case 'critical':
+        return 'Crítica';
+      case 'high':
+        return 'Alta';
+      case 'medium':
+        return 'Média';
+      case 'low':
+        return 'Baixa';
+      default:
+        return severity;
     }
-  }
-
+  };
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'active': return 'Aberta'
-      case 'pending': return 'Em Andamento'
-      case 'resolved': return 'Resolvida'
-      default: return status
+      case 'active':
+        return 'Aberta';
+      case 'pending':
+        return 'Em Andamento';
+      case 'resolved':
+        return 'Resolvida';
+      default:
+        return status;
     }
-  }
-
-  return (
-    <COPFLayout>
+  };
+  return <COPFLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -269,20 +277,14 @@ const Ocorrencias = () => {
               {/* Busca Principal */}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input 
-                  placeholder="Buscar por ID, agência ou descrição..." 
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 h-11 border-2 focus:border-primary/50 transition-colors"
-                />
+                <Input placeholder="Buscar por ID, agência ou descrição..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 h-11 border-2 focus:border-primary/50 transition-colors" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Bot Assistente */}
-        {showBot && (
-          <Card>
+        {showBot && <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Bot className="h-5 w-5" />
@@ -292,31 +294,19 @@ const Ocorrencias = () => {
             <CardContent>
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => handleBotInteraction("Analisar ocorrências críticas")}
-                    className="text-left p-4 h-auto"
-                  >
+                  <Button variant="outline" onClick={() => handleBotInteraction("Analisar ocorrências críticas")} className="text-left p-4 h-auto">
                     <div>
                       <p className="font-medium">Analisar Criticidade</p>
                       <p className="text-sm text-muted-foreground">Identifica ocorrências que precisam de atenção imediata</p>
                     </div>
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => handleBotInteraction("Analisar performance fornecedores")}
-                    className="text-left p-4 h-auto"
-                  >
+                  <Button variant="outline" onClick={() => handleBotInteraction("Analisar performance fornecedores")} className="text-left p-4 h-auto">
                     <div>
                       <p className="font-medium">Performance Fornecedores</p>
                       <p className="text-sm text-muted-foreground">Avalia tempo de resposta e eficiência</p>
                     </div>
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => handleBotInteraction("Sugerir otimizações")}
-                    className="text-left p-4 h-auto"
-                  >
+                  <Button variant="outline" onClick={() => handleBotInteraction("Sugerir otimizações")} className="text-left p-4 h-auto">
                     <div>
                       <p className="font-medium">Sugestões de Melhoria</p>
                       <p className="text-sm text-muted-foreground">Recomendações baseadas em padrões identificados</p>
@@ -324,23 +314,19 @@ const Ocorrencias = () => {
                   </Button>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Input 
-                    placeholder="Digite sua pergunta sobre as ocorrências..." 
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        handleBotInteraction(e.currentTarget.value)
-                        e.currentTarget.value = ''
-                      }
-                    }}
-                  />
+                  <Input placeholder="Digite sua pergunta sobre as ocorrências..." onKeyPress={e => {
+                if (e.key === 'Enter') {
+                  handleBotInteraction(e.currentTarget.value);
+                  e.currentTarget.value = '';
+                }
+              }} />
                   <Button size="sm" variant="premium">
                     Perguntar
                   </Button>
                 </div>
               </div>
             </CardContent>
-          </Card>
-        )}
+          </Card>}
 
         <Card>
           <CardHeader>
@@ -352,12 +338,9 @@ const Ocorrencias = () => {
             </div>
           </CardHeader>
           <CardContent>
-            {isLoading ? (
-              <div className="text-center py-8">
+            {isLoading ? <div className="text-center py-8">
                 <p className="text-muted-foreground">Carregando ocorrências...</p>
-              </div>
-            ) : (
-              <ScrollArea className="h-[600px]">
+              </div> : <ScrollArea className="h-[600px]">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -368,14 +351,13 @@ const Ocorrencias = () => {
                       <TableHead>Nº Série</TableHead>
                       <TableHead>Severidade</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Data/Hora</TableHead>
+                      <TableHead>Data/Hora Abertura</TableHead>
                       <TableHead>Fornecedor</TableHead>
                       <TableHead>Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredOccurrences.map((occurrence) => (
-                      <TableRow key={occurrence.id}>
+                    {filteredOccurrences.map(occurrence => <TableRow key={occurrence.id}>
                         <TableCell className="font-medium">{occurrence.id}</TableCell>
                         <TableCell className="max-w-[200px] truncate">{occurrence.agency}</TableCell>
                         <TableCell>
@@ -397,12 +379,7 @@ const Ocorrencias = () => {
                         <TableCell className="text-sm">{occurrence.vendor}</TableCell>
                         <TableCell>
                           <div className="flex gap-1">
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => handleViewDetails(occurrence)}
-                              title="Visualizar detalhes"
-                            >
+                            <Button variant="ghost" size="sm" onClick={() => handleViewDetails(occurrence)} title="Visualizar detalhes">
                               <Eye className="h-4 w-4" />
                             </Button>
                             <DropdownMenu>
@@ -413,21 +390,15 @@ const Ocorrencias = () => {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-48">
-                                <DropdownMenuItem 
-                                  onClick={() => handlePrioritize(occurrence, 'priority_only')}
-                                >
+                                <DropdownMenuItem onClick={() => handlePrioritize(occurrence, 'priority_only')}>
                                   <Zap className="mr-2 h-4 w-4" />
                                   Apenas Priorizar
                                 </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  onClick={() => handlePrioritize(occurrence, 'priority_with_message')}
-                                >
+                                <DropdownMenuItem onClick={() => handlePrioritize(occurrence, 'priority_with_message')}>
                                   <MessageSquare className="mr-2 h-4 w-4" />
                                   Priorizar + Mensagem
                                 </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  onClick={() => handleSendMessage(occurrence)}
-                                >
+                                <DropdownMenuItem onClick={() => handleSendMessage(occurrence)}>
                                   <MessageSquare className="mr-2 h-4 w-4" />
                                   Apenas Mensagem
                                 </DropdownMenuItem>
@@ -435,22 +406,15 @@ const Ocorrencias = () => {
                             </DropdownMenu>
                           </div>
                         </TableCell>
-                      </TableRow>
-                    ))}
+                      </TableRow>)}
                   </TableBody>
                 </Table>
-              </ScrollArea>
-            )}
+              </ScrollArea>}
           </CardContent>
         </Card>
       </div>
 
-      <OccurrenceModal
-        occurrence={selectedOccurrence}
-        open={isModalOpen}
-        onOpenChange={setIsModalOpen}
-        mode={modalMode}
-      />
+      <OccurrenceModal occurrence={selectedOccurrence} open={isModalOpen} onOpenChange={setIsModalOpen} mode={modalMode} />
 
       {/* Modal de seleção de prioridade */}
       <Dialog open={priorityModalOpen} onOpenChange={setPriorityModalOpen}>
@@ -462,11 +426,7 @@ const Ocorrencias = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-1 gap-3 py-4">
-            <Button
-              variant="destructive"
-              onClick={() => handlePrioritySelect('Crítica')}
-              className="justify-start h-auto p-4"
-            >
+            <Button variant="destructive" onClick={() => handlePrioritySelect('Crítica')} className="justify-start h-auto p-4">
               <div className="flex items-start gap-3">
                 <Zap className="h-5 w-5 mt-0.5 text-destructive-foreground" />
                 <div className="text-left">
@@ -475,11 +435,7 @@ const Ocorrencias = () => {
                 </div>
               </div>
             </Button>
-            <Button
-              variant="secondary"
-              onClick={() => handlePrioritySelect('Alta')}
-              className="justify-start h-auto p-4"
-            >
+            <Button variant="secondary" onClick={() => handlePrioritySelect('Alta')} className="justify-start h-auto p-4">
               <div className="flex items-start gap-3">
                 <Star className="h-5 w-5 mt-0.5" />
                 <div className="text-left">
@@ -488,11 +444,7 @@ const Ocorrencias = () => {
                 </div>
               </div>
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => handlePrioritySelect('Média')}
-              className="justify-start h-auto p-4"
-            >
+            <Button variant="outline" onClick={() => handlePrioritySelect('Média')} className="justify-start h-auto p-4">
               <div className="flex items-start gap-3">
                 <MessageSquare className="h-5 w-5 mt-0.5" />
                 <div className="text-left">
@@ -501,11 +453,7 @@ const Ocorrencias = () => {
                 </div>
               </div>
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => handlePrioritySelect('Baixa')}
-              className="justify-start h-auto p-4"
-            >
+            <Button variant="outline" onClick={() => handlePrioritySelect('Baixa')} className="justify-start h-auto p-4">
               <div className="flex items-start gap-3">
                 <Clock className="h-5 w-5 mt-0.5" />
                 <div className="text-left">
@@ -522,8 +470,6 @@ const Ocorrencias = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </COPFLayout>
-  );
+    </COPFLayout>;
 };
-
 export default Ocorrencias;
