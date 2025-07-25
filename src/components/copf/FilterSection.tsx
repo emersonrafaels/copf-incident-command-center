@@ -244,7 +244,7 @@ export function FilterSection({ className }: FilterSectionProps) {
                 </div>
                 <h4 className="text-base font-semibold text-foreground">Localização</h4>
               </div>
-              <div className="responsive-grid responsive-grid-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* Agência */}
                 <div className="group space-y-3">
                   <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
