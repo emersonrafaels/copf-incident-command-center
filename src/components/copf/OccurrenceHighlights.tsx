@@ -80,7 +80,7 @@ export function OccurrenceHighlights({
 
     // Ocorrências que vencem hoje
     const dueToday = occurrences.filter(occ => {
-      if (occ.status === 'encerrada') return false;
+      if (occ.status === 'encerrada' || occ.status === 'cancelada') return false;
       const sla = calculateSLA(occ);
       return isToday(sla.endDate);
     }).slice(0, 3); // Limitar a 3 cards
