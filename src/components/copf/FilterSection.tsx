@@ -886,246 +886,246 @@ export function FilterSection({ className, showSerialNumber = false }: FilterSec
                      {isSpecialFiltersOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                    </Button>
                  </CollapsibleTrigger>
-                 <CollapsibleContent className="space-y-4">
-                   <div className="responsive-grid responsive-grid-3">
-                     {/* Ocorrências Vencidas */}
-                     <div className="flex items-center space-x-2 p-3 border border-border/50 rounded-lg bg-background/50 hover:bg-accent/10 transition-colors">
-                       <Switch
-                         id="override-filter"
-                         checked={overrideFilter}
-                         onCheckedChange={(checked) => updateFilter('overrideFilter', checked)}
-                         className="data-[state=checked]:bg-primary"
-                       />
-                       <Label htmlFor="override-filter" className="text-sm cursor-pointer select-none">
-                         Ocorrências Vencidas
-                       </Label>
+                 <CollapsibleContent>
+                   <div className="space-y-4">
+                     {/* Primeira linha: Switches */}
+                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                       <div className="flex items-center space-x-2 p-3 border border-border/50 rounded-lg bg-background/50 hover:bg-accent/10 transition-colors">
+                         <Switch
+                           id="override-filter"
+                           checked={overrideFilter}
+                           onCheckedChange={(checked) => updateFilter('overrideFilter', checked)}
+                           className="data-[state=checked]:bg-primary"
+                         />
+                         <Label htmlFor="override-filter" className="text-sm cursor-pointer select-none">
+                           Ocorrências Vencidas
+                         </Label>
+                       </div>
+
+                       <div className="flex items-center space-x-2 p-3 border border-border/50 rounded-lg bg-background/50 hover:bg-accent/10 transition-colors">
+                         <Switch
+                           id="reincident-filter"
+                           checked={reincidentFilter}
+                           onCheckedChange={(checked) => updateFilter('reincidentFilter', checked)}
+                           className="data-[state=checked]:bg-primary"
+                         />
+                         <Label htmlFor="reincident-filter" className="text-sm cursor-pointer select-none">
+                           Ocorrências Reincidentes
+                         </Label>
+                       </div>
+
+                       <div className="flex items-center space-x-2 p-3 border border-border/50 rounded-lg bg-background/50 hover:bg-accent/10 transition-colors">
+                         <Switch
+                           id="vendor-priority-filter"
+                           checked={vendorPriorityFilter}
+                           onCheckedChange={(checked) => updateFilter('vendorPriorityFilter', checked)}
+                           className="data-[state=checked]:bg-primary"
+                         />
+                         <Label htmlFor="vendor-priority-filter" className="text-sm cursor-pointer select-none">
+                           Priorizadas com o Fornecedor
+                         </Label>
+                       </div>
                      </div>
 
-                     {/* Ocorrências Reincidentes */}
-                     <div className="flex items-center space-x-2 p-3 border border-border/50 rounded-lg bg-background/50 hover:bg-accent/10 transition-colors">
-                       <Switch
-                         id="reincident-filter"
-                         checked={reincidentFilter}
-                         onCheckedChange={(checked) => updateFilter('reincidentFilter', checked)}
-                         className="data-[state=checked]:bg-primary"
-                       />
-                       <Label htmlFor="reincident-filter" className="text-sm cursor-pointer select-none">
-                         Ocorrências Reincidentes
-                       </Label>
+                     {/* Segunda linha: Filtros dropdown */}
+                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                       {/* Status SLA */}
+                       <div className="group space-y-3">
+                         <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                           <div className="w-1 h-4 bg-warning/60 rounded-full"></div>
+                           Status SLA
+                         </Label>
+                         <Popover>
+                           <PopoverTrigger asChild>
+                             <Button variant="outline" className="w-full h-10 justify-between hover:bg-warning/5 hover:border-warning/30 transition-all duration-200 group-hover:shadow-sm">
+                               {statusSlaFilter.length > 0 ? (
+                                 <div className="flex items-center gap-2">
+                                   <Badge variant="secondary" className="h-5 text-xs bg-warning/10 text-warning">
+                                     {statusSlaFilter.length}
+                                   </Badge>
+                                   <span className="text-sm">
+                                     {statusSlaFilter.length === 1 ? 
+                                       (['no_prazo', 'vencido', 'critico'].includes(statusSlaFilter[0]) ? 
+                                         { no_prazo: 'No Prazo', vencido: 'Vencido', critico: 'Crítico' }[statusSlaFilter[0] as 'no_prazo' | 'vencido' | 'critico'] : 
+                                         statusSlaFilter[0]
+                                       ) : 
+                                       `${statusSlaFilter.length} status`
+                                     }
+                                   </span>
+                                 </div>
+                               ) : "Todos os status SLA"}
+                               <div className="w-4 h-4 opacity-50">⌄</div>
+                             </Button>
+                           </PopoverTrigger>
+                           <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                             <Command>
+                               <CommandInput placeholder="Buscar status SLA..." className="h-9" />
+                               <CommandEmpty>Nenhum status SLA encontrado.</CommandEmpty>
+                               <CommandList>
+                                 <CommandGroup>
+                                   {[
+                                     { value: 'no_prazo', label: 'No Prazo' },
+                                     { value: 'vencido', label: 'Vencido' },
+                                     { value: 'critico', label: 'Crítico' }
+                                   ].map(status => (
+                                     <CommandItem key={status.value} onSelect={() => {
+                                       const isSelected = statusSlaFilter.includes(status.value);
+                                       if (isSelected) {
+                                         updateFilter('statusSlaFilter', statusSlaFilter.filter(s => s !== status.value));
+                                       } else {
+                                         updateFilter('statusSlaFilter', [...statusSlaFilter, status.value]);
+                                       }
+                                     }}>
+                                       <Check className={cn("mr-2 h-4 w-4", statusSlaFilter.includes(status.value) ? "opacity-100" : "opacity-0")} />
+                                       {status.label}
+                                     </CommandItem>
+                                   ))}
+                                 </CommandGroup>
+                               </CommandList>
+                             </Command>
+                           </PopoverContent>
+                         </Popover>
+                       </div>
+
+                       {/* Severidade */}
+                       <div className="group space-y-3">
+                         <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                           <div className="w-1 h-4 bg-destructive/60 rounded-full"></div>
+                           Severidade
+                         </Label>
+                         <Popover>
+                           <PopoverTrigger asChild>
+                             <Button variant="outline" className="w-full h-10 justify-between hover:bg-destructive/5 hover:border-destructive/30 transition-all duration-200 group-hover:shadow-sm">
+                               {severityFilterMulti.length > 0 ? (
+                                 <div className="flex items-center gap-2">
+                                   <Badge variant="secondary" className="h-5 text-xs bg-destructive/10 text-destructive">
+                                     {severityFilterMulti.length}
+                                   </Badge>
+                                   <span className="text-sm">
+                                     {severityFilterMulti.length === 1 ? 
+                                       (['critical', 'high', 'medium', 'low'].includes(severityFilterMulti[0]) ? 
+                                         { critical: 'Crítico', high: 'Alto', medium: 'Médio', low: 'Baixo' }[severityFilterMulti[0] as 'critical' | 'high' | 'medium' | 'low'] : 
+                                         severityFilterMulti[0]
+                                       ) : 
+                                       `${severityFilterMulti.length} severidades`
+                                     }
+                                   </span>
+                                 </div>
+                               ) : "Todas as severidades"}
+                               <div className="w-4 h-4 opacity-50">⌄</div>
+                             </Button>
+                           </PopoverTrigger>
+                           <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                             <Command>
+                               <CommandInput placeholder="Buscar severidade..." className="h-9" />
+                               <CommandEmpty>Nenhuma severidade encontrada.</CommandEmpty>
+                               <CommandList>
+                                 <CommandGroup>
+                                   {[
+                                     { value: 'critical', label: 'Crítico' },
+                                     { value: 'high', label: 'Alto' },
+                                     { value: 'medium', label: 'Médio' },
+                                     { value: 'low', label: 'Baixo' }
+                                   ].map(severity => (
+                                     <CommandItem key={severity.value} onSelect={() => {
+                                       const isSelected = severityFilterMulti.includes(severity.value);
+                                       if (isSelected) {
+                                         updateFilter('severityFilterMulti', severityFilterMulti.filter(s => s !== severity.value));
+                                       } else {
+                                         updateFilter('severityFilterMulti', [...severityFilterMulti, severity.value]);
+                                       }
+                                     }}>
+                                       <Check className={cn("mr-2 h-4 w-4", severityFilterMulti.includes(severity.value) ? "opacity-100" : "opacity-0")} />
+                                       {severity.label}
+                                     </CommandItem>
+                                   ))}
+                                 </CommandGroup>
+                               </CommandList>
+                             </Command>
+                           </PopoverContent>
+                         </Popover>
+                       </div>
+
+                       {/* Long Tail */}
+                       <div className="group space-y-3">
+                         <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                           <Clock className="h-3 w-3 text-orange-500" />
+                           Long Tail
+                         </Label>
+                         <Popover>
+                           <PopoverTrigger asChild>
+                             <Button variant="outline" className="w-full h-10 justify-between hover:bg-orange-500/5 hover:border-orange-500/30 transition-all duration-200 group-hover:shadow-sm">
+                               {longTailFilter.length > 0 ? (
+                                 <div className="flex items-center gap-2">
+                                   <Badge variant="secondary" className="h-5 text-xs bg-orange-500/10 text-orange-500">
+                                     {longTailFilter.length}
+                                   </Badge>
+                                   <span className="text-sm">
+                                     {longTailFilter.length === 1 ? 
+                                       (['1d', '2d', '3d', '4d', '5d'].includes(longTailFilter[0]) ? 
+                                         { '1d': '>1 dia', '2d': '>2 dias', '3d': '>3 dias', '4d': '>4 dias', '5d': '>5 dias' }[longTailFilter[0] as '1d' | '2d' | '3d' | '4d' | '5d'] : 
+                                         longTailFilter[0]
+                                       ) : 
+                                       `${longTailFilter.length} faixas`
+                                     }
+                                   </span>
+                                 </div>
+                               ) : "Todas as faixas"}
+                               <div className="w-4 h-4 opacity-50">⌄</div>
+                             </Button>
+                           </PopoverTrigger>
+                           <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                             <Command>
+                               <CommandInput placeholder="Buscar faixa..." className="h-9" />
+                               <CommandEmpty>Nenhuma faixa encontrada.</CommandEmpty>
+                               <CommandList>
+                                 <CommandGroup>
+                                   {[
+                                     { value: '1d', label: '>1 dia' },
+                                     { value: '2d', label: '>2 dias' },
+                                     { value: '3d', label: '>3 dias' },
+                                     { value: '4d', label: '>4 dias' },
+                                     { value: '5d', label: '>5 dias', highlight: true }
+                                   ].map(range => (
+                                     <CommandItem key={range.value} onSelect={() => {
+                                       const isSelected = longTailFilter.includes(range.value);
+                                       if (isSelected) {
+                                         updateFilter('longTailFilter', longTailFilter.filter(l => l !== range.value));
+                                       } else {
+                                         updateFilter('longTailFilter', [...longTailFilter, range.value]);
+                                       }
+                                     }}>
+                                       <Check className={cn("mr-2 h-4 w-4", longTailFilter.includes(range.value) ? "opacity-100" : "opacity-0")} />
+                                       <span className={cn(
+                                         range.highlight && "font-semibold text-orange-500"
+                                       )}>
+                                         {range.label}
+                                       </span>
+                                     </CommandItem>
+                                   ))}
+                                 </CommandGroup>
+                               </CommandList>
+                             </Command>
+                           </PopoverContent>
+                         </Popover>
+                       </div>
                      </div>
 
-                     {/* Priorizadas com o Fornecedor */}
-                     <div className="flex items-center space-x-2 p-3 border border-border/50 rounded-lg bg-background/50 hover:bg-accent/10 transition-colors">
-                       <Switch
-                         id="vendor-priority-filter"
-                         checked={vendorPriorityFilter}
-                         onCheckedChange={(checked) => updateFilter('vendorPriorityFilter', checked)}
-                         className="data-[state=checked]:bg-primary"
-                       />
-                       <Label htmlFor="vendor-priority-filter" className="text-sm cursor-pointer select-none">
-                         Priorizadas com o Fornecedor
-                       </Label>
-                     </div>
+                     {/* Número de Série - Apenas na página Ocorrências */}
+                     {showSerialNumber && (
+                       <div className="space-y-3">
+                         <Label className="text-sm font-medium text-muted-foreground">
+                           Número de Série
+                         </Label>
+                         <Input
+                           placeholder="Ex: ATM001-SP-001"
+                           value={serialNumberFilter}
+                           onChange={(e) => updateFilter('serialNumberFilter', e.target.value)}
+                           className="h-10"
+                         />
+                       </div>
+                     )}
                    </div>
-
-                   {/* Status SLA, Severidade, Long Tail e Número de Série */}
-                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                     {/* Status SLA */}
-                     <div className="group space-y-3">
-                       <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                         <div className="w-1 h-4 bg-warning/60 rounded-full"></div>
-                         Status SLA
-                       </Label>
-                       <Popover>
-                         <PopoverTrigger asChild>
-                           <Button variant="outline" className="w-full h-10 justify-between hover:bg-warning/5 hover:border-warning/30 transition-all duration-200 group-hover:shadow-sm">
-                             {statusSlaFilter.length > 0 ? (
-                               <div className="flex items-center gap-2">
-                                 <Badge variant="secondary" className="h-5 text-xs bg-warning/10 text-warning">
-                                   {statusSlaFilter.length}
-                                 </Badge>
-                                 <span className="text-sm">
-                                   {statusSlaFilter.length === 1 ? 
-                                     (['no_prazo', 'vencido', 'critico'].includes(statusSlaFilter[0]) ? 
-                                       { no_prazo: 'No Prazo', vencido: 'Vencido', critico: 'Crítico' }[statusSlaFilter[0] as 'no_prazo' | 'vencido' | 'critico'] : 
-                                       statusSlaFilter[0]
-                                     ) : 
-                                     `${statusSlaFilter.length} status`
-                                   }
-                                 </span>
-                               </div>
-                             ) : "Todos os status SLA"}
-                             <div className="w-4 h-4 opacity-50">⌄</div>
-                           </Button>
-                         </PopoverTrigger>
-                         <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
-                           <Command>
-                             <CommandInput placeholder="Buscar status SLA..." className="h-9" />
-                             <CommandEmpty>Nenhum status SLA encontrado.</CommandEmpty>
-                             <CommandList>
-                               <CommandGroup>
-                                 {[
-                                   { value: 'no_prazo', label: 'No Prazo' },
-                                   { value: 'vencido', label: 'Vencido' },
-                                   { value: 'critico', label: 'Crítico' }
-                                 ].map(status => (
-                                   <CommandItem key={status.value} onSelect={() => {
-                                     const isSelected = statusSlaFilter.includes(status.value);
-                                     if (isSelected) {
-                                       updateFilter('statusSlaFilter', statusSlaFilter.filter(s => s !== status.value));
-                                     } else {
-                                       updateFilter('statusSlaFilter', [...statusSlaFilter, status.value]);
-                                     }
-                                   }}>
-                                     <Check className={cn("mr-2 h-4 w-4", statusSlaFilter.includes(status.value) ? "opacity-100" : "opacity-0")} />
-                                     {status.label}
-                                   </CommandItem>
-                                 ))}
-                               </CommandGroup>
-                             </CommandList>
-                           </Command>
-                         </PopoverContent>
-                       </Popover>
-                     </div>
-
-                     {/* Severidade */}
-                     <div className="group space-y-3">
-                       <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                         <div className="w-1 h-4 bg-destructive/60 rounded-full"></div>
-                         Severidade
-                       </Label>
-                       <Popover>
-                         <PopoverTrigger asChild>
-                           <Button variant="outline" className="w-full h-10 justify-between hover:bg-destructive/5 hover:border-destructive/30 transition-all duration-200 group-hover:shadow-sm">
-                             {severityFilterMulti.length > 0 ? (
-                               <div className="flex items-center gap-2">
-                                 <Badge variant="secondary" className="h-5 text-xs bg-destructive/10 text-destructive">
-                                   {severityFilterMulti.length}
-                                 </Badge>
-                                 <span className="text-sm">
-                                   {severityFilterMulti.length === 1 ? 
-                                     (['critical', 'high', 'medium', 'low'].includes(severityFilterMulti[0]) ? 
-                                       { critical: 'Crítico', high: 'Alto', medium: 'Médio', low: 'Baixo' }[severityFilterMulti[0] as 'critical' | 'high' | 'medium' | 'low'] : 
-                                       severityFilterMulti[0]
-                                     ) : 
-                                     `${severityFilterMulti.length} severidades`
-                                   }
-                                 </span>
-                               </div>
-                             ) : "Todas as severidades"}
-                             <div className="w-4 h-4 opacity-50">⌄</div>
-                           </Button>
-                         </PopoverTrigger>
-                         <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
-                           <Command>
-                             <CommandInput placeholder="Buscar severidade..." className="h-9" />
-                             <CommandEmpty>Nenhuma severidade encontrada.</CommandEmpty>
-                             <CommandList>
-                               <CommandGroup>
-                                 {[
-                                   { value: 'critical', label: 'Crítico' },
-                                   { value: 'high', label: 'Alto' },
-                                   { value: 'medium', label: 'Médio' },
-                                   { value: 'low', label: 'Baixo' }
-                                 ].map(severity => (
-                                   <CommandItem key={severity.value} onSelect={() => {
-                                     const isSelected = severityFilterMulti.includes(severity.value);
-                                     if (isSelected) {
-                                       updateFilter('severityFilterMulti', severityFilterMulti.filter(s => s !== severity.value));
-                                     } else {
-                                       updateFilter('severityFilterMulti', [...severityFilterMulti, severity.value]);
-                                     }
-                                   }}>
-                                     <Check className={cn("mr-2 h-4 w-4", severityFilterMulti.includes(severity.value) ? "opacity-100" : "opacity-0")} />
-                                     {severity.label}
-                                   </CommandItem>
-                                 ))}
-                               </CommandGroup>
-                             </CommandList>
-                           </Command>
-                         </PopoverContent>
-                       </Popover>
-                     </div>
-
-                     {/* Long Tail */}
-                     <div className="group space-y-3">
-                       <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                         <Clock className="h-3 w-3 text-orange-500" />
-                         Long Tail
-                       </Label>
-                       <Popover>
-                         <PopoverTrigger asChild>
-                           <Button variant="outline" className="w-full h-10 justify-between hover:bg-orange-500/5 hover:border-orange-500/30 transition-all duration-200 group-hover:shadow-sm">
-                             {longTailFilter.length > 0 ? (
-                               <div className="flex items-center gap-2">
-                                 <Badge variant="secondary" className="h-5 text-xs bg-orange-500/10 text-orange-500">
-                                   {longTailFilter.length}
-                                 </Badge>
-                                 <span className="text-sm">
-                                   {longTailFilter.length === 1 ? 
-                                     (['1d', '2d', '3d', '4d', '5d'].includes(longTailFilter[0]) ? 
-                                       { '1d': '>1 dia', '2d': '>2 dias', '3d': '>3 dias', '4d': '>4 dias', '5d': '>5 dias' }[longTailFilter[0] as '1d' | '2d' | '3d' | '4d' | '5d'] : 
-                                       longTailFilter[0]
-                                     ) : 
-                                     `${longTailFilter.length} faixas`
-                                   }
-                                 </span>
-                               </div>
-                             ) : "Todas as faixas"}
-                             <div className="w-4 h-4 opacity-50">⌄</div>
-                           </Button>
-                         </PopoverTrigger>
-                         <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
-                           <Command>
-                             <CommandInput placeholder="Buscar faixa..." className="h-9" />
-                             <CommandEmpty>Nenhuma faixa encontrada.</CommandEmpty>
-                             <CommandList>
-                               <CommandGroup>
-                                 {[
-                                   { value: '1d', label: '>1 dia' },
-                                   { value: '2d', label: '>2 dias' },
-                                   { value: '3d', label: '>3 dias' },
-                                   { value: '4d', label: '>4 dias' },
-                                   { value: '5d', label: '>5 dias', highlight: true }
-                                 ].map(range => (
-                                   <CommandItem key={range.value} onSelect={() => {
-                                     const isSelected = longTailFilter.includes(range.value);
-                                     if (isSelected) {
-                                       updateFilter('longTailFilter', longTailFilter.filter(l => l !== range.value));
-                                     } else {
-                                       updateFilter('longTailFilter', [...longTailFilter, range.value]);
-                                     }
-                                   }}>
-                                     <Check className={cn("mr-2 h-4 w-4", longTailFilter.includes(range.value) ? "opacity-100" : "opacity-0")} />
-                                     <span className={cn(
-                                       range.highlight && "font-semibold text-orange-500"
-                                     )}>
-                                       {range.label}
-                                     </span>
-                                   </CommandItem>
-                                 ))}
-                               </CommandGroup>
-                             </CommandList>
-                           </Command>
-                         </PopoverContent>
-                       </Popover>
-                     </div>
-                   </div>
-
-                   {/* Número de Série - Apenas na página Ocorrências */}
-                   {showSerialNumber && (
-                     <div className="space-y-3">
-                       <Label className="text-sm font-medium text-muted-foreground">
-                         Número de Série
-                       </Label>
-                       <Input
-                         placeholder="Ex: ATM001-SP-001"
-                         value={serialNumberFilter}
-                         onChange={(e) => updateFilter('serialNumberFilter', e.target.value)}
-                         className="h-10"
-                       />
-                     </div>
-                   )}
                 </CollapsibleContent>
               </div>
             </Collapsible>
