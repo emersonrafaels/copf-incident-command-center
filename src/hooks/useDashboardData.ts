@@ -37,155 +37,115 @@ export function useDashboardData() {
 
   // Dados mock mais realistas - Memoizado para performance
   const generateMockData = useCallback(() => {
+    // Estrutura hierárquica completa
+    const hierarchyStructure = [
+      // SP - DINEG 2
+      { estado: 'SP', municipio: 'São Paulo', dineg: '2', agencias: ['0001', '0015', '0032'], tipo: 'convencional', vip: 'sim' },
+      { estado: 'SP', municipio: 'São Paulo', dineg: '2', agencias: ['0045', '0067', '0089'], tipo: 'terceirizada', vip: 'nao' },
+      { estado: 'SP', municipio: 'Campinas', dineg: '2', agencias: ['0101', '0115', '0132'], tipo: 'pab', vip: 'sim' },
+      { estado: 'SP', municipio: 'Santos', dineg: '2', agencias: ['0201', '0215'], tipo: 'pae', vip: 'nao' },
+      
+      // RJ - DINEG 4
+      { estado: 'RJ', municipio: 'Rio de Janeiro', dineg: '4', agencias: ['1001', '1015', '1032'], tipo: 'convencional', vip: 'sim' },
+      { estado: 'RJ', municipio: 'Rio de Janeiro', dineg: '4', agencias: ['1045', '1067'], tipo: 'terceirizada', vip: 'nao' },
+      { estado: 'RJ', municipio: 'Niterói', dineg: '4', agencias: ['1101', '1115'], tipo: 'pab', vip: 'sim' },
+      { estado: 'RJ', municipio: 'Campos dos Goytacazes', dineg: '4', agencias: ['1201'], tipo: 'pae', vip: 'nao' },
+      
+      // MG - DINEG 8
+      { estado: 'MG', municipio: 'Belo Horizonte', dineg: '8', agencias: ['2001', '2015', '2032'], tipo: 'convencional', vip: 'sim' },
+      { estado: 'MG', municipio: 'Belo Horizonte', dineg: '8', agencias: ['2045', '2067'], tipo: 'terceirizada', vip: 'nao' },
+      { estado: 'MG', municipio: 'Uberlândia', dineg: '8', agencias: ['2101', '2115'], tipo: 'pab', vip: 'sim' },
+      { estado: 'MG', municipio: 'Contagem', dineg: '8', agencias: ['2201'], tipo: 'pae', vip: 'nao' },
+      
+      // RS - DINEG 80
+      { estado: 'RS', municipio: 'Porto Alegre', dineg: '80', agencias: ['3001', '3015'], tipo: 'convencional', vip: 'sim' },
+      { estado: 'RS', municipio: 'Porto Alegre', dineg: '80', agencias: ['3032', '3045'], tipo: 'terceirizada', vip: 'nao' },
+      { estado: 'RS', municipio: 'Caxias do Sul', dineg: '80', agencias: ['3101'], tipo: 'pab', vip: 'sim' },
+      { estado: 'RS', municipio: 'Pelotas', dineg: '80', agencias: ['3201'], tipo: 'pae', vip: 'nao' }
+    ];
+
     // Equipamentos por segmento
     const equipmentsBySegment = {
       AA: ['ATM Saque', 'ATM Depósito', 'Cassete'],
       AB: ['Notebook', 'Desktop', 'Leitor de Cheques/documentos', 'Leitor biométrico', 'PIN PAD', 'Scanner de Cheque', 'Impressora', 'Impressora térmica', 'Impressora multifuncional', 'Monitor LCD/LED', 'Teclado', 'Servidor', 'Televisão', 'Senheiro', 'TCR', 'Classificadora', 'Fragmentadora de Papel']
     };
 
-    // Array para rastrear números de agência já usados
-    const usedAgencyNumbers = new Set<string>();
-    
-    const getUniqueAgencyNumber = (): string => {
-      let agencyNum: string;
-      do {
-        agencyNum = String(Math.floor(Math.random() * 9999) + 1).padStart(4, '0');
-      } while (usedAgencyNumbers.has(agencyNum));
-      usedAgencyNumbers.add(agencyNum);
-      return agencyNum;
+    // Transportadoras por tipo terceirizada
+    const transportadoras = ['Express Logística', 'TechTransporte', 'LogiCorp'];
+    const fornecedoresPorTransportadora = {
+      'Express Logística': ['Fornecedor A', 'Fornecedor B', 'Fornecedor C'],
+      'TechTransporte': ['Fornecedor D', 'Fornecedor E'],
+      'LogiCorp': ['Fornecedor F', 'Fornecedor G', 'Fornecedor H']
     };
 
-    const mockOccurrences: OccurrenceData[] = [
-      {
-        id: "COPF-2024-001",
-        agency: "AG0001 - Centro (São Paulo)",
-        segment: "AA",
-        equipment: "ATM Saque",
-        serialNumber: "ATM001-SP-001",
-        description: "ATM não está dispensando cédulas - erro de hardware na gaveta",
-        severity: "critical",
-        status: "em_atuacao",
-        createdAt: "2024-01-15T08:30:00",
-        assignedTo: "João Silva - NOC",
-        vendor: "Diebold Nixdorf"
-      },
-      {
-        id: "COPF-2024-002",
-        agency: "AG0015 - Paulista (São Paulo)",
-        segment: "AB",
-        equipment: "Impressora térmica",
-        serialNumber: "IMP002-SP-015",
-        description: "Impressora com papel atolado constantemente",
-        severity: "high",
-        status: "a_iniciar",
-        createdAt: "2024-01-15T09:15:00",
-        assignedTo: "Maria Santos - Facilities",
-        vendor: "Bematech"
-      },
-      {
-        id: "COPF-2024-003",
-        agency: "AG0032 - Vila Madalena (São Paulo)",
-        segment: "AB",
-        equipment: "Servidor",
-        serialNumber: "SRV003-SP-032",
-        description: "Perda total de conectividade - link primário inoperante",
-        severity: "high",
-        status: "em_atuacao",
-        createdAt: "2024-01-14T14:20:00",
-        assignedTo: "Carlos Oliveira - Redes",
-        vendor: "Dell Technologies"
-      },
-      {
-        id: "COPF-2024-004",
-        agency: "AG0045 - Pinheiros (São Paulo)",
-        segment: "AB",
-        equipment: "PIN PAD",
-        serialNumber: "PIN004-SP-045",
-        description: "Terminal não reconhece cartões chip",
-        severity: "medium",
-        status: "encerrada",
-        createdAt: "2024-01-14T11:00:00",
-        assignedTo: "Ana Costa - POS",
-        vendor: "Gertec"
-      },
-      {
-        id: "COPF-2024-005",
-        agency: "AG0067 - Moema (São Paulo)",
-        segment: "AA",
-        equipment: "ATM Depósito",
-        serialNumber: "ATM005-SP-067",
-        description: "ATM não aceita depósitos - problemas no mecanismo de captura",
-        severity: "low",
-        status: "a_iniciar",
-        createdAt: "2024-01-13T16:45:00",
-        assignedTo: "Roberto Lima - Suporte",
-        vendor: "NCR Corporation"
-      }
-    ]
+    const mockOccurrences: OccurrenceData[] = [];
 
-    // Gerar ocorrências do segmento AA (reduzido para 400 para otimização)
-    const aaOccurrences = Array.from({ length: 400 }, (_, i) => {
-      const equipmentList = equipmentsBySegment.AA;
-      const equipment = equipmentList[Math.floor(Math.random() * equipmentList.length)];
-      const agencyNum = getUniqueAgencyNumber();
+    // Gerar ocorrências baseadas na estrutura hierárquica
+    hierarchyStructure.forEach((structure, groupIndex) => {
+      const isSegmentAA = Math.random() < 0.8; // 80% AA, 20% AB
+      const segment = isSegmentAA ? 'AA' : 'AB';
+      const equipmentList = equipmentsBySegment[segment];
       
-      return {
-        id: `COPF-2024-AA-${String(i + 1).padStart(4, '0')}`,
-        agency: `AG${agencyNum} - ${['Centro', 'Paulista', 'Vila Madalena', 'Pinheiros', 'Moema', 'Itaim', 'Brooklin', 'Vila Olímpia', 'Jardins', 'Liberdade'][Math.floor(Math.random() * 10)]} (São Paulo)`,
-        segment: 'AA' as const,
-        equipment,
-        serialNumber: `AA${String(i + 1).padStart(4, '0')}-SP-${agencyNum}`,
-        description: [
-          'ATM não está dispensando cédulas - erro de hardware na gaveta',
-          'ATM não aceita depósitos - problemas no mecanismo de captura',
-          'Erro de conectividade com o servidor central',
-          'Cassete com defeito no sensor de notas',
-          'Falha na autenticação biométrica',
-          'Problema no leitor de cartão magnético'
-        ][Math.floor(Math.random() * 6)],
-        severity: ['critical', 'high', 'medium', 'low'][Math.floor(Math.random() * 4)] as ('critical' | 'high' | 'medium' | 'low'),
-        status: ['a_iniciar', 'em_atuacao', 'encerrada', 'cancelada'][Math.floor(Math.random() * 4)] as ('a_iniciar' | 'em_atuacao' | 'encerrada' | 'cancelada'),
-        createdAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
-        assignedTo: ['João Silva - NOC', 'Maria Santos - Facilities', 'Carlos Oliveira - Redes', 'Ana Costa - POS', 'Roberto Lima - Suporte'][Math.floor(Math.random() * 5)],
-        vendor: ['Diebold Nixdorf', 'NCR Corporation', 'Itautec'][Math.floor(Math.random() * 3)]
+      // Determinar fornecedor baseado no tipo
+      let vendor: string;
+      let transportadora = '';
+      
+      if (structure.tipo === 'terceirizada') {
+        transportadora = transportadoras[Math.floor(Math.random() * transportadoras.length)];
+        const fornecedores = fornecedoresPorTransportadora[transportadora];
+        vendor = fornecedores[Math.floor(Math.random() * fornecedores.length)];
+      } else {
+        vendor = segment === 'AA' 
+          ? ['Diebold Nixdorf', 'NCR Corporation', 'Itautec'][Math.floor(Math.random() * 3)]
+          : ['Dell Technologies', 'HP', 'Lenovo', 'Gertec', 'Bematech', 'Epson', 'Canon'][Math.floor(Math.random() * 7)];
       }
+
+      structure.agencias.forEach((agencyNum, agencyIndex) => {
+        // Gerar 3-8 ocorrências por agência
+        const occurrenceCount = Math.floor(Math.random() * 6) + 3;
+        
+        for (let i = 0; i < occurrenceCount; i++) {
+          const equipment = equipmentList[Math.floor(Math.random() * equipmentList.length)];
+          const occurrenceId = `COPF-2024-${String(groupIndex + 1).padStart(2, '0')}-${agencyNum}-${String(i + 1).padStart(3, '0')}`;
+          
+          mockOccurrences.push({
+            id: occurrenceId,
+            agency: `AG${agencyNum} - Centro (${structure.municipio})`,
+            segment,
+            equipment,
+            serialNumber: `${segment}${String(i + 1).padStart(3, '0')}-${structure.estado}-${agencyNum}`,
+            description: segment === 'AA' 
+              ? [
+                  'ATM não está dispensando cédulas - erro de hardware na gaveta',
+                  'ATM não aceita depósitos - problemas no mecanismo de captura',
+                  'Erro de conectividade com o servidor central',
+                  'Cassete com defeito no sensor de notas',
+                  'Falha na autenticação biométrica',
+                  'Problema no leitor de cartão magnético'
+                ][Math.floor(Math.random() * 6)]
+              : [
+                  'Impressora com papel atolado constantemente',
+                  'Perda total de conectividade - link primário inoperante', 
+                  'Terminal não reconhece cartões chip',
+                  'Monitor com falha na exibição',
+                  'Teclado com teclas não responsivas',
+                  'Servidor com alta latência',
+                  'Scanner não consegue ler documentos',
+                  'Leitor biométrico não funciona',
+                  'Televisão sem sinal',
+                  'Classificadora com erro de contagem'
+                ][Math.floor(Math.random() * 10)],
+            severity: ['critical', 'high', 'medium', 'low'][Math.floor(Math.random() * 4)] as ('critical' | 'high' | 'medium' | 'low'),
+            status: ['a_iniciar', 'em_atuacao', 'encerrada', 'cancelada'][Math.floor(Math.random() * 4)] as ('a_iniciar' | 'em_atuacao' | 'encerrada' | 'cancelada'),
+            createdAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
+            assignedTo: ['João Silva - NOC', 'Maria Santos - Facilities', 'Carlos Oliveira - Redes', 'Ana Costa - POS', 'Roberto Lima - Suporte'][Math.floor(Math.random() * 5)],
+            vendor
+          });
+        }
+      });
     });
 
-    // Gerar ocorrências do segmento AB (reduzido para 100 para otimização)
-    const abOccurrences = Array.from({ length: 100 }, (_, i) => {
-      const equipmentList = equipmentsBySegment.AB;
-      const equipment = equipmentList[Math.floor(Math.random() * equipmentList.length)];
-      const agencyNum = getUniqueAgencyNumber();
-      
-      return {
-        id: `COPF-2024-AB-${String(i + 1).padStart(4, '0')}`,
-        agency: `AG${agencyNum} - ${['Centro', 'Paulista', 'Vila Madalena', 'Pinheiros', 'Moema', 'Itaim', 'Brooklin', 'Vila Olímpia', 'Jardins', 'Liberdade'][Math.floor(Math.random() * 10)]} (São Paulo)`,
-        segment: 'AB' as const,
-        equipment,
-        serialNumber: `AB${String(i + 1).padStart(4, '0')}-SP-${agencyNum}`,
-        description: [
-          'Impressora com papel atolado constantemente',
-          'Perda total de conectividade - link primário inoperante', 
-          'Terminal não reconhece cartões chip',
-          'Monitor com falha na exibição',
-          'Teclado com teclas não responsivas',
-          'Servidor com alta latência',
-          'Scanner não consegue ler documentos',
-          'Leitor biométrico não funciona',
-          'Televisão sem sinal',
-          'Classificadora com erro de contagem'
-        ][Math.floor(Math.random() * 10)],
-        severity: ['critical', 'high', 'medium', 'low'][Math.floor(Math.random() * 4)] as ('critical' | 'high' | 'medium' | 'low'),
-        status: ['a_iniciar', 'em_atuacao', 'encerrada', 'cancelada'][Math.floor(Math.random() * 4)] as ('a_iniciar' | 'em_atuacao' | 'encerrada' | 'cancelada'),
-        createdAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
-        assignedTo: ['João Silva - NOC', 'Maria Santos - Facilities', 'Carlos Oliveira - Redes', 'Ana Costa - POS', 'Roberto Lima - Suporte'][Math.floor(Math.random() * 5)],
-        vendor: ['Dell Technologies', 'HP', 'Lenovo', 'Gertec', 'Bematech', 'Epson', 'Canon'][Math.floor(Math.random() * 7)]
-      }
-    });
-
-    const additionalOccurrences = [...aaOccurrences, ...abOccurrences];
-
-    return [...mockOccurrences, ...additionalOccurrences]
+    return mockOccurrences;
   }, [])
 
   useEffect(() => {
