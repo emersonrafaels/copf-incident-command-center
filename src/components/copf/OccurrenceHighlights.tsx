@@ -77,7 +77,7 @@ export function OccurrenceHighlights({
 
     // Ocorrências críticas vencendo (próximas 4 horas ou vencidas)
     const criticalDue = occurrences.filter(occ => {
-      if (occ.status === 'encerrada') return false;
+      if (occ.status === 'encerrada' || occ.status === 'cancelada') return false;
       if (occ.severity !== 'critical' && occ.severity !== 'high') return false;
       const sla = calculateSLA(occ);
       return sla.hoursRemaining <= 4; // Vence em 4h ou já venceu
