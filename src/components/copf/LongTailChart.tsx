@@ -328,7 +328,7 @@ export const LongTailChart = memo(function LongTailChart({
                   <div className="flex items-center gap-2 cursor-help">
                     <div className="w-2 h-2 rounded-full bg-success"></div>
                     <span className="text-sm text-muted-foreground">Meta de Excelência:</span>
-                    <span className="text-lg font-bold text-success">{formatHours(timeRangeAnalysis.metrics.metaExcelencia)} ({timeRangeAnalysis.metrics.percentualExcelencia}%)</span>
+                    <span className="text-lg font-bold text-success">{formatHours(timeRangeAnalysis.metrics.metaExcelencia)}</span>
                     <Info className="h-3 w-3 text-muted-foreground" />
                   </div>
                 </TooltipTrigger>
