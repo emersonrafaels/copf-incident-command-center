@@ -1,4 +1,3 @@
-
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,7 +6,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AlertTriangle, Clock, RotateCcw, TrendingUp, Info, Calculator, ArrowUp, ArrowDown, Minus, Activity } from "lucide-react";
 import { useFilters } from "@/contexts/FiltersContext";
-
 interface CriticalityData {
   equipment: string;
   segment: string;
@@ -26,22 +24,46 @@ interface CriticalityData {
   percentualVolumeBaseline: number;
   reincidenciaPercentual: number;
 }
-
 interface CriticalityHeatmapProps {
   occurrences: any[];
 }
 
 // Baselines por tipo de equipamento (em dias)
 const EQUIPMENT_BASELINES = {
-  'ATM': { aging: 7, volume: 2, sla: 10 },
-  'POS': { aging: 5, volume: 3, sla: 15 },
-  'Servidor': { aging: 3, volume: 1, sla: 5 },
-  'Impressora': { aging: 10, volume: 4, sla: 20 },
-  'Rede': { aging: 2, volume: 2, sla: 8 },
-  'default': { aging: 7, volume: 3, sla: 15 }
+  'ATM': {
+    aging: 7,
+    volume: 2,
+    sla: 10
+  },
+  'POS': {
+    aging: 5,
+    volume: 3,
+    sla: 15
+  },
+  'Servidor': {
+    aging: 3,
+    volume: 1,
+    sla: 5
+  },
+  'Impressora': {
+    aging: 10,
+    volume: 4,
+    sla: 20
+  },
+  'Rede': {
+    aging: 2,
+    volume: 2,
+    sla: 8
+  },
+  'default': {
+    aging: 7,
+    volume: 3,
+    sla: 15
+  }
 };
-
-export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
+export function CriticalityHeatmap({
+  occurrences
+}: CriticalityHeatmapProps) {
   const filters = useFilters();
 
   // Aplicar filtros às ocorrências antes do processamento
@@ -73,20 +95,14 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
       // Filtros Especiais
       if (filters.overrideFilter) {
         const hours = (Date.now() - new Date(occ.createdAt).getTime()) / (1000 * 60 * 60);
-        const slaLimit = (occ.severity === 'critical' || occ.severity === 'high') ? 24 : 72;
+        const slaLimit = occ.severity === 'critical' || occ.severity === 'high' ? 24 : 72;
         if (!(hours > slaLimit && occ.status !== 'encerrada')) return false;
       }
-
       if (filters.reincidentFilter) {
         // Lógica para identificar ocorrências reincidentes
-        const recentOccurrences = occurrences.filter(o => 
-          o.equipment === occ.equipment && 
-          o.agency === occ.agency &&
-          Math.abs(new Date(o.createdAt).getTime() - new Date(occ.createdAt).getTime()) <= (30 * 24 * 60 * 60 * 1000)
-        );
+        const recentOccurrences = occurrences.filter(o => o.equipment === occ.equipment && o.agency === occ.agency && Math.abs(new Date(o.createdAt).getTime() - new Date(occ.createdAt).getTime()) <= 30 * 24 * 60 * 60 * 1000);
         if (recentOccurrences.length <= 1) return false;
       }
-
       if (filters.vendorPriorityFilter && (!occ.priorizado || !occ.vendor)) return false;
 
       // Filtros de Período
@@ -94,15 +110,23 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
         const occDate = new Date(occ.createdAt);
         const now = new Date();
         let daysLimit = 30;
-
         switch (filters.filterPeriod) {
-          case '7d': daysLimit = 7; break;
-          case '15d': daysLimit = 15; break;
-          case '30d': daysLimit = 30; break;
-          case '60d': daysLimit = 60; break;
-          case '90d': daysLimit = 90; break;
+          case '7d':
+            daysLimit = 7;
+            break;
+          case '15d':
+            daysLimit = 15;
+            break;
+          case '30d':
+            daysLimit = 30;
+            break;
+          case '60d':
+            daysLimit = 60;
+            break;
+          case '90d':
+            daysLimit = 90;
+            break;
         }
-
         const daysDiff = (now.getTime() - occDate.getTime()) / (1000 * 60 * 60 * 24);
         if (daysDiff > daysLimit) return false;
       }
@@ -113,7 +137,6 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
         if (filters.customDateRange.from && occDate < filters.customDateRange.from) return false;
         if (filters.customDateRange.to && occDate > filters.customDateRange.to) return false;
       }
-
       return true;
     });
   }, [occurrences, filters]);
@@ -151,7 +174,7 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
     filteredOccurrences.forEach(occ => {
       const equipmentKey = `${occ.equipment}-${occ.segment}`;
       const agencyKey = occ.agency;
-      
+
       // Equipamentos
       if (!equipmentMap.has(equipmentKey)) {
         equipmentMap.set(equipmentKey, {
@@ -161,7 +184,6 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
           totalCount: 0
         });
       }
-      
       const equipmentData = equipmentMap.get(equipmentKey);
       equipmentData.occurrences.push(occ);
       equipmentData.totalCount++;
@@ -173,32 +195,33 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
           occurrences: []
         });
       }
-      
       const agencyData = agencyMap.get(agencyKey);
       agencyData.occurrences.push(occ);
     });
 
     // Calcular percentual de agências com SLA estourado
     let agenciesWithSLABreach = 0;
-    agencyMap.forEach((agencyData) => {
+    agencyMap.forEach(agencyData => {
       const hasSLABreach = agencyData.occurrences.some((occ: any) => {
         const hours = (Date.now() - new Date(occ.createdAt).getTime()) / (1000 * 60 * 60);
-        const slaLimit = (occ.severity === 'critical' || occ.severity === 'high') ? 24 : 72;
+        const slaLimit = occ.severity === 'critical' || occ.severity === 'high' ? 24 : 72;
         return hours > slaLimit && occ.status !== 'encerrada';
       });
       if (hasSLABreach) agenciesWithSLABreach++;
     });
-
-    const percentualAgenciasSLA = agencyMap.size > 0 ? (agenciesWithSLABreach / agencyMap.size) * 100 : 0;
-
+    const percentualAgenciasSLA = agencyMap.size > 0 ? agenciesWithSLABreach / agencyMap.size * 100 : 0;
     const criticalityData: CriticalityData[] = [];
-
     equipmentMap.forEach((data, key) => {
-      const { occurrences: occs, equipment, segment, totalCount } = data;
-      
+      const {
+        occurrences: occs,
+        equipment,
+        segment,
+        totalCount
+      } = data;
+
       // Obter baseline específico para o tipo de equipamento
       const baseline = EQUIPMENT_BASELINES[equipment as keyof typeof EQUIPMENT_BASELINES] || EQUIPMENT_BASELINES.default;
-      
+
       // Calcular aging médio (em dias)
       const avgAging = occs.reduce((sum: number, occ: any) => {
         const daysDiff = Math.floor((Date.now() - new Date(occ.createdAt).getTime()) / (1000 * 60 * 60 * 24));
@@ -206,13 +229,13 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
       }, 0) / occs.length;
 
       // Calcular variação do aging em relação ao baseline
-      const agingVariation = Math.round(((avgAging - baseline.aging) / baseline.aging) * 100);
+      const agingVariation = Math.round((avgAging - baseline.aging) / baseline.aging * 100);
 
       // Verificar se há SLA quebrado e calcular percentual de ocorrências com SLA vencido
       let slaBreachedCount = 0;
       const slaBreached = occs.some((occ: any) => {
         const hours = (Date.now() - new Date(occ.createdAt).getTime()) / (1000 * 60 * 60);
-        const slaLimit = (occ.severity === 'critical' || occ.severity === 'high') ? 24 : 72;
+        const slaLimit = occ.severity === 'critical' || occ.severity === 'high' ? 24 : 72;
         const isBreached = hours > slaLimit && occ.status !== 'encerrada';
         if (isBreached) {
           slaBreachedCount++;
@@ -221,7 +244,7 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
       });
 
       // Calcular percentual de SLA vencido
-      const slaBreachPercentage = occs.length > 0 ? Math.round((slaBreachedCount / occs.length) * 100) : 0;
+      const slaBreachPercentage = occs.length > 0 ? Math.round(slaBreachedCount / occs.length * 100) : 0;
 
       // Definir percentual normal de SLA baseado no baseline do equipamento
       const normalSLAPercentage = baseline.sla;
@@ -240,7 +263,6 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
         const type = occ.type || 'unknown';
         occurrencesByTypeCount.set(type, (occurrencesByTypeCount.get(type) || 0) + 1);
       });
-      
       let reincidentOccurrences = 0;
       occurrencesByTypeCount.forEach(count => {
         if (count > 1) reincidentOccurrences += count;
@@ -250,27 +272,26 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
       const baseReincidenceRate = Math.min(30, Math.floor(Math.random() * 25) + 5); // 5-30%
       const equipmentFactor = equipment === 'ATM' ? 1.2 : equipment === 'POS' ? 0.8 : 1.0;
       const adjustedRate = Math.round(baseReincidenceRate * equipmentFactor);
-      
       const reincidenciaPercentual = recentOccurrences.length > 0 ? Math.min(adjustedRate, 40) : 0;
 
       // Calcular % de volume em relação ao baseline específico do equipamento
-      const percentualVolumeBaseline = baseline.volume > 0 ? Math.round((reincidencia / baseline.volume) * 100) : 0;
+      const percentualVolumeBaseline = baseline.volume > 0 ? Math.round(reincidencia / baseline.volume * 100) : 0;
       const volumeAtipico = percentualVolumeBaseline > 200; // 200% do baseline
 
       // Calcular score de criticidade (0-100) baseado nos 4 fatores com pesos ajustados
       let criticalityScore = 0;
-      
+
       // Peso por variação do aging vs baseline (máximo 25 pontos)
       const agingScore = Math.max(0, Math.min(agingVariation * 0.25, 25));
       criticalityScore += agingScore;
-      
+
       // Peso por volume vs baseline (máximo 25 pontos)
       const volumeScore = Math.max(0, Math.min((percentualVolumeBaseline - 100) * 0.1, 25));
       criticalityScore += volumeScore;
-      
+
       // Peso por percentual de reincidência (máximo 25 pontos)
       criticalityScore += Math.min(reincidenciaPercentual * 0.25, 25);
-      
+
       // Peso por SLA vs baseline (máximo 25 pontos)
       const slaScore = Math.max(0, Math.min(slaDifference * 0.5, 25));
       criticalityScore += slaScore;
@@ -278,17 +299,15 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
       // Calcular agências com SLA estourado para este equipamento específico
       const equipmentAgencies = new Set(occs.map((occ: any) => occ.agency));
       let equipmentAgenciesWithSLA = 0;
-      
       equipmentAgencies.forEach(agency => {
         const agencyOccs = occs.filter((occ: any) => occ.agency === agency);
         const hasSLABreach = agencyOccs.some((occ: any) => {
           const hours = (Date.now() - new Date(occ.createdAt).getTime()) / (1000 * 60 * 60);
-          const slaLimit = (occ.severity === 'critical' || occ.severity === 'high') ? 24 : 72;
+          const slaLimit = occ.severity === 'critical' || occ.severity === 'high' ? 24 : 72;
           return hours > slaLimit && occ.status !== 'encerrada';
         });
         if (hasSLABreach) equipmentAgenciesWithSLA++;
       });
-
       criticalityData.push({
         equipment,
         segment,
@@ -308,10 +327,8 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
         reincidenciaPercentual
       });
     });
-
     return criticalityData.sort((a, b) => b.criticalityScore - a.criticalityScore);
   }, [filteredOccurrences]);
-
   const getCriticalityColor = (score: number) => {
     if (score >= 80) return 'bg-gradient-to-br from-red-600/90 via-red-700/95 to-red-800/95 border-red-500/30 shadow-xl shadow-red-500/20';
     if (score >= 60) return 'bg-gradient-to-br from-orange-500/90 via-orange-600/95 to-orange-700/95 border-orange-400/30 shadow-xl shadow-orange-500/20';
@@ -319,7 +336,6 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
     if (score >= 20) return 'bg-gradient-to-br from-blue-500/90 via-blue-600/95 to-blue-700/95 border-blue-400/30 shadow-xl shadow-blue-500/20';
     return 'bg-gradient-to-br from-emerald-500/90 via-emerald-600/95 to-emerald-700/95 border-emerald-400/30 shadow-xl shadow-emerald-500/20';
   };
-
   const getCriticalityLabel = (score: number) => {
     if (score >= 80) return 'Crítico';
     if (score >= 60) return 'Alto';
@@ -329,8 +345,7 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
   };
 
   // Componente do Modal Explicativo
-  const CriticalityExplanationModal = () => (
-    <Dialog>
+  const CriticalityExplanationModal = () => <Dialog>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2">
           <Calculator className="h-4 w-4" />
@@ -370,8 +385,8 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                   Compara o aging médio atual com o baseline específico do equipamento.
                 </p>
                 <div className="text-xs bg-muted/50 p-2 rounded">
-                  <strong>Baselines por equipamento:</strong><br/>
-                  • ATM: 7 dias | POS: 5 dias | Servidor: 3 dias<br/>
+                  <strong>Baselines por equipamento:</strong><br />
+                  • ATM: 7 dias | POS: 5 dias | Servidor: 3 dias<br />
                   • Impressora: 10 dias | Rede: 2 dias
                 </div>
               </div>
@@ -422,30 +437,39 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
           <div className="border-t pt-4">
             <h4 className="font-semibold mb-3">Níveis de Criticidade</h4>
             <div className="grid grid-cols-5 gap-3 text-xs">
-              {[
-                { level: 'Crítico', range: '80-100', color: 'bg-destructive' },
-                { level: 'Alto', range: '60-79', color: 'bg-warning' },
-                { level: 'Médio', range: '40-59', color: 'bg-yellow-500' },
-                { level: 'Baixo', range: '20-39', color: 'bg-blue-500' },
-                { level: 'Mínimo', range: '0-19', color: 'bg-success' }
-              ].map((item) => (
-                <div key={item.level} className="text-center space-y-2">
+              {[{
+              level: 'Crítico',
+              range: '80-100',
+              color: 'bg-destructive'
+            }, {
+              level: 'Alto',
+              range: '60-79',
+              color: 'bg-warning'
+            }, {
+              level: 'Médio',
+              range: '40-59',
+              color: 'bg-yellow-500'
+            }, {
+              level: 'Baixo',
+              range: '20-39',
+              color: 'bg-blue-500'
+            }, {
+              level: 'Mínimo',
+              range: '0-19',
+              color: 'bg-success'
+            }].map(item => <div key={item.level} className="text-center space-y-2">
                   <div className={`w-full h-4 ${item.color} rounded-md shadow-sm`}></div>
                   <div>
                     <div className="font-medium">{item.level}</div>
                     <div className="text-muted-foreground">{item.range}</div>
                   </div>
-                </div>
-              ))}
+                </div>)}
             </div>
           </div>
         </div>
       </DialogContent>
-    </Dialog>
-  );
-
-  return (
-    <Card className="animate-fade-in border-border/50 bg-gradient-to-br from-card to-muted/10">
+    </Dialog>;
+  return <Card className="animate-fade-in border-border/50 bg-gradient-to-br from-card to-muted/10">
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -460,11 +484,7 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
               </div>
               <p className="text-sm text-muted-foreground">
                 Análise baseada em baselines específicos por tipo de equipamento
-                {filteredOccurrences.length !== occurrences.length && (
-                  <span className="ml-2 text-primary font-medium">
-                    ({filteredOccurrences.length} de {occurrences.length} ocorrências)
-                  </span>
-                )}
+                {filteredOccurrences.length !== occurrences.length}
               </p>
             </div>
           </div>
@@ -479,34 +499,49 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
             Escala de Criticidade
           </h4>
           <div className="grid grid-cols-5 gap-4">
-            {[
-              { level: 'Crítico', range: '80-100', color: 'bg-destructive', textColor: 'text-destructive' },
-              { level: 'Alto', range: '60-79', color: 'bg-warning', textColor: 'text-warning' },
-              { level: 'Médio', range: '40-59', color: 'bg-yellow-500', textColor: 'text-yellow-600' },
-              { level: 'Baixo', range: '20-39', color: 'bg-blue-500', textColor: 'text-blue-600' },
-              { level: 'Mínimo', range: '0-19', color: 'bg-success', textColor: 'text-success' }
-            ].map((item) => (
-              <div key={item.level} className="text-center space-y-2">
+            {[{
+            level: 'Crítico',
+            range: '80-100',
+            color: 'bg-destructive',
+            textColor: 'text-destructive'
+          }, {
+            level: 'Alto',
+            range: '60-79',
+            color: 'bg-warning',
+            textColor: 'text-warning'
+          }, {
+            level: 'Médio',
+            range: '40-59',
+            color: 'bg-yellow-500',
+            textColor: 'text-yellow-600'
+          }, {
+            level: 'Baixo',
+            range: '20-39',
+            color: 'bg-blue-500',
+            textColor: 'text-blue-600'
+          }, {
+            level: 'Mínimo',
+            range: '0-19',
+            color: 'bg-success',
+            textColor: 'text-success'
+          }].map(item => <div key={item.level} className="text-center space-y-2">
                 <div className={`w-full h-4 ${item.color} rounded-lg shadow-sm border border-border/20`}></div>
                 <div>
                   <div className={`font-semibold text-sm ${item.textColor}`}>{item.level}</div>
                   <div className="text-xs text-muted-foreground">{item.range}</div>
                 </div>
-              </div>
-            ))}
+              </div>)}
           </div>
         </div>
 
         {/* Grade de Equipamentos Melhorada */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {criticalityData.slice(0, 16).map((item, index) => (
-            <TooltipProvider key={`${item.equipment}-${item.segment}`}>
+          {criticalityData.slice(0, 16).map((item, index) => <TooltipProvider key={`${item.equipment}-${item.segment}`}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div 
-                    className={`group relative p-5 rounded-2xl border-2 cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-xl animate-fade-in ${getCriticalityColor(item.criticalityScore)} text-white overflow-hidden backdrop-blur-sm`}
-                    style={{ animationDelay: `${index * 50}ms` }}
-                  >
+                  <div className={`group relative p-5 rounded-2xl border-2 cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-xl animate-fade-in ${getCriticalityColor(item.criticalityScore)} text-white overflow-hidden backdrop-blur-sm`} style={{
+                animationDelay: `${index * 50}ms`
+              }}>
                     {/* Background patterns */}
                     <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-black/10"></div>
                     <div className="absolute top-0 right-0 w-20 h-20 bg-white/5 rounded-full -translate-y-10 translate-x-10"></div>
@@ -566,13 +601,7 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                           {/* SLA Status */}
                           <div className="p-3 rounded-xl border border-white/20 bg-white/5">
                             <div className="flex items-center gap-1 mb-2">
-                              {item.slaStatus === 'above' ? (
-                                <ArrowUp className="h-3 w-3" />
-                              ) : item.slaStatus === 'below' ? (
-                                <ArrowDown className="h-3 w-3" />
-                              ) : (
-                                <Minus className="h-3 w-3" />
-                              )}
+                              {item.slaStatus === 'above' ? <ArrowUp className="h-3 w-3" /> : item.slaStatus === 'below' ? <ArrowDown className="h-3 w-3" /> : <Minus className="h-3 w-3" />}
                               <span className="text-xs opacity-80">SLA</span>
                             </div>
                             <div className="text-sm font-bold">
@@ -636,12 +665,10 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
                   </div>
                 </TooltipContent>
               </Tooltip>
-            </TooltipProvider>
-          ))}
+            </TooltipProvider>)}
         </div>
 
-        {criticalityData.length === 0 && (
-          <div className="text-center py-16 text-muted-foreground">
+        {criticalityData.length === 0 && <div className="text-center py-16 text-muted-foreground">
             <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-muted/30 flex items-center justify-center">
               {activeFiltersCount > 0 ? <AlertTriangle className="h-10 w-10 opacity-50" /> : <AlertTriangle className="h-10 w-10 opacity-50" />}
             </div>
@@ -649,24 +676,12 @@ export function CriticalityHeatmap({ occurrences }: CriticalityHeatmapProps) {
               {activeFiltersCount > 0 ? 'Nenhum equipamento encontrado' : 'Sem dados suficientes'}
             </h4>
             <p className="text-sm max-w-md mx-auto">
-              {activeFiltersCount > 0 
-                ? 'Os filtros aplicados não retornaram equipamentos. Tente ajustar os critérios de filtragem.'
-                : 'Aguardando dados de ocorrências para gerar a análise de criticidade por equipamento'
-              }
+              {activeFiltersCount > 0 ? 'Os filtros aplicados não retornaram equipamentos. Tente ajustar os critérios de filtragem.' : 'Aguardando dados de ocorrências para gerar a análise de criticidade por equipamento'}
             </p>
-            {activeFiltersCount > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => filters.clearAllFilters()}
-                className="mt-4"
-              >
+            {activeFiltersCount > 0 && <Button variant="outline" size="sm" onClick={() => filters.clearAllFilters()} className="mt-4">
                 Limpar Filtros
-              </Button>
-            )}
-          </div>
-        )}
+              </Button>}
+          </div>}
       </CardContent>
-    </Card>
-  );
+    </Card>;
 }
