@@ -507,53 +507,40 @@ export const LongTailChart = memo(function LongTailChart({
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Métricas principais em grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 bg-card rounded-lg border">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-2 h-2 rounded-full bg-muted-foreground"></div>
-                <span className="text-sm font-medium text-muted-foreground">Tempo Mediano</span>
-              </div>
-              <div className="text-2xl font-bold text-foreground">{formatHours(timeRangeAnalysis.metrics.tempoMediano)}</div>
-              <p className="text-xs text-muted-foreground mt-1">50% das ocorrências resolvidas em até este tempo</p>
-            </div>
-            
-            <div className="p-4 bg-card rounded-lg border">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-2 h-2 rounded-full bg-success"></div>
-                <span className="text-sm font-medium text-success">Meta de Excelência</span>
-              </div>
-              <div className="text-2xl font-bold text-success">{timeRangeAnalysis.metrics.percentualExcelencia}%</div>
-              <p className="text-xs text-muted-foreground mt-1">Resolvidas em até {formatHours(timeRangeAnalysis.metrics.metaExcelencia)}</p>
-            </div>
-            
-            <div className="p-4 bg-card rounded-lg border">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-2 h-2 rounded-full bg-destructive"></div>
-                <span className="text-sm font-medium text-destructive">Aging Crítico</span>
-              </div>
-              <div className="text-2xl font-bold text-destructive">{timeRangeAnalysis.metrics.agingCritico}</div>
-              <p className="text-xs text-muted-foreground mt-1">{timeRangeAnalysis.metrics.percentualCritico}% acima de 5 dias</p>
-            </div>
-          </div>
-          
-          {/* Insight textual */}
+          {/* Resumo Executivo expandido */}
           <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
             <div className="flex items-start gap-3">
               <TrendingUp className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
               <div>
-                <h4 className="font-semibold text-foreground mb-2">Resumo Executivo</h4>
-                <div className="space-y-2 text-sm text-muted-foreground leading-relaxed">
+                <h4 className="font-semibold text-foreground mb-3">Resumo Executivo</h4>
+                <div className="space-y-3 text-sm text-muted-foreground leading-relaxed">
+                  {/* Overview geral */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div className="text-center p-3 bg-card/50 rounded-lg">
+                      <div className="text-xl font-bold text-foreground">{formatHours(timeRangeAnalysis.metrics.tempoMediano)}</div>
+                      <div className="text-xs text-muted-foreground">Tempo Mediano</div>
+                    </div>
+                    <div className="text-center p-3 bg-card/50 rounded-lg">
+                      <div className="text-xl font-bold text-success">{timeRangeAnalysis.metrics.percentualExcelencia}%</div>
+                      <div className="text-xs text-muted-foreground">Meta de Excelência</div>
+                    </div>
+                    <div className="text-center p-3 bg-card/50 rounded-lg">
+                      <div className="text-xl font-bold text-destructive">{timeRangeAnalysis.metrics.agingCritico}</div>
+                      <div className="text-xs text-muted-foreground">Aging Crítico</div>
+                    </div>
+                  </div>
+                  
+                  {/* Análise textual */}
                   <p>
                     <span className="font-medium text-foreground">{timeRangeAnalysis.metrics.total}</span> ocorrências em aberto com tempo mediano de{" "}
-                    <span className="font-medium text-foreground">{formatHours(timeRangeAnalysis.metrics.tempoMediano)}</span>.
+                    <span className="font-medium text-foreground">{formatHours(timeRangeAnalysis.metrics.tempoMediano)}</span>, indicando que 50% das ocorrências são resolvidas em até esse tempo.
                   </p>
                   <p>
-                    <span className="font-medium text-success">{timeRangeAnalysis.metrics.percentualExcelencia}%</span> das ocorrências estão dentro da meta de excelência.
+                    <span className="font-medium text-success">{timeRangeAnalysis.metrics.percentualExcelencia}%</span> das ocorrências estão dentro da meta de excelência (≤ {formatHours(timeRangeAnalysis.metrics.metaExcelencia)}), demonstrando {timeRangeAnalysis.metrics.percentualExcelencia >= 70 ? 'boa' : 'baixa'} performance operacional.
                   </p>
                   {timeRangeAnalysis.metrics.agingCritico > 0 && (
                     <p className="text-destructive font-medium">
-                      ⚠️ Atenção: <span className="font-bold">{timeRangeAnalysis.metrics.agingCritico}</span> ocorrências com aging crítico requerem ação imediata.
+                      ⚠️ Atenção: <span className="font-bold">{timeRangeAnalysis.metrics.agingCritico}</span> ocorrências ({timeRangeAnalysis.metrics.percentualCritico}%) com aging crítico ({">"}5 dias) requerem ação imediata.
                     </p>
                   )}
                 </div>
