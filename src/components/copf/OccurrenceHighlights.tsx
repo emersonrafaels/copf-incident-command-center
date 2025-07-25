@@ -126,11 +126,22 @@ export function OccurrenceHighlights({ occurrences, onOccurrenceClick }: Occurre
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-2 mb-4">
-        <TrendingUp className="h-5 w-5 text-primary" />
-        <h2 className="text-xl font-semibold text-foreground">Highlights Operacionais</h2>
-        <div className="h-px bg-border flex-1 ml-4" />
+    <div className="space-y-8">
+      {/* Header moderno */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-gradient-primary">
+            <TrendingUp className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <h2 className="text-xl font-semibold text-foreground">Highlights Operacionais</h2>
+            <p className="text-sm text-muted-foreground">Visão em tempo real das ocorrências prioritárias</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/30 px-3 py-1 rounded-full">
+          <div className="w-2 h-2 bg-success rounded-full animate-pulse"></div>
+          Atualizado agora
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

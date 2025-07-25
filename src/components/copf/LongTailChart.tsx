@@ -199,93 +199,102 @@ export const LongTailChart = memo(function LongTailChart({
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header com título */}
-      <div className="flex items-center gap-2 mb-4">
-        <TrendingUp className="h-5 w-5 text-primary" />
-        <h2 className="text-xl font-semibold text-foreground">Análise Long Tail - Tempos de Resolução</h2>
-        <div className="h-px bg-border flex-1 ml-4" />
-      </div>
+    <div className="space-y-8">
+      {/* Card principal com design aprimorado */}
+      <Card className="bg-gradient-subtle border-0 shadow-elegant">
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-gradient-primary">
+                <TrendingUp className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <CardTitle className="text-xl font-semibold text-foreground">
+                  Análise Long Tail - Tempos de Resolução
+                </CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Distribuição de ocorrências por faixas de tempo aberto
+                </p>
+              </div>
+            </div>
+            <Button 
+              variant="premium" 
+              size="sm"
+              onClick={handleFilterOutliers}
+              className="flex items-center gap-2 shadow-card-hover"
+            >
+              <AlertTriangle className="h-4 w-4" />
+              Ver Outliers Críticos
+            </Button>
+          </div>
 
-      {/* Métricas principais no topo - Compactas */}
-      <div className="flex flex-wrap items-center gap-4 p-4 bg-muted/30 rounded-lg">
-        <Badge variant="outline" className="px-3 py-2">
-          <span className="text-sm font-semibold text-primary">{timeRangeAnalysis.metrics.total}</span>
-          <span className="text-xs text-muted-foreground ml-1">Total</span>
-        </Badge>
-        <Badge variant="outline" className="px-3 py-2">
-          <span className="text-sm font-semibold text-green-600">{timeRangeAnalysis.metrics.p50}h</span>
-          <span className="text-xs text-muted-foreground ml-1">P50</span>
-        </Badge>
-        <Badge variant="outline" className="px-3 py-2">
-          <span className="text-sm font-semibold text-orange-600">{timeRangeAnalysis.metrics.p90}h</span>
-          <span className="text-xs text-muted-foreground ml-1">P90 Meta</span>
-        </Badge>
-        <Badge variant="outline" className="px-3 py-2">
-          <span className="text-sm font-semibold text-red-600">{timeRangeAnalysis.metrics.outliers}</span>
-          <span className="text-xs text-muted-foreground ml-1">Outliers</span>
-        </Badge>
-        <div className="flex-1" />
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={handleFilterOutliers}
-          className="flex items-center gap-1"
-        >
-          <AlertTriangle className="h-3 w-3" />
-          Ver Outliers Críticos
-          <ArrowRight className="h-3 w-3" />
-        </Button>
-      </div>
-
-      {/* Gráfico principal */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base font-medium flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
-            Distribuição por Faixas de Tempo Aberto
-          </CardTitle>
+          {/* Métricas em linha horizontal */}
+          <div className="flex flex-wrap items-center gap-3 mt-6 p-4 bg-card/50 rounded-lg border border-border/50">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-primary"></div>
+              <span className="text-sm text-muted-foreground">Total:</span>
+              <span className="text-lg font-bold text-foreground">{timeRangeAnalysis.metrics.total}</span>
+            </div>
+            <div className="w-px h-6 bg-border"></div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-success"></div>
+              <span className="text-sm text-muted-foreground">P50:</span>
+              <span className="text-lg font-bold text-success">{timeRangeAnalysis.metrics.p50}h</span>
+            </div>
+            <div className="w-px h-6 bg-border"></div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-warning"></div>
+              <span className="text-sm text-muted-foreground">Meta P90:</span>
+              <span className="text-lg font-bold text-warning">{timeRangeAnalysis.metrics.p90}h</span>
+            </div>
+            <div className="w-px h-6 bg-border"></div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-destructive"></div>
+              <span className="text-sm text-muted-foreground">Outliers:</span>
+              <span className="text-lg font-bold text-destructive">{timeRangeAnalysis.metrics.outliers}</span>
+            </div>
+          </div>
         </CardHeader>
-        <CardContent>
+        
+        <CardContent className="pt-0">
           <ChartContainer config={chartConfig} className="h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart 
                 data={timeRangeAnalysis.data} 
-                margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                margin={{ top: 20, right: 30, left: 40, bottom: 80 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <defs>
+                  <linearGradient id="barGradient1" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#22c55e" stopOpacity={0.8} />
+                    <stop offset="100%" stopColor="#22c55e" stopOpacity={0.4} />
+                  </linearGradient>
+                  <linearGradient id="barGradient2" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#f97316" stopOpacity={0.8} />
+                    <stop offset="100%" stopColor="#f97316" stopOpacity={0.4} />
+                  </linearGradient>
+                  <linearGradient id="barGradient3" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#ef4444" stopOpacity={0.8} />
+                    <stop offset="100%" stopColor="#ef4444" stopOpacity={0.4} />
+                  </linearGradient>
+                </defs>
+                
+                <CartesianGrid 
+                  strokeDasharray="3 3" 
+                  stroke="hsl(var(--border))" 
+                  opacity={0.3}
+                />
                 <XAxis 
                   dataKey="rangeLabel"
                   stroke="hsl(var(--muted-foreground))"
-                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
+                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
                   angle={-45}
                   textAnchor="end"
                   height={80}
                   interval={0}
-                  label={{ 
-                    value: 'Faixas de tempo aberto (horas)', 
-                    position: 'insideBottom', 
-                    offset: -10,
-                    style: { textAnchor: 'middle' }
-                  }}
                 />
                 <YAxis 
                   stroke="hsl(var(--muted-foreground))"
-                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                  label={{ 
-                    value: 'Quantidade de ocorrências', 
-                    angle: -90, 
-                    position: 'insideLeft',
-                    style: { textAnchor: 'middle' }
-                  }}
-                />
-                
-                {/* Linha de referência para meta P90 */}
-                <ReferenceLine 
-                  y={0} 
-                  stroke="hsl(var(--warning))" 
-                  strokeDasharray="5 5"
-                  label={`Meta P90: ${timeRangeAnalysis.metrics.p90}h`}
+                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
                 />
                 
                 <ChartTooltipContent 
@@ -294,15 +303,26 @@ export const LongTailChart = memo(function LongTailChart({
                     'Quantidade'
                   ]}
                   labelFormatter={(label) => `Faixa: ${label}`}
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                    boxShadow: 'var(--shadow-elegant)'
+                  }}
                 />
                 
                 <Bar 
                   dataKey="count" 
-                  radius={[4, 4, 0, 0]}
-                  className="cursor-pointer"
+                  radius={[6, 6, 0, 0]}
+                  className="cursor-pointer transition-all duration-200"
                 >
                   {timeRangeAnalysis.data.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={entry.category === 'within_target' ? 'url(#barGradient1)' : 
+                            entry.category === 'above_target' ? 'url(#barGradient2)' : 
+                            'url(#barGradient3)'}
+                    />
                   ))}
                 </Bar>
               </BarChart>
@@ -311,52 +331,44 @@ export const LongTailChart = memo(function LongTailChart({
         </CardContent>
       </Card>
 
-      {/* Legenda e narrativa */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Legenda explicativa */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="text-sm flex items-center gap-2">
-              <Clock className="h-4 w-4" />
-              Entendendo as Métricas
+      {/* Insights e legendas - Layout aprimorado */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Legenda com design moderno */}
+        <Card className="border-border/50 shadow-card-default">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Clock className="h-4 w-4 text-primary" />
+              Legenda das Categorias
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-4 h-4 rounded" style={{ backgroundColor: '#22c55e' }}></div>
-                <div>
-                  <div className="text-sm font-medium">Dentro do padrão</div>
-                  <div className="text-xs text-muted-foreground">≤ {timeRangeAnalysis.metrics.p90}h</div>
+          <CardContent className="space-y-4">
+            <div className="grid gap-3">
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-success/5 border border-success/20">
+                <div className="w-3 h-3 rounded-full bg-gradient-to-br from-success to-success/70"></div>
+                <div className="flex-1">
+                  <div className="text-sm font-medium text-success-foreground">Dentro do padrão</div>
+                  <div className="text-xs text-muted-foreground">≤ {timeRangeAnalysis.metrics.p90}h - Performance ideal</div>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="w-4 h-4 rounded" style={{ backgroundColor: '#f97316' }}></div>
-                <div>
-                  <div className="text-sm font-medium">Acima da meta</div>
-                  <div className="text-xs text-muted-foreground">{timeRangeAnalysis.metrics.p90}h - 5 dias</div>
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-warning/5 border border-warning/20">
+                <div className="w-3 h-3 rounded-full bg-gradient-to-br from-warning to-warning/70"></div>
+                <div className="flex-1">
+                  <div className="text-sm font-medium text-warning-foreground">Acima da meta</div>
+                  <div className="text-xs text-muted-foreground">{timeRangeAnalysis.metrics.p90}h - 5 dias - Atenção necessária</div>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="w-4 h-4 rounded" style={{ backgroundColor: '#ef4444' }}></div>
-                <div>
-                  <div className="text-sm font-medium">Outliers críticos</div>
-                  <div className="text-xs text-muted-foreground">&gt; 5 dias</div>
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-destructive/5 border border-destructive/20">
+                <div className="w-3 h-3 rounded-full bg-gradient-to-br from-destructive to-destructive/70"></div>
+                <div className="flex-1">
+                  <div className="text-sm font-medium text-destructive-foreground">Outliers críticos</div>
+                  <div className="text-xs text-muted-foreground">&gt; 5 dias - Revisão urgente</div>
                 </div>
               </div>
-            </div>
-            
-            <div className="p-3 bg-muted/50 rounded-lg">
-              <p className="text-xs text-muted-foreground">
-                <strong>Distribuição Long Tail:</strong> A maioria das ocorrências deve ser resolvida 
-                dentro da meta operacional. Faixas que excedem 5 dias (outliers críticos) requerem 
-                atenção especial e revisão dos processos.
-              </p>
             </div>
           </CardContent>
         </Card>
 
-        {/* Narrativa operacional */}
+        {/* Narrativa operacional com destaque */}
         <OperationalNarrativeCard
           title="Análise Operacional"
           insight={timeRangeAnalysis.insight}
