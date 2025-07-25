@@ -106,6 +106,32 @@ export function COPFLayout({
               {children}
             </div>
           </main>
+
+          {/* Footer */}
+          <footer className="border-t bg-gradient-to-r from-card/80 via-card/90 to-card/80 backdrop-blur-md">
+            <div className="px-responsive py-4">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-6 h-6 rounded bg-gradient-primary flex items-center justify-center">
+                    <span className="text-white font-bold text-xs">I</span>
+                  </div>
+                  <div className="text-center sm:text-left">
+                    <p className="text-sm font-medium text-foreground">Itaú Unibanco S.A.</p>
+                    <p className="text-xs text-muted-foreground">Centro de Operações - COPF</p>
+                  </div>
+                </div>
+                
+                <div className="text-center sm:text-right">
+                  <p className="text-xs text-muted-foreground">
+                    © {new Date().getFullYear()} Itaú Unibanco. Todos os direitos reservados.
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Ambiente interno - Uso restrito
+                  </p>
+                </div>
+              </div>
+            </div>
+          </footer>
         </div>
       </div>
     </SidebarProvider>;
