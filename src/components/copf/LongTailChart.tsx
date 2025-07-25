@@ -256,12 +256,12 @@ export const LongTailChart = memo(function LongTailChart({
           </div>
         </CardHeader>
         
-        <CardContent className="pt-0">
-          <ChartContainer config={chartConfig} className="h-[400px]">
+        <CardContent className="p-6">
+          <ChartContainer config={chartConfig} className="h-[450px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart 
                 data={timeRangeAnalysis.data} 
-                margin={{ top: 20, right: 30, left: 40, bottom: 80 }}
+                margin={{ top: 30, right: 40, left: 50, bottom: 100 }}
               >
                 <defs>
                   <linearGradient id="barGradient1" x1="0" y1="0" x2="0" y2="1">
