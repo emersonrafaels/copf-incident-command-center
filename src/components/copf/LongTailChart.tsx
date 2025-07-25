@@ -517,13 +517,11 @@ export const LongTailChart = memo(function LongTailChart({
           </ChartContainer>
           
           {/* Indicadores visuais e dica de interatividade aprimorados */}
-          <div className="mt-6 space-y-4">
+          <div className="mt-3 space-y-3">
             {/* Dica de interatividade melhorada */}
-            <div className="flex items-center justify-center gap-3 p-3 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
-                <span className="text-sm font-medium text-foreground">Clique nas barras para aplicar filtros na tabela de ocorrências</span>
-              </div>
+            <div className="flex items-center justify-center gap-2 p-2 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20">
+              <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
+              <span className="text-xs font-medium text-foreground">Clique nas barras para filtrar ocorrências</span>
             </div>
             
             {/* Estatísticas resumidas */}
