@@ -2,6 +2,7 @@ import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { BarChart3, MapPin, FileText, MessageSquare, Users, Settings, Home, Building2 } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 const navigation = [{
   title: "Dashboard",
   url: "/",
@@ -63,37 +64,39 @@ export function COPFSidebar() {
     const active = isActive(path);
     return active ? "bg-primary/10 text-primary border-r-2 border-primary font-medium hover:bg-primary/15" : "text-muted-foreground hover:bg-accent hover:text-accent-foreground";
   };
-  return <Sidebar className={collapsed ? "w-14 sm:w-16" : "w-56 sm:w-64"} collapsible="icon">
+  return <Sidebar className={cn("sidebar-responsive transition-all duration-300 border-r bg-sidebar text-sidebar-foreground", { "w-14": collapsed, "w-64": !collapsed })} collapsible="icon">
       <SidebarContent className="bg-gradient-subtle sidebar-content">
         {/* Header */}
-        <div className="p-responsive border-b">
+        <div className="p-responsive-sm border-b border-sidebar-border">
           <div className="flex items-center space-responsive-sm">
             <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center flex-shrink-0">
-              <span className="text-white font-bold text-responsive-sm">ER</span>
+              <span className="text-white font-bold text-responsive-sm">C</span>
             </div>
             {!collapsed && <div className="min-w-0">
                 <h2 className="font-semibold text-responsive-base text-foreground truncate">COPF</h2>
-                <p className="text-responsive-sm text-muted-foreground truncate">Itaú Unibanco</p>
+                <p className="text-responsive-xs text-muted-foreground truncate">Centro de Operações</p>
               </div>}
           </div>
         </div>
 
         {/* Main Navigation */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Navegação Principal</SidebarGroupLabel>
+        <SidebarGroup className="px-responsive-xs">
+          <SidebarGroupLabel className="text-responsive-xs font-semibold text-sidebar-foreground/80 px-2 mb-2">Navegação Principal</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-responsive-xs">
               {navigation.filter(item => {
                 if (item.title === "Comunicação") return showCommunication;
                 return true;
               }).map(item => <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild className="h-10 sm:h-11 px-3 rounded-lg transition-all duration-200 hover:bg-sidebar-accent data-[active=true]:bg-sidebar-accent data-[active=true]:font-semibold">
                     <NavLink to={item.url} className={getNavCls(item.url)} title={collapsed ? item.description : undefined}>
-                      <item.icon className="h-5 w-5" />
-                       {!collapsed && <div className="flex flex-col min-w-0">
-                          <span className="text-responsive-sm font-medium truncate">{item.title}</span>
-                          <span className="text-responsive-sm text-muted-foreground truncate">{item.description}</span>
-                        </div>}
+                      <div className="flex items-center gap-responsive-sm w-full">
+                        <item.icon className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+                        {!collapsed && <div className="flex flex-col min-w-0">
+                            <span className="text-responsive-sm font-medium truncate">{item.title}</span>
+                            <span className="text-responsive-xs text-muted-foreground truncate">{item.description}</span>
+                          </div>}
+                      </div>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>)}
@@ -102,18 +105,20 @@ export function COPFSidebar() {
         </SidebarGroup>
 
         {/* Admin Navigation */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Administração</SidebarGroupLabel>
+        <SidebarGroup className="px-responsive-xs">
+          <SidebarGroupLabel className="text-responsive-xs font-semibold text-sidebar-foreground/80 px-2 mb-2">Administração</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-responsive-xs">
               {adminNavigation.filter(item => !item.hidden || (item.title === "Equipes" && showTeams)).map(item => <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild className="h-10 sm:h-11 px-3 rounded-lg transition-all duration-200 hover:bg-sidebar-accent data-[active=true]:bg-sidebar-accent data-[active=true]:font-semibold">
                     <NavLink to={item.url} className={getNavCls(item.url)} title={collapsed ? item.description : undefined}>
-                      <item.icon className="h-5 w-5" />
-                       {!collapsed && <div className="flex flex-col min-w-0">
-                          <span className="text-responsive-sm font-medium truncate">{item.title}</span>
-                          <span className="text-responsive-sm text-muted-foreground truncate">{item.description}</span>
-                        </div>}
+                      <div className="flex items-center gap-responsive-sm w-full">
+                        <item.icon className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+                        {!collapsed && <div className="flex flex-col min-w-0">
+                            <span className="text-responsive-sm font-medium truncate">{item.title}</span>
+                            <span className="text-responsive-xs text-muted-foreground truncate">{item.description}</span>
+                          </div>}
+                      </div>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>)}
