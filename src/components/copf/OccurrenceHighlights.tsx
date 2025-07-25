@@ -79,45 +79,46 @@ export function OccurrenceHighlights({
       return createdDate >= todayStart && createdDate <= todayEnd;
     }).slice(0, 3); // Limitar a 3 cards
 
-    // Ocorrências que vencem hoje
+    // Ocorrências que vencem hoje (em andamento e que ainda não venceram)
     const dueToday = occurrences.filter(occ => {
       if (occ.status === 'encerrado' || occ.status === 'cancelado') return false;
       const sla = calculateSLA(occ);
-      return isToday(sla.endDate);
+      return isToday(sla.endDate) && !sla.isExpired;
     }).slice(0, 3); // Limitar a 3 cards
 
-    // Ocorrências críticas vencendo (próximas 4 horas ou vencidas)
-    const criticalDue = occurrences.filter(occ => {
+    // Ocorrências vencidas (todas não encerradas que estão vencidas)
+    const overdueOccurrences = occurrences.filter(occ => {
       if (occ.status === 'encerrado' || occ.status === 'cancelado') return false;
-      if (occ.severity !== 'critical' && occ.severity !== 'high') return false;
       const sla = calculateSLA(occ);
-      return sla.hoursRemaining <= 4; // Vence em 4h ou já venceu
+      return sla.isExpired;
     }).sort((a, b) => {
       const slaA = calculateSLA(a);
       const slaB = calculateSLA(b);
-      return slaA.hoursRemaining - slaB.hoursRemaining;
+      return slaA.hoursRemaining - slaB.hoursRemaining; // Mais vencidas primeiro
     }).slice(0, 5); // Mostrar até 5 mais urgentes
 
     return {
       enteredToday,
       dueToday,
-      criticalDue
+      overdueOccurrences
     };
   }, [occurrences]);
-  const handleViewAll = (type: 'entered' | 'due' | 'critical') => {
+  const handleViewAll = (type: 'entered' | 'due' | 'overdue') => {
     clearAllFilters();
     setTimeout(() => {
       if (type === 'entered') {
         // Filtrar por data de criação = hoje
-        navigate('/ocorrencias');
+        const todayParam = format(new Date(), 'yyyy-MM-dd');
+        navigate(`/ocorrencias?created_date=${todayParam}`);
       } else if (type === 'due') {
-        // Filtrar por status não resolvido
-        updateFilter('statusFilterMulti', ['a_iniciar', 'em_atuacao']);
-        navigate('/ocorrencias');
-      } else if (type === 'critical') {
-        // Filtrar por severidade crítica/alta e status não resolvido
-        updateFilter('statusFilterMulti', ['a_iniciar', 'em_atuacao']);
-        navigate('/ocorrencias');
+        // Filtrar por status em andamento e que vencem hoje
+        updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento']);
+        const todayParam = format(new Date(), 'yyyy-MM-dd');
+        navigate(`/ocorrencias?sla_date=${todayParam}&sla_status=due_today`);
+      } else if (type === 'overdue') {
+        // Filtrar por status não resolvido e que estão vencidas
+        updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento', 'com_impedimentos']);
+        navigate('/ocorrencias?sla_status=overdue');
       }
     }, 100);
   };
@@ -149,7 +150,7 @@ export function OccurrenceHighlights({
           </div>
           <div>
             <h2 className="text-xl font-semibold text-foreground">Highlights Operacionais</h2>
-            
+            <p className="text-sm text-muted-foreground">Monitoramento em tempo real de ocorrências prioritárias</p>
           </div>
         </div>
         
@@ -166,6 +167,7 @@ export function OccurrenceHighlights({
                 </div>
                 <div>
                   <span className="text-base font-semibold">Entraram Hoje</span>
+                  <p className="text-xs text-muted-foreground">Ocorrências criadas no dia atual</p>
                   <Badge variant="secondary" className="ml-2">
                     {highlights.enteredToday.length}
                   </Badge>
@@ -211,6 +213,7 @@ export function OccurrenceHighlights({
                 </div>
                 <div>
                   <span className="text-base font-semibold">Vencem Hoje</span>
+                  <p className="text-xs text-muted-foreground">Em andamento - SLA vence hoje</p>
                   <Badge variant="secondary" className="ml-2">
                     {highlights.dueToday.length}
                   </Badge>
@@ -245,7 +248,7 @@ export function OccurrenceHighlights({
         </Card>
       </div>
 
-      {/* Críticas Vencendo - Linha completa */}
+      {/* Ocorrências Vencidas - Linha completa */}
       <Card className="border-l-4 border-l-red-500">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center justify-between">
@@ -254,13 +257,14 @@ export function OccurrenceHighlights({
                 <AlertTriangle className="h-4 w-4" />
               </div>
               <div>
-                <span className="text-base font-semibold">Críticas Vencidas</span>
+                <span className="text-base font-semibold">Ocorrências Vencidas</span>
+                <p className="text-xs text-muted-foreground">Não encerradas - SLA expirado</p>
                 <Badge variant="destructive" className="ml-2">
-                  {highlights.criticalDue.length}
+                  {highlights.overdueOccurrences.length}
                 </Badge>
               </div>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => handleViewAll('critical')} className="text-red-600 hover:text-red-700">
+            <Button variant="ghost" size="sm" onClick={() => handleViewAll('overdue')} className="text-red-600 hover:text-red-700">
               Ver todas
               <ArrowRight className="w-3 h-3 ml-1" />
             </Button>
@@ -269,12 +273,20 @@ export function OccurrenceHighlights({
         <CardContent className="p-0">
           <ScrollArea className="h-[300px] px-6">
             <div className="py-6">
-              {highlights.criticalDue.length === 0 ? <p className="text-sm text-muted-foreground py-4 text-center">
-                  Nenhuma ocorrência crítica próxima do vencimento
-                </p> : <div className="space-y-3">
-                  {highlights.criticalDue.map(occ => {
-                const sla = calculateSLA(occ);
-                return <div key={occ.id} className="flex items-center justify-between p-3 bg-red-50/50 border border-red-100 rounded-lg cursor-pointer hover:bg-red-50 transition-colors" onClick={() => onOccurrenceClick(occ)}>
+              {highlights.overdueOccurrences.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-4 text-center">
+                  Nenhuma ocorrência vencida no momento
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {highlights.overdueOccurrences.map(occ => {
+                    const sla = calculateSLA(occ);
+                    return (
+                      <div 
+                        key={occ.id} 
+                        className="flex items-center justify-between p-3 bg-red-50/50 border border-red-100 rounded-lg cursor-pointer hover:bg-red-50 transition-colors" 
+                        onClick={() => onOccurrenceClick(occ)}
+                      >
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
                             <span className="text-sm font-medium">{occ.equipment}</span>
@@ -293,9 +305,11 @@ export function OccurrenceHighlights({
                             SLA: {format(sla.endDate, 'dd/MM HH:mm')}
                           </p>
                         </div>
-                      </div>;
-              })}
-                </div>}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </ScrollArea>
         </CardContent>

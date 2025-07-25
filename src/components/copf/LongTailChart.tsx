@@ -99,7 +99,7 @@ export const LongTailChart = memo(function LongTailChart({
   const navigate = useNavigate();
   const [showMethodologyModal, setShowMethodologyModal] = useState(false);
   const [isAnalysisCollapsed, setIsAnalysisCollapsed] = useState(false);
-  const [isGuideCollapsed, setIsGuideCollapsed] = useState(true);
+  const [isGuideCollapsed, setIsGuideCollapsed] = useState(false);
   const {
     updateFilter,
     clearAllFilters
