@@ -14,6 +14,12 @@ export interface OccurrenceData {
   resolvedAt?: string
   assignedTo: string
   vendor: string
+  transportadora?: string // Hierarquia: transportadora > fornecedor para terceirizados
+  tipoAgencia: string
+  estado: string
+  municipio: string
+  dineg: string
+  vip: boolean
 }
 
 export interface ChartData {
@@ -196,7 +202,13 @@ export function useDashboardData() {
             createdAt: createdAt.toISOString(),
             resolvedAt,
             assignedTo: ['João Silva - NOC', 'Maria Santos - Facilities', 'Carlos Oliveira - Redes', 'Ana Costa - POS', 'Roberto Lima - Suporte'][Math.floor(Math.random() * 5)],
-            vendor
+            vendor,
+            transportadora: transportadora, // Hierarquia: transportadora > fornecedor para terceirizados
+            tipoAgencia: structure.tipo,
+            estado: structure.estado,
+            municipio: structure.municipio,
+            dineg: structure.dineg,
+            vip: structure.vip === 'sim'
           });
         }
       });
