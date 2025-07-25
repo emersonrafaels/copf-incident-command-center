@@ -572,7 +572,7 @@ export const LongTailChart = memo(function LongTailChart({
             <div className="grid grid-cols-3 gap-3 p-3 bg-muted/20 rounded-lg">
               <div className="text-center">
                 <div className="text-xl font-bold text-green-600">{Math.round((timeRangeAnalysis.metrics.percentualExcelencia / 100) * timeRangeAnalysis.metrics.total)}</div>
-                <div className="text-xs text-muted-foreground font-medium">Meta</div>
+                <div className="text-xs text-muted-foreground font-medium">Excelência</div>
                 <div className="text-xs text-muted-foreground">≤ {formatHours(timeRangeAnalysis.metrics.metaExcelencia)}</div>
               </div>
               <div className="text-center">
