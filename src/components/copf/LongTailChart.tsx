@@ -1,6 +1,6 @@
 import React, { memo, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, ReferenceLine, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, ReferenceLine, Cell, LabelList } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
@@ -360,50 +360,58 @@ export const LongTailChart = memo(function LongTailChart({
         </CardHeader>
         
         <CardContent className="p-6">
-          <ChartContainer config={chartConfig} className="h-[420px] w-full">
+          <ChartContainer config={chartConfig} className="h-[480px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={timeRangeAnalysis.data} margin={{
-                top: 30,
+                top: 40,
                 right: 30,
-                left: 40,
-                bottom: 100
+                left: 50,
+                bottom: 120
               }}>
                 <defs>
                   <linearGradient id="barGradient1" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#22c55e" stopOpacity={0.8} />
-                    <stop offset="100%" stopColor="#22c55e" stopOpacity={0.4} />
+                    <stop offset="0%" stopColor="#22c55e" stopOpacity={0.9} />
+                    <stop offset="100%" stopColor="#22c55e" stopOpacity={0.6} />
                   </linearGradient>
                   <linearGradient id="barGradient2" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#f97316" stopOpacity={0.8} />
-                    <stop offset="100%" stopColor="#f97316" stopOpacity={0.4} />
+                    <stop offset="0%" stopColor="#f97316" stopOpacity={0.9} />
+                    <stop offset="100%" stopColor="#f97316" stopOpacity={0.6} />
                   </linearGradient>
                   <linearGradient id="barGradient3" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#ef4444" stopOpacity={0.8} />
-                    <stop offset="100%" stopColor="#ef4444" stopOpacity={0.4} />
+                    <stop offset="0%" stopColor="#ef4444" stopOpacity={0.9} />
+                    <stop offset="100%" stopColor="#ef4444" stopOpacity={0.6} />
                   </linearGradient>
                 </defs>
                 
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                <CartesianGrid strokeDasharray="2 2" stroke="hsl(var(--border))" opacity={0.4} />
                 <XAxis 
                   dataKey="rangeLabel" 
                   stroke="hsl(var(--muted-foreground))" 
                   tick={{
                     fill: 'hsl(var(--muted-foreground))',
-                    fontSize: 11,
+                    fontSize: 12,
                     fontWeight: 500
                   }} 
                   angle={-45} 
                   textAnchor="end" 
-                  height={100} 
+                  height={110} 
                   interval={0}
+                  axisLine={{
+                    stroke: 'hsl(var(--border))',
+                    strokeWidth: 1
+                  }}
+                  tickLine={{
+                    stroke: 'hsl(var(--border))',
+                    strokeWidth: 1
+                  }}
                   label={{ 
                     value: 'Faixas de Tempo de Abertura', 
                     position: 'insideBottom', 
-                    offset: -5,
+                    offset: -15,
                     style: { 
                       textAnchor: 'middle',
                       fill: 'hsl(var(--foreground))',
-                      fontSize: '12px',
+                      fontSize: '13px',
                       fontWeight: 600
                     }
                   }}
@@ -412,8 +420,16 @@ export const LongTailChart = memo(function LongTailChart({
                   stroke="hsl(var(--muted-foreground))" 
                   tick={{
                     fill: 'hsl(var(--muted-foreground))',
-                    fontSize: 11,
+                    fontSize: 12,
                     fontWeight: 500
+                  }}
+                  axisLine={{
+                    stroke: 'hsl(var(--border))',
+                    strokeWidth: 1
+                  }}
+                  tickLine={{
+                    stroke: 'hsl(var(--border))',
+                    strokeWidth: 1
                   }}
                   label={{ 
                     value: 'Número de Ocorrências', 
@@ -422,33 +438,49 @@ export const LongTailChart = memo(function LongTailChart({
                     style: { 
                       textAnchor: 'middle',
                       fill: 'hsl(var(--foreground))',
-                      fontSize: '12px',
+                      fontSize: '13px',
                       fontWeight: 600
                     }
                   }}
                 />
                 
                 <ChartTooltipContent 
-                  formatter={(value, name) => [
-                    `${value} ocorrências`, 
-                    'Quantidade'
-                  ]} 
-                  labelFormatter={label => `Faixa: ${label}`} 
+                  formatter={(value, name, props) => {
+                    const data = props.payload;
+                    const percentage = ((Number(value) / timeRangeAnalysis.metrics.total) * 100).toFixed(1);
+                    const avgHours = data?.avgHours ? ` (média: ${formatHours(data.avgHours)})` : '';
+                    
+                    return [
+                      <div key="tooltip-content" className="space-y-1">
+                        <div className="font-semibold text-sm">{value} ocorrências</div>
+                        <div className="text-xs text-muted-foreground">{percentage}% do total</div>
+                        <div className="text-xs text-muted-foreground">Faixa: {data?.rangeLabel}{avgHours}</div>
+                        <div className="text-xs font-medium text-primary mt-2 border-t border-border pt-1">
+                          ↗ Clique para filtrar na tabela de ocorrências
+                        </div>
+                      </div>, 
+                      ''
+                    ];
+                  }} 
+                  labelFormatter={() => ''} 
                   contentStyle={{
                     backgroundColor: 'hsl(var(--card))',
                     border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px',
-                    boxShadow: 'var(--shadow-elegant)'
+                    borderRadius: '12px',
+                    boxShadow: '0 10px 30px -10px hsl(var(--primary) / 0.2)',
+                    padding: '12px',
+                    minWidth: '220px'
                   }}
                   itemStyle={{
                     color: 'hsl(var(--foreground))',
-                    fontWeight: 500
+                    fontWeight: 500,
+                    padding: 0
                   }}
                 />
                 
                 <Bar 
                   dataKey="count" 
-                  radius={[6, 6, 0, 0]}
+                  radius={[8, 8, 0, 0]}
                   cursor="pointer"
                   onClick={(data, index) => {
                     if (data) {
@@ -460,36 +492,75 @@ export const LongTailChart = memo(function LongTailChart({
                     <Cell 
                       key={`cell-${index}`} 
                       fill={entry.color}
-                      stroke="none"
-                      className="transition-all duration-200 hover:opacity-80"
+                      stroke="hsl(var(--border))"
+                      strokeWidth={1}
+                      className="transition-all duration-300 hover:opacity-90 hover:shadow-lg"
                     />
                   ))}
+                  
+                  {/* Números nas barras */}
+                  <LabelList 
+                    dataKey="count" 
+                    position="top" 
+                    style={{ 
+                      fill: 'hsl(var(--foreground))', 
+                      fontSize: '11px', 
+                      fontWeight: 600,
+                      textAnchor: 'middle'
+                    }}
+                    offset={8}
+                    formatter={(value) => value > 0 ? value : ''}
+                  />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </ChartContainer>
           
-          {/* Indicadores visuais e dica de interatividade abaixo do gráfico */}
-          <div className="mt-4 space-y-3">
-            {/* Dica de interatividade */}
-            <div className="flex items-center justify-center gap-2 p-2 bg-muted/30 rounded text-center">
-              <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground"></div>
-              <span className="text-xs text-muted-foreground">Clique nas barras para filtrar por faixa de tempo</span>
+          {/* Indicadores visuais e dica de interatividade aprimorados */}
+          <div className="mt-6 space-y-4">
+            {/* Dica de interatividade melhorada */}
+            <div className="flex items-center justify-center gap-3 p-3 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+                <span className="text-sm font-medium text-foreground">Clique nas barras para aplicar filtros na tabela de ocorrências</span>
+              </div>
             </div>
             
-            {/* Legendas das cores */}
-            <div className="flex flex-wrap items-center justify-center gap-6 p-3 bg-muted/20 rounded-lg">
-              <div className="flex items-center gap-2 text-xs">
-                <div className="w-3 h-3 rounded bg-green-500"></div>
-                <span className="text-muted-foreground">Meta de Excelência: ≤ {formatHours(timeRangeAnalysis.metrics.metaExcelencia)}</span>
+            {/* Estatísticas resumidas */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-muted/30 rounded-lg">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">{Math.round((timeRangeAnalysis.metrics.percentualExcelencia / 100) * timeRangeAnalysis.metrics.total)}</div>
+                <div className="text-xs text-muted-foreground font-medium">Dentro da Meta</div>
+                <div className="text-xs text-muted-foreground">≤ {formatHours(timeRangeAnalysis.metrics.metaExcelencia)}</div>
               </div>
-              <div className="flex items-center gap-2 text-xs">
-                <div className="w-3 h-3 rounded bg-orange-500"></div>
-                <span className="text-muted-foreground">Atenção: {formatHours(timeRangeAnalysis.metrics.metaExcelencia)} - 5d</span>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-orange-600">{Math.round(((timeRangeAnalysis.metrics.percentualSLA - timeRangeAnalysis.metrics.percentualExcelencia) / 100) * timeRangeAnalysis.metrics.total)}</div>
+                <div className="text-xs text-muted-foreground font-medium">Necessita Atenção</div>
+                <div className="text-xs text-muted-foreground">{formatHours(timeRangeAnalysis.metrics.metaExcelencia)} - 5d</div>
               </div>
-              <div className="flex items-center gap-2 text-xs">
-                <div className="w-3 h-3 rounded bg-red-500"></div>
-                <span className="text-muted-foreground">Crítico: {">"}5 dias</span>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-red-600">{timeRangeAnalysis.metrics.agingCritico}</div>
+                <div className="text-xs text-muted-foreground font-medium">Aging Crítico</div>
+                <div className="text-xs text-muted-foreground">{">"} 5 dias</div>
+              </div>
+            </div>
+            
+            {/* Legendas das cores melhoradas */}
+            <div className="flex flex-wrap items-center justify-center gap-6 p-4 bg-card/50 rounded-lg border border-border/50">
+              <div className="flex items-center gap-2 text-sm">
+                <div className="w-4 h-4 rounded bg-gradient-to-b from-green-500 to-green-600 shadow-sm"></div>
+                <span className="text-foreground font-medium">Excelência</span>
+                <span className="text-muted-foreground text-xs">≤ {formatHours(timeRangeAnalysis.metrics.metaExcelencia)}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <div className="w-4 h-4 rounded bg-gradient-to-b from-orange-500 to-orange-600 shadow-sm"></div>
+                <span className="text-foreground font-medium">Atenção</span>
+                <span className="text-muted-foreground text-xs">{formatHours(timeRangeAnalysis.metrics.metaExcelencia)} - 5d</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <div className="w-4 h-4 rounded bg-gradient-to-b from-red-500 to-red-600 shadow-sm"></div>
+                <span className="text-foreground font-medium">Crítico</span>
+                <span className="text-muted-foreground text-xs">{">"} 5 dias</span>
               </div>
             </div>
           </div>
