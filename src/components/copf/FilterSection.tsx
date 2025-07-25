@@ -468,8 +468,8 @@ export function FilterSection({ className, showSerialNumber = false }: FilterSec
                       </div>
                     </div>
 
-                    {/* Linha com DINEG e SUPT */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Segunda linha: DINEG, SUPT, Ponto VIP */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {/* DINEG */}
                       <div className="group space-y-3">
                         <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
