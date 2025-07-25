@@ -171,9 +171,8 @@ export function Dashboard() {
         if (!ufFilter.includes(agencyUF)) return false;
       }
 
-      // Simular tipo de agência baseado na agência
-      const tipoAgencia = occurrence.agency.includes('Terceirizada') ? 'terceirizada' : 'convencional';
-      if (tipoAgenciaFilter.length > 0 && !tipoAgenciaFilter.includes(tipoAgencia)) return false;
+      // Usar o campo tipoAgencia do objeto de dados
+      if (tipoAgenciaFilter.length > 0 && !tipoAgenciaFilter.includes(occurrence.tipoAgencia)) return false;
 
       // Simular ponto VIP (agências com número terminado em 0, 5 são VIP)
       const agencyNumber = occurrence.agency.match(/\d+/)?.[0] || '0';
