@@ -82,32 +82,41 @@ export function useDashboardData() {
 
     const mockOccurrences: OccurrenceData[] = [];
 
+    // Lista de todos os fornecedores para garantir distribuição
+    const allVendors = {
+      AA: ['Diebold Nixdorf', 'NCR Corporation', 'Itautec'],
+      AB: ['Dell Technologies', 'HP', 'Lenovo', 'Gertec', 'Bematech', 'Epson', 'Canon'],
+      terceirizada: ['Fornecedor A', 'Fornecedor B', 'Fornecedor C', 'Fornecedor D', 'Fornecedor E', 'Fornecedor F', 'Fornecedor G', 'Fornecedor H']
+    };
+
+    let vendorRotationIndex = 0;
+
     // Gerar ocorrências baseadas na estrutura hierárquica
     hierarchyStructure.forEach((structure, groupIndex) => {
-      const isSegmentAA = Math.random() < 0.8; // 80% AA, 20% AB
-      const segment = isSegmentAA ? 'AA' : 'AB';
-      const equipmentList = equipmentsBySegment[segment];
-      
-      // Determinar fornecedor baseado no tipo
-      let vendor: string;
-      let transportadora = '';
-      
-      if (structure.tipo === 'terceirizada') {
-        transportadora = transportadoras[Math.floor(Math.random() * transportadoras.length)];
-        const fornecedores = fornecedoresPorTransportadora[transportadora];
-        vendor = fornecedores[Math.floor(Math.random() * fornecedores.length)];
-      } else {
-        vendor = segment === 'AA' 
-          ? ['Diebold Nixdorf', 'NCR Corporation', 'Itautec'][Math.floor(Math.random() * 3)]
-          : ['Dell Technologies', 'HP', 'Lenovo', 'Gertec', 'Bematech', 'Epson', 'Canon'][Math.floor(Math.random() * 7)];
-      }
-
       structure.agencias.forEach((agencyNum, agencyIndex) => {
-        // Gerar 3-8 ocorrências por agência
-        const occurrenceCount = Math.floor(Math.random() * 6) + 3;
+        // Gerar 4-7 ocorrências por agência para garantir mais dados
+        const occurrenceCount = Math.floor(Math.random() * 4) + 4;
         
         for (let i = 0; i < occurrenceCount; i++) {
+          // Alternar entre segmentos AA e AB para distribuição equilibrada
+          const segment = (i % 3 === 0) ? 'AB' : 'AA'; // 33% AB, 67% AA
+          const equipmentList = equipmentsBySegment[segment];
           const equipment = equipmentList[Math.floor(Math.random() * equipmentList.length)];
+          
+          // Determinar fornecedor baseado no tipo e garantir distribuição
+          let vendor: string;
+          
+          if (structure.tipo === 'terceirizada') {
+            // Rotacionar entre fornecedores terceirizados
+            vendor = allVendors.terceirizada[vendorRotationIndex % allVendors.terceirizada.length];
+            vendorRotationIndex++;
+          } else {
+            // Rotacionar entre fornecedores do segmento
+            const segmentVendors = allVendors[segment];
+            vendor = segmentVendors[vendorRotationIndex % segmentVendors.length];
+            vendorRotationIndex++;
+          }
+
           const occurrenceId = `COPF-2024-${String(groupIndex + 1).padStart(2, '0')}-${agencyNum}-${String(i + 1).padStart(3, '0')}`;
           
           const status = ['a_iniciar', 'em_andamento', 'encerrado', 'com_impedimentos', 'cancelado'][Math.floor(Math.random() * 5)] as ('a_iniciar' | 'em_andamento' | 'encerrado' | 'com_impedimentos' | 'cancelado');
@@ -135,33 +144,42 @@ export function useDashboardData() {
             resolvedAt = new Date(createdAt.getTime() + durationHours * 60 * 60 * 1000).toISOString();
           }
 
+          // Descrições variadas baseadas no segmento
+          const descriptions = {
+            AA: [
+              'ATM não está dispensando cédulas - erro de hardware na gaveta',
+              'ATM não aceita depósitos - problemas no mecanismo de captura',
+              'Erro de conectividade com o servidor central',
+              'Cassete com defeito no sensor de notas',
+              'Falha na autenticação biométrica',
+              'Problema no leitor de cartão magnético',
+              'Display do ATM com falha na exibição',
+              'Teclado numérico não responsivo'
+            ],
+            AB: [
+              'Impressora com papel atolado constantemente',
+              'Perda total de conectividade - link primário inoperante', 
+              'Terminal não reconhece cartões chip',
+              'Monitor com falha na exibição',
+              'Teclado com teclas não responsivas',
+              'Servidor com alta latência',
+              'Scanner não consegue ler documentos',
+              'Leitor biométrico não funciona',
+              'Televisão sem sinal',
+              'Classificadora com erro de contagem',
+              'Notebook apresentando tela azul',
+              'Desktop com lentidão extrema',
+              'PIN PAD com botões travados'
+            ]
+          };
+
           mockOccurrences.push({
             id: occurrenceId,
             agency: `AG${agencyNum} - Centro (${structure.municipio})`,
             segment,
             equipment,
             serialNumber: `${segment}${String(i + 1).padStart(3, '0')}-${structure.estado}-${agencyNum}`,
-            description: segment === 'AA' 
-              ? [
-                  'ATM não está dispensando cédulas - erro de hardware na gaveta',
-                  'ATM não aceita depósitos - problemas no mecanismo de captura',
-                  'Erro de conectividade com o servidor central',
-                  'Cassete com defeito no sensor de notas',
-                  'Falha na autenticação biométrica',
-                  'Problema no leitor de cartão magnético'
-                ][Math.floor(Math.random() * 6)]
-              : [
-                  'Impressora com papel atolado constantemente',
-                  'Perda total de conectividade - link primário inoperante', 
-                  'Terminal não reconhece cartões chip',
-                  'Monitor com falha na exibição',
-                  'Teclado com teclas não responsivas',
-                  'Servidor com alta latência',
-                  'Scanner não consegue ler documentos',
-                  'Leitor biométrico não funciona',
-                  'Televisão sem sinal',
-                  'Classificadora com erro de contagem'
-                ][Math.floor(Math.random() * 10)],
+            description: descriptions[segment][Math.floor(Math.random() * descriptions[segment].length)],
             severity: ['critical', 'high', 'medium', 'low'][Math.floor(Math.random() * 4)] as ('critical' | 'high' | 'medium' | 'low'),
             status,
             createdAt: createdAt.toISOString(),
