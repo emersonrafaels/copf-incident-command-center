@@ -719,7 +719,7 @@ export const LongTailChart = memo(function LongTailChart({
                       </p>
                       <ul className="list-disc list-inside text-xs text-red-600 dark:text-red-500 ml-2 space-y-1">
                         <li>Escalação imediata de ocorrências antigas</li>
-                        <li>Revisão completa de fornecedores</li>
+                        <li>Revisão completa com fornecedores</li>
                         <li>Implementação de monitoramento em tempo real</li>
                       </ul>
                     </div>
