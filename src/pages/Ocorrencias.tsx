@@ -51,6 +51,7 @@ const Ocorrencias = () => {
     ufFilter,
     tipoAgenciaFilter,
     pontoVipFilter,
+    suptFilter,
     segmentFilterMulti,
     equipmentFilterMulti,
     statusFilterMulti,
@@ -97,6 +98,13 @@ const Ocorrencias = () => {
     const isVip = agencyNumber.endsWith('0') || agencyNumber.endsWith('5');
     const pontoVipStatus = isVip ? 'sim' : 'nao';
     const matchesPontoVip = pontoVipFilter.length === 0 || pontoVipFilter.includes(pontoVipStatus);
+
+    // Filtro de SUPT baseado na DINEG da agência
+    const agencyNum = parseInt(agencyNumber);
+    let agencySupt = '';
+    if (agencyNum >= 210 && agencyNum <= 299) agencySupt = agencyNum.toString().substring(0, 2);
+    else if (agencyNum >= 510 && agencyNum <= 599) agencySupt = agencyNum.toString().substring(0, 2);
+    const matchesSupt = suptFilter.length === 0 || (agencySupt && suptFilter.includes(agencySupt));
 
     // Filtro de ocorrências vencidas
     if (overrideFilter) {
@@ -159,7 +167,7 @@ const Ocorrencias = () => {
       }
     }
 
-    return matchesSearch && matchesStatus && matchesSegment && matchesEquipment && matchesSerial && matchesVendor && matchesAgencia && matchesUF && matchesTipoAgencia && matchesPontoVip;
+    return matchesSearch && matchesStatus && matchesSegment && matchesEquipment && matchesSerial && matchesVendor && matchesAgencia && matchesUF && matchesTipoAgencia && matchesPontoVip && matchesSupt;
   });
   const handleViewDetails = occurrence => {
     setSelectedOccurrence(occurrence);
@@ -456,7 +464,7 @@ const Ocorrencias = () => {
         </div>
 
         {/* Filtros */}
-        <FilterSection />
+        <FilterSection showSerialNumber={true} />
 
         <Card className="shadow-lg border-0 bg-gradient-to-r from-background to-accent/5">
           <CardHeader className="pb-4">

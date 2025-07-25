@@ -25,6 +25,7 @@ export interface FiltersState {
   dinegFilter: string[];
   tipoAgenciaFilter: string[];
   pontoVipFilter: string[];
+  suptFilter: string[];
   
   // Filtros especiais
   overrideFilter: boolean;
@@ -67,6 +68,7 @@ const defaultFilters: FiltersState = {
   dinegFilter: [],
   tipoAgenciaFilter: [],
   pontoVipFilter: [],
+  suptFilter: [],
   
   overrideFilter: false,
   vendorPriorityFilter: false,
@@ -115,6 +117,7 @@ export const FiltersProvider: React.FC<{ children: ReactNode }> = ({ children })
     filters.dinegFilter.length > 0 ||
     filters.tipoAgenciaFilter.length > 0 ||
     filters.pontoVipFilter.length > 0 ||
+    filters.suptFilter.length > 0 ||
     filters.statusSlaFilter.length > 0;
 
   return (

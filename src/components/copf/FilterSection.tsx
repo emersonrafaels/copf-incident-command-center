@@ -15,9 +15,10 @@ import { cn } from "@/lib/utils";
 
 interface FilterSectionProps {
   className?: string;
+  showSerialNumber?: boolean;
 }
 
-export function FilterSection({ className }: FilterSectionProps) {
+export function FilterSection({ className, showSerialNumber = false }: FilterSectionProps) {
   const [isFiltersOpen, setIsFiltersOpen] = useState(true);
   const [isLocationOpen, setIsLocationOpen] = useState(true);
   const [isEquipmentOpen, setIsEquipmentOpen] = useState(true);
@@ -31,6 +32,7 @@ export function FilterSection({ className }: FilterSectionProps) {
     dinegFilter,
     tipoAgenciaFilter,
     pontoVipFilter,
+    suptFilter,
     segmentFilterMulti,
     equipmentFilterMulti,
     statusFilterMulti,
@@ -117,7 +119,21 @@ export function FilterSection({ className }: FilterSectionProps) {
     : ufFilter.flatMap(uf => municipiosPorUF[uf as keyof typeof municipiosPorUF] || []).sort();
 
   // Diretorias de Negócio (DINEG)
-  const dinegOptions = ['2', '4', '8', '80'];
+  const dinegOptions = ['2', '5', '8', '80'];
+
+  // Superintendências (SUPT) - Hierarquia baseada em DINEG
+  const suptOptions = {
+    '2': ['21', '22', '23', '24', '25', '26', '27', '28', '29'],
+    '5': ['51', '52', '53', '54', '55', '56', '57', '58', '59']
+  };
+
+  // Filtrar SUPT baseado nos DINEGs selecionados
+  const getAvailableSupts = () => {
+    if (dinegFilter.length === 0) {
+      return Object.values(suptOptions).flat().sort();
+    }
+    return dinegFilter.flatMap(dineg => suptOptions[dineg as keyof typeof suptOptions] || []).sort();
+  };
 
   // Filtrar DINEG baseado nas agências selecionadas (lógica simplificada)
   const availableDinegs = agenciaFilter.length === 0 ? dinegOptions : dinegOptions.filter((dineg, index) => {
@@ -165,13 +181,14 @@ export function FilterSection({ className }: FilterSectionProps) {
                         dineg: dinegFilter.length > 0,
                         tipoAgencia: tipoAgenciaFilter.length > 0,
                         pontoVip: pontoVipFilter.length > 0,
+                        supt: suptFilter.length > 0,
                         segmento: segmentFilterMulti.length > 0,
                         equipamento: equipmentFilterMulti.length > 0,
                         status: statusFilterMulti.length > 0,
                         severidade: severityFilterMulti.length > 0,
                         fornecedor: vendorFilterMulti.length > 0,
                         transportadora: transportadoraFilterMulti.length > 0,
-                        serie: serialNumberFilter !== '',
+                        serie: showSerialNumber && serialNumberFilter !== '',
                         vencidas: overrideFilter,
                         priorizado: vendorPriorityFilter,
                         reincidentes: reincidentFilter
@@ -182,13 +199,14 @@ export function FilterSection({ className }: FilterSectionProps) {
                         dineg: dinegFilter.length > 0,
                         tipoAgencia: tipoAgenciaFilter.length > 0,
                         pontoVip: pontoVipFilter.length > 0,
+                        supt: suptFilter.length > 0,
                         segmento: segmentFilterMulti.length > 0,
                         equipamento: equipmentFilterMulti.length > 0,
                         status: statusFilterMulti.length > 0,
                         severidade: severityFilterMulti.length > 0,
                         fornecedor: vendorFilterMulti.length > 0,
                         transportadora: transportadoraFilterMulti.length > 0,
-                        serie: serialNumberFilter !== '',
+                        serie: showSerialNumber && serialNumberFilter !== '',
                         vencidas: overrideFilter,
                         priorizado: vendorPriorityFilter,
                         reincidentes: reincidentFilter
@@ -199,13 +217,14 @@ export function FilterSection({ className }: FilterSectionProps) {
                         dineg: dinegFilter.length > 0,
                         tipoAgencia: tipoAgenciaFilter.length > 0,
                         pontoVip: pontoVipFilter.length > 0,
+                        supt: suptFilter.length > 0,
                         segmento: segmentFilterMulti.length > 0,
                         equipamento: equipmentFilterMulti.length > 0,
                         status: statusFilterMulti.length > 0,
                         severidade: severityFilterMulti.length > 0,
                         fornecedor: vendorFilterMulti.length > 0,
                         transportadora: transportadoraFilterMulti.length > 0,
-                        serie: serialNumberFilter !== '',
+                        serie: showSerialNumber && serialNumberFilter !== '',
                         vencidas: overrideFilter,
                         priorizado: vendorPriorityFilter,
                         reincidentes: reincidentFilter
@@ -431,6 +450,102 @@ export function FilterSection({ className }: FilterSectionProps) {
                                   }}>
                                     <Check className={cn("mr-2 h-4 w-4", dinegFilter.includes(dineg) ? "opacity-100" : "opacity-0")} />
                                     DINEG {dineg}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+
+                    {/* SUPT */}
+                    <div className="group space-y-3">
+                      <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                        <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                        Supt
+                      </Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                            {suptFilter.length > 0 ? (
+                              <div className="flex items-center gap-2">
+                                <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                                  {suptFilter.length}
+                                </Badge>
+                                <span className="text-sm">
+                                  {suptFilter.length === 1 ? `Supt ${suptFilter[0]}` : `${suptFilter.length} Supts`}
+                                </span>
+                              </div>
+                            ) : "Todas as Supts"}
+                            <div className="w-4 h-4 opacity-50">⌄</div>
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                          <Command>
+                            <CommandInput placeholder="Buscar Supt..." className="h-9" />
+                            <CommandEmpty>Nenhuma Supt encontrada.</CommandEmpty>
+                            <CommandList>
+                              <CommandGroup>
+                                {getAvailableSupts().map(supt => (
+                                  <CommandItem key={supt} onSelect={() => {
+                                    const isSelected = suptFilter.includes(supt);
+                                    if (isSelected) {
+                                      updateFilter('suptFilter', suptFilter.filter(s => s !== supt));
+                                    } else {
+                                      updateFilter('suptFilter', [...suptFilter, supt]);
+                                    }
+                                  }}>
+                                    <Check className={cn("mr-2 h-4 w-4", suptFilter.includes(supt) ? "opacity-100" : "opacity-0")} />
+                                    Supt {supt}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+
+                    {/* Tipo da Agência */}
+                    <div className="group space-y-3">
+                      <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                        <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                        Tipo da Agência
+                      </Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                            {tipoAgenciaFilter.length > 0 ? (
+                              <div className="flex items-center gap-2">
+                                <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                                  {tipoAgenciaFilter.length}
+                                </Badge>
+                                <span className="text-sm">
+                                  {tipoAgenciaFilter.length === 1 ? 
+                                    (tipoAgenciaFilter[0] === 'convencional' ? 'Convencional' : 'Terceirizada') : 
+                                    `${tipoAgenciaFilter.length} tipos`}
+                                </span>
+                              </div>
+                            ) : "Todos os tipos"}
+                            <div className="w-4 h-4 opacity-50">⌄</div>
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                          <Command>
+                            <CommandList>
+                              <CommandGroup>
+                                {['convencional', 'terceirizada'].map(tipo => (
+                                  <CommandItem key={tipo} onSelect={() => {
+                                    const isSelected = tipoAgenciaFilter.includes(tipo);
+                                    if (isSelected) {
+                                      updateFilter('tipoAgenciaFilter', tipoAgenciaFilter.filter(t => t !== tipo));
+                                    } else {
+                                      updateFilter('tipoAgenciaFilter', [...tipoAgenciaFilter, tipo]);
+                                    }
+                                  }}>
+                                    <Check className={cn("mr-2 h-4 w-4", tipoAgenciaFilter.includes(tipo) ? "opacity-100" : "opacity-0")} />
+                                    {tipo === 'convencional' ? 'Convencional' : 'Terceirizada'}
                                   </CommandItem>
                                 ))}
                               </CommandGroup>
@@ -910,18 +1025,20 @@ export function FilterSection({ className }: FilterSectionProps) {
                        </Popover>
                      </div>
 
-                     {/* Número de Série */}
-                     <div className="space-y-3">
-                       <Label className="text-sm font-medium text-muted-foreground">
-                         Número de Série
-                       </Label>
-                       <Input
-                         placeholder="Ex: ATM001-SP-001"
-                         value={serialNumberFilter}
-                         onChange={(e) => updateFilter('serialNumberFilter', e.target.value)}
-                         className="h-10"
-                       />
-                     </div>
+                      {/* Número de Série - Apenas na página Ocorrências */}
+                      {showSerialNumber && (
+                        <div className="space-y-3">
+                          <Label className="text-sm font-medium text-muted-foreground">
+                            Número de Série
+                          </Label>
+                          <Input
+                            placeholder="Ex: ATM001-SP-001"
+                            value={serialNumberFilter}
+                            onChange={(e) => updateFilter('serialNumberFilter', e.target.value)}
+                            className="h-10"
+                          />
+                        </div>
+                      )}
                    </div>
                 </CollapsibleContent>
               </div>
