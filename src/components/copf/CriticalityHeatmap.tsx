@@ -1,10 +1,11 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { AlertTriangle, Clock, RotateCcw, TrendingUp, Info, Calculator, ArrowUp, ArrowDown, Minus, Activity } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { AlertTriangle, Clock, RotateCcw, TrendingUp, Info, Calculator, ArrowUp, ArrowDown, Minus, Activity, ChevronDown } from "lucide-react";
 import { useFilters } from "@/contexts/FiltersContext";
 interface CriticalityData {
   equipment: string;
@@ -65,6 +66,7 @@ export function CriticalityHeatmap({
   occurrences
 }: CriticalityHeatmapProps) {
   const filters = useFilters();
+  const [isOpen, setIsOpen] = useState(true);
 
   // Aplicar filtros às ocorrências antes do processamento
   const filteredOccurrences = useMemo(() => {
@@ -470,218 +472,225 @@ export function CriticalityHeatmap({
       </DialogContent>
     </Dialog>;
   return <Card className="animate-fade-in border-border/50 bg-gradient-to-br from-card to-muted/10">
-      <CardHeader className="pb-4">
-        <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20">
-              <AlertTriangle className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <div className="flex items-center gap-3 mb-1">
-                <h3 className="text-xl font-semibold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
-                  Mapa de Criticidade por Equipamento
-                </h3>
+      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20">
+                <AlertTriangle className="h-5 w-5 text-primary" />
               </div>
-              <p className="text-sm text-muted-foreground">
-                Análise baseada em baselines específicos por tipo de equipamento
-                {filteredOccurrences.length !== occurrences.length}
-              </p>
-            </div>
-          </div>
-          <CriticalityExplanationModal />
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Legenda Renovada */}
-        <div className="bg-gradient-to-r from-muted/20 to-muted/30 p-4 rounded-xl border border-border/30">
-          <h4 className="font-semibold mb-4 text-sm flex items-center gap-2">
-            <Activity className="h-4 w-4 text-primary" />
-            Escala de Criticidade
-          </h4>
-          <div className="grid grid-cols-5 gap-4">
-            {[{
-            level: 'Crítico',
-            range: '80-100',
-            color: 'bg-destructive',
-            textColor: 'text-destructive'
-          }, {
-            level: 'Alto',
-            range: '60-79',
-            color: 'bg-warning',
-            textColor: 'text-warning'
-          }, {
-            level: 'Médio',
-            range: '40-59',
-            color: 'bg-yellow-500',
-            textColor: 'text-yellow-600'
-          }, {
-            level: 'Baixo',
-            range: '20-39',
-            color: 'bg-blue-500',
-            textColor: 'text-blue-600'
-          }, {
-            level: 'Mínimo',
-            range: '0-19',
-            color: 'bg-success',
-            textColor: 'text-success'
-          }].map(item => <div key={item.level} className="text-center space-y-2">
-                <div className={`w-full h-4 ${item.color} rounded-lg shadow-sm border border-border/20`}></div>
-                <div>
-                  <div className={`font-semibold text-sm ${item.textColor}`}>{item.level}</div>
-                  <div className="text-xs text-muted-foreground">{item.range}</div>
+              <div>
+                <div className="flex items-center gap-3 mb-1">
+                  <CollapsibleTrigger asChild>
+                    <h3 className="text-xl font-semibold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text cursor-pointer hover:opacity-80 transition-opacity flex items-center gap-2">
+                      Mapa de Criticidade por Equipamento
+                      <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+                    </h3>
+                  </CollapsibleTrigger>
                 </div>
-              </div>)}
-          </div>
-        </div>
+                <p className="text-sm text-muted-foreground">
+                  Análise baseada em baselines específicos por tipo de equipamento
+                  {filteredOccurrences.length !== occurrences.length}
+                </p>
+              </div>
+            </div>
+            <CriticalityExplanationModal />
+          </CardTitle>
+        </CardHeader>
+        <CollapsibleContent>
+          <CardContent className="space-y-6">
+            {/* Legenda Renovada */}
+            <div className="bg-gradient-to-r from-muted/20 to-muted/30 p-4 rounded-xl border border-border/30">
+              <h4 className="font-semibold mb-4 text-sm flex items-center gap-2">
+                <Activity className="h-4 w-4 text-primary" />
+                Escala de Criticidade
+              </h4>
+              <div className="grid grid-cols-5 gap-4">
+                {[{
+                level: 'Crítico',
+                range: '80-100',
+                color: 'bg-destructive',
+                textColor: 'text-destructive'
+              }, {
+                level: 'Alto',
+                range: '60-79',
+                color: 'bg-warning',
+                textColor: 'text-warning'
+              }, {
+                level: 'Médio',
+                range: '40-59',
+                color: 'bg-yellow-500',
+                textColor: 'text-yellow-600'
+              }, {
+                level: 'Baixo',
+                range: '20-39',
+                color: 'bg-blue-500',
+                textColor: 'text-blue-600'
+              }, {
+                level: 'Mínimo',
+                range: '0-19',
+                color: 'bg-success',
+                textColor: 'text-success'
+              }].map(item => <div key={item.level} className="text-center space-y-2">
+                    <div className={`w-full h-4 ${item.color} rounded-lg shadow-sm border border-border/20`}></div>
+                    <div>
+                      <div className={`font-semibold text-sm ${item.textColor}`}>{item.level}</div>
+                      <div className="text-xs text-muted-foreground">{item.range}</div>
+                    </div>
+                  </div>)}
+              </div>
+            </div>
 
-        {/* Grade de Equipamentos Melhorada */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {criticalityData.slice(0, 16).map((item, index) => <TooltipProvider key={`${item.equipment}-${item.segment}`}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className={`group relative p-5 rounded-2xl border-2 cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-xl animate-fade-in ${getCriticalityColor(item.criticalityScore)} text-white overflow-hidden backdrop-blur-sm`} style={{
-                animationDelay: `${index * 50}ms`
-              }}>
-                    {/* Background patterns */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-black/10"></div>
-                    <div className="absolute top-0 right-0 w-20 h-20 bg-white/5 rounded-full -translate-y-10 translate-x-10"></div>
-                    
-                    <div className="relative space-y-4">
-                      {/* Header */}
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-bold text-base truncate mb-2" title={item.equipment}>
-                            {item.equipment}
-                          </h4>
-                          <Badge variant="secondary" className="text-xs bg-white/15 text-white border-white/25 backdrop-blur-sm px-3 py-1">
-                            {item.segment}
-                          </Badge>
-                        </div>
-                        <div className="text-right flex-shrink-0 ml-3">
-                          <div className="text-3xl font-bold leading-none mb-1">
-                            {Math.round(item.criticalityScore)}
+            {/* Grade de Equipamentos Melhorada */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {criticalityData.slice(0, 16).map((item, index) => <TooltipProvider key={`${item.equipment}-${item.segment}`}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className={`group relative p-5 rounded-2xl border-2 cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-xl animate-fade-in ${getCriticalityColor(item.criticalityScore)} text-white overflow-hidden backdrop-blur-sm`} style={{
+                    animationDelay: `${index * 50}ms`
+                  }}>
+                        {/* Background patterns */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-black/10"></div>
+                        <div className="absolute top-0 right-0 w-20 h-20 bg-white/5 rounded-full -translate-y-10 translate-x-10"></div>
+                        
+                        <div className="relative space-y-4">
+                          {/* Header */}
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-bold text-base truncate mb-2" title={item.equipment}>
+                                {item.equipment}
+                              </h4>
+                              <Badge variant="secondary" className="text-xs bg-white/15 text-white border-white/25 backdrop-blur-sm px-3 py-1">
+                                {item.segment}
+                              </Badge>
+                            </div>
+                            <div className="text-right flex-shrink-0 ml-3">
+                              <div className="text-3xl font-bold leading-none mb-1">
+                                {Math.round(item.criticalityScore)}
+                              </div>
+                              <div className="text-xs font-semibold opacity-90 tracking-wide">
+                                {getCriticalityLabel(item.criticalityScore)}
+                              </div>
+                            </div>
                           </div>
-                          <div className="text-xs font-semibold opacity-90 tracking-wide">
-                            {getCriticalityLabel(item.criticalityScore)}
-                          </div>
-                        </div>
-                      </div>
 
-                      {/* Principais métricas */}
-                      <div className="space-y-3">
-                        <div className="text-sm opacity-90 font-medium flex items-center gap-2">
-                          <Activity className="h-3 w-3" />
-                          {item.occurrenceCount} ocorrências
+                          {/* Principais métricas */}
+                          <div className="space-y-3">
+                            <div className="text-sm opacity-90 font-medium flex items-center gap-2">
+                              <Activity className="h-3 w-3" />
+                              {item.occurrenceCount} ocorrências
+                            </div>
+                            
+                            {/* Métricas principais em grid 2x2 */}
+                            <div className="grid grid-cols-2 gap-3">
+                              {/* Aging Médio */}
+                              <div className="p-3 rounded-xl border border-white/20 bg-white/5">
+                                <div className="flex items-center gap-1 mb-2">
+                                  <Clock className="h-3 w-3" />
+                                  <span className="text-xs opacity-80">AGING</span>
+                                </div>
+                                <div className="text-sm font-bold">
+                                  {item.aging}d
+                                </div>
+                                <div className="text-xs opacity-70">baseline: {item.agingBaseline}d</div>
+                              </div>
+
+                              {/* Volume vs Baseline */}
+                              <div className="p-3 rounded-xl border border-white/20 bg-white/5">
+                                <div className="flex items-center gap-1 mb-2">
+                                  <TrendingUp className="h-3 w-3" />
+                                  <span className="text-xs opacity-80">VOLUME</span>
+                                </div>
+                                <div className="text-sm font-bold">{item.percentualVolumeBaseline}%</div>
+                                <div className="text-xs opacity-70">baseline: 100%</div>
+                              </div>
+
+                              {/* SLA Status */}
+                              <div className="p-3 rounded-xl border border-white/20 bg-white/5">
+                                <div className="flex items-center gap-1 mb-2">
+                                  {item.slaStatus === 'above' ? <ArrowUp className="h-3 w-3" /> : item.slaStatus === 'below' ? <ArrowDown className="h-3 w-3" /> : <Minus className="h-3 w-3" />}
+                                  <span className="text-xs opacity-80">SLA</span>
+                                </div>
+                                <div className="text-sm font-bold">
+                                  {item.slaBreach}%
+                                </div>
+                                <div className="text-xs opacity-70">baseline: {EQUIPMENT_BASELINES[item.equipment as keyof typeof EQUIPMENT_BASELINES]?.sla || EQUIPMENT_BASELINES.default.sla}%</div>
+                              </div>
+
+                              {/* Reincidência */}
+                              <div className="p-3 rounded-xl border border-white/20 bg-white/5">
+                                <div className="flex items-center gap-1 mb-2">
+                                  <RotateCcw className="h-3 w-3" />
+                                  <span className="text-xs opacity-80">REIN</span>
+                                </div>
+                                <div className="text-sm font-bold">{item.reincidenciaPercentual}%</div>
+                                <div className="text-xs opacity-70">baseline: 0%</div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                         
-                        {/* Métricas principais em grid 2x2 */}
-                        <div className="grid grid-cols-2 gap-3">
-                          {/* Aging Médio */}
-                          <div className="p-3 rounded-xl border border-white/20 bg-white/5">
-                            <div className="flex items-center gap-1 mb-2">
-                              <Clock className="h-3 w-3" />
-                              <span className="text-xs opacity-80">AGING</span>
-                            </div>
-                            <div className="text-sm font-bold">
-                              {item.aging}d
-                            </div>
-                            <div className="text-xs opacity-70">baseline: {item.agingBaseline}d</div>
+                        {/* Hover glow effect */}
+                        <div className="absolute inset-0 border-2 border-white/0 rounded-2xl transition-all duration-300 group-hover:border-white/20 group-hover:shadow-[0_0_30px_rgba(255,255,255,0.1)]"></div>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-sm bg-background/95 backdrop-blur-sm border border-border/80 p-4">
+                      <div className="space-y-3">
+                        <div className="font-semibold text-base">{item.equipment} ({item.segment})</div>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span>Criticidade:</span>
+                            <span className="font-semibold capitalize">{getCriticalityLabel(item.criticalityScore)} ({Math.round(item.criticalityScore)})</span>
                           </div>
-
-                          {/* Volume vs Baseline */}
-                          <div className="p-3 rounded-xl border border-white/20 bg-white/5">
-                            <div className="flex items-center gap-1 mb-2">
-                              <TrendingUp className="h-3 w-3" />
-                              <span className="text-xs opacity-80">VOLUME</span>
-                            </div>
-                            <div className="text-sm font-bold">{item.percentualVolumeBaseline}%</div>
-                            <div className="text-xs opacity-70">baseline: 100%</div>
+                          <div className="flex justify-between">
+                            <span>Aging atual:</span>
+                            <span className="font-semibold">{item.aging}d (baseline: {item.agingBaseline}d)</span>
                           </div>
-
-                          {/* SLA Status */}
-                          <div className="p-3 rounded-xl border border-white/20 bg-white/5">
-                            <div className="flex items-center gap-1 mb-2">
-                              {item.slaStatus === 'above' ? <ArrowUp className="h-3 w-3" /> : item.slaStatus === 'below' ? <ArrowDown className="h-3 w-3" /> : <Minus className="h-3 w-3" />}
-                              <span className="text-xs opacity-80">SLA</span>
-                            </div>
-                            <div className="text-sm font-bold">
-                              {item.slaBreach}%
-                            </div>
-                            <div className="text-xs opacity-70">baseline: {EQUIPMENT_BASELINES[item.equipment as keyof typeof EQUIPMENT_BASELINES]?.sla || EQUIPMENT_BASELINES.default.sla}%</div>
+                          <div className="flex justify-between">
+                            <span>Variação aging:</span>
+                            <span className={`font-semibold ${item.agingVariation > 0 ? 'text-destructive' : 'text-success'}`}>
+                              {item.agingVariation > 0 ? '+' : ''}{item.agingVariation}%
+                            </span>
                           </div>
-
-                          {/* Reincidência */}
-                          <div className="p-3 rounded-xl border border-white/20 bg-white/5">
-                            <div className="flex items-center gap-1 mb-2">
-                              <RotateCcw className="h-3 w-3" />
-                              <span className="text-xs opacity-80">REIN</span>
-                            </div>
-                            <div className="text-sm font-bold">{item.reincidenciaPercentual}%</div>
-                            <div className="text-xs opacity-70">baseline: 0%</div>
-                          </div>
+                           <div className="flex justify-between">
+                             <span>Reincidência:</span>
+                             <span className="font-semibold">{item.reincidencia} ocorrências ({item.reincidenciaPercentual}%)</span>
+                           </div>
+                           <div className="flex justify-between">
+                             <span>Volume vs baseline:</span>
+                             <span className={`font-semibold ${item.volumeAtipico ? 'text-warning' : 'text-success'}`}>
+                               {item.percentualVolumeBaseline}%  <span className="mx-1">({item.volumeAtipico ? 'Atípico' : 'Normal'})</span>
+                             </span>
+                           </div>
+                           <div className="flex justify-between">
+                             <span>Agências SLA vencido:</span>
+                             <span className="font-semibold text-destructive">
+                               {item.agenciesWithSLABreach}
+                             </span>
+                           </div>
                         </div>
                       </div>
-                    </div>
-                    
-                    {/* Hover glow effect */}
-                    <div className="absolute inset-0 border-2 border-white/0 rounded-2xl transition-all duration-300 group-hover:border-white/20 group-hover:shadow-[0_0_30px_rgba(255,255,255,0.1)]"></div>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-sm bg-background/95 backdrop-blur-sm border border-border/80 p-4">
-                  <div className="space-y-3">
-                    <div className="font-semibold text-base">{item.equipment} ({item.segment})</div>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span>Criticidade:</span>
-                        <span className="font-semibold capitalize">{getCriticalityLabel(item.criticalityScore)} ({Math.round(item.criticalityScore)})</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Aging atual:</span>
-                        <span className="font-semibold">{item.aging}d (baseline: {item.agingBaseline}d)</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Variação aging:</span>
-                        <span className={`font-semibold ${item.agingVariation > 0 ? 'text-destructive' : 'text-success'}`}>
-                          {item.agingVariation > 0 ? '+' : ''}{item.agingVariation}%
-                        </span>
-                      </div>
-                       <div className="flex justify-between">
-                         <span>Reincidência:</span>
-                         <span className="font-semibold">{item.reincidencia} ocorrências ({item.reincidenciaPercentual}%)</span>
-                       </div>
-                       <div className="flex justify-between">
-                         <span>Volume vs baseline:</span>
-                         <span className={`font-semibold ${item.volumeAtipico ? 'text-warning' : 'text-success'}`}>
-                           {item.percentualVolumeBaseline}%  <span className="mx-1">({item.volumeAtipico ? 'Atípico' : 'Normal'})</span>
-                         </span>
-                       </div>
-                       <div className="flex justify-between">
-                         <span>Agências SLA vencido:</span>
-                         <span className="font-semibold text-destructive">
-                           {item.agenciesWithSLABreach}
-                         </span>
-                       </div>
-                    </div>
-                  </div>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>)}
-        </div>
-
-        {criticalityData.length === 0 && <div className="text-center py-16 text-muted-foreground">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-muted/30 flex items-center justify-center">
-              {activeFiltersCount > 0 ? <AlertTriangle className="h-10 w-10 opacity-50" /> : <AlertTriangle className="h-10 w-10 opacity-50" />}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>)}
             </div>
-            <h4 className="font-semibold mb-2 text-lg">
-              {activeFiltersCount > 0 ? 'Nenhum equipamento encontrado' : 'Sem dados suficientes'}
-            </h4>
-            <p className="text-sm max-w-md mx-auto">
-              {activeFiltersCount > 0 ? 'Os filtros aplicados não retornaram equipamentos. Tente ajustar os critérios de filtragem.' : 'Aguardando dados de ocorrências para gerar a análise de criticidade por equipamento'}
-            </p>
-            {activeFiltersCount > 0 && <Button variant="outline" size="sm" onClick={() => filters.clearAllFilters()} className="mt-4">
-                Limpar Filtros
-              </Button>}
-          </div>}
-      </CardContent>
+
+            {criticalityData.length === 0 && <div className="text-center py-16 text-muted-foreground">
+                <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-muted/30 flex items-center justify-center">
+                  {activeFiltersCount > 0 ? <AlertTriangle className="h-10 w-10 opacity-50" /> : <AlertTriangle className="h-10 w-10 opacity-50" />}
+                </div>
+                <h4 className="font-semibold mb-2 text-lg">
+                  {activeFiltersCount > 0 ? 'Nenhum equipamento encontrado' : 'Sem dados suficientes'}
+                </h4>
+                <p className="text-sm max-w-md mx-auto">
+                  {activeFiltersCount > 0 ? 'Os filtros aplicados não retornaram equipamentos. Tente ajustar os critérios de filtragem.' : 'Aguardando dados de ocorrências para gerar a análise de criticidade por equipamento'}
+                </p>
+                {activeFiltersCount > 0 && <Button variant="outline" size="sm" onClick={() => filters.clearAllFilters()} className="mt-4">
+                    Limpar Filtros
+                  </Button>}
+              </div>}
+          </CardContent>
+        </CollapsibleContent>
+      </Collapsible>
     </Card>;
 }
