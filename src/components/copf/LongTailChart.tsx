@@ -342,22 +342,6 @@ export const LongTailChart = memo(function LongTailChart({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="flex items-center gap-2 cursor-help">
-                    <div className="w-2 h-2 rounded-full bg-warning"></div>
-                    <span className="text-sm text-muted-foreground">SLA Padrão:</span>
-                    <span className="text-lg font-bold text-warning">{formatHours(timeRangeAnalysis.metrics.slaPadrao)} ({timeRangeAnalysis.metrics.percentualSLA}%)</span>
-                    <Info className="h-3 w-3 text-muted-foreground" />
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>SLA máximo: resolver em até {formatHours(timeRangeAnalysis.metrics.slaPadrao)}. Atualmente {timeRangeAnalysis.metrics.percentualSLA}% dentro do SLA.</p>
-                </TooltipContent>
-              </Tooltip>
-              
-              <div className="w-px h-6 bg-border"></div>
-              
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex items-center gap-2 cursor-help">
                     <div className="w-2 h-2 rounded-full bg-destructive"></div>
                     <span className="text-sm text-muted-foreground">Aging Crítico ({">"}5 dias):</span>
                     <span className="text-lg font-bold text-destructive">{timeRangeAnalysis.metrics.agingCritico}</span>
@@ -491,19 +475,6 @@ export const LongTailChart = memo(function LongTailChart({
                   }}
                 />
                 
-                {/* Linha de referência: SLA Padrão */}
-                <ReferenceLine 
-                  y={0} 
-                  stroke="#f59e0b" 
-                  strokeWidth={2}
-                  strokeDasharray="5 5"
-                  label={{
-                    value: `SLA Padrão: ${formatHours(timeRangeAnalysis.metrics.slaPadrao)}`,
-                    position: "top",
-                    style: { fill: '#f59e0b', fontSize: '11px', fontWeight: 600 }
-                  }}
-                />
-                
                 {/* Linha de referência: Aging Crítico */}
                 <ReferenceLine 
                   y={0} 
@@ -532,13 +503,13 @@ export const LongTailChart = memo(function LongTailChart({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2 text-sm text-muted-foreground">
                   <p>• <strong>Clique nas barras</strong> para filtrar ocorrências por faixa de tempo específica</p>
-                  <p>• <strong>Tempo Mediano:</strong> Indica o ponto médio do aging atual - metade das ocorrências está abaixo deste valor</p>
-                  <p>• <strong>Meta de Excelência:</strong> Objetivo de resolver em até 12h (alta performance)</p>
+                  <p>• <strong>Aging de Ocorrências:</strong> Tempo que uma ocorrência permanece em aberto desde sua criação</p>
+                  <p>• <strong>Análise Long Tail:</strong> Identifica concentração de ocorrências por faixas de tempo</p>
                 </div>
                 <div className="space-y-2 text-sm text-muted-foreground">
-                  <p>• <strong>SLA Padrão:</strong> Limite máximo aceitável de 24h para resolução</p>
-                  <p>• <strong>Aging Crítico:</strong> Ocorrências acima de 5 dias requerem ação imediata</p>
                   <p>• <strong>Cores das barras:</strong> Verde (dentro da meta), Laranja (acima da meta), Vermelho (crítico)</p>
+                  <p>• <strong>Meta de Excelência:</strong> Objetivo de alta performance (resolver em até 12h)</p>
+                  <p>• <strong>Aging Crítico:</strong> Ocorrências que excedem 5 dias requerem ação imediata</p>
                 </div>
               </div>
             </div>
@@ -546,10 +517,10 @@ export const LongTailChart = memo(function LongTailChart({
         </CardContent>
       </Card>
 
-      {/* Card de Análise Operacional */}
+      {/* Card de Análise Operacional com insights detalhados do hover */}
       <OperationalNarrativeCard 
         title="Análise de Aging" 
-        insight={timeRangeAnalysis.insight} 
+        insight={`${timeRangeAnalysis.metrics.total} ocorrências em aberto com tempo mediano de ${formatHours(timeRangeAnalysis.metrics.tempoMediano)}. Meta de Excelência: ${timeRangeAnalysis.metrics.percentualExcelencia}% das ocorrências resolvidas em até ${formatHours(timeRangeAnalysis.metrics.metaExcelencia)}. Aging Crítico: ${timeRangeAnalysis.metrics.agingCritico} ocorrências acima de 5 dias (${timeRangeAnalysis.metrics.percentualCritico}% do total).`}
         priority={timeRangeAnalysis.priority} 
         actionSuggestion={timeRangeAnalysis.actionSuggestion}
         trend={timeRangeAnalysis.metrics.agingCritico > 0 ? 'up' : 'stable'}
