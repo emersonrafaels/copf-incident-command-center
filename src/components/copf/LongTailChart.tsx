@@ -279,7 +279,18 @@ export const LongTailChart = memo(function LongTailChart({
       </Card>;
   }
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-fade-in">
+      {/* Seção Header */}
+      <div className="space-y-2">
+        <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+          <div className="p-2 rounded-lg bg-gradient-primary">
+            <TrendingUp className="h-5 w-5 text-white" />
+          </div>
+          Análise Long Tail - Aging
+        </h2>
+        <p className="text-muted-foreground">Análise detalhada da distribuição temporal de ocorrências em aberto</p>
+      </div>
+
       {/* Card principal com design aprimorado */}
       <Card className="bg-gradient-subtle border-0 shadow-elegant">
         <CardHeader className="pb-4">
@@ -613,162 +624,159 @@ export const LongTailChart = memo(function LongTailChart({
         </CardContent>
       </Card>
 
-      {/* Card de Análise Operacional colapsável */}
-      <Collapsible open={!isAnalysisCollapsed} onOpenChange={setIsAnalysisCollapsed}>
-        <CollapsibleTrigger asChild>
-          <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 cursor-pointer hover:bg-primary/5 transition-colors">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <Clock className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg font-semibold">Análise de Performance - Aging</CardTitle>
-                    <p className="text-sm text-muted-foreground">Insights detalhados sobre tempo de resolução</p>
-                  </div>
-                </div>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  {isAnalysisCollapsed ? (
-                    <ChevronDown className="h-4 w-4" />
-                  ) : (
-                    <ChevronUp className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-            </CardHeader>
-          </Card>
-        </CollapsibleTrigger>
-        
-        <CollapsibleContent>
-          <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 mt-2">
-            <CardContent className="space-y-4 pt-6">
-              {/* Resumo Executivo expandido */}
-              <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
-                <div className="flex items-start gap-3">
-                  <TrendingUp className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                  <div>
-                    <h4 className="font-semibold text-foreground mb-3">Resumo Executivo</h4>
-                    <div className="space-y-3 text-sm text-muted-foreground leading-relaxed">
-                      <p>
-                        <span className="font-medium text-foreground">{timeRangeAnalysis.metrics.total}</span> ocorrências em aberto com tempo mediano de{" "}
-                        <span className="font-medium text-foreground">{formatHours(timeRangeAnalysis.metrics.tempoMediano)}</span>, indicando que 50% das ocorrências são resolvidas em até esse tempo.
-                      </p>
-                      <p>
-                        <span className="font-medium text-success">{timeRangeAnalysis.metrics.percentualExcelencia}%</span> das ocorrências estão dentro da meta de excelência (≤ {formatHours(timeRangeAnalysis.metrics.metaExcelencia)}), demonstrando {timeRangeAnalysis.metrics.percentualExcelencia >= 70 ? 'boa' : 'baixa'} performance operacional.
-                      </p>
-                      {timeRangeAnalysis.metrics.agingCritico > 0 && (
-                        <p className="text-destructive font-medium">
-                          ⚠️ Atenção: <span className="font-bold">{timeRangeAnalysis.metrics.agingCritico}</span> ocorrências ({timeRangeAnalysis.metrics.percentualCritico}%) com aging crítico ({">"}5 dias) requerem ação imediata.
-                        </p>
+      {/* Cards de Análise em Grid */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        {/* Card de Análise Operacional colapsável */}
+        <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
+          <Collapsible open={!isAnalysisCollapsed} onOpenChange={setIsAnalysisCollapsed}>
+            <CollapsibleTrigger asChild>
+              <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 cursor-pointer hover:bg-primary/5 transition-all duration-200 hover-scale">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 rounded-xl bg-primary/10">
+                        <Clock className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg font-semibold">Análise de Performance</CardTitle>
+                        <p className="text-sm text-muted-foreground">Insights detalhados sobre aging</p>
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      {isAnalysisCollapsed ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronUp className="h-4 w-4" />
                       )}
+                    </Button>
+                  </div>
+                </CardHeader>
+              </Card>
+            </CollapsibleTrigger>
+            
+            <CollapsibleContent className="animate-accordion-down">
+              <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 mt-3">
+                <CardContent className="space-y-4 pt-6">
+                  {/* Resumo Executivo expandido */}
+                  <div className="p-4 bg-primary/8 rounded-xl border border-primary/15">
+                    <div className="flex items-start gap-3">
+                      <TrendingUp className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                      <div className="space-y-3">
+                        <h4 className="font-bold text-foreground">Resumo Executivo</h4>
+                        <div className="space-y-3 text-sm text-muted-foreground leading-relaxed">
+                          <p>
+                            <span className="font-medium text-foreground">{timeRangeAnalysis.metrics.total}</span> ocorrências em aberto com tempo mediano de{" "}
+                            <span className="font-medium text-foreground">{formatHours(timeRangeAnalysis.metrics.tempoMediano)}</span>.
+                          </p>
+                          <p>
+                            <span className="font-medium text-success">{timeRangeAnalysis.metrics.percentualExcelencia}%</span> dentro da meta de excelência (≤ {formatHours(timeRangeAnalysis.metrics.metaExcelencia)}).
+                          </p>
+                          {timeRangeAnalysis.metrics.agingCritico > 0 && (
+                            <p className="text-destructive font-medium">
+                              ⚠️ <span className="font-bold">{timeRangeAnalysis.metrics.agingCritico}</span> ocorrências com aging crítico ({">"} 5 dias).
+                            </p>
+                          )}
+                        </div>
+                        
+                        {/* Botão para metodologia */}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowMethodologyModal(true);
+                          }}
+                          className="flex items-center gap-2 text-primary border-primary/20 hover:bg-primary/5"
+                        >
+                          <BookOpen className="h-4 w-4" />
+                          Metodologia Completa
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </CollapsibleContent>
+          </Collapsible>
+        </div>
+
+        {/* Como usar esta análise - colapsável */}
+        <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          <Collapsible open={!isGuideCollapsed} onOpenChange={setIsGuideCollapsed}>
+            <CollapsibleTrigger asChild>
+              <Card className="bg-gradient-to-r from-info/5 to-info/10 border-info/20 cursor-pointer hover:bg-info/5 transition-all duration-200 hover-scale">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2.5 rounded-xl bg-info/10">
+                        <Info className="h-5 w-5 text-info flex-shrink-0" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="text-lg font-semibold text-foreground mb-1 flex items-center gap-2">
+                          Guia de Interpretação
+                          <Badge variant="outline" className="text-xs">Interativo</Badge>
+                        </h4>
+                        <p className="text-sm text-muted-foreground">Como entender e usar os insights</p>
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      {isGuideCollapsed ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronUp className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                </CardHeader>
+              </Card>
+            </CollapsibleTrigger>
+            
+            <CollapsibleContent className="animate-accordion-down">
+              <Card className="bg-gradient-to-r from-info/5 to-info/10 border-info/20 mt-3">
+                <CardContent className="pt-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <div className="flex items-start gap-3 p-3 bg-card/50 rounded-lg hover:bg-card/70 transition-colors">
+                        <div className="w-3 h-3 rounded-full bg-muted-foreground mt-1.5 flex-shrink-0"></div>
+                        <div>
+                          <p className="font-medium text-sm text-foreground">Aging de Ocorrências</p>
+                          <p className="text-xs text-muted-foreground">Tempo em aberto desde criação</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-start gap-3 p-3 bg-card/50 rounded-lg hover:bg-card/70 transition-colors">
+                        <div className="w-3 h-3 rounded-full bg-success mt-1.5 flex-shrink-0"></div>
+                        <div>
+                          <p className="font-medium text-sm text-foreground">Meta de Excelência</p>
+                          <p className="text-xs text-muted-foreground">Resolver em até 12h</p>
+                        </div>
+                      </div>
                     </div>
                     
-                    {/* Botão para abrir modal de metodologia */}
-                    <div className="mt-4">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setShowMethodologyModal(true);
-                        }}
-                        className="flex items-center gap-2 text-primary border-primary/20 hover:bg-primary/5"
-                      >
-                        <BookOpen className="h-4 w-4" />
-                        <span>Metodologia e Recomendações</span>
-                      </Button>
+                    <div className="space-y-3">
+                      <div className="flex items-start gap-3 p-3 bg-card/50 rounded-lg hover:bg-card/70 transition-colors">
+                        <div className="w-3 h-3 rounded-full bg-orange-500 mt-1.5 flex-shrink-0"></div>
+                        <div>
+                          <p className="font-medium text-sm text-foreground">Análise Long Tail</p>
+                          <p className="text-xs text-muted-foreground">Distribuição por faixas temporais</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-start gap-3 p-3 bg-card/50 rounded-lg hover:bg-card/70 transition-colors">
+                        <div className="w-3 h-3 rounded-full bg-destructive mt-1.5 flex-shrink-0"></div>
+                        <div>
+                          <p className="font-medium text-sm text-foreground">Aging Crítico</p>
+                          <p className="text-xs text-muted-foreground">{">"} 5 dias - ação imediata</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </CollapsibleContent>
-      </Collapsible>
-
-      {/* Como usar esta análise - colapsável */}
-      <Collapsible open={!isGuideCollapsed} onOpenChange={setIsGuideCollapsed}>
-        <CollapsibleTrigger asChild>
-          <Card className="bg-gradient-to-r from-info/5 to-info/10 border-info/20 cursor-pointer hover:bg-info/5 transition-colors">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-start gap-4">
-                  <div className="p-2 rounded-lg bg-info/10">
-                    <Info className="h-6 w-6 text-info flex-shrink-0" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-lg font-semibold text-foreground mb-1 flex items-center gap-2">
-                      Como interpretar esta análise
-                      <Badge variant="outline" className="text-xs">Guia Interativo</Badge>
-                    </h4>
-                    <p className="text-sm text-muted-foreground">Guia prático para entender e usar os insights do gráfico</p>
-                  </div>
-                </div>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  {isGuideCollapsed ? (
-                    <ChevronDown className="h-4 w-4" />
-                  ) : (
-                    <ChevronUp className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-            </CardHeader>
-          </Card>
-        </CollapsibleTrigger>
-        
-        <CollapsibleContent>
-          <Card className="bg-gradient-to-r from-info/5 to-info/10 border-info/20 mt-2">
-            <CardContent className="pt-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-3">
-                  <div className="flex items-start gap-3 p-3 bg-card/50 rounded-lg">
-                    <div className="w-2 h-2 rounded-full bg-muted-foreground mt-2 flex-shrink-0"></div>
-                    <div>
-                      <p className="font-medium text-sm text-foreground">Aging de Ocorrências</p>
-                      <p className="text-xs text-muted-foreground">Tempo que uma ocorrência permanece em aberto desde sua criação</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-3 p-3 bg-card/50 rounded-lg">
-                    <div className="w-2 h-2 rounded-full bg-success mt-2 flex-shrink-0"></div>
-                    <div>
-                      <p className="font-medium text-sm text-foreground">Meta de Excelência</p>
-                      <p className="text-xs text-muted-foreground">Objetivo de alta performance - resolver ocorrências em até 12h</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="space-y-3">
-                  <div className="flex items-start gap-3 p-3 bg-card/50 rounded-lg">
-                    <div className="w-2 h-2 rounded-full bg-orange-500 mt-2 flex-shrink-0"></div>
-                    <div>
-                      <p className="font-medium text-sm text-foreground">Análise Long Tail</p>
-                      <p className="text-xs text-muted-foreground">Identifica concentração e distribuição de ocorrências por faixas de tempo</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-3 p-3 bg-card/50 rounded-lg">
-                    <div className="w-2 h-2 rounded-full bg-destructive mt-2 flex-shrink-0"></div>
-                    <div>
-                      <p className="font-medium text-sm text-foreground">Aging Crítico</p>
-                      <p className="text-xs text-muted-foreground">Ocorrências que excedem 5 dias em aberto requerem ação imediata</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-3 p-3 bg-card/50 rounded-lg">
-                    <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0"></div>
-                    <div>
-                      <p className="font-medium text-sm text-foreground">Interpretação Visual</p>
-                      <p className="text-xs text-muted-foreground">Verde (meta), Laranja (atenção), Vermelho (crítico)</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </CollapsibleContent>
-      </Collapsible>
+                </CardContent>
+              </Card>
+            </CollapsibleContent>
+          </Collapsible>
+        </div>
+      </div>
 
       {/* Modal de Metodologia e Recomendações */}
       <Dialog open={showMethodologyModal} onOpenChange={setShowMethodologyModal}>
