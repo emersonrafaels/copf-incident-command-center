@@ -10,6 +10,8 @@ interface MetricCardProps {
   icon?: ReactNode
   description?: string
   className?: string
+  onClick?: () => void
+  clickable?: boolean
 }
 
 export const MetricCard = memo(function MetricCard({ 
@@ -19,7 +21,9 @@ export const MetricCard = memo(function MetricCard({
   changeType = "neutral", 
   icon, 
   description,
-  className 
+  className,
+  onClick,
+  clickable = false
 }: MetricCardProps) {
   const changeColor = {
     positive: "text-success",
@@ -28,10 +32,14 @@ export const MetricCard = memo(function MetricCard({
   }[changeType]
 
   return (
-    <Card className={cn(
-      "hover:shadow-card-hover transition-all duration-200 hover:scale-[1.02]",
-      className
-    )}>
+    <Card 
+      className={cn(
+        "hover:shadow-card-hover transition-all duration-200 hover:scale-[1.02]",
+        clickable && "cursor-pointer hover:border-primary/30",
+        className
+      )}
+      onClick={onClick}
+    >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {title}
@@ -58,6 +66,11 @@ export const MetricCard = memo(function MetricCard({
             </p>
           )}
         </div>
+        {clickable && (
+          <div className="text-xs text-primary mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            ↗ Clique para ver detalhes
+          </div>
+        )}
       </CardContent>
     </Card>
   )

@@ -614,9 +614,9 @@ export const LongTailChart = memo(function LongTailChart({
 
       {/* Card de Análise Operacional colapsável */}
       <Collapsible open={!isAnalysisCollapsed} onOpenChange={setIsAnalysisCollapsed}>
-        <CollapsibleTrigger asChild>
-          <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 cursor-pointer hover:bg-primary/5 transition-colors">
-            <CardHeader className="pb-3">
+        <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+          <CollapsibleTrigger asChild>
+            <CardHeader className="pb-3 cursor-pointer hover:bg-primary/5 transition-colors">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-primary/10">
@@ -636,12 +636,10 @@ export const LongTailChart = memo(function LongTailChart({
                 </Button>
               </div>
             </CardHeader>
-          </Card>
-        </CollapsibleTrigger>
-        
-        <CollapsibleContent>
-          <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 border-t-0 rounded-t-none">
-            <CardContent className="space-y-4 pt-0">
+          </CollapsibleTrigger>
+          
+          <CollapsibleContent>
+            <CardContent className="space-y-4">
               {/* Resumo Executivo expandido */}
               <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
                 <div className="flex items-start gap-3">
@@ -682,8 +680,8 @@ export const LongTailChart = memo(function LongTailChart({
                 </div>
               </div>
             </CardContent>
-          </Card>
-        </CollapsibleContent>
+          </CollapsibleContent>
+        </Card>
       </Collapsible>
 
       {/* Como usar esta análise - colapsável */}

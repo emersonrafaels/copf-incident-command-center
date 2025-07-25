@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { MetricCard } from "./MetricCard";
 import { StatusBadge } from "./StatusBadge";
 import { LongTailChart } from "./LongTailChart";
@@ -27,7 +28,10 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { toast } from 'sonner';
+
 export function Dashboard() {
+  const navigate = useNavigate();
   const {
     occurrences,
     isLoading,
@@ -38,9 +42,7 @@ export function Dashboard() {
     metrics,
     refreshData
   } = useDashboardData();
-  const {
-    toast
-  } = useToast();
+  const { toast: toastHook } = useToast();
   const [selectedOccurrence, setSelectedOccurrence] = useState<any>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [filterPeriod, setFilterPeriod] = useState('30-days');
@@ -68,10 +70,7 @@ export function Dashboard() {
     hasActiveFilters
   } = filters;
   const handleExport = async () => {
-    toast({
-      title: "Exportação iniciada",
-      description: "Gerando PDF da dashboard..."
-    });
+    toast('Exportação iniciada - Gerando PDF da dashboard...');
     try {
       const dashboardElement = document.getElementById('dashboard-content');
       if (!dashboardElement) return;
@@ -99,16 +98,9 @@ export function Dashboard() {
         heightLeft -= pageHeight;
       }
       pdf.save(`dashboard-copf-${new Date().toISOString().split('T')[0]}.pdf`);
-      toast({
-        title: "Download concluído",
-        description: "Dashboard exportada em PDF com sucesso!"
-      });
+      toast('Download concluído - Dashboard exportada em PDF com sucesso!');
     } catch (error) {
-      toast({
-        title: "Erro na exportação",
-        description: "Não foi possível gerar o PDF. Tente novamente.",
-        variant: "destructive"
-      });
+      toast('Erro na exportação - Não foi possível gerar o PDF. Tente novamente.');
     }
   };
   const handleOccurrenceClick = (occurrence: any) => {
@@ -117,10 +109,32 @@ export function Dashboard() {
   };
   const handleRefresh = () => {
     refreshData();
-    toast({
-      title: "Dados atualizados",
-      description: "Dashboard atualizado com as informações mais recentes."
-    });
+    toast('Dados atualizados - Dashboard atualizado com as informações mais recentes.');
+  };
+
+  // Handlers para navegar com filtros específicos
+  const handleNavigateToOccurrences = (filter: 'total' | 'in_progress' | 'overdue' | 'resolved') => {
+    filters.clearAllFilters();
+    
+    setTimeout(() => {
+      switch (filter) {
+        case 'total':
+          // Sem filtros específicos - mostra todas
+          break;
+        case 'in_progress':
+          filters.updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento']);
+          break;
+        case 'overdue':
+          filters.updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento']);
+          filters.updateFilter('overrideFilter', true);
+          break;
+        case 'resolved':
+          filters.updateFilter('statusFilterMulti', ['encerrado']);
+          break;
+      }
+      navigate('/ocorrencias');
+      toast('Filtros aplicados - navegando para página de ocorrências');
+    }, 100);
   };
 
   // Filtrar ocorrências - Memoizado para performance
@@ -358,10 +372,26 @@ export function Dashboard() {
         
         <div className="responsive-grid responsive-grid-4">
           {/* 1. Storytelling: Visão Geral */}
-          <MetricCard title="Total de Ocorrências" value={filteredOccurrences.length.toString()} icon={<AlertTriangle className="h-4 w-4" />} change={`+${Math.round(filteredOccurrences.length / occurrences.length * 100)}% do total`} changeType="neutral" />
+          <MetricCard 
+            title="Total de Ocorrências" 
+            value={filteredOccurrences.length.toString()} 
+            icon={<AlertTriangle className="h-4 w-4" />} 
+            change={`+${Math.round(filteredOccurrences.length / occurrences.length * 100)}% do total`} 
+            changeType="neutral" 
+            clickable={true}
+            onClick={() => handleNavigateToOccurrences('total')}
+          />
           
           {/* 2. Storytelling: Situação Atual */}
-          <MetricCard title="Em Andamento" value={filteredOccurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_andamento').length.toString()} icon={<Clock className="h-4 w-4" />} change={`${Math.round(filteredOccurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_andamento').length / filteredOccurrences.length * 100)}% do filtrado`} changeType="neutral" />
+          <MetricCard 
+            title="Em Andamento" 
+            value={filteredOccurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_andamento').length.toString()} 
+            icon={<Clock className="h-4 w-4" />} 
+            change={`${Math.round(filteredOccurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_andamento').length / filteredOccurrences.length * 100)}% do filtrado`} 
+            changeType="neutral" 
+            clickable={true}
+            onClick={() => handleNavigateToOccurrences('in_progress')}
+          />
           
           {/* 3. Storytelling: Problemas Urgentes */}
           <MetricCard 
@@ -378,10 +408,20 @@ export function Dashboard() {
               return hoursDiff > slaLimit && o.status !== 'encerrado';
             }).length / filteredOccurrences.length * 100)}% do filtrado`} 
             changeType="negative" 
+            clickable={true}
+            onClick={() => handleNavigateToOccurrences('overdue')}
           />
           
           {/* 4. Storytelling: Resultados Positivos */}
-          <MetricCard title="Resolvidas" value={filteredOccurrences.filter(o => o.status === 'encerrado').length.toString()} icon={<CheckCircle2 className="h-4 w-4" />} change={`${Math.round(filteredOccurrences.filter(o => o.status === 'encerrado').length / filteredOccurrences.length * 100)}% do filtrado`} changeType="positive" />
+          <MetricCard 
+            title="Resolvidas" 
+            value={filteredOccurrences.filter(o => o.status === 'encerrado').length.toString()} 
+            icon={<CheckCircle2 className="h-4 w-4" />} 
+            change={`${Math.round(filteredOccurrences.filter(o => o.status === 'encerrado').length / filteredOccurrences.length * 100)}% do filtrado`} 
+            changeType="positive" 
+            clickable={true}
+            onClick={() => handleNavigateToOccurrences('resolved')}
+          />
         </div>
       </div>
 
