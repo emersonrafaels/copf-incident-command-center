@@ -96,7 +96,7 @@ export function CriticalityHeatmap({
       if (filters.overrideFilter) {
         const hours = (Date.now() - new Date(occ.createdAt).getTime()) / (1000 * 60 * 60);
         const slaLimit = occ.severity === 'critical' || occ.severity === 'high' ? 24 : 72;
-        if (!(hours > slaLimit && occ.status !== 'encerrada')) return false;
+        if (!(hours > slaLimit && occ.status !== 'encerrado')) return false;
       }
       if (filters.reincidentFilter) {
         // Lógica para identificar ocorrências reincidentes
@@ -205,7 +205,7 @@ export function CriticalityHeatmap({
       const hasSLABreach = agencyData.occurrences.some((occ: any) => {
         const hours = (Date.now() - new Date(occ.createdAt).getTime()) / (1000 * 60 * 60);
         const slaLimit = occ.severity === 'critical' || occ.severity === 'high' ? 24 : 72;
-        return hours > slaLimit && occ.status !== 'encerrada';
+        return hours > slaLimit && occ.status !== 'encerrado';
       });
       if (hasSLABreach) agenciesWithSLABreach++;
     });
@@ -236,7 +236,7 @@ export function CriticalityHeatmap({
       const slaBreached = occs.some((occ: any) => {
         const hours = (Date.now() - new Date(occ.createdAt).getTime()) / (1000 * 60 * 60);
         const slaLimit = occ.severity === 'critical' || occ.severity === 'high' ? 24 : 72;
-        const isBreached = hours > slaLimit && occ.status !== 'encerrada';
+        const isBreached = hours > slaLimit && occ.status !== 'encerrado';
         if (isBreached) {
           slaBreachedCount++;
         }
@@ -304,7 +304,7 @@ export function CriticalityHeatmap({
         const hasSLABreach = agencyOccs.some((occ: any) => {
           const hours = (Date.now() - new Date(occ.createdAt).getTime()) / (1000 * 60 * 60);
           const slaLimit = occ.severity === 'critical' || occ.severity === 'high' ? 24 : 72;
-          return hours > slaLimit && occ.status !== 'encerrada';
+          return hours > slaLimit && occ.status !== 'encerrado';
         });
         if (hasSLABreach) equipmentAgenciesWithSLA++;
       });

@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 
-export type StatusType = "a_iniciar" | "em_atuacao" | "encerrada" | "cancelada"
+export type StatusType = "a_iniciar" | "em_andamento" | "encerrado" | "com_impedimentos" | "cancelado"
 
 interface StatusBadgeProps {
   status: StatusType
@@ -14,18 +14,23 @@ const statusConfig = {
     variant: "secondary" as const,
     className: "bg-muted/10 text-muted-foreground border-muted/20"
   },
-  em_atuacao: {
-    label: "Em atuação",
+  em_andamento: {
+    label: "Em andamento",
     variant: "secondary" as const,
     className: "bg-warning/10 text-warning border-warning/20"
   },
-  encerrada: {
-    label: "Encerrada",
+  encerrado: {
+    label: "Encerrado",
     variant: "secondary" as const,
     className: "bg-success/10 text-success border-success/20"
   },
-  cancelada: {
-    label: "Cancelada",
+  com_impedimentos: {
+    label: "Com impedimentos",
+    variant: "secondary" as const,
+    className: "bg-amber-500/10 text-amber-600 border-amber-500/20"
+  },
+  cancelado: {
+    label: "Cancelado",
     variant: "secondary" as const,
     className: "bg-destructive/10 text-destructive border-destructive/20"
   }

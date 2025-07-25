@@ -109,9 +109,10 @@ export const EnhancedStorytellingCharts = memo(function EnhancedStorytellingChar
     
     const statusMap = {
       'a_iniciar': 'A Iniciar',
-      'em_atuacao': 'Em Atuação', 
-      'encerrada': 'Encerrada',
-      'cancelada': 'Cancelada'
+      'em_andamento': 'Em Andamento', 
+      'encerrado': 'Encerrado',
+      'com_impedimentos': 'Com Impedimentos',
+      'cancelado': 'Cancelado'
     }
     
     const statusCounts = occurrences.reduce((acc, occ) => {
@@ -122,9 +123,10 @@ export const EnhancedStorytellingCharts = memo(function EnhancedStorytellingChar
 
     const colors = {
       'A Iniciar': 'hsl(var(--warning))',
-      'Em Atuação': 'hsl(var(--primary))',
-      'Encerrada': 'hsl(var(--success))',
-      'Cancelada': 'hsl(var(--muted-foreground))',
+      'Em Andamento': 'hsl(var(--primary))',
+      'Encerrado': 'hsl(var(--success))',
+      'Com Impedimentos': 'hsl(var(--amber-500))',
+      'Cancelado': 'hsl(var(--muted-foreground))',
       'Outros': 'hsl(var(--muted))'
     }
 
@@ -137,8 +139,8 @@ export const EnhancedStorytellingCharts = memo(function EnhancedStorytellingChar
     
     // Gerar insight inteligente
     const total = data.reduce((sum, item) => sum + item.value, 0)
-    const pending = (statusCounts['A Iniciar'] || 0) + (statusCounts['Em Atuação'] || 0)
-    const resolved = statusCounts['Encerrada'] || 0
+    const pending = (statusCounts['A Iniciar'] || 0) + (statusCounts['Em Andamento'] || 0)
+    const resolved = statusCounts['Encerrado'] || 0
     const resolutionRate = total > 0 ? Math.round((resolved / total) * 100) : 0
     
     let insight = `${resolutionRate}% das ocorrências foram resolvidas. `

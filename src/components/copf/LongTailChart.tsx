@@ -105,7 +105,7 @@ export const LongTailChart = memo(function LongTailChart({
     
     // Por padrão, analisar apenas ocorrências em aberto (não canceladas/encerradas)
     const activeOccurrences = sourceOccurrences.filter(occ => 
-      occ.status === 'a_iniciar' || occ.status === 'em_atuacao'
+      occ.status === 'a_iniciar' || occ.status === 'em_andamento'
     );
     if (activeOccurrences.length === 0) {
       return {
@@ -212,7 +212,7 @@ export const LongTailChart = memo(function LongTailChart({
   const handleFilterAgingCritico = () => {
     clearAllFilters();
     setTimeout(() => {
-      updateFilter('statusFilterMulti', ['a_iniciar', 'em_atuacao']);
+      updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento']);
       updateFilter('overrideFilter', true); // Filtrar apenas vencidas (aging > SLA)
       navigate('/ocorrencias');
       toast.success('Mostrando ocorrências acima do aging esperado (5 dias)');
@@ -223,7 +223,7 @@ export const LongTailChart = memo(function LongTailChart({
   const handleBarClick = (data: TimeRangeData) => {
     clearAllFilters();
     setTimeout(() => {
-      updateFilter('statusFilterMulti', ['a_iniciar', 'em_atuacao']);
+      updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento']);
       // Adicionar filtro customizado por range de horas
       navigate(`/ocorrencias?aging_min=${data.minHours}&aging_max=${data.maxHours === Infinity ? 999999 : data.maxHours}`);
       toast.success(`Filtrando ocorrências entre ${data.rangeLabel}`);

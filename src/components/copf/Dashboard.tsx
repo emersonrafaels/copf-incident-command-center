@@ -166,7 +166,7 @@ export function Dashboard() {
         const createdDate = new Date(occurrence.createdAt);
         const hoursDiff = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60);
         const slaLimit = occurrence.severity === 'critical' || occurrence.severity === 'high' ? 24 : 72;
-        const isOverdue = hoursDiff > slaLimit && occurrence.status !== 'encerrada';
+        const isOverdue = hoursDiff > slaLimit && occurrence.status !== 'encerrado';
         if (!isOverdue) return false;
       }
 
@@ -352,8 +352,8 @@ export function Dashboard() {
         <div className="responsive-grid responsive-grid-4">
           <MetricCard title="Total de Ocorrências" value={filteredOccurrences.length.toString()} icon={<AlertTriangle className="h-4 w-4" />} change={`+${Math.round(filteredOccurrences.length / occurrences.length * 100)}% do total`} changeType="neutral" />
           <MetricCard title="Ocorrências Críticas" value={filteredOccurrences.filter(o => o.severity === 'critical').length.toString()} icon={<CheckCircle2 className="h-4 w-4" />} change={`${Math.round(filteredOccurrences.filter(o => o.severity === 'critical').length / filteredOccurrences.length * 100)}% do filtrado`} changeType="negative" />
-          <MetricCard title="Em Andamento" value={filteredOccurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_atuacao').length.toString()} icon={<Clock className="h-4 w-4" />} change={`${Math.round(filteredOccurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_atuacao').length / filteredOccurrences.length * 100)}% do filtrado`} changeType="neutral" />
-          <MetricCard title="Resolvidas" value={filteredOccurrences.filter(o => o.status === 'encerrada').length.toString()} icon={<TrendingUp className="h-4 w-4" />} change={`${Math.round(filteredOccurrences.filter(o => o.status === 'encerrada').length / filteredOccurrences.length * 100)}% do filtrado`} changeType="positive" />
+          <MetricCard title="Em Andamento" value={filteredOccurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_andamento').length.toString()} icon={<Clock className="h-4 w-4" />} change={`${Math.round(filteredOccurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_andamento').length / filteredOccurrences.length * 100)}% do filtrado`} changeType="neutral" />
+          <MetricCard title="Resolvidas" value={filteredOccurrences.filter(o => o.status === 'encerrado').length.toString()} icon={<TrendingUp className="h-4 w-4" />} change={`${Math.round(filteredOccurrences.filter(o => o.status === 'encerrado').length / filteredOccurrences.length * 100)}% do filtrado`} changeType="positive" />
         </div>
       </div>
 

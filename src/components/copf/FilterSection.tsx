@@ -34,6 +34,7 @@ export function FilterSection({ className }: FilterSectionProps) {
     statusFilterMulti,
     vendorFilterMulti,
     transportadoraFilterMulti,
+    severityFilterMulti,
     serialNumberFilter,
     overrideFilter,
     vendorPriorityFilter,
@@ -164,6 +165,7 @@ export function FilterSection({ className }: FilterSectionProps) {
                         segmento: segmentFilterMulti.length > 0,
                         equipamento: equipmentFilterMulti.length > 0,
                         status: statusFilterMulti.length > 0,
+                        severidade: severityFilterMulti.length > 0,
                         fornecedor: vendorFilterMulti.length > 0,
                         transportadora: transportadoraFilterMulti.length > 0,
                         serie: serialNumberFilter !== '',
@@ -180,6 +182,7 @@ export function FilterSection({ className }: FilterSectionProps) {
                         segmento: segmentFilterMulti.length > 0,
                         equipamento: equipmentFilterMulti.length > 0,
                         status: statusFilterMulti.length > 0,
+                        severidade: severityFilterMulti.length > 0,
                         fornecedor: vendorFilterMulti.length > 0,
                         transportadora: transportadoraFilterMulti.length > 0,
                         serie: serialNumberFilter !== '',
@@ -196,6 +199,7 @@ export function FilterSection({ className }: FilterSectionProps) {
                         segmento: segmentFilterMulti.length > 0,
                         equipamento: equipmentFilterMulti.length > 0,
                         status: statusFilterMulti.length > 0,
+                        severidade: severityFilterMulti.length > 0,
                         fornecedor: vendorFilterMulti.length > 0,
                         transportadora: transportadoraFilterMulti.length > 0,
                         serie: serialNumberFilter !== '',
@@ -689,9 +693,11 @@ export function FilterSection({ className }: FilterSectionProps) {
                         <CommandList>
                           <CommandGroup>
                             {[
-                              { value: 'active', label: 'Ativo' },
-                              { value: 'pending', label: 'Pendente' },
-                              { value: 'resolved', label: 'Resolvido' }
+                              { value: 'a_iniciar', label: 'A iniciar' },
+                              { value: 'em_andamento', label: 'Em andamento' },
+                              { value: 'encerrado', label: 'Encerrado' },
+                              { value: 'com_impedimentos', label: 'Com impedimentos' },
+                              { value: 'cancelado', label: 'Cancelado' }
                             ].map(status => (
                               <CommandItem key={status.value} onSelect={() => {
                                 const isSelected = statusFilterMulti.includes(status.value);
@@ -703,6 +709,59 @@ export function FilterSection({ className }: FilterSectionProps) {
                               }}>
                                 <Check className={cn("mr-2 h-4 w-4", statusFilterMulti.includes(status.value) ? "opacity-100" : "opacity-0")} />
                                 {status.label}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                
+                {/* Severidade */}
+                <div className="group space-y-3">
+                  <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <div className="w-1 h-4 bg-destructive/60 rounded-full"></div>
+                    Severidade
+                  </Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-full h-10 justify-between hover:bg-destructive/5 hover:border-destructive/30 transition-all duration-200 group-hover:shadow-sm">
+                        {severityFilterMulti.length > 0 ? (
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary" className="h-5 text-xs bg-destructive/10 text-destructive">
+                              {severityFilterMulti.length}
+                            </Badge>
+                            <span className="text-sm">
+                              {severityFilterMulti.length === 1 ? severityFilterMulti[0] : `${severityFilterMulti.length} severidades`}
+                            </span>
+                          </div>
+                        ) : "Todas as severidades"}
+                        <div className="w-4 h-4 opacity-50">⌄</div>
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                      <Command>
+                        <CommandInput placeholder="Buscar severidade..." className="h-9" />
+                        <CommandEmpty>Nenhuma severidade encontrada.</CommandEmpty>
+                        <CommandList>
+                          <CommandGroup>
+                            {[
+                              { value: 'critical', label: 'Crítico' },
+                              { value: 'high', label: 'Alto' },
+                              { value: 'medium', label: 'Médio' },
+                              { value: 'low', label: 'Baixo' }
+                            ].map(severity => (
+                              <CommandItem key={severity.value} onSelect={() => {
+                                const isSelected = severityFilterMulti.includes(severity.value);
+                                if (isSelected) {
+                                  updateFilter('severityFilterMulti', severityFilterMulti.filter(s => s !== severity.value));
+                                } else {
+                                  updateFilter('severityFilterMulti', [...severityFilterMulti, severity.value]);
+                                }
+                              }}>
+                                <Check className={cn("mr-2 h-4 w-4", severityFilterMulti.includes(severity.value) ? "opacity-100" : "opacity-0")} />
+                                {severity.label}
                               </CommandItem>
                             ))}
                           </CommandGroup>

@@ -92,7 +92,7 @@ const Ocorrencias = () => {
       const createdDate = new Date(occurrence.createdAt);
       const hoursDiff = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60);
       const slaLimit = occurrence.severity === 'critical' || occurrence.severity === 'high' ? 24 : 72;
-      const isOverdue = hoursDiff > slaLimit && occurrence.status !== 'encerrada';
+      const isOverdue = hoursDiff > slaLimit && occurrence.status !== 'encerrado';
       if (!isOverdue) return false;
     }
 
@@ -249,7 +249,7 @@ const Ocorrencias = () => {
     const hoursDiff = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60);
     const slaLimit = occurrence.severity === 'critical' || occurrence.severity === 'high' ? 24 : 72;
     
-    if (occurrence.status === 'resolved' || occurrence.status === 'encerrada') {
+    if (occurrence.status === 'resolved' || occurrence.status === 'encerrado') {
       return 'Dentro do SLA';
     }
     
@@ -280,7 +280,7 @@ const Ocorrencias = () => {
     const hoursDiff = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60);
     const slaLimit = occurrence.severity === 'critical' || occurrence.severity === 'high' ? 24 : 72;
     
-    if (occurrence.status === 'resolved' || occurrence.status === 'encerrada') {
+    if (occurrence.status === 'resolved' || occurrence.status === 'encerrado') {
       return 'Concluída';
     }
     

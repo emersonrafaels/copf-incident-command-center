@@ -8,7 +8,7 @@ export interface OccurrenceData {
   serialNumber: string
   description: string
   severity: 'critical' | 'high' | 'medium' | 'low'
-  status: 'a_iniciar' | 'em_atuacao' | 'encerrada' | 'cancelada'
+  status: 'a_iniciar' | 'em_andamento' | 'encerrado' | 'com_impedimentos' | 'cancelado'
   createdAt: string
   resolvedAt?: string
   assignedTo: string
@@ -109,12 +109,12 @@ export function useDashboardData() {
           const equipment = equipmentList[Math.floor(Math.random() * equipmentList.length)];
           const occurrenceId = `COPF-2024-${String(groupIndex + 1).padStart(2, '0')}-${agencyNum}-${String(i + 1).padStart(3, '0')}`;
           
-          const status = ['a_iniciar', 'em_atuacao', 'encerrada', 'cancelada'][Math.floor(Math.random() * 4)] as ('a_iniciar' | 'em_atuacao' | 'encerrada' | 'cancelada');
+          const status = ['a_iniciar', 'em_andamento', 'encerrado', 'com_impedimentos', 'cancelado'][Math.floor(Math.random() * 5)] as ('a_iniciar' | 'em_andamento' | 'encerrado' | 'com_impedimentos' | 'cancelado');
           const createdAt = new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000);
           
           // Gerar resolvedAt para ocorrências encerradas com distribuição Long Tail realística
           let resolvedAt: string | undefined;
-          if (status === 'encerrada') {
+          if (status === 'encerrado') {
             // Distribuição Long Tail: maioria resolvida rápido, alguns outliers
             const randomValue = Math.random();
             let durationHours: number;
@@ -243,13 +243,13 @@ export function useDashboardData() {
   ], [occurrences])
 
   const metrics = useMemo(() => {
-    const resolvedCount = occurrences.filter(o => o.status === 'encerrada').length
+    const resolvedCount = occurrences.filter(o => o.status === 'encerrado').length
     const totalCount = occurrences.length
     
     return {
       totalOccurrences: totalCount,
       resolvedOccurrences: resolvedCount,
-      pendingOccurrences: occurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_atuacao').length,
+      pendingOccurrences: occurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_andamento').length,
       avgMTTR: '4.2h',
       affectedAgencies: new Set(occurrences.map(o => o.agency)).size,
       resolutionRate: totalCount > 0 ? Math.round((resolvedCount / totalCount) * 100) : 0
