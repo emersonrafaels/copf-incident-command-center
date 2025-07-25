@@ -467,7 +467,7 @@ export function Dashboard() {
           {/* 6. MTTR */}
           <MetricCard 
             title="MTTR" 
-            value="4.2h" 
+            value={metrics?.avgMTTR || "4.2h"} 
             icon={<Clock className="h-4 w-4" />} 
             change="-0.3h desde ontem" 
             changeType="positive" 
