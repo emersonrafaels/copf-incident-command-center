@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Filter, RefreshCw, ChevronDown, ChevronUp, Check, Truck } from "lucide-react";
+import { Filter, RefreshCw, ChevronDown, ChevronUp, Check, Truck, Clock } from "lucide-react";
 import { useFilters } from "@/contexts/FiltersContext";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { cn } from "@/lib/utils";
@@ -44,6 +44,7 @@ export function FilterSection({ className, showSerialNumber = false }: FilterSec
     vendorPriorityFilter,
     reincidentFilter,
     statusSlaFilter,
+    longTailFilter,
     hasActiveFilters,
     updateFilter,
     clearAllFilters
@@ -191,7 +192,8 @@ export function FilterSection({ className, showSerialNumber = false }: FilterSec
                         serie: showSerialNumber && serialNumberFilter !== '',
                         vencidas: overrideFilter,
                         priorizado: vendorPriorityFilter,
-                        reincidentes: reincidentFilter
+                        reincidentes: reincidentFilter,
+                        longTail: longTailFilter.length > 0
                       }).filter(Boolean).length} filtro{Object.values({
                         agencia: agenciaFilter.length > 0,
                         uf: ufFilter.length > 0,
@@ -209,7 +211,8 @@ export function FilterSection({ className, showSerialNumber = false }: FilterSec
                         serie: showSerialNumber && serialNumberFilter !== '',
                         vencidas: overrideFilter,
                         priorizado: vendorPriorityFilter,
-                        reincidentes: reincidentFilter
+                        reincidentes: reincidentFilter,
+                        longTail: longTailFilter.length > 0
                       }).filter(Boolean).length !== 1 ? 's' : ''} ativo{Object.values({
                         agencia: agenciaFilter.length > 0,
                         uf: ufFilter.length > 0,
@@ -227,7 +230,8 @@ export function FilterSection({ className, showSerialNumber = false }: FilterSec
                         serie: showSerialNumber && serialNumberFilter !== '',
                         vencidas: overrideFilter,
                         priorizado: vendorPriorityFilter,
-                        reincidentes: reincidentFilter
+                        reincidentes: reincidentFilter,
+                        longTail: longTailFilter.length > 0
                       }).filter(Boolean).length !== 1 ? 's' : ''}
                     </Badge>
                     <Button
@@ -906,7 +910,7 @@ export function FilterSection({ className, showSerialNumber = false }: FilterSec
                      </div>
                    </div>
 
-                   {/* Status SLA, Severidade e Número de Série */}
+                   {/* Status SLA, Severidade, Long Tail e Número de Série */}
                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                      {/* Status SLA */}
                      <div className="group space-y-3">
@@ -1025,21 +1029,85 @@ export function FilterSection({ className, showSerialNumber = false }: FilterSec
                        </Popover>
                      </div>
 
-                      {/* Número de Série - Apenas na página Ocorrências */}
-                      {showSerialNumber && (
-                        <div className="space-y-3">
-                          <Label className="text-sm font-medium text-muted-foreground">
-                            Número de Série
-                          </Label>
-                          <Input
-                            placeholder="Ex: ATM001-SP-001"
-                            value={serialNumberFilter}
-                            onChange={(e) => updateFilter('serialNumberFilter', e.target.value)}
-                            className="h-10"
-                          />
-                        </div>
-                      )}
+                     {/* Long Tail */}
+                     <div className="group space-y-3">
+                       <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                         <Clock className="h-3 w-3 text-orange-500" />
+                         Long Tail
+                       </Label>
+                       <Popover>
+                         <PopoverTrigger asChild>
+                           <Button variant="outline" className="w-full h-10 justify-between hover:bg-orange-500/5 hover:border-orange-500/30 transition-all duration-200 group-hover:shadow-sm">
+                             {longTailFilter.length > 0 ? (
+                               <div className="flex items-center gap-2">
+                                 <Badge variant="secondary" className="h-5 text-xs bg-orange-500/10 text-orange-500">
+                                   {longTailFilter.length}
+                                 </Badge>
+                                 <span className="text-sm">
+                                   {longTailFilter.length === 1 ? 
+                                     (['1d', '2d', '3d', '4d', '5d'].includes(longTailFilter[0]) ? 
+                                       { '1d': '>1 dia', '2d': '>2 dias', '3d': '>3 dias', '4d': '>4 dias', '5d': '>5 dias' }[longTailFilter[0] as '1d' | '2d' | '3d' | '4d' | '5d'] : 
+                                       longTailFilter[0]
+                                     ) : 
+                                     `${longTailFilter.length} faixas`
+                                   }
+                                 </span>
+                               </div>
+                             ) : "Todas as faixas"}
+                             <div className="w-4 h-4 opacity-50">⌄</div>
+                           </Button>
+                         </PopoverTrigger>
+                         <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                           <Command>
+                             <CommandInput placeholder="Buscar faixa..." className="h-9" />
+                             <CommandEmpty>Nenhuma faixa encontrada.</CommandEmpty>
+                             <CommandList>
+                               <CommandGroup>
+                                 {[
+                                   { value: '1d', label: '>1 dia' },
+                                   { value: '2d', label: '>2 dias' },
+                                   { value: '3d', label: '>3 dias' },
+                                   { value: '4d', label: '>4 dias' },
+                                   { value: '5d', label: '>5 dias', highlight: true }
+                                 ].map(range => (
+                                   <CommandItem key={range.value} onSelect={() => {
+                                     const isSelected = longTailFilter.includes(range.value);
+                                     if (isSelected) {
+                                       updateFilter('longTailFilter', longTailFilter.filter(l => l !== range.value));
+                                     } else {
+                                       updateFilter('longTailFilter', [...longTailFilter, range.value]);
+                                     }
+                                   }}>
+                                     <Check className={cn("mr-2 h-4 w-4", longTailFilter.includes(range.value) ? "opacity-100" : "opacity-0")} />
+                                     <span className={cn(
+                                       range.highlight && "font-semibold text-orange-500"
+                                     )}>
+                                       {range.label}
+                                     </span>
+                                   </CommandItem>
+                                 ))}
+                               </CommandGroup>
+                             </CommandList>
+                           </Command>
+                         </PopoverContent>
+                       </Popover>
+                     </div>
                    </div>
+
+                   {/* Número de Série - Apenas na página Ocorrências */}
+                   {showSerialNumber && (
+                     <div className="space-y-3">
+                       <Label className="text-sm font-medium text-muted-foreground">
+                         Número de Série
+                       </Label>
+                       <Input
+                         placeholder="Ex: ATM001-SP-001"
+                         value={serialNumberFilter}
+                         onChange={(e) => updateFilter('serialNumberFilter', e.target.value)}
+                         className="h-10"
+                       />
+                     </div>
+                   )}
                 </CollapsibleContent>
               </div>
             </Collapsible>
