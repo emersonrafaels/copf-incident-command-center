@@ -309,6 +309,7 @@ export function Dashboard() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-card border-border/50">
+                  <SelectItem value="7-days">Últimos 7 dias</SelectItem>
                   <SelectItem value="30-days">Últimos 30 dias</SelectItem>
                   <SelectItem value="60-days">Últimos 60 dias</SelectItem>
                   <SelectItem value="90-days">Últimos 90 dias</SelectItem>
