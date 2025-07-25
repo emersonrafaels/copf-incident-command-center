@@ -10,6 +10,7 @@ export interface OccurrenceData {
   severity: 'critical' | 'high' | 'medium' | 'low'
   status: 'a_iniciar' | 'em_atuacao' | 'encerrada' | 'cancelada'
   createdAt: string
+  resolvedAt?: string
   assignedTo: string
   vendor: string
 }
@@ -108,6 +109,31 @@ export function useDashboardData() {
           const equipment = equipmentList[Math.floor(Math.random() * equipmentList.length)];
           const occurrenceId = `COPF-2024-${String(groupIndex + 1).padStart(2, '0')}-${agencyNum}-${String(i + 1).padStart(3, '0')}`;
           
+          const status = ['a_iniciar', 'em_atuacao', 'encerrada', 'cancelada'][Math.floor(Math.random() * 4)] as ('a_iniciar' | 'em_atuacao' | 'encerrada' | 'cancelada');
+          const createdAt = new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000);
+          
+          // Gerar resolvedAt para ocorrências encerradas com distribuição Long Tail realística
+          let resolvedAt: string | undefined;
+          if (status === 'encerrada') {
+            // Distribuição Long Tail: maioria resolvida rápido, alguns outliers
+            const randomValue = Math.random();
+            let durationHours: number;
+            
+            if (randomValue < 0.4) { // 40% resolvidas em até 2h
+              durationHours = Math.random() * 2;
+            } else if (randomValue < 0.7) { // 30% entre 2-8h  
+              durationHours = 2 + Math.random() * 6;
+            } else if (randomValue < 0.9) { // 20% entre 8-24h
+              durationHours = 8 + Math.random() * 16;
+            } else if (randomValue < 0.98) { // 8% entre 1-5 dias
+              durationHours = 24 + Math.random() * 96;
+            } else { // 2% acima de 5 dias (Long do Long Tail)
+              durationHours = 120 + Math.random() * 240; // 5-15 dias
+            }
+            
+            resolvedAt = new Date(createdAt.getTime() + durationHours * 60 * 60 * 1000).toISOString();
+          }
+
           mockOccurrences.push({
             id: occurrenceId,
             agency: `AG${agencyNum} - Centro (${structure.municipio})`,
@@ -136,8 +162,9 @@ export function useDashboardData() {
                   'Classificadora com erro de contagem'
                 ][Math.floor(Math.random() * 10)],
             severity: ['critical', 'high', 'medium', 'low'][Math.floor(Math.random() * 4)] as ('critical' | 'high' | 'medium' | 'low'),
-            status: ['a_iniciar', 'em_atuacao', 'encerrada', 'cancelada'][Math.floor(Math.random() * 4)] as ('a_iniciar' | 'em_atuacao' | 'encerrada' | 'cancelada'),
-            createdAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
+            status,
+            createdAt: createdAt.toISOString(),
+            resolvedAt,
             assignedTo: ['João Silva - NOC', 'Maria Santos - Facilities', 'Carlos Oliveira - Redes', 'Ana Costa - POS', 'Roberto Lima - Suporte'][Math.floor(Math.random() * 5)],
             vendor
           });

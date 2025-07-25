@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { MetricCard } from "./MetricCard";
 import { StatusBadge } from "./StatusBadge";
-import { EnhancedStorytellingCharts } from "./EnhancedStorytellingCharts";
+import { LongTailChart } from "./LongTailChart";
 import { OccurrenceModal } from "./OccurrenceModal";
 import { CriticalityHeatmap } from "./CriticalityHeatmap";
 import { FilterSection } from "./FilterSection";
@@ -353,11 +353,6 @@ export function Dashboard() {
         <CriticalityHeatmap occurrences={filteredOccurrences} />
       </div>
 
-      {/* Gráficos Clicáveis */}
-      <div className="space-y-6">
-        <h2 className="text-responsive-2xl font-bold text-foreground">Análise de Dados - Clique para Filtrar</h2>
-        <EnhancedStorytellingCharts occurrences={filteredOccurrences} />
-      </div>
 
       {/* Lista de Ocorrências Recentes */}
       <Card className="animate-fade-in">
@@ -528,7 +523,7 @@ export function Dashboard() {
         {/* Criticality Heatmap */}
         <CriticalityHeatmap occurrences={filteredOccurrences} />
 
-        {/* Enhanced Storytelling Charts */}
+        {/* Long Tail Analysis */}
         {isLoading ? <div className="responsive-grid responsive-grid-2">
             {Array.from({
           length: 4
@@ -540,7 +535,7 @@ export function Dashboard() {
                   <Skeleton className="h-[300px] w-full" />
                 </CardContent>
               </Card>)}
-          </div> : <EnhancedStorytellingCharts occurrences={filteredOccurrences} />}
+          </div> : <LongTailChart occurrences={filteredOccurrences} />}
       </div>
 
       {/* Occurrence Details Modal */}
