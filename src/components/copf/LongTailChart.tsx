@@ -681,9 +681,6 @@ export const LongTailChart = memo(function LongTailChart({
                       <p className="text-green-700 dark:text-green-400">
                         <strong>Ação:</strong> Manter padrão atual e documentar boas práticas
                       </p>
-                      <p className="text-green-600 dark:text-green-500">
-                        <strong>Resultado Esperado:</strong> Sustentabilidade operacional e benchmarking interno
-                      </p>
                       <ul className="list-disc list-inside text-xs text-green-600 dark:text-green-500 ml-2 space-y-1">
                         <li>Redução contínua do tempo médio de resolução</li>
                         <li>Maior satisfação do cliente interno</li>
@@ -701,9 +698,6 @@ export const LongTailChart = memo(function LongTailChart({
                     <div className="space-y-2 text-sm">
                       <p className="text-orange-700 dark:text-orange-400">
                         <strong>Ação:</strong> Revisar processos e identificar gargalos específicos
-                      </p>
-                      <p className="text-orange-600 dark:text-orange-500">
-                        <strong>Resultado Esperado:</strong> Melhoria de 15-25% no tempo de resolução
                       </p>
                       <ul className="list-disc list-inside text-xs text-orange-600 dark:text-orange-500 ml-2 space-y-1">
                         <li>Otimização de fluxos de comunicação</li>
@@ -723,9 +717,6 @@ export const LongTailChart = memo(function LongTailChart({
                       <p className="text-red-700 dark:text-red-400">
                         <strong>Ação:</strong> Intervenção imediata e reestruturação operacional
                       </p>
-                      <p className="text-red-600 dark:text-red-500">
-                        <strong>Resultado Esperado:</strong> Recuperação em 30-60 dias com melhoria de 40%
-                      </p>
                       <ul className="list-disc list-inside text-xs text-red-600 dark:text-red-500 ml-2 space-y-1">
                         <li>Escalação imediata de ocorrências antigas</li>
                         <li>Revisão completa de fornecedores</li>
@@ -743,9 +734,6 @@ export const LongTailChart = memo(function LongTailChart({
                     <div className="space-y-2 text-sm">
                       <p className="text-purple-700 dark:text-purple-400">
                         <strong>Ação:</strong> Força-tarefa dedicada e revisão de contratos
-                      </p>
-                      <p className="text-purple-600 dark:text-purple-500">
-                        <strong>Resultado Esperado:</strong> Eliminação do backlog em 15 dias
                       </p>
                       <ul className="list-disc list-inside text-xs text-purple-600 dark:text-purple-500 ml-2 space-y-1">
                         <li>Redução imediata de 80% das ocorrências antigas</li>
