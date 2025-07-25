@@ -113,18 +113,7 @@ export function FilterSection({ className }: FilterSectionProps) {
     : ufFilter.flatMap(uf => municipiosPorUF[uf as keyof typeof municipiosPorUF] || []).sort();
 
   // Diretorias de Negócio (DINEG)
-  const dinegOptions = [
-    'DINEG Metropolitana',
-    'DINEG Interior',
-    'DINEG Capital',
-    'DINEG Região Sul',
-    'DINEG Região Norte',
-    'DINEG Região Nordeste',
-    'DINEG Região Centro-Oeste',
-    'DINEG Varejo',
-    'DINEG Atacado',
-    'DINEG Pessoa Jurídica'
-  ];
+  const dinegOptions = ['2', '4', '8', '80'];
 
   // Filtrar DINEG baseado nas agências selecionadas (lógica simplificada)
   const availableDinegs = agenciaFilter.length === 0 ? dinegOptions : dinegOptions.filter((dineg, index) => {
