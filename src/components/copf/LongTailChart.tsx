@@ -458,77 +458,174 @@ export const LongTailChart = memo(function LongTailChart({
                       key={`cell-${index}`} 
                       fill={entry.color}
                       stroke="none"
+                      className="transition-all duration-200 hover:opacity-80"
                     />
                   ))}
                 </Bar>
-                
-                {/* Linha de referência: Meta de Excelência */}
-                <ReferenceLine 
-                  y={0} 
-                  stroke="#22c55e" 
-                  strokeWidth={2}
-                  strokeDasharray="5 5"
-                  label={{
-                    value: `Meta Excelência: ${formatHours(timeRangeAnalysis.metrics.metaExcelencia)}`,
-                    position: "top",
-                    style: { fill: '#22c55e', fontSize: '11px', fontWeight: 600 }
-                  }}
-                />
-                
-                {/* Linha de referência: Aging Crítico */}
-                <ReferenceLine 
-                  y={0} 
-                  stroke="#ef4444" 
-                  strokeWidth={2}
-                  strokeDasharray="8 3"
-                  label={{
-                    value: "Aging Crítico: > 5 dias",
-                    position: "top",
-                    style: { fill: '#ef4444', fontSize: '11px', fontWeight: 600 }
-                  }}
-                />
               </BarChart>
             </ResponsiveContainer>
           </ChartContainer>
+          
+          {/* Indicadores visuais abaixo do gráfico */}
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-6 p-3 bg-muted/20 rounded-lg">
+            <div className="flex items-center gap-2 text-xs">
+              <div className="w-3 h-3 rounded bg-green-500"></div>
+              <span className="text-muted-foreground">Meta de Excelência: ≤ {formatHours(timeRangeAnalysis.metrics.metaExcelencia)}</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs">
+              <div className="w-3 h-3 rounded bg-orange-500"></div>
+              <span className="text-muted-foreground">Atenção: {formatHours(timeRangeAnalysis.metrics.metaExcelencia)} - 5d</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs">
+              <div className="w-3 h-3 rounded bg-red-500"></div>
+              <span className="text-muted-foreground">Crítico: {">"}5 dias</span>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
-      {/* Como usar esta análise */}
-      <Card className="bg-muted/30 border-muted/50">
-        <CardContent className="p-4">
-          <div className="flex items-start gap-3">
-            <Info className="h-5 w-5 text-info mt-0.5 flex-shrink-0" />
-            <div className="flex-1">
-              <h4 className="font-semibold text-foreground mb-3">Como usar esta análise</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2 text-sm text-muted-foreground">
-                  <p>• <strong>Clique nas barras</strong> para filtrar ocorrências por faixa de tempo específica</p>
-                  <p>• <strong>Aging de Ocorrências:</strong> Tempo que uma ocorrência permanece em aberto desde sua criação</p>
-                  <p>• <strong>Análise Long Tail:</strong> Identifica concentração de ocorrências por faixas de tempo</p>
-                </div>
-                <div className="space-y-2 text-sm text-muted-foreground">
-                  <p>• <strong>Cores das barras:</strong> Verde (dentro da meta), Laranja (acima da meta), Vermelho (crítico)</p>
-                  <p>• <strong>Meta de Excelência:</strong> Objetivo de alta performance (resolver em até 12h)</p>
-                  <p>• <strong>Aging Crítico:</strong> Ocorrências que excedem 5 dias requerem ação imediata</p>
-                </div>
+      {/* Card de Análise Operacional aprimorado */}
+      <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <Clock className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-lg font-semibold">Análise de Performance - Aging</CardTitle>
+              <p className="text-sm text-muted-foreground">Insights detalhados sobre tempo de resolução</p>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Métricas principais em grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-4 bg-card rounded-lg border">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-2 h-2 rounded-full bg-muted-foreground"></div>
+                <span className="text-sm font-medium text-muted-foreground">Tempo Mediano</span>
+              </div>
+              <div className="text-2xl font-bold text-foreground">{formatHours(timeRangeAnalysis.metrics.tempoMediano)}</div>
+              <p className="text-xs text-muted-foreground mt-1">50% das ocorrências resolvidas em até este tempo</p>
+            </div>
+            
+            <div className="p-4 bg-card rounded-lg border">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-2 h-2 rounded-full bg-success"></div>
+                <span className="text-sm font-medium text-success">Meta de Excelência</span>
+              </div>
+              <div className="text-2xl font-bold text-success">{timeRangeAnalysis.metrics.percentualExcelencia}%</div>
+              <p className="text-xs text-muted-foreground mt-1">Resolvidas em até {formatHours(timeRangeAnalysis.metrics.metaExcelencia)}</p>
+            </div>
+            
+            <div className="p-4 bg-card rounded-lg border">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-2 h-2 rounded-full bg-destructive"></div>
+                <span className="text-sm font-medium text-destructive">Aging Crítico</span>
+              </div>
+              <div className="text-2xl font-bold text-destructive">{timeRangeAnalysis.metrics.agingCritico}</div>
+              <p className="text-xs text-muted-foreground mt-1">{timeRangeAnalysis.metrics.percentualCritico}% acima de 5 dias</p>
+            </div>
+          </div>
+          
+          {/* Insight textual */}
+          <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
+            <div className="flex items-start gap-3">
+              <TrendingUp className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+              <div>
+                <h4 className="font-semibold text-foreground mb-2">Resumo Executivo</h4>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {timeRangeAnalysis.metrics.total} ocorrências em aberto com tempo mediano de {formatHours(timeRangeAnalysis.metrics.tempoMediano)}. 
+                  {timeRangeAnalysis.metrics.percentualExcelencia}% das ocorrências estão dentro da meta de excelência. 
+                  {timeRangeAnalysis.metrics.agingCritico > 0 && (
+                    ` Atenção: ${timeRangeAnalysis.metrics.agingCritico} ocorrências com aging crítico requerem ação imediata.`
+                  )}
+                </p>
+                {timeRangeAnalysis.actionSuggestion && (
+                  <div className="mt-3 p-3 bg-primary/10 rounded border border-primary/20">
+                    <div className="flex items-center gap-2 mb-1">
+                      <ArrowRight className="h-4 w-4 text-primary" />
+                      <span className="text-sm font-medium text-primary">Ação Recomendada</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{timeRangeAnalysis.actionSuggestion}</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Card de Análise Operacional com insights detalhados do hover */}
-      <OperationalNarrativeCard 
-        title="Análise de Aging" 
-        insight={`${timeRangeAnalysis.metrics.total} ocorrências em aberto com tempo mediano de ${formatHours(timeRangeAnalysis.metrics.tempoMediano)}. Meta de Excelência: ${timeRangeAnalysis.metrics.percentualExcelencia}% das ocorrências resolvidas em até ${formatHours(timeRangeAnalysis.metrics.metaExcelencia)}. Aging Crítico: ${timeRangeAnalysis.metrics.agingCritico} ocorrências acima de 5 dias (${timeRangeAnalysis.metrics.percentualCritico}% do total).`}
-        priority={timeRangeAnalysis.priority} 
-        actionSuggestion={timeRangeAnalysis.actionSuggestion}
-        trend={timeRangeAnalysis.metrics.agingCritico > 0 ? 'up' : 'stable'}
-        metric={{
-          value: timeRangeAnalysis.metrics.agingCritico,
-          label: "Ocorrências Críticas"
-        }}
-      />
+      {/* Como usar esta análise - Redesenhado */}
+      <Card className="bg-gradient-to-r from-info/5 to-info/10 border-info/20">
+        <CardContent className="p-6">
+          <div className="flex items-start gap-4">
+            <div className="p-2 rounded-lg bg-info/10">
+              <Info className="h-6 w-6 text-info flex-shrink-0" />
+            </div>
+            <div className="flex-1">
+              <h4 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                Como interpretar esta análise
+                <Badge variant="outline" className="text-xs">Guia Interativo</Badge>
+              </h4>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3 p-3 bg-card/50 rounded-lg">
+                    <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0"></div>
+                    <div>
+                      <p className="font-medium text-sm text-foreground">Interatividade</p>
+                      <p className="text-xs text-muted-foreground">Clique nas barras para filtrar ocorrências por faixa de tempo específica</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3 p-3 bg-card/50 rounded-lg">
+                    <div className="w-2 h-2 rounded-full bg-muted-foreground mt-2 flex-shrink-0"></div>
+                    <div>
+                      <p className="font-medium text-sm text-foreground">Aging de Ocorrências</p>
+                      <p className="text-xs text-muted-foreground">Tempo que uma ocorrência permanece em aberto desde sua criação</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3 p-3 bg-card/50 rounded-lg">
+                    <div className="w-2 h-2 rounded-full bg-success mt-2 flex-shrink-0"></div>
+                    <div>
+                      <p className="font-medium text-sm text-foreground">Meta de Excelência</p>
+                      <p className="text-xs text-muted-foreground">Objetivo de alta performance - resolver ocorrências em até 12h</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3 p-3 bg-card/50 rounded-lg">
+                    <div className="w-2 h-2 rounded-full bg-orange-500 mt-2 flex-shrink-0"></div>
+                    <div>
+                      <p className="font-medium text-sm text-foreground">Análise Long Tail</p>
+                      <p className="text-xs text-muted-foreground">Identifica concentração e distribuição de ocorrências por faixas de tempo</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3 p-3 bg-card/50 rounded-lg">
+                    <div className="w-2 h-2 rounded-full bg-destructive mt-2 flex-shrink-0"></div>
+                    <div>
+                      <p className="font-medium text-sm text-foreground">Aging Crítico</p>
+                      <p className="text-xs text-muted-foreground">Ocorrências que excedem 5 dias em aberto requerem ação imediata</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3 p-3 bg-card/50 rounded-lg">
+                    <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0"></div>
+                    <div>
+                      <p className="font-medium text-sm text-foreground">Interpretação Visual</p>
+                      <p className="text-xs text-muted-foreground">Verde (meta), Laranja (atenção), Vermelho (crítico)</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 });
