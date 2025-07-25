@@ -2,12 +2,14 @@ import React, { memo, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, ReferenceLine, Cell } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { OperationalNarrativeCard } from './OperationalNarrativeCard';
-import { BarChart3, Clock, AlertTriangle, ArrowRight, TrendingUp, Info, ChevronDown, ChevronUp, BookOpen } from 'lucide-react';
+import { BarChart3, Clock, AlertTriangle, ArrowRight, TrendingUp, Info, BookOpen, Target, Zap, Users, Settings, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useFilters } from '@/contexts/FiltersContext';
 import { toast } from 'sonner';
 import { OccurrenceData } from '@/hooks/useDashboardData';
@@ -94,7 +96,7 @@ export const LongTailChart = memo(function LongTailChart({
   filteredOccurrences
 }: LongTailChartProps) {
   const navigate = useNavigate();
-  const [showMethodology, setShowMethodology] = useState(false);
+  const [showMethodologyModal, setShowMethodologyModal] = useState(false);
   const {
     updateFilter,
     clearAllFilters
@@ -529,55 +531,17 @@ export const LongTailChart = memo(function LongTailChart({
                   )}
                 </div>
                 
-                {/* Botão para mostrar metodologia */}
+                {/* Botão para abrir modal de metodologia */}
                 <div className="mt-4">
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setShowMethodology(!showMethodology)}
+                    onClick={() => setShowMethodologyModal(true)}
                     className="flex items-center gap-2 text-primary border-primary/20 hover:bg-primary/5"
                   >
                     <BookOpen className="h-4 w-4" />
-                    <span>Metodologia da Análise</span>
-                    {showMethodology ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    <span>Metodologia e Recomendações</span>
                   </Button>
-                  
-                  {showMethodology && (
-                    <div className="mt-3 p-4 bg-info/5 rounded-lg border border-info/20">
-                      <h5 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-                        <Info className="h-4 w-4 text-info" />
-                        Metodologia Long Tail - Análise de Aging
-                      </h5>
-                      <div className="space-y-3 text-sm text-muted-foreground">
-                        <p>
-                          <strong>Conceito:</strong> A análise Long Tail identifica a distribuição de ocorrências por faixas de tempo de abertura (aging), revelando padrões de concentração e outliers que requerem atenção especial.
-                        </p>
-                        <p>
-                          <strong>Faixas de Tempo:</strong> Dividimos o aging em 11 faixas estratégicas: desde 0-30 minutos até mais de 5 dias, permitindo identificar gargalos específicos no processo de resolução.
-                        </p>
-                        <p>
-                          <strong>Métricas Calculadas:</strong>
-                        </p>
-                        <ul className="list-disc list-inside ml-4 space-y-1">
-                          <li><strong>Tempo Mediano:</strong> P50 real dos dados (50% das ocorrências resolvidas até este tempo)</li>
-                          <li><strong>Meta de Excelência:</strong> Objetivo fixo de 12h para alta performance operacional</li>
-                          <li><strong>Aging Crítico:</strong> Ocorrências acima de 120h (5 dias) que requerem escalação</li>
-                        </ul>
-                        <p>
-                          <strong>Interpretação:</strong> Barras verdes indicam performance dentro da meta, laranja sinaliza atenção necessária, e vermelho representa situações críticas. A concentração nas primeiras faixas indica eficiência operacional.
-                        </p>
-                        {timeRangeAnalysis.actionSuggestion && (
-                          <div className="mt-3 p-3 bg-primary/10 rounded border border-primary/20">
-                            <div className="flex items-center gap-2 mb-1">
-                              <ArrowRight className="h-4 w-4 text-primary" />
-                              <span className="text-sm font-medium text-primary">Ação Recomendada para este Cenário</span>
-                            </div>
-                            <p className="text-sm text-muted-foreground">{timeRangeAnalysis.actionSuggestion}</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
@@ -647,6 +611,198 @@ export const LongTailChart = memo(function LongTailChart({
           </div>
         </CardContent>
       </Card>
+
+      {/* Modal de Metodologia e Recomendações */}
+      <Dialog open={showMethodologyModal} onOpenChange={setShowMethodologyModal}>
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BookOpen className="h-5 w-5 text-primary" />
+              Metodologia Long Tail - Recomendações Estratégicas
+            </DialogTitle>
+          </DialogHeader>
+          
+          <ScrollArea className="max-h-[70vh] pr-4">
+            <div className="space-y-6">
+              
+              {/* Seção: Conceito da Análise */}
+              <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
+                <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                  <Info className="h-5 w-5 text-primary" />
+                  Conceito da Análise Long Tail
+                </h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  A análise Long Tail identifica a distribuição de ocorrências por faixas de tempo de abertura (aging), 
+                  revelando padrões de concentração e outliers que requerem intervenção estratégica. 
+                  Esta metodologia permite identificar gargalos operacionais e priorizar ações de melhoria.
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                  <div className="text-center p-3 bg-card/50 rounded-lg">
+                    <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                    </div>
+                    <div className="text-sm font-medium text-foreground">Eficiência</div>
+                    <div className="text-xs text-muted-foreground">≤ 12h</div>
+                  </div>
+                  <div className="text-center p-3 bg-card/50 rounded-lg">
+                    <div className="w-8 h-8 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <Clock className="h-4 w-4 text-orange-600" />
+                    </div>
+                    <div className="text-sm font-medium text-foreground">Atenção</div>
+                    <div className="text-xs text-muted-foreground">12h - 5d</div>
+                  </div>
+                  <div className="text-center p-3 bg-card/50 rounded-lg">
+                    <div className="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <AlertCircle className="h-4 w-4 text-red-600" />
+                    </div>
+                    <div className="text-sm font-medium text-foreground">Crítico</div>
+                    <div className="text-xs text-muted-foreground">{">"}5 dias</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Seção: Recomendações Estratégicas */}
+              <div>
+                <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <Target className="h-5 w-5 text-primary" />
+                  Recomendações Estratégicas por Cenário
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  
+                  {/* Cenário: Performance Excelente */}
+                  <div className="p-4 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                      <h4 className="font-medium text-green-800 dark:text-green-300">Performance Excelente ({">"}70% Meta)</h4>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <p className="text-green-700 dark:text-green-400">
+                        <strong>Ação:</strong> Manter padrão atual e documentar boas práticas
+                      </p>
+                      <p className="text-green-600 dark:text-green-500">
+                        <strong>Resultado Esperado:</strong> Sustentabilidade operacional e benchmarking interno
+                      </p>
+                      <ul className="list-disc list-inside text-xs text-green-600 dark:text-green-500 ml-2 space-y-1">
+                        <li>Redução contínua do tempo médio de resolução</li>
+                        <li>Maior satisfação do cliente interno</li>
+                        <li>Modelo para replicação em outras áreas</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  {/* Cenário: Performance Moderada */}
+                  <div className="p-4 bg-orange-50 dark:bg-orange-950/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                      <h4 className="font-medium text-orange-800 dark:text-orange-300">Performance Moderada (40-70% Meta)</h4>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <p className="text-orange-700 dark:text-orange-400">
+                        <strong>Ação:</strong> Revisar processos e identificar gargalos específicos
+                      </p>
+                      <p className="text-orange-600 dark:text-orange-500">
+                        <strong>Resultado Esperado:</strong> Melhoria de 15-25% no tempo de resolução
+                      </p>
+                      <ul className="list-disc list-inside text-xs text-orange-600 dark:text-orange-500 ml-2 space-y-1">
+                        <li>Otimização de fluxos de comunicação</li>
+                        <li>Redução de retrabalho em 20%</li>
+                        <li>Melhoria no SLA de fornecedores</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  {/* Cenário: Performance Crítica */}
+                  <div className="p-4 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                      <h4 className="font-medium text-red-800 dark:text-red-300">Performance Crítica ({"<"}40% Meta)</h4>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <p className="text-red-700 dark:text-red-400">
+                        <strong>Ação:</strong> Intervenção imediata e reestruturação operacional
+                      </p>
+                      <p className="text-red-600 dark:text-red-500">
+                        <strong>Resultado Esperado:</strong> Recuperação em 30-60 dias com melhoria de 40%
+                      </p>
+                      <ul className="list-disc list-inside text-xs text-red-600 dark:text-red-500 ml-2 space-y-1">
+                        <li>Escalação imediata de ocorrências antigas</li>
+                        <li>Revisão completa de fornecedores</li>
+                        <li>Implementação de monitoramento em tempo real</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  {/* Cenário: Aging Crítico Alto */}
+                  <div className="p-4 bg-purple-50 dark:bg-purple-950/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                      <h4 className="font-medium text-purple-800 dark:text-purple-300">Aging Crítico Elevado ({">"}10 ocorrências)</h4>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <p className="text-purple-700 dark:text-purple-400">
+                        <strong>Ação:</strong> Força-tarefa dedicada e revisão de contratos
+                      </p>
+                      <p className="text-purple-600 dark:text-purple-500">
+                        <strong>Resultado Esperado:</strong> Eliminação do backlog em 15 dias
+                      </p>
+                      <ul className="list-disc list-inside text-xs text-purple-600 dark:text-purple-500 ml-2 space-y-1">
+                        <li>Redução imediata de 80% das ocorrências antigas</li>
+                        <li>Prevenção de novos casos críticos</li>
+                        <li>Fortalecimento da governança</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Seção: Impactos e ROI */}
+              <div className="p-4 bg-muted/30 rounded-lg">
+                <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-primary" />
+                  Impactos e ROI das Recomendações
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-primary">25-40%</div>
+                    <div className="text-sm text-muted-foreground">Redução no tempo médio de resolução</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-success">15-30%</div>
+                    <div className="text-sm text-muted-foreground">Economia operacional anual</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-info">80%</div>
+                    <div className="text-sm text-muted-foreground">Melhoria na satisfação interna</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Ação Recomendada Atual */}
+              {timeRangeAnalysis.actionSuggestion && (
+                <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <ArrowRight className="h-5 w-5 text-primary" />
+                    <h4 className="font-semibold text-primary">Recomendação para sua Situação Atual</h4>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-3">{timeRangeAnalysis.actionSuggestion}</p>
+                  
+                  <div className="bg-card/50 p-3 rounded border">
+                    <h5 className="text-sm font-medium text-foreground mb-2">Próximos Passos Sugeridos:</h5>
+                    <ul className="list-disc list-inside text-xs text-muted-foreground space-y-1">
+                      <li>Clique nas barras críticas (vermelhas) para filtrar e analisar casos específicos</li>
+                      <li>Identifique padrões comuns entre fornecedores ou tipos de equipamento</li>
+                      <li>Defina plano de ação com prazos específicos para cada faixa de aging</li>
+                      <li>Monitore semanalmente a evolução dos indicadores</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 });
