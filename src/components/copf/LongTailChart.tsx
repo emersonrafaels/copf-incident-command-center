@@ -366,7 +366,7 @@ export const LongTailChart = memo(function LongTailChart({
                 top: 40,
                 right: 30,
                 left: 50,
-                bottom: 120
+                bottom: 80
               }}>
                 <defs>
                   <linearGradient id="barGradient1" x1="0" y1="0" x2="0" y2="1">
@@ -407,7 +407,7 @@ export const LongTailChart = memo(function LongTailChart({
                   label={{ 
                     value: 'Faixas de Tempo de Abertura', 
                     position: 'insideBottom', 
-                    offset: -15,
+                    offset: -5,
                     style: { 
                       textAnchor: 'middle',
                       fill: 'hsl(var(--foreground))',
