@@ -309,9 +309,9 @@ export const LongTailChart = memo(function LongTailChart({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="flex items-center gap-2 cursor-help">
-                    <div className="w-2 h-2 rounded-full bg-success"></div>
+                    <div className="w-2 h-2 rounded-full bg-muted-foreground"></div>
                     <span className="text-sm text-muted-foreground">Tempo Mediano:</span>
-                    <span className="text-lg font-bold text-success">{formatHours(timeRangeAnalysis.metrics.tempoMediano)}</span>
+                    <span className="text-lg font-bold text-muted-foreground">{formatHours(timeRangeAnalysis.metrics.tempoMediano)}</span>
                     <Info className="h-3 w-3 text-muted-foreground" />
                   </div>
                 </TooltipTrigger>
@@ -440,7 +440,7 @@ export const LongTailChart = memo(function LongTailChart({
                   }}
                 />
                 
-                <ChartTooltipContent 
+                 <ChartTooltipContent 
                   formatter={(value, name) => [
                     `${value} ocorrências`, 
                     'Quantidade'
@@ -458,88 +458,92 @@ export const LongTailChart = memo(function LongTailChart({
                   }}
                 />
                 
-                {/* Linha de referência para Meta de Excelência (12h) */}
-                <ReferenceLine 
-                  x={timeRangeAnalysis.metrics.metaExcelencia} 
-                  stroke="hsl(var(--success))" 
-                  strokeDasharray="8 4" 
-                  strokeWidth={2}
-                  label={{ 
-                    value: `Meta Excelência: ${formatHours(timeRangeAnalysis.metrics.metaExcelencia)}`, 
-                    position: "insideTopLeft",
-                    style: {
-                      fill: 'hsl(var(--success))',
-                      fontSize: '11px',
-                      fontWeight: 600
-                    }
-                  }}
-                />
-                
-                {/* Linha de referência para SLA Padrão (24h) */}
-                <ReferenceLine 
-                  x={timeRangeAnalysis.metrics.slaPadrao} 
-                  stroke="hsl(var(--warning))" 
-                  strokeDasharray="5 5" 
-                  strokeWidth={2}
-                  label={{ 
-                    value: `SLA: ${formatHours(timeRangeAnalysis.metrics.slaPadrao)}`, 
-                    position: "insideTopRight",
-                    style: {
-                      fill: 'hsl(var(--warning))',
-                      fontSize: '11px',
-                      fontWeight: 600
-                    }
-                  }}
-                />
-                
-                {/* Linha de referência para Aging Crítico (120h) */}
-                <ReferenceLine 
-                  x={120} 
-                  stroke="hsl(var(--destructive))" 
-                  strokeDasharray="3 3" 
-                  strokeWidth={2}
-                  label={{ 
-                    value: `Crítico: 5d`, 
-                    position: "insideBottomRight",
-                    style: {
-                      fill: 'hsl(var(--destructive))',
-                      fontSize: '11px',
-                      fontWeight: 600
-                    }
-                  }}
-                />
-                
                 <Bar 
                   dataKey="count" 
-                  radius={[6, 6, 0, 0]} 
-                  className="cursor-pointer transition-all duration-200 hover:opacity-80"
-                  onClick={(data) => handleBarClick(data.payload)}
-                  label={{ 
-                    position: 'top',
-                    fill: 'hsl(var(--foreground))',
-                    fontSize: 10,
-                    fontWeight: 600,
-                    formatter: (value: number) => value > 0 ? value : ''
+                  radius={[6, 6, 0, 0]}
+                  cursor="pointer"
+                  onClick={(data, index) => {
+                    if (data) {
+                      handleBarClick(data);
+                    }
                   }}
                 >
                   {timeRangeAnalysis.data.map((entry, index) => (
                     <Cell 
                       key={`cell-${index}`} 
-                      fill={entry.category === 'within_target' ? 'url(#barGradient1)' : entry.category === 'above_target' ? 'url(#barGradient2)' : 'url(#barGradient3)'} 
+                      fill={entry.color}
+                      stroke="none"
                     />
                   ))}
                 </Bar>
+                
+                {/* Linha de referência: Meta de Excelência */}
+                <ReferenceLine 
+                  y={0} 
+                  stroke="#22c55e" 
+                  strokeWidth={2}
+                  strokeDasharray="5 5"
+                  label={{
+                    value: `Meta Excelência: ${formatHours(timeRangeAnalysis.metrics.metaExcelencia)}`,
+                    position: "top",
+                    style: { fill: '#22c55e', fontSize: '11px', fontWeight: 600 }
+                  }}
+                />
+                
+                {/* Linha de referência: SLA Padrão */}
+                <ReferenceLine 
+                  y={0} 
+                  stroke="#f59e0b" 
+                  strokeWidth={2}
+                  strokeDasharray="5 5"
+                  label={{
+                    value: `SLA Padrão: ${formatHours(timeRangeAnalysis.metrics.slaPadrao)}`,
+                    position: "top",
+                    style: { fill: '#f59e0b', fontSize: '11px', fontWeight: 600 }
+                  }}
+                />
+                
+                {/* Linha de referência: Aging Crítico */}
+                <ReferenceLine 
+                  y={0} 
+                  stroke="#ef4444" 
+                  strokeWidth={2}
+                  strokeDasharray="8 3"
+                  label={{
+                    value: "Aging Crítico: > 5 dias",
+                    position: "top",
+                    style: { fill: '#ef4444', fontSize: '11px', fontWeight: 600 }
+                  }}
+                />
               </BarChart>
             </ResponsiveContainer>
           </ChartContainer>
+          
+          {/* Como usar esta análise - movido para logo abaixo do gráfico */}
+          <div className="mt-6 p-4 bg-info/5 border border-info/20 rounded-lg">
+            <div className="flex items-start gap-3">
+              <Info className="h-5 w-5 text-info mt-0.5 flex-shrink-0" />
+              <div>
+                <h4 className="font-semibold text-foreground mb-2">Como usar esta análise</h4>
+                <div className="space-y-2 text-sm text-muted-foreground">
+                  <p>• <strong>Clique nas barras</strong> para filtrar ocorrências por faixa de tempo específica</p>
+                  <p>• <strong>Tempo Mediano:</strong> Indica o ponto médio do aging atual - metade das ocorrências está abaixo deste valor</p>
+                  <p>• <strong>Meta de Excelência:</strong> Objetivo de resolver em até 12h (alta performance)</p>
+                  <p>• <strong>SLA Padrão:</strong> Limite máximo aceitável de 24h para resolução</p>
+                  <p>• <strong>Aging Crítico:</strong> Ocorrências acima de 5 dias requerem ação imediata</p>
+                  <p>• <strong>Cores das barras:</strong> Verde (dentro da meta), Laranja (acima da meta), Vermelho (crítico)</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
-      {/* Card de Insights Operacionais */}
-      <OperationalNarrativeCard
-        title="Análise de Aging"
-        insight={timeRangeAnalysis.insight}
-        priority={timeRangeAnalysis.priority}
+      {/* Card de Análise Operacional com insights detalhados */}
+      <OperationalNarrativeCard 
+        title="Análise de Aging" 
+        insight={timeRangeAnalysis.insight} 
+        priority={timeRangeAnalysis.priority} 
         actionSuggestion={timeRangeAnalysis.actionSuggestion}
         trend={timeRangeAnalysis.metrics.agingCritico > 0 ? 'up' : 'stable'}
         metric={{
@@ -547,32 +551,5 @@ export const LongTailChart = memo(function LongTailChart({
           label: "Ocorrências Críticas"
         }}
       />
-
-      {/* Legendas e Instruções */}
-      <Card className="bg-muted/30 border-muted/50">
-        <CardContent className="p-4">
-          <div className="space-y-3">
-            <h4 className="font-semibold text-sm text-foreground">Como usar esta análise:</h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded bg-green-500"></div>
-                <span>Dentro do Padrão: Aging normal</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded bg-orange-500"></div>
-                <span>Atenção: Próximo ao vencimento</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded bg-red-500"></div>
-                <span>Crítico: Aging acima de 5 dias</span>
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              💡 Clique nas barras do gráfico para filtrar ocorrências por faixa de tempo
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-      
     </div>;
 });
