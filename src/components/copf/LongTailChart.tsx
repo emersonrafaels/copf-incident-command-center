@@ -907,27 +907,6 @@ export const LongTailChart = memo(function LongTailChart({
                 </div>
               </div>
 
-              {/* Seção: Impactos e ROI */}
-              <div className="p-4 bg-muted/30 rounded-lg">
-                <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-primary" />
-                  Impactos e ROI das Recomendações
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">25-40%</div>
-                    <div className="text-sm text-muted-foreground">Redução no tempo médio de resolução</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-success">15-30%</div>
-                    <div className="text-sm text-muted-foreground">Economia operacional anual</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-info">80%</div>
-                    <div className="text-sm text-muted-foreground">Melhoria na satisfação interna</div>
-                  </div>
-                </div>
-              </div>
 
               {/* Ação Recomendada Atual */}
               {timeRangeAnalysis.actionSuggestion && (
