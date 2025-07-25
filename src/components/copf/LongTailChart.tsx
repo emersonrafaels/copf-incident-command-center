@@ -334,10 +334,10 @@ export const LongTailChart = memo(function LongTailChart({
           <ChartContainer config={chartConfig} className="h-[420px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={timeRangeAnalysis.data} margin={{
-              top: 20,
-              right: 20,
-              left: 30,
-              bottom: 80
+              top: 30,
+              right: 30,
+              left: 40,
+              bottom: 100
             }}>
                 <defs>
                   <linearGradient id="barGradient1" x1="0" y1="0" x2="0" y2="1">
@@ -355,27 +355,114 @@ export const LongTailChart = memo(function LongTailChart({
                 </defs>
                 
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-                <XAxis dataKey="rangeLabel" stroke="hsl(var(--muted-foreground))" tick={{
-                fill: 'hsl(var(--muted-foreground))',
-                fontSize: 12
-              }} angle={-45} textAnchor="end" height={80} interval={0} />
-                <YAxis stroke="hsl(var(--muted-foreground))" tick={{
-                fill: 'hsl(var(--muted-foreground))',
-                fontSize: 12
-              }} />
+                <XAxis 
+                  dataKey="rangeLabel" 
+                  stroke="hsl(var(--muted-foreground))" 
+                  tick={{
+                    fill: 'hsl(var(--muted-foreground))',
+                    fontSize: 11,
+                    fontWeight: 500
+                  }} 
+                  angle={-45} 
+                  textAnchor="end" 
+                  height={100} 
+                  interval={0}
+                  label={{ 
+                    value: 'Faixas de Tempo de Abertura', 
+                    position: 'insideBottom', 
+                    offset: -5,
+                    style: { 
+                      textAnchor: 'middle',
+                      fill: 'hsl(var(--foreground))',
+                      fontSize: '12px',
+                      fontWeight: 600
+                    }
+                  }}
+                />
+                <YAxis 
+                  stroke="hsl(var(--muted-foreground))" 
+                  tick={{
+                    fill: 'hsl(var(--muted-foreground))',
+                    fontSize: 11,
+                    fontWeight: 500
+                  }}
+                  label={{ 
+                    value: 'Número de Ocorrências', 
+                    angle: -90, 
+                    position: 'insideLeft',
+                    style: { 
+                      textAnchor: 'middle',
+                      fill: 'hsl(var(--foreground))',
+                      fontSize: '12px',
+                      fontWeight: 600
+                    }
+                  }}
+                />
                 
-                <ChartTooltipContent formatter={(value, name) => [`${value} ocorrências`, 'Quantidade']} labelFormatter={label => `Faixa: ${label}`} contentStyle={{
-                backgroundColor: 'hsl(var(--card))',
-                border: '1px solid hsl(var(--border))',
-                borderRadius: '8px',
-                boxShadow: 'var(--shadow-elegant)'
-              }} />
+                <ChartTooltipContent 
+                  formatter={(value, name) => [
+                    `${value} ocorrências`, 
+                    'Quantidade'
+                  ]} 
+                  labelFormatter={label => `Faixa: ${label}`} 
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                    boxShadow: 'var(--shadow-elegant)'
+                  }}
+                  itemStyle={{
+                    color: 'hsl(var(--foreground))',
+                    fontWeight: 500
+                  }}
+                />
+                
+                {/* Linha de referência para P85 */}
+                <ReferenceLine 
+                  y={timeRangeAnalysis.metrics.metaExcelencia} 
+                  stroke="hsl(var(--warning))" 
+                  strokeDasharray="8 4" 
+                  strokeWidth={2}
+                  label={{ 
+                    value: `Meta P85: ${formatHours(timeRangeAnalysis.metrics.metaExcelencia)}`, 
+                    position: "insideTopLeft",
+                    style: {
+                      fill: 'hsl(var(--warning))',
+                      fontSize: '11px',
+                      fontWeight: 600
+                    }
+                  }}
+                />
+                
+                {/* Linha de referência para mediana */}
+                <ReferenceLine 
+                  y={timeRangeAnalysis.metrics.tempoMediano} 
+                  stroke="hsl(var(--success))" 
+                  strokeDasharray="5 5" 
+                  strokeWidth={2}
+                  label={{ 
+                    value: `Mediana: ${formatHours(timeRangeAnalysis.metrics.tempoMediano)}`, 
+                    position: "insideTopRight",
+                    style: {
+                      fill: 'hsl(var(--success))',
+                      fontSize: '11px',
+                      fontWeight: 600
+                    }
+                  }}
+                />
                 
                 <Bar 
                   dataKey="count" 
                   radius={[6, 6, 0, 0]} 
                   className="cursor-pointer transition-all duration-200 hover:opacity-80"
                   onClick={(data) => handleBarClick(data.payload)}
+                  label={{ 
+                    position: 'top',
+                    fill: 'hsl(var(--foreground))',
+                    fontSize: 10,
+                    fontWeight: 600,
+                    formatter: (value: number) => value > 0 ? value : ''
+                  }}
                 >
                   {timeRangeAnalysis.data.map((entry, index) => (
                     <Cell 
