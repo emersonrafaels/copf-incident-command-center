@@ -50,26 +50,39 @@ export function useDashboardData() {
       // SP - DINEG 2
       { estado: 'SP', municipio: 'São Paulo', dineg: '2', agencias: ['0001', '0015', '0032'], tipo: 'convencional', vip: 'sim' },
       { estado: 'SP', municipio: 'São Paulo', dineg: '2', agencias: ['0045', '0067', '0089'], tipo: 'terceirizada', vip: 'nao' },
+      { estado: 'SP', municipio: 'São Paulo', dineg: '2', agencias: ['0091', '0095'], tipo: 'terceirizada', vip: 'sim' },
       { estado: 'SP', municipio: 'Campinas', dineg: '2', agencias: ['0101', '0115', '0132'], tipo: 'pab', vip: 'sim' },
       { estado: 'SP', municipio: 'Santos', dineg: '2', agencias: ['0201', '0215'], tipo: 'pae', vip: 'nao' },
+      { estado: 'SP', municipio: 'Guarulhos', dineg: '2', agencias: ['0301', '0315', '0320'], tipo: 'terceirizada', vip: 'nao' },
       
       // RJ - DINEG 4
       { estado: 'RJ', municipio: 'Rio de Janeiro', dineg: '4', agencias: ['1001', '1015', '1032'], tipo: 'convencional', vip: 'sim' },
       { estado: 'RJ', municipio: 'Rio de Janeiro', dineg: '4', agencias: ['1045', '1067'], tipo: 'terceirizada', vip: 'nao' },
+      { estado: 'RJ', municipio: 'Rio de Janeiro', dineg: '4', agencias: ['1070', '1075', '1080'], tipo: 'terceirizada', vip: 'sim' },
       { estado: 'RJ', municipio: 'Niterói', dineg: '4', agencias: ['1101', '1115'], tipo: 'pab', vip: 'sim' },
       { estado: 'RJ', municipio: 'Campos dos Goytacazes', dineg: '4', agencias: ['1201'], tipo: 'pae', vip: 'nao' },
+      { estado: 'RJ', municipio: 'Nova Iguaçu', dineg: '4', agencias: ['1401', '1410'], tipo: 'terceirizada', vip: 'nao' },
       
       // MG - DINEG 8
       { estado: 'MG', municipio: 'Belo Horizonte', dineg: '8', agencias: ['2001', '2015', '2032'], tipo: 'convencional', vip: 'sim' },
       { estado: 'MG', municipio: 'Belo Horizonte', dineg: '8', agencias: ['2045', '2067'], tipo: 'terceirizada', vip: 'nao' },
+      { estado: 'MG', municipio: 'Belo Horizonte', dineg: '8', agencias: ['2070', '2075'], tipo: 'terceirizada', vip: 'sim' },
       { estado: 'MG', municipio: 'Uberlândia', dineg: '8', agencias: ['2101', '2115'], tipo: 'pab', vip: 'sim' },
       { estado: 'MG', municipio: 'Contagem', dineg: '8', agencias: ['2201'], tipo: 'pae', vip: 'nao' },
+      { estado: 'MG', municipio: 'Juiz de Fora', dineg: '8', agencias: ['2301', '2315'], tipo: 'terceirizada', vip: 'nao' },
       
       // RS - DINEG 80
       { estado: 'RS', municipio: 'Porto Alegre', dineg: '80', agencias: ['3001', '3015'], tipo: 'convencional', vip: 'sim' },
       { estado: 'RS', municipio: 'Porto Alegre', dineg: '80', agencias: ['3032', '3045'], tipo: 'terceirizada', vip: 'nao' },
+      { estado: 'RS', municipio: 'Porto Alegre', dineg: '80', agencias: ['3050', '3055'], tipo: 'terceirizada', vip: 'sim' },
       { estado: 'RS', municipio: 'Caxias do Sul', dineg: '80', agencias: ['3101'], tipo: 'pab', vip: 'sim' },
-      { estado: 'RS', municipio: 'Pelotas', dineg: '80', agencias: ['3201'], tipo: 'pae', vip: 'nao' }
+      { estado: 'RS', municipio: 'Pelotas', dineg: '80', agencias: ['3201'], tipo: 'pae', vip: 'nao' },
+      { estado: 'RS', municipio: 'Canoas', dineg: '80', agencias: ['3301', '3310'], tipo: 'terceirizada', vip: 'nao' },
+      
+      // BA - DINEG 3 (nova região)
+      { estado: 'BA', municipio: 'Salvador', dineg: '3', agencias: ['4001', '4015', '4032'], tipo: 'convencional', vip: 'sim' },
+      { estado: 'BA', municipio: 'Salvador', dineg: '3', agencias: ['4045', '4067', '4070'], tipo: 'terceirizada', vip: 'nao' },
+      { estado: 'BA', municipio: 'Feira de Santana', dineg: '3', agencias: ['4101', '4115'], tipo: 'terceirizada', vip: 'sim' },
     ];
 
     // Equipamentos por segmento
