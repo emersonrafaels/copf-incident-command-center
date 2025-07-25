@@ -186,7 +186,7 @@ export function FilterSection({ className, showSerialNumber = false }: FilterSec
                         segmento: segmentFilterMulti.length > 0,
                         equipamento: equipmentFilterMulti.length > 0,
                         status: statusFilterMulti.length > 0,
-                        severidade: severityFilterMulti.length > 0,
+                        criticidade: severityFilterMulti.length > 0,
                         fornecedor: vendorFilterMulti.length > 0,
                         transportadora: transportadoraFilterMulti.length > 0,
                         serie: showSerialNumber && serialNumberFilter !== '',
@@ -205,7 +205,7 @@ export function FilterSection({ className, showSerialNumber = false }: FilterSec
                         segmento: segmentFilterMulti.length > 0,
                         equipamento: equipmentFilterMulti.length > 0,
                         status: statusFilterMulti.length > 0,
-                        severidade: severityFilterMulti.length > 0,
+                        criticidade: severityFilterMulti.length > 0,
                         fornecedor: vendorFilterMulti.length > 0,
                         transportadora: transportadoraFilterMulti.length > 0,
                         serie: showSerialNumber && serialNumberFilter !== '',
@@ -224,7 +224,7 @@ export function FilterSection({ className, showSerialNumber = false }: FilterSec
                         segmento: segmentFilterMulti.length > 0,
                         equipamento: equipmentFilterMulti.length > 0,
                         status: statusFilterMulti.length > 0,
-                        severidade: severityFilterMulti.length > 0,
+                        criticidade: severityFilterMulti.length > 0,
                         fornecedor: vendorFilterMulti.length > 0,
                         transportadora: transportadoraFilterMulti.length > 0,
                         serie: showSerialNumber && serialNumberFilter !== '',
@@ -897,9 +897,9 @@ export function FilterSection({ className, showSerialNumber = false }: FilterSec
                            onCheckedChange={(checked) => updateFilter('overrideFilter', checked)}
                            className="data-[state=checked]:bg-primary"
                          />
-                         <Label htmlFor="override-filter" className="text-sm cursor-pointer select-none">
-                           Ocorrências Vencidas
-                         </Label>
+                          <Label htmlFor="override-filter" className="text-sm cursor-pointer select-none">
+                            Ocorrências em Atraso
+                          </Label>
                        </div>
 
                        <div className="flex items-center space-x-2 p-3 border border-border/50 rounded-lg bg-background/50 hover:bg-accent/10 transition-colors">
@@ -987,11 +987,11 @@ export function FilterSection({ className, showSerialNumber = false }: FilterSec
                          </Popover>
                        </div>
 
-                       {/* Severidade */}
+                       {/* Criticidade */}
                        <div className="group space-y-3">
                          <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                            <div className="w-1 h-4 bg-destructive/60 rounded-full"></div>
-                           Severidade
+                          Criticidade
                          </Label>
                          <Popover>
                            <PopoverTrigger asChild>
@@ -1006,19 +1006,19 @@ export function FilterSection({ className, showSerialNumber = false }: FilterSec
                                        (['critical', 'high', 'medium', 'low'].includes(severityFilterMulti[0]) ? 
                                          { critical: 'Crítico', high: 'Alto', medium: 'Médio', low: 'Baixo' }[severityFilterMulti[0] as 'critical' | 'high' | 'medium' | 'low'] : 
                                          severityFilterMulti[0]
-                                       ) : 
-                                       `${severityFilterMulti.length} severidades`
+                                        ) : 
+                                        `${severityFilterMulti.length} criticidades`
                                      }
                                    </span>
                                  </div>
-                               ) : "Todas as severidades"}
+                               ) : "Todas as criticidades"}
                                <div className="w-4 h-4 opacity-50">⌄</div>
                              </Button>
                            </PopoverTrigger>
                            <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
                              <Command>
-                               <CommandInput placeholder="Buscar severidade..." className="h-9" />
-                               <CommandEmpty>Nenhuma severidade encontrada.</CommandEmpty>
+                                <CommandInput placeholder="Buscar criticidade..." className="h-9" />
+                                <CommandEmpty>Nenhuma criticidade encontrada.</CommandEmpty>
                                <CommandList>
                                  <CommandGroup>
                                    {[

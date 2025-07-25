@@ -241,7 +241,7 @@ export function OccurrenceModal({
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="bg-muted/30 p-3 rounded-lg">
-                      <p className="text-sm font-medium text-muted-foreground">Severidade</p>
+                      <p className="text-sm font-medium text-muted-foreground">Criticidade</p>
                       <Badge variant={getSeverityVariant(occurrence.severity)} className="mt-1">
                         {getSeverityLabel(occurrence.severity)}
                       </Badge>

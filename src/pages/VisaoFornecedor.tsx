@@ -344,7 +344,7 @@ const VisaoFornecedor = () => {
                     <TableRow>
                       <TableHead>ID</TableHead>
                       <TableHead>Equipamento</TableHead>
-                      <TableHead>Severidade</TableHead>
+                      <TableHead>Criticidade</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Tempo</TableHead>
                       <TableHead>SLA</TableHead>
@@ -413,7 +413,7 @@ const VisaoFornecedor = () => {
                     <TableRow>
                       <TableHead>ID</TableHead>
                       <TableHead>Equipamento</TableHead>
-                      <TableHead>Severidade</TableHead>
+                      <TableHead>Criticidade</TableHead>
                       <TableHead>Tempo Decorrido</TableHead>
                       <TableHead>SLA Restante</TableHead>
                       <TableHead>Resposta</TableHead>
@@ -655,7 +655,7 @@ const VisaoFornecedor = () => {
                       <TableRow>
                         <TableHead>ID</TableHead>
                         <TableHead>Equipamento</TableHead>
-                        <TableHead>Severidade</TableHead>
+                        <TableHead>Criticidade</TableHead>
                         <TableHead>Resolvida em</TableHead>
                         <TableHead>Tempo de Resolução</TableHead>
                         <TableHead>Resumo</TableHead>

@@ -302,7 +302,7 @@ export function OccurrenceHighlights({
                   <AlertTriangle className="h-5 w-5" />
                 </div>
                 <div>
-                  <span className="text-lg font-semibold">Ocorrências Vencidas</span>
+                  <span className="text-lg font-semibold">Ocorrências em Atraso</span>
                   <p className="text-sm text-muted-foreground">Não encerradas - SLA expirado</p>
                 </div>
               </div>

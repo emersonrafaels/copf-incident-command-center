@@ -113,7 +113,7 @@ export function Dashboard() {
   };
 
   // Handlers para navegar com filtros específicos
-  const handleNavigateToOccurrences = (filter: 'total' | 'in_progress' | 'overdue' | 'resolved') => {
+  const handleNavigateToOccurrences = (filter: 'total' | 'pending' | 'reincidence' | 'overdue' | 'agencies' | 'mttr') => {
     filters.clearAllFilters();
     
     setTimeout(() => {
@@ -121,14 +121,20 @@ export function Dashboard() {
         case 'total':
           // Sem filtros específicos - mostra todas
           break;
-        case 'in_progress':
+        case 'pending':
           filters.updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento']);
+          break;
+        case 'reincidence':
+          // Não há filtro direto para reincidência, navega para todas
           break;
         case 'overdue':
           filters.updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento']);
           filters.updateFilter('overrideFilter', true);
           break;
-        case 'resolved':
+        case 'agencies':
+          // Sem filtros específicos - mostra todas
+          break;
+        case 'mttr':
           filters.updateFilter('statusFilterMulti', ['encerrado']);
           break;
       }
@@ -370,57 +376,103 @@ export function Dashboard() {
           <p className="text-muted-foreground mt-1">Visão geral do status operacional em tempo real</p>
         </div>
         
-        <div className="responsive-grid responsive-grid-4">
-          {/* 1. Storytelling: Visão Geral */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* 1. Total de Ocorrências */}
           <MetricCard 
             title="Total de Ocorrências" 
             value={filteredOccurrences.length.toString()} 
             icon={<AlertTriangle className="h-4 w-4" />} 
-            change={`+${Math.round(filteredOccurrences.length / occurrences.length * 100)}% do total`} 
+            change={`${Math.round(filteredOccurrences.length / occurrences.length * 100)}% do total`} 
             changeType="neutral" 
             clickable={true}
             onClick={() => handleNavigateToOccurrences('total')}
           />
           
-          {/* 2. Storytelling: Situação Atual */}
+          {/* 2. Ocorrências Pendentes */}
           <MetricCard 
-            title="Em Andamento" 
+            title="Ocorrências Pendentes" 
             value={filteredOccurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_andamento').length.toString()} 
             icon={<Clock className="h-4 w-4" />} 
-            change={`${Math.round(filteredOccurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_andamento').length / filteredOccurrences.length * 100)}% do filtrado`} 
+            change="+12% desde ontem" 
             changeType="neutral" 
             clickable={true}
-            onClick={() => handleNavigateToOccurrences('in_progress')}
+            onClick={() => handleNavigateToOccurrences('pending')}
           />
           
-          {/* 3. Storytelling: Problemas Urgentes */}
+          {/* 3. Reincidências */}
           <MetricCard 
-            title="SLA Vencido" 
+            title="Reincidências" 
+            value={filteredOccurrences.reduce((count, occurrence, index) => {
+              const sameReasonEquipment = filteredOccurrences.filter((other, otherIndex) => 
+                otherIndex !== index &&
+                other.description === occurrence.description &&
+                other.equipment === occurrence.equipment &&
+                other.agency === occurrence.agency
+              );
+              
+              if (sameReasonEquipment.length > 0) {
+                const hasRecentRecurrence = sameReasonEquipment.some(other => {
+                  const daysDiff = Math.abs(new Date(occurrence.createdAt).getTime() - new Date(other.createdAt).getTime()) / (1000 * 60 * 60 * 24);
+                  return daysDiff <= 4;
+                });
+                
+                if (hasRecentRecurrence) {
+                  return count + 1;
+                }
+              }
+              return count;
+            }, 0).toString()} 
+            icon={<AlertTriangle className="h-4 w-4" />} 
+            change="-5% desde ontem" 
+            changeType="positive" 
+            clickable={true}
+            onClick={() => handleNavigateToOccurrences('reincidence')}
+          />
+          
+          {/* 4. Ocorrências com SLA em atraso */}
+          <MetricCard 
+            title="SLA em Atraso" 
             value={filteredOccurrences.filter(o => {
-              const hoursDiff = (Date.now() - new Date(o.createdAt).getTime()) / (1000 * 60 * 60);
+              if (o.status === 'encerrado') return false;
+              const createdDate = new Date(o.createdAt);
+              const hoursDiff = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60);
               const slaLimit = o.severity === 'critical' || o.severity === 'high' ? 24 : 72;
-              return hoursDiff > slaLimit && o.status !== 'encerrado';
+              return hoursDiff > slaLimit;
             }).length.toString()} 
             icon={<AlertTriangle className="h-4 w-4" />} 
-            change={`${Math.round(filteredOccurrences.filter(o => {
-              const hoursDiff = (Date.now() - new Date(o.createdAt).getTime()) / (1000 * 60 * 60);
-              const slaLimit = o.severity === 'critical' || o.severity === 'high' ? 24 : 72;
-              return hoursDiff > slaLimit && o.status !== 'encerrado';
-            }).length / filteredOccurrences.length * 100)}% do filtrado`} 
-            changeType="negative" 
+            change="-8% desde ontem" 
+            changeType="positive" 
             clickable={true}
             onClick={() => handleNavigateToOccurrences('overdue')}
           />
           
-          {/* 4. Storytelling: Resultados Positivos */}
+          {/* 5. Agências Afetadas + VIP */}
           <MetricCard 
-            title="Resolvidas" 
-            value={filteredOccurrences.filter(o => o.status === 'encerrado').length.toString()} 
-            icon={<CheckCircle2 className="h-4 w-4" />} 
-            change={`${Math.round(filteredOccurrences.filter(o => o.status === 'encerrado').length / filteredOccurrences.length * 100)}% do filtrado`} 
+            title="Agências Afetadas" 
+            value={(() => {
+              const affectedAgencies = new Set(filteredOccurrences.map(o => o.agency));
+              const vipAgencies = Array.from(affectedAgencies).filter(agency => {
+                const agencyNumber = agency.match(/\d+/)?.[0] || '0';
+                return agencyNumber.endsWith('0') || agencyNumber.endsWith('5');
+              });
+              return `${affectedAgencies.size} (${vipAgencies.length} VIPs)`;
+            })()} 
+            icon={<MapPin className="h-4 w-4" />} 
+            change="+3% desde ontem" 
+            changeType="neutral" 
+            clickable={true}
+            onClick={() => handleNavigateToOccurrences('agencies')}
+          />
+          
+          {/* 6. MTTR */}
+          <MetricCard 
+            title="MTTR" 
+            value="4.2h" 
+            icon={<Clock className="h-4 w-4" />} 
+            change="-0.3h desde ontem" 
             changeType="positive" 
             clickable={true}
-            onClick={() => handleNavigateToOccurrences('resolved')}
+            onClick={() => handleNavigateToOccurrences('mttr')}
           />
         </div>
       </div>

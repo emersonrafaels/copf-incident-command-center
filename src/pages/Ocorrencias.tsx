@@ -205,7 +205,7 @@ const Ocorrencias = () => {
       'ID': occurrence.id,
       'Agência': occurrence.agency,
       'Equipamento': occurrence.equipment,
-      'Severidade': getSeverityLabel(occurrence.severity),
+      'Criticidade': getSeverityLabel(occurrence.severity),
       'Status': getStatusLabel(occurrence.status),
       'Data/Hora': new Date(occurrence.createdAt).toLocaleString('pt-BR'),
       'Fornecedor': occurrence.vendor,
@@ -233,7 +233,7 @@ const Ocorrencias = () => {
     {
       wch: 15
     },
-    // Severidade
+    // Criticidade
     {
       wch: 15
     },
@@ -612,7 +612,7 @@ const Ocorrencias = () => {
                           onClick={() => handleSort('severity')}
                         >
                           <div className="flex items-center gap-1 text-sm font-medium">
-                            Severidade
+                             Criticidade
                             <div className="flex flex-col opacity-40 hover:opacity-100 transition-opacity">
                               <ChevronUp className={`h-3 w-3 -mb-1 ${sortColumn === 'severity' && sortDirection === 'asc' ? 'opacity-100 text-primary' : ''}`} />
                               <ChevronDown className={`h-3 w-3 ${sortColumn === 'severity' && sortDirection === 'desc' ? 'opacity-100 text-primary' : ''}`} />

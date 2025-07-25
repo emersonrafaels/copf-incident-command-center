@@ -167,7 +167,7 @@ const EnhancedInteractiveChartsComponent = memo(function EnhancedInteractiveChar
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5" />
-            Distribuição por Severidade
+            Distribuição por Criticidade
           </CardTitle>
         </CardHeader>
         <CardContent>

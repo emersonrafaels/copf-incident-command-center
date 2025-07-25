@@ -246,13 +246,55 @@ export function useDashboardData() {
   const metrics = useMemo(() => {
     const resolvedCount = occurrences.filter(o => o.status === 'encerrado').length
     const totalCount = occurrences.length
+    const pendingCount = occurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_andamento').length
+    
+    // Calcular reincidências (mesmo motivo, mesmo equipamento, em até 4 dias)
+    const reincidenceCount = occurrences.reduce((count, occurrence, index) => {
+      const sameReasonEquipment = occurrences.filter((other, otherIndex) => 
+        otherIndex !== index &&
+        other.description === occurrence.description &&
+        other.equipment === occurrence.equipment &&
+        other.agency === occurrence.agency
+      );
+      
+      if (sameReasonEquipment.length > 0) {
+        const hasRecentRecurrence = sameReasonEquipment.some(other => {
+          const daysDiff = Math.abs(new Date(occurrence.createdAt).getTime() - new Date(other.createdAt).getTime()) / (1000 * 60 * 60 * 24);
+          return daysDiff <= 4;
+        });
+        
+        if (hasRecentRecurrence) {
+          return count + 1;
+        }
+      }
+      return count;
+    }, 0);
+    
+    // Calcular SLA em atraso
+    const overdueCount = occurrences.filter(o => {
+      if (o.status === 'encerrado') return false;
+      const createdDate = new Date(o.createdAt);
+      const hoursDiff = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60);
+      const slaLimit = o.severity === 'critical' || o.severity === 'high' ? 24 : 72;
+      return hoursDiff > slaLimit;
+    }).length;
+    
+    // Calcular agências afetadas e VIPs
+    const affectedAgencies = new Set(occurrences.map(o => o.agency));
+    const vipAgencies = Array.from(affectedAgencies).filter(agency => {
+      const agencyNumber = agency.match(/\d+/)?.[0] || '0';
+      return agencyNumber.endsWith('0') || agencyNumber.endsWith('5');
+    });
     
     return {
       totalOccurrences: totalCount,
       resolvedOccurrences: resolvedCount,
-      pendingOccurrences: occurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_andamento').length,
+      pendingOccurrences: pendingCount,
+      reincidenceCount,
+      overdueCount,
+      affectedAgencies: affectedAgencies.size,
+      vipAgencies: vipAgencies.length,
       avgMTTR: formatHours(4.2),
-      affectedAgencies: new Set(occurrences.map(o => o.agency)).size,
       resolutionRate: totalCount > 0 ? Math.round((resolvedCount / totalCount) * 100) : 0
     }
   }, [occurrences])
