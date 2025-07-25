@@ -448,15 +448,59 @@ export const LongTailChart = memo(function LongTailChart({
                   formatter={(value, name, props) => {
                     const data = props.payload;
                     const percentage = ((Number(value) / timeRangeAnalysis.metrics.total) * 100).toFixed(1);
-                    const avgHours = data?.avgHours ? ` (média: ${formatHours(data.avgHours)})` : '';
+                    const rangeLabel = data?.rangeLabel || '';
+                    const category = data?.category || '';
+                    
+                    // Texto explicativo baseado na categoria
+                    let categoryText = '';
+                    let statusColor = '';
+                    let actionText = '';
+                    
+                    if (category === 'within_target') {
+                      categoryText = 'Performance Excelente';
+                      statusColor = 'text-green-600';
+                      actionText = 'Dentro da meta de excelência - manter padrão atual';
+                    } else if (category === 'above_target') {
+                      categoryText = 'Necessita Atenção';
+                      statusColor = 'text-orange-600';
+                      actionText = 'Acima da meta - revisar processos de resolução';
+                    } else if (category === 'critical') {
+                      categoryText = 'Aging Crítico';
+                      statusColor = 'text-red-600';
+                      actionText = 'Ação imediata necessária - escalar para gestão';
+                    }
                     
                     return [
-                      <div key="tooltip-content" className="space-y-1">
-                        <div className="font-semibold text-sm">{value} ocorrências</div>
-                        <div className="text-xs text-muted-foreground">{percentage}% do total</div>
-                        <div className="text-xs text-muted-foreground">Faixa: {data?.rangeLabel}{avgHours}</div>
-                        <div className="text-xs font-medium text-primary mt-2 border-t border-border pt-1">
-                          ↗ Clique para filtrar na tabela de ocorrências
+                      <div key="tooltip-content" className="space-y-3 min-w-[280px]">
+                        <div className="border-b border-border pb-2">
+                          <div className="font-bold text-base">{value} ocorrências</div>
+                          <div className="text-sm text-muted-foreground">
+                            {percentage}% do total em aberto ({timeRangeAnalysis.metrics.total})
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <div>
+                            <div className="text-sm font-medium text-foreground">Faixa de Tempo:</div>
+                            <div className="text-sm text-muted-foreground">{rangeLabel}</div>
+                          </div>
+                          
+                          <div>
+                            <div className="text-sm font-medium text-foreground">Status:</div>
+                            <div className={`text-sm font-medium ${statusColor}`}>{categoryText}</div>
+                          </div>
+                          
+                          <div>
+                            <div className="text-sm font-medium text-foreground">Recomendação:</div>
+                            <div className="text-xs text-muted-foreground leading-relaxed">{actionText}</div>
+                          </div>
+                        </div>
+                        
+                        <div className="border-t border-border pt-2">
+                          <div className="flex items-center gap-1 text-xs font-medium text-primary">
+                            <span>💡</span>
+                            <span>Clique para filtrar estas ocorrências na tabela</span>
+                          </div>
                         </div>
                       </div>, 
                       ''
@@ -466,9 +510,10 @@ export const LongTailChart = memo(function LongTailChart({
                   contentStyle={{
                     backgroundColor: 'hsl(var(--card))',
                     border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px',
-                    boxShadow: '0 8px 24px -8px hsl(var(--primary) / 0.2)',
-                    padding: '10px'
+                    borderRadius: '12px',
+                    boxShadow: '0 12px 32px -8px hsl(var(--primary) / 0.25)',
+                    padding: '16px',
+                    maxWidth: '350px'
                   }}
                   itemStyle={{
                     color: 'hsl(var(--foreground))',
