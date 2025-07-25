@@ -359,14 +359,14 @@ export const LongTailChart = memo(function LongTailChart({
           </div>
         </CardHeader>
         
-        <CardContent className="p-6">
-          <ChartContainer config={chartConfig} className="h-[480px] w-full">
+        <CardContent className="p-4">
+          <ChartContainer config={chartConfig} className="h-[400px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={timeRangeAnalysis.data} margin={{
-                top: 40,
-                right: 30,
-                left: 50,
-                bottom: 60
+                top: 30,
+                right: 20,
+                left: 40,
+                bottom: 50
               }}>
                 <defs>
                   <linearGradient id="barGradient1" x1="0" y1="0" x2="0" y2="1">
@@ -383,18 +383,18 @@ export const LongTailChart = memo(function LongTailChart({
                   </linearGradient>
                 </defs>
                 
-                <CartesianGrid strokeDasharray="2 2" stroke="hsl(var(--border))" opacity={0.4} />
+                <CartesianGrid strokeDasharray="2 2" stroke="hsl(var(--border))" opacity={0.3} />
                 <XAxis 
                   dataKey="rangeLabel" 
                   stroke="hsl(var(--muted-foreground))" 
                   tick={{
                     fill: 'hsl(var(--muted-foreground))',
-                    fontSize: 12,
+                    fontSize: 11,
                     fontWeight: 500
                   }} 
                   angle={-45} 
                   textAnchor="end" 
-                  height={110} 
+                  height={80} 
                   interval={0}
                   axisLine={{
                     stroke: 'hsl(var(--border))',
@@ -404,23 +404,12 @@ export const LongTailChart = memo(function LongTailChart({
                     stroke: 'hsl(var(--border))',
                     strokeWidth: 1
                   }}
-                  label={{ 
-                    value: 'Faixas de Tempo de Abertura', 
-                    position: 'insideBottom', 
-                    offset: 0,
-                    style: { 
-                      textAnchor: 'middle',
-                      fill: 'hsl(var(--foreground))',
-                      fontSize: '13px',
-                      fontWeight: 600
-                    }
-                  }}
                 />
                 <YAxis 
                   stroke="hsl(var(--muted-foreground))" 
                   tick={{
                     fill: 'hsl(var(--muted-foreground))',
-                    fontSize: 12,
+                    fontSize: 11,
                     fontWeight: 500
                   }}
                   axisLine={{
@@ -430,17 +419,6 @@ export const LongTailChart = memo(function LongTailChart({
                   tickLine={{
                     stroke: 'hsl(var(--border))',
                     strokeWidth: 1
-                  }}
-                  label={{ 
-                    value: 'Número de Ocorrências', 
-                    angle: -90, 
-                    position: 'insideLeft',
-                    style: { 
-                      textAnchor: 'middle',
-                      fill: 'hsl(var(--foreground))',
-                      fontSize: '13px',
-                      fontWeight: 600
-                    }
                   }}
                 />
                 
@@ -466,10 +444,9 @@ export const LongTailChart = memo(function LongTailChart({
                   contentStyle={{
                     backgroundColor: 'hsl(var(--card))',
                     border: '1px solid hsl(var(--border))',
-                    borderRadius: '12px',
-                    boxShadow: '0 10px 30px -10px hsl(var(--primary) / 0.2)',
-                    padding: '12px',
-                    minWidth: '220px'
+                    borderRadius: '8px',
+                    boxShadow: '0 8px 24px -8px hsl(var(--primary) / 0.2)',
+                    padding: '10px'
                   }}
                   itemStyle={{
                     color: 'hsl(var(--foreground))',
@@ -480,7 +457,7 @@ export const LongTailChart = memo(function LongTailChart({
                 
                 <Bar 
                   dataKey="count" 
-                  radius={[8, 8, 0, 0]}
+                  radius={[6, 6, 0, 0]}
                   cursor="pointer"
                   onClick={(data, index) => {
                     if (data) {
@@ -494,7 +471,7 @@ export const LongTailChart = memo(function LongTailChart({
                       fill={entry.color}
                       stroke="hsl(var(--border))"
                       strokeWidth={1}
-                      className="transition-all duration-300 hover:opacity-90 hover:shadow-lg"
+                      className="transition-all duration-200 hover:opacity-80"
                     />
                   ))}
                   
@@ -504,11 +481,11 @@ export const LongTailChart = memo(function LongTailChart({
                     position="top" 
                     style={{ 
                       fill: 'hsl(var(--foreground))', 
-                      fontSize: '11px', 
+                      fontSize: '10px', 
                       fontWeight: 600,
                       textAnchor: 'middle'
                     }}
-                    offset={8}
+                    offset={6}
                     formatter={(value) => value > 0 ? value : ''}
                   />
                 </Bar>
@@ -516,49 +493,49 @@ export const LongTailChart = memo(function LongTailChart({
             </ResponsiveContainer>
           </ChartContainer>
           
-          {/* Indicadores visuais e dica de interatividade aprimorados */}
-          <div className="mt-3 space-y-3">
-            {/* Dica de interatividade melhorada */}
-            <div className="flex items-center justify-center gap-2 p-2 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20">
+          {/* Dica de interatividade e estatísticas condensadas */}
+          <div className="mt-4 space-y-4">
+            {/* Dica de interatividade compacta */}
+            <div className="flex items-center justify-center gap-2 p-2 bg-gradient-to-r from-primary/8 to-primary/4 rounded-lg border border-primary/15">
               <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
               <span className="text-xs font-medium text-foreground">Clique nas barras para filtrar as ocorrências</span>
             </div>
             
-            {/* Estatísticas resumidas */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-muted/30 rounded-lg">
+            {/* Estatísticas resumidas em grid compacto */}
+            <div className="grid grid-cols-3 gap-3 p-3 bg-muted/20 rounded-lg">
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{Math.round((timeRangeAnalysis.metrics.percentualExcelencia / 100) * timeRangeAnalysis.metrics.total)}</div>
-                <div className="text-xs text-muted-foreground font-medium">Dentro da Meta</div>
+                <div className="text-xl font-bold text-green-600">{Math.round((timeRangeAnalysis.metrics.percentualExcelencia / 100) * timeRangeAnalysis.metrics.total)}</div>
+                <div className="text-xs text-muted-foreground font-medium">Meta</div>
                 <div className="text-xs text-muted-foreground">≤ {formatHours(timeRangeAnalysis.metrics.metaExcelencia)}</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-orange-600">{Math.round(((timeRangeAnalysis.metrics.percentualSLA - timeRangeAnalysis.metrics.percentualExcelencia) / 100) * timeRangeAnalysis.metrics.total)}</div>
-                <div className="text-xs text-muted-foreground font-medium">Necessita Atenção</div>
+                <div className="text-xl font-bold text-orange-600">{Math.round(((timeRangeAnalysis.metrics.percentualSLA - timeRangeAnalysis.metrics.percentualExcelencia) / 100) * timeRangeAnalysis.metrics.total)}</div>
+                <div className="text-xs text-muted-foreground font-medium">Atenção</div>
                 <div className="text-xs text-muted-foreground">{formatHours(timeRangeAnalysis.metrics.metaExcelencia)} - 5d</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-red-600">{timeRangeAnalysis.metrics.agingCritico}</div>
-                <div className="text-xs text-muted-foreground font-medium">Aging Crítico</div>
+                <div className="text-xl font-bold text-red-600">{timeRangeAnalysis.metrics.agingCritico}</div>
+                <div className="text-xs text-muted-foreground font-medium">Crítico</div>
                 <div className="text-xs text-muted-foreground">{">"} 5 dias</div>
               </div>
             </div>
             
-            {/* Legendas das cores melhoradas */}
-            <div className="flex flex-wrap items-center justify-center gap-6 p-4 bg-card/50 rounded-lg border border-border/50">
-              <div className="flex items-center gap-2 text-sm">
-                <div className="w-4 h-4 rounded bg-gradient-to-b from-green-500 to-green-600 shadow-sm"></div>
+            {/* Legendas das cores compactas */}
+            <div className="flex items-center justify-center gap-4 p-3 bg-card/30 rounded-lg border border-border/30">
+              <div className="flex items-center gap-1.5 text-xs">
+                <div className="w-3 h-3 rounded bg-gradient-to-b from-green-500 to-green-600"></div>
                 <span className="text-foreground font-medium">Excelência</span>
-                <span className="text-muted-foreground text-xs">≤ {formatHours(timeRangeAnalysis.metrics.metaExcelencia)}</span>
+                <span className="text-muted-foreground">≤ {formatHours(timeRangeAnalysis.metrics.metaExcelencia)}</span>
               </div>
-              <div className="flex items-center gap-2 text-sm">
-                <div className="w-4 h-4 rounded bg-gradient-to-b from-orange-500 to-orange-600 shadow-sm"></div>
+              <div className="flex items-center gap-1.5 text-xs">
+                <div className="w-3 h-3 rounded bg-gradient-to-b from-orange-500 to-orange-600"></div>
                 <span className="text-foreground font-medium">Atenção</span>
-                <span className="text-muted-foreground text-xs">{formatHours(timeRangeAnalysis.metrics.metaExcelencia)} - 5d</span>
+                <span className="text-muted-foreground">{formatHours(timeRangeAnalysis.metrics.metaExcelencia)} - 5d</span>
               </div>
-              <div className="flex items-center gap-2 text-sm">
-                <div className="w-4 h-4 rounded bg-gradient-to-b from-red-500 to-red-600 shadow-sm"></div>
+              <div className="flex items-center gap-1.5 text-xs">
+                <div className="w-3 h-3 rounded bg-gradient-to-b from-red-500 to-red-600"></div>
                 <span className="text-foreground font-medium">Crítico</span>
-                <span className="text-muted-foreground text-xs">{">"} 5 dias</span>
+                <span className="text-muted-foreground">{">"} 5 dias</span>
               </div>
             </div>
           </div>
