@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
+import { formatHours } from '@/lib/timeUtils'
 
 export interface OccurrenceData {
   id: string
@@ -250,7 +251,7 @@ export function useDashboardData() {
       totalOccurrences: totalCount,
       resolvedOccurrences: resolvedCount,
       pendingOccurrences: occurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_andamento').length,
-      avgMTTR: '4.2h',
+      avgMTTR: formatHours(4.2),
       affectedAgencies: new Set(occurrences.map(o => o.agency)).size,
       resolutionRate: totalCount > 0 ? Math.round((resolvedCount / totalCount) * 100) : 0
     }

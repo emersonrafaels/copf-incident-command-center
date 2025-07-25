@@ -11,6 +11,7 @@ import { BarChart3, Clock, AlertTriangle, ArrowRight, TrendingUp, Info } from 'l
 import { useFilters } from '@/contexts/FiltersContext';
 import { toast } from 'sonner';
 import { OccurrenceData } from '@/hooks/useDashboardData';
+import { formatHours } from '@/lib/timeUtils';
 interface LongTailChartProps {
   occurrences: OccurrenceData[];
   filteredOccurrences?: OccurrenceData[];
@@ -285,12 +286,12 @@ export const LongTailChart = memo(function LongTailChart({
                   <div className="flex items-center gap-2 cursor-help">
                     <div className="w-2 h-2 rounded-full bg-success"></div>
                     <span className="text-sm text-muted-foreground">Tempo Mediano:</span>
-                    <span className="text-lg font-bold text-success">{timeRangeAnalysis.metrics.tempoMediano}h</span>
+                    <span className="text-lg font-bold text-success">{formatHours(timeRangeAnalysis.metrics.tempoMediano)}</span>
                     <Info className="h-3 w-3 text-muted-foreground" />
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>50% das ocorrências estão em aberto há até {timeRangeAnalysis.metrics.tempoMediano}h</p>
+                  <p>50% das ocorrências estão em aberto há até {formatHours(timeRangeAnalysis.metrics.tempoMediano)}</p>
                 </TooltipContent>
               </Tooltip>
               
@@ -301,12 +302,12 @@ export const LongTailChart = memo(function LongTailChart({
                   <div className="flex items-center gap-2 cursor-help">
                     <div className="w-2 h-2 rounded-full bg-warning"></div>
                     <span className="text-sm text-muted-foreground">Meta de Excelência:</span>
-                    <span className="text-lg font-bold text-warning">{timeRangeAnalysis.metrics.metaExcelencia}h</span>
+                    <span className="text-lg font-bold text-warning">{formatHours(timeRangeAnalysis.metrics.metaExcelencia)}</span>
                     <Info className="h-3 w-3 text-muted-foreground" />
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>85% das ocorrências devem ser resolvidas em até {timeRangeAnalysis.metrics.metaExcelencia}h</p>
+                  <p>85% das ocorrências devem ser resolvidas em até {formatHours(timeRangeAnalysis.metrics.metaExcelencia)}</p>
                 </TooltipContent>
               </Tooltip>
               
