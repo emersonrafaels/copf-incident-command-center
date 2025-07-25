@@ -105,13 +105,24 @@ export function useDashboardData() {
           
           // Determinar fornecedor baseado no tipo e garantir distribuição
           let vendor: string;
+          let transportadora: string | undefined;
           
           if (structure.tipo === 'terceirizada') {
-            // Rotacionar entre fornecedores terceirizados
-            vendor = allVendors.terceirizada[vendorRotationIndex % allVendors.terceirizada.length];
-            vendorRotationIndex++;
+            // Para pontos terceirizados, definir transportadora
+            transportadora = transportadoras[Math.floor(Math.random() * transportadoras.length)];
+            vendor = fornecedoresPorTransportadora[transportadora][Math.floor(Math.random() * fornecedoresPorTransportadora[transportadora].length)];
+          } else if (structure.tipo === 'convencional') {
+            // Para pontos convencionais, garantir dados para Express Logística + Fornecedor A
+            if (groupIndex % 3 === 0 || Math.random() < 0.3) { // 30% chance + garantia estrutural
+              transportadora = 'Express Logística';
+              vendor = 'Fornecedor A';
+            } else {
+              // Alternar outras transportadoras
+              transportadora = transportadoras[Math.floor(Math.random() * transportadoras.length)];
+              vendor = fornecedoresPorTransportadora[transportadora][Math.floor(Math.random() * fornecedoresPorTransportadora[transportadora].length)];
+            }
           } else {
-            // Rotacionar entre fornecedores do segmento
+            // Para PAB/PAE usar fornecedores do segmento
             const segmentVendors = allVendors[segment];
             vendor = segmentVendors[vendorRotationIndex % segmentVendors.length];
             vendorRotationIndex++;
