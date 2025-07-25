@@ -489,8 +489,8 @@ export function FilterSection({ className }: FilterSectionProps) {
                             <CommandList>
                               <CommandGroup>
                                 {[
-                                  { value: 'AA', label: 'Segmento AA (ATMs)' },
-                                  { value: 'AB', label: 'Segmento AB (Facilities)' }
+                                  { value: 'AA', label: 'Segmento AA' },
+                                  { value: 'AB', label: 'Segmento AB' }
                                 ].map(segment => (
                                   <CommandItem key={segment.value} onSelect={() => {
                                     const isSelected = segmentFilterMulti.includes(segment.value);
