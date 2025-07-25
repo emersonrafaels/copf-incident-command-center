@@ -453,7 +453,7 @@ export function FilterSection({ className }: FilterSectionProps) {
                       <div className="w-6 h-6 rounded-full bg-secondary/10 flex items-center justify-center">
                         <div className="w-2 h-2 rounded-full bg-secondary"></div>
                       </div>
-                      <h4 className="text-base font-semibold text-foreground">Equipamentos</h4>
+                      <h4 className="text-base font-semibold text-foreground">Ocorrência/Equipamentos</h4>
                     </div>
                     {isEquipmentOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                   </Button>
