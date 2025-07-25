@@ -259,13 +259,8 @@ export function Dashboard() {
               
               {/* Status Badges */}
               <div className="flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-success/10 border border-success/20">
-                  
-                  <span className="text-sm font-medium text-success-foreground">
-                    {hasActiveFilters ? 'Visão Filtrada Ativa' : 'Monitoramento em Tempo Real'}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
+                
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-primary/20 bg-neutral-500">
                   <MapPin className="h-4 w-4 text-primary" />
                   <span className="text-sm font-medium text-primary-foreground">
                     2.360 Pontos Monitorados
