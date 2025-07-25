@@ -30,6 +30,7 @@ export interface FiltersState {
   overrideFilter: boolean;
   vendorPriorityFilter: boolean;
   reincidentFilter: boolean;
+  statusSlaFilter: string[];
   
   // Filtros de período
   filterPeriod: string;
@@ -70,6 +71,7 @@ const defaultFilters: FiltersState = {
   overrideFilter: false,
   vendorPriorityFilter: false,
   reincidentFilter: false,
+  statusSlaFilter: [],
   
   filterPeriod: '30-days',
   customDateRange: {}
@@ -112,7 +114,8 @@ export const FiltersProvider: React.FC<{ children: ReactNode }> = ({ children })
     filters.municipioFilter.length > 0 ||
     filters.dinegFilter.length > 0 ||
     filters.tipoAgenciaFilter.length > 0 ||
-    filters.pontoVipFilter.length > 0;
+    filters.pontoVipFilter.length > 0 ||
+    filters.statusSlaFilter.length > 0;
 
   return (
     <FiltersContext.Provider

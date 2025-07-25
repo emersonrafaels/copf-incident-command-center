@@ -41,6 +41,7 @@ export function FilterSection({ className }: FilterSectionProps) {
     overrideFilter,
     vendorPriorityFilter,
     reincidentFilter,
+    statusSlaFilter,
     hasActiveFilters,
     updateFilter,
     clearAllFilters
@@ -730,140 +731,198 @@ export function FilterSection({ className }: FilterSectionProps) {
                       </Popover>
                     </div>
                   </div>
-                </CollapsibleContent>
-              </div>
-            </Collapsible>
+                 </CollapsibleContent>
+               </div>
+             </Collapsible>
 
-            {/* Filtros Especiais */}
-            <Collapsible open={isSpecialFiltersOpen} onOpenChange={setIsSpecialFiltersOpen}>
-              <div className="space-y-4">
-                <CollapsibleTrigger asChild>
-                  <Button variant="ghost" className="w-full justify-between p-0 h-auto">
-                    <div className="flex items-center gap-2 pb-2 border-b border-border/50">
-                      <div className="w-6 h-6 rounded-full bg-warning/10 flex items-center justify-center">
-                        <div className="w-2 h-2 rounded-full bg-warning"></div>
-                      </div>
-                      <h4 className="text-base font-semibold text-foreground">Filtros Especiais</h4>
-                    </div>
-                    {isSpecialFiltersOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="space-y-4">
-                  <div className="responsive-grid responsive-grid-3">
-                    {/* Ocorrências Vencidas */}
-                    <div className="flex items-center space-x-2 p-3 border border-border/50 rounded-lg bg-background/50 hover:bg-accent/10 transition-colors">
-                      <Switch
-                        id="override-filter"
-                        checked={overrideFilter}
-                        onCheckedChange={(checked) => updateFilter('overrideFilter', checked)}
-                        className="data-[state=checked]:bg-primary"
-                      />
-                      <Label htmlFor="override-filter" className="text-sm cursor-pointer select-none">
-                        Ocorrências Vencidas
-                      </Label>
-                    </div>
+             {/* Filtros Especiais */}
+             <Collapsible open={isSpecialFiltersOpen} onOpenChange={setIsSpecialFiltersOpen}>
+               <div className="space-y-4">
+                 <CollapsibleTrigger asChild>
+                   <Button variant="ghost" className="w-full justify-between p-0 h-auto">
+                     <div className="flex items-center gap-2 pb-2 border-b border-border/50">
+                       <div className="w-6 h-6 rounded-full bg-warning/10 flex items-center justify-center">
+                         <div className="w-2 h-2 rounded-full bg-warning"></div>
+                       </div>
+                       <h4 className="text-base font-semibold text-foreground">Filtros Especiais</h4>
+                     </div>
+                     {isSpecialFiltersOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                   </Button>
+                 </CollapsibleTrigger>
+                 <CollapsibleContent className="space-y-4">
+                   <div className="responsive-grid responsive-grid-3">
+                     {/* Ocorrências Vencidas */}
+                     <div className="flex items-center space-x-2 p-3 border border-border/50 rounded-lg bg-background/50 hover:bg-accent/10 transition-colors">
+                       <Switch
+                         id="override-filter"
+                         checked={overrideFilter}
+                         onCheckedChange={(checked) => updateFilter('overrideFilter', checked)}
+                         className="data-[state=checked]:bg-primary"
+                       />
+                       <Label htmlFor="override-filter" className="text-sm cursor-pointer select-none">
+                         Ocorrências Vencidas
+                       </Label>
+                     </div>
 
-                    {/* Ocorrências Reincidentes */}
-                    <div className="flex items-center space-x-2 p-3 border border-border/50 rounded-lg bg-background/50 hover:bg-accent/10 transition-colors">
-                      <Switch
-                        id="reincident-filter"
-                        checked={reincidentFilter}
-                        onCheckedChange={(checked) => updateFilter('reincidentFilter', checked)}
-                        className="data-[state=checked]:bg-primary"
-                      />
-                      <Label htmlFor="reincident-filter" className="text-sm cursor-pointer select-none">
-                        Ocorrências Reincidentes
-                      </Label>
-                    </div>
+                     {/* Ocorrências Reincidentes */}
+                     <div className="flex items-center space-x-2 p-3 border border-border/50 rounded-lg bg-background/50 hover:bg-accent/10 transition-colors">
+                       <Switch
+                         id="reincident-filter"
+                         checked={reincidentFilter}
+                         onCheckedChange={(checked) => updateFilter('reincidentFilter', checked)}
+                         className="data-[state=checked]:bg-primary"
+                       />
+                       <Label htmlFor="reincident-filter" className="text-sm cursor-pointer select-none">
+                         Ocorrências Reincidentes
+                       </Label>
+                     </div>
 
-                    {/* Priorizadas com o Fornecedor */}
-                    <div className="flex items-center space-x-2 p-3 border border-border/50 rounded-lg bg-background/50 hover:bg-accent/10 transition-colors">
-                      <Switch
-                        id="vendor-priority-filter"
-                        checked={vendorPriorityFilter}
-                        onCheckedChange={(checked) => updateFilter('vendorPriorityFilter', checked)}
-                        className="data-[state=checked]:bg-primary"
-                      />
-                      <Label htmlFor="vendor-priority-filter" className="text-sm cursor-pointer select-none">
-                        Priorizadas com o Fornecedor
-                      </Label>
-                    </div>
-                  </div>
+                     {/* Priorizadas com o Fornecedor */}
+                     <div className="flex items-center space-x-2 p-3 border border-border/50 rounded-lg bg-background/50 hover:bg-accent/10 transition-colors">
+                       <Switch
+                         id="vendor-priority-filter"
+                         checked={vendorPriorityFilter}
+                         onCheckedChange={(checked) => updateFilter('vendorPriorityFilter', checked)}
+                         className="data-[state=checked]:bg-primary"
+                       />
+                       <Label htmlFor="vendor-priority-filter" className="text-sm cursor-pointer select-none">
+                         Priorizadas com o Fornecedor
+                       </Label>
+                     </div>
+                   </div>
 
-                  {/* Severidade e Número de Série na mesma linha */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Severidade */}
-                    <div className="group space-y-3">
-                      <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                        <div className="w-1 h-4 bg-destructive/60 rounded-full"></div>
-                        Severidade
-                      </Label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button variant="outline" className="w-full h-10 justify-between hover:bg-destructive/5 hover:border-destructive/30 transition-all duration-200 group-hover:shadow-sm">
-                            {severityFilterMulti.length > 0 ? (
-                              <div className="flex items-center gap-2">
-                                <Badge variant="secondary" className="h-5 text-xs bg-destructive/10 text-destructive">
-                                  {severityFilterMulti.length}
-                                </Badge>
-                                <span className="text-sm">
-                                  {severityFilterMulti.length === 1 ? 
-                                    (['critical', 'high', 'medium', 'low'].includes(severityFilterMulti[0]) ? 
-                                      { critical: 'Crítico', high: 'Alto', medium: 'Médio', low: 'Baixo' }[severityFilterMulti[0] as 'critical' | 'high' | 'medium' | 'low'] : 
-                                      severityFilterMulti[0]
-                                    ) : 
-                                    `${severityFilterMulti.length} severidades`
-                                  }
-                                </span>
-                              </div>
-                            ) : "Todas as severidades"}
-                            <div className="w-4 h-4 opacity-50">⌄</div>
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
-                          <Command>
-                            <CommandInput placeholder="Buscar severidade..." className="h-9" />
-                            <CommandEmpty>Nenhuma severidade encontrada.</CommandEmpty>
-                            <CommandList>
-                              <CommandGroup>
-                                {[
-                                  { value: 'critical', label: 'Crítico' },
-                                  { value: 'high', label: 'Alto' },
-                                  { value: 'medium', label: 'Médio' },
-                                  { value: 'low', label: 'Baixo' }
-                                ].map(severity => (
-                                  <CommandItem key={severity.value} onSelect={() => {
-                                    const isSelected = severityFilterMulti.includes(severity.value);
-                                    if (isSelected) {
-                                      updateFilter('severityFilterMulti', severityFilterMulti.filter(s => s !== severity.value));
-                                    } else {
-                                      updateFilter('severityFilterMulti', [...severityFilterMulti, severity.value]);
-                                    }
-                                  }}>
-                                    <Check className={cn("mr-2 h-4 w-4", severityFilterMulti.includes(severity.value) ? "opacity-100" : "opacity-0")} />
-                                    {severity.label}
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
-                    </div>
+                   {/* Status SLA, Severidade e Número de Série */}
+                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                     {/* Status SLA */}
+                     <div className="group space-y-3">
+                       <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                         <div className="w-1 h-4 bg-warning/60 rounded-full"></div>
+                         Status SLA
+                       </Label>
+                       <Popover>
+                         <PopoverTrigger asChild>
+                           <Button variant="outline" className="w-full h-10 justify-between hover:bg-warning/5 hover:border-warning/30 transition-all duration-200 group-hover:shadow-sm">
+                             {statusSlaFilter.length > 0 ? (
+                               <div className="flex items-center gap-2">
+                                 <Badge variant="secondary" className="h-5 text-xs bg-warning/10 text-warning">
+                                   {statusSlaFilter.length}
+                                 </Badge>
+                                 <span className="text-sm">
+                                   {statusSlaFilter.length === 1 ? 
+                                     (['no_prazo', 'vencido', 'critico'].includes(statusSlaFilter[0]) ? 
+                                       { no_prazo: 'No Prazo', vencido: 'Vencido', critico: 'Crítico' }[statusSlaFilter[0] as 'no_prazo' | 'vencido' | 'critico'] : 
+                                       statusSlaFilter[0]
+                                     ) : 
+                                     `${statusSlaFilter.length} status`
+                                   }
+                                 </span>
+                               </div>
+                             ) : "Todos os status SLA"}
+                             <div className="w-4 h-4 opacity-50">⌄</div>
+                           </Button>
+                         </PopoverTrigger>
+                         <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                           <Command>
+                             <CommandInput placeholder="Buscar status SLA..." className="h-9" />
+                             <CommandEmpty>Nenhum status SLA encontrado.</CommandEmpty>
+                             <CommandList>
+                               <CommandGroup>
+                                 {[
+                                   { value: 'no_prazo', label: 'No Prazo' },
+                                   { value: 'vencido', label: 'Vencido' },
+                                   { value: 'critico', label: 'Crítico' }
+                                 ].map(status => (
+                                   <CommandItem key={status.value} onSelect={() => {
+                                     const isSelected = statusSlaFilter.includes(status.value);
+                                     if (isSelected) {
+                                       updateFilter('statusSlaFilter', statusSlaFilter.filter(s => s !== status.value));
+                                     } else {
+                                       updateFilter('statusSlaFilter', [...statusSlaFilter, status.value]);
+                                     }
+                                   }}>
+                                     <Check className={cn("mr-2 h-4 w-4", statusSlaFilter.includes(status.value) ? "opacity-100" : "opacity-0")} />
+                                     {status.label}
+                                   </CommandItem>
+                                 ))}
+                               </CommandGroup>
+                             </CommandList>
+                           </Command>
+                         </PopoverContent>
+                       </Popover>
+                     </div>
 
-                    {/* Número de Série */}
-                    <div className="space-y-3">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Número de Série
-                      </Label>
-                      <Input
-                        placeholder="Ex: ATM001-SP-001"
-                        value={serialNumberFilter}
-                        onChange={(e) => updateFilter('serialNumberFilter', e.target.value)}
-                        className="h-10"
-                      />
-                    </div>
-                  </div>
+                     {/* Severidade */}
+                     <div className="group space-y-3">
+                       <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                         <div className="w-1 h-4 bg-destructive/60 rounded-full"></div>
+                         Severidade
+                       </Label>
+                       <Popover>
+                         <PopoverTrigger asChild>
+                           <Button variant="outline" className="w-full h-10 justify-between hover:bg-destructive/5 hover:border-destructive/30 transition-all duration-200 group-hover:shadow-sm">
+                             {severityFilterMulti.length > 0 ? (
+                               <div className="flex items-center gap-2">
+                                 <Badge variant="secondary" className="h-5 text-xs bg-destructive/10 text-destructive">
+                                   {severityFilterMulti.length}
+                                 </Badge>
+                                 <span className="text-sm">
+                                   {severityFilterMulti.length === 1 ? 
+                                     (['critical', 'high', 'medium', 'low'].includes(severityFilterMulti[0]) ? 
+                                       { critical: 'Crítico', high: 'Alto', medium: 'Médio', low: 'Baixo' }[severityFilterMulti[0] as 'critical' | 'high' | 'medium' | 'low'] : 
+                                       severityFilterMulti[0]
+                                     ) : 
+                                     `${severityFilterMulti.length} severidades`
+                                   }
+                                 </span>
+                               </div>
+                             ) : "Todas as severidades"}
+                             <div className="w-4 h-4 opacity-50">⌄</div>
+                           </Button>
+                         </PopoverTrigger>
+                         <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                           <Command>
+                             <CommandInput placeholder="Buscar severidade..." className="h-9" />
+                             <CommandEmpty>Nenhuma severidade encontrada.</CommandEmpty>
+                             <CommandList>
+                               <CommandGroup>
+                                 {[
+                                   { value: 'critical', label: 'Crítico' },
+                                   { value: 'high', label: 'Alto' },
+                                   { value: 'medium', label: 'Médio' },
+                                   { value: 'low', label: 'Baixo' }
+                                 ].map(severity => (
+                                   <CommandItem key={severity.value} onSelect={() => {
+                                     const isSelected = severityFilterMulti.includes(severity.value);
+                                     if (isSelected) {
+                                       updateFilter('severityFilterMulti', severityFilterMulti.filter(s => s !== severity.value));
+                                     } else {
+                                       updateFilter('severityFilterMulti', [...severityFilterMulti, severity.value]);
+                                     }
+                                   }}>
+                                     <Check className={cn("mr-2 h-4 w-4", severityFilterMulti.includes(severity.value) ? "opacity-100" : "opacity-0")} />
+                                     {severity.label}
+                                   </CommandItem>
+                                 ))}
+                               </CommandGroup>
+                             </CommandList>
+                           </Command>
+                         </PopoverContent>
+                       </Popover>
+                     </div>
+
+                     {/* Número de Série */}
+                     <div className="space-y-3">
+                       <Label className="text-sm font-medium text-muted-foreground">
+                         Número de Série
+                       </Label>
+                       <Input
+                         placeholder="Ex: ATM001-SP-001"
+                         value={serialNumberFilter}
+                         onChange={(e) => updateFilter('serialNumberFilter', e.target.value)}
+                         className="h-10"
+                       />
+                     </div>
+                   </div>
                 </CollapsibleContent>
               </div>
             </Collapsible>
