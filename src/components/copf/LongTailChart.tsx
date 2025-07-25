@@ -469,9 +469,9 @@ export const LongTailChart = memo(function LongTailChart({
           {/* Indicadores visuais e dica de interatividade abaixo do gráfico */}
           <div className="mt-4 space-y-3">
             {/* Dica de interatividade */}
-            <div className="flex items-center justify-center gap-2 p-2 bg-primary/10 rounded-lg border border-primary/20">
-              <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
-              <span className="text-sm font-medium text-primary">💡 Clique nas barras para filtrar ocorrências por faixa de tempo específica</span>
+            <div className="flex items-center justify-center gap-2 p-2 bg-muted/30 rounded text-center">
+              <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground"></div>
+              <span className="text-xs text-muted-foreground">Clique nas barras para filtrar por faixa de tempo</span>
             </div>
             
             {/* Legendas das cores */}
