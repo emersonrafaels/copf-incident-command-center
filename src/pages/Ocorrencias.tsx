@@ -11,9 +11,10 @@ import { Search, Download, Eye, MessageSquare, Bot, Star, Zap, Clock, ChevronUp,
 import { StatusBadge } from "@/components/copf/StatusBadge";
 import { OccurrenceModal } from "@/components/copf/OccurrenceModal";
 import { useDashboardData } from "@/hooks/useDashboardData";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useFilters } from "@/contexts/FiltersContext";
+import { useSearchParams } from "react-router-dom";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import * as XLSX from 'xlsx';
 const Ocorrencias = () => {
@@ -33,6 +34,11 @@ const Ocorrencias = () => {
   const [selectedPriorityOccurrence, setSelectedPriorityOccurrence] = useState(null);
   const [sortColumn, setSortColumn] = useState<string>('remainingTime');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [searchParams] = useSearchParams();
+
+  // Extrair parâmetros de aging da URL
+  const agingMin = searchParams.get('aging_min');
+  const agingMax = searchParams.get('aging_max');
 
   // Usar filtros do contexto
   const {
@@ -101,6 +107,23 @@ const Ocorrencias = () => {
       const isHighPriority = occurrence.severity === 'critical' || occurrence.severity === 'high';
       if (!isHighPriority) return false;
     }
+
+    // Filtro de aging (quando vindo do gráfico Long Tail)
+    if (agingMin !== null || agingMax !== null) {
+      const createdDate = new Date(occurrence.createdAt);
+      const agingHours = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60);
+      
+      if (agingMin !== null) {
+        const minHours = parseFloat(agingMin);
+        if (agingHours < minHours) return false;
+      }
+      
+      if (agingMax !== null) {
+        const maxHours = parseFloat(agingMax);
+        if (agingMax !== '999999' && agingHours >= maxHours) return false;
+      }
+    }
+
     return matchesSearch && matchesStatus && matchesSegment && matchesEquipment && matchesSerial && matchesVendor && matchesAgencia && matchesUF && matchesTipoAgencia && matchesPontoVip;
   });
   const handleViewDetails = occurrence => {

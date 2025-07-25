@@ -242,8 +242,8 @@ export const LongTailChart = memo(function LongTailChart({
     clearAllFilters();
     setTimeout(() => {
       updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento']);
-      updateFilter('overrideFilter', true); // Filtrar apenas vencidas (aging > SLA)
-      navigate('/ocorrencias');
+      // Navegar com filtro específico para aging > 120 horas (5 dias)
+      navigate('/ocorrencias?aging_min=120');
       toast.success('Mostrando ocorrências acima do aging esperado (5 dias)');
     }, 100);
   };
@@ -366,7 +366,7 @@ export const LongTailChart = memo(function LongTailChart({
                 top: 40,
                 right: 30,
                 left: 50,
-                bottom: 80
+                bottom: 60
               }}>
                 <defs>
                   <linearGradient id="barGradient1" x1="0" y1="0" x2="0" y2="1">
@@ -407,7 +407,7 @@ export const LongTailChart = memo(function LongTailChart({
                   label={{ 
                     value: 'Faixas de Tempo de Abertura', 
                     position: 'insideBottom', 
-                    offset: -5,
+                    offset: 0,
                     style: { 
                       textAnchor: 'middle',
                       fill: 'hsl(var(--foreground))',
