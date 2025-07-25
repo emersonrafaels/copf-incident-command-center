@@ -1,4 +1,4 @@
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, ReferenceLine, Cell } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { OperationalNarrativeCard } from './OperationalNarrativeCard';
-import { BarChart3, Clock, AlertTriangle, ArrowRight, TrendingUp, Info } from 'lucide-react';
+import { BarChart3, Clock, AlertTriangle, ArrowRight, TrendingUp, Info, ChevronDown, ChevronUp, BookOpen } from 'lucide-react';
 import { useFilters } from '@/contexts/FiltersContext';
 import { toast } from 'sonner';
 import { OccurrenceData } from '@/hooks/useDashboardData';
@@ -94,6 +94,7 @@ export const LongTailChart = memo(function LongTailChart({
   filteredOccurrences
 }: LongTailChartProps) {
   const navigate = useNavigate();
+  const [showMethodology, setShowMethodology] = useState(false);
   const {
     updateFilter,
     clearAllFilters
@@ -527,15 +528,57 @@ export const LongTailChart = memo(function LongTailChart({
                     </p>
                   )}
                 </div>
-                {timeRangeAnalysis.actionSuggestion && (
-                  <div className="mt-3 p-3 bg-primary/10 rounded border border-primary/20">
-                    <div className="flex items-center gap-2 mb-1">
-                      <ArrowRight className="h-4 w-4 text-primary" />
-                      <span className="text-sm font-medium text-primary">Ação Recomendada</span>
+                
+                {/* Botão para mostrar metodologia */}
+                <div className="mt-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowMethodology(!showMethodology)}
+                    className="flex items-center gap-2 text-primary border-primary/20 hover:bg-primary/5"
+                  >
+                    <BookOpen className="h-4 w-4" />
+                    <span>Metodologia da Análise</span>
+                    {showMethodology ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  </Button>
+                  
+                  {showMethodology && (
+                    <div className="mt-3 p-4 bg-info/5 rounded-lg border border-info/20">
+                      <h5 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                        <Info className="h-4 w-4 text-info" />
+                        Metodologia Long Tail - Análise de Aging
+                      </h5>
+                      <div className="space-y-3 text-sm text-muted-foreground">
+                        <p>
+                          <strong>Conceito:</strong> A análise Long Tail identifica a distribuição de ocorrências por faixas de tempo de abertura (aging), revelando padrões de concentração e outliers que requerem atenção especial.
+                        </p>
+                        <p>
+                          <strong>Faixas de Tempo:</strong> Dividimos o aging em 11 faixas estratégicas: desde 0-30 minutos até mais de 5 dias, permitindo identificar gargalos específicos no processo de resolução.
+                        </p>
+                        <p>
+                          <strong>Métricas Calculadas:</strong>
+                        </p>
+                        <ul className="list-disc list-inside ml-4 space-y-1">
+                          <li><strong>Tempo Mediano:</strong> P50 real dos dados (50% das ocorrências resolvidas até este tempo)</li>
+                          <li><strong>Meta de Excelência:</strong> Objetivo fixo de 12h para alta performance operacional</li>
+                          <li><strong>Aging Crítico:</strong> Ocorrências acima de 120h (5 dias) que requerem escalação</li>
+                        </ul>
+                        <p>
+                          <strong>Interpretação:</strong> Barras verdes indicam performance dentro da meta, laranja sinaliza atenção necessária, e vermelho representa situações críticas. A concentração nas primeiras faixas indica eficiência operacional.
+                        </p>
+                        {timeRangeAnalysis.actionSuggestion && (
+                          <div className="mt-3 p-3 bg-primary/10 rounded border border-primary/20">
+                            <div className="flex items-center gap-2 mb-1">
+                              <ArrowRight className="h-4 w-4 text-primary" />
+                              <span className="text-sm font-medium text-primary">Ação Recomendada para este Cenário</span>
+                            </div>
+                            <p className="text-sm text-muted-foreground">{timeRangeAnalysis.actionSuggestion}</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <p className="text-sm text-muted-foreground">{timeRangeAnalysis.actionSuggestion}</p>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
           </div>
