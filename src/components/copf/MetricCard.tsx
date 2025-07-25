@@ -67,8 +67,8 @@ export const MetricCard = memo(function MetricCard({
           )}
         </div>
         {clickable && (
-          <div className="text-xs text-primary mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            ↗ Clique para ver detalhes
+          <div className="text-xs text-primary mt-2 flex items-center gap-1 opacity-70 hover:opacity-100 transition-opacity">
+            ↗ Clique para filtrar ocorrências
           </div>
         )}
       </CardContent>
