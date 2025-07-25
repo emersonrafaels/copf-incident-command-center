@@ -559,11 +559,11 @@ export function FilterSection({ className }: FilterSectionProps) {
                       </Popover>
                     </div>
 
-                    {/* Status */}
+                    {/* Status da ocorrência */}
                     <div className="group space-y-3">
                       <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                         <div className="w-1 h-4 bg-secondary/60 rounded-full"></div>
-                        Status
+                        Status da ocorrência
                       </Label>
                       <Popover>
                         <PopoverTrigger asChild>
