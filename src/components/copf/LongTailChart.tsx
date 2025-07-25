@@ -133,10 +133,14 @@ export const LongTailChart = memo(function LongTailChart({
       };
     });
 
-    // Calcular percentis para definir metas
+    // Metas fixas de negócio (em horas)
+    const META_EXCELENCIA = 12; // 12 horas - meta de alta performance
+    const SLA_PADRAO = 24; // 24 horas (1 dia) - SLA padrão
+    const AGING_CRITICO_THRESHOLD = 120; // 120 horas (5 dias) - aging crítico
+
+    // Calcular tempo mediano real (apenas para comparação)
     const sortedDurations = durations.map(d => d.durationHours).sort((a, b) => a - b);
-    const tempoMediano = sortedDurations[Math.floor(sortedDurations.length * 0.5)] || 0; // P50 = Tempo Mediano
-    const metaExcelencia = sortedDurations[Math.floor(sortedDurations.length * 0.85)] || 12.8; // P85 = Meta de Excelência
+    const tempoMediano = sortedDurations[Math.floor(sortedDurations.length * 0.5)] || 0;
 
     // Agrupar por faixas de tempo
     const timeRangeData: TimeRangeData[] = TIME_RANGES.map(range => {
@@ -155,12 +159,12 @@ export const LongTailChart = memo(function LongTailChart({
         // > 5 dias
         category = 'critical';
         color = '#ef4444'; // Vermelho - aging crítico
-      } else if (range.minHours >= metaExcelencia) {
-        // Acima da Meta de Excelência (P85)
+      } else if (range.minHours >= META_EXCELENCIA) {
+        // Acima da Meta de Excelência (12h)
         category = 'above_target';
         color = '#f59e0b'; // Laranja - acima da meta
-      } else if (range.minHours >= 12) {
-        // Entre 12h e Meta de Excelência
+      } else if (range.minHours >= 8) {
+        // Entre 8h e Meta de Excelência
         category = 'above_target';
         color = '#f97316'; // Laranja mais escuro
       }
@@ -179,29 +183,46 @@ export const LongTailChart = memo(function LongTailChart({
     const agingCritico = durations.filter(d => d.durationHours > 120).length;
     const agingPercentage = Math.round(agingCritico / durations.length * 100);
 
+    // Calcular percentuais de performance
+    const dentroMetaExcelencia = durations.filter(d => d.durationHours <= META_EXCELENCIA).length;
+    const dentroSLA = durations.filter(d => d.durationHours <= SLA_PADRAO).length;
+    const percentualExcelencia = Math.round((dentroMetaExcelencia / durations.length) * 100);
+    const percentualSLA = Math.round((dentroSLA / durations.length) * 100);
+    const percentualCritico = Math.round((agingCritico / durations.length) * 100);
+
     // Gerar insight operacional
-    let insight = `${durations.length} ocorrências em aberto | Tempo Mediano: ${tempoMediano.toFixed(1)}h | Meta de Excelência: ${metaExcelencia.toFixed(1)}h`;
+    let insight = `${durations.length} ocorrências em aberto | Tempo Mediano: ${formatHours(tempoMediano)} | Meta Excelência: ${formatHours(META_EXCELENCIA)} (${percentualExcelencia}% dentro)`;
     let priority: 'high' | 'medium' | 'low' = 'medium';
     let actionSuggestion = "";
-    if (agingPercentage > 5) {
-      insight += ` | ${agingCritico} acima do aging esperado (${agingPercentage}%)`;
+    
+    if (percentualCritico > 25) {
+      insight += ` | CRÍTICO: ${agingCritico} acima de 5 dias (${percentualCritico}%)`;
       priority = 'high';
-      actionSuggestion = "Alto número de ocorrências com aging crítico. Priorizar resolução imediata.";
+      actionSuggestion = "Situação crítica: alto número de ocorrências com aging > 5 dias. Ação imediata necessária.";
+    } else if (percentualExcelencia < 70) {
+      insight += ` | ${agingCritico} aging crítico (${percentualCritico}%)`;
+      priority = 'high';
+      actionSuggestion = "Performance abaixo da meta de excelência. Revisar processos de resolução.";
     } else if (agingCritico > 0) {
-      insight += ` | ${agingCritico} acima do aging esperado`;
+      insight += ` | ${agingCritico} aging crítico`;
       actionSuggestion = "Investigar causas das ocorrências que excedem 5 dias em aberto.";
     } else {
-      insight += " | Aging dentro do esperado";
+      insight += " | Performance dentro das metas";
       priority = 'low';
-      actionSuggestion = "Performance de aging saudável. Manter monitoramento atual.";
+      actionSuggestion = "Performance saudável. Manter monitoramento atual.";
     }
+    
     return {
       data: timeRangeData,
       metrics: {
         total: durations.length,
         tempoMediano: Number(tempoMediano.toFixed(1)),
-        metaExcelencia: Number(metaExcelencia.toFixed(1)),
-        agingCritico
+        metaExcelencia: META_EXCELENCIA,
+        slaPadrao: SLA_PADRAO,
+        agingCritico,
+        percentualExcelencia,
+        percentualSLA,
+        percentualCritico
       },
       insight,
       priority,
@@ -300,14 +321,30 @@ export const LongTailChart = memo(function LongTailChart({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="flex items-center gap-2 cursor-help">
-                    <div className="w-2 h-2 rounded-full bg-warning"></div>
+                    <div className="w-2 h-2 rounded-full bg-success"></div>
                     <span className="text-sm text-muted-foreground">Meta de Excelência:</span>
-                    <span className="text-lg font-bold text-warning">{formatHours(timeRangeAnalysis.metrics.metaExcelencia)}</span>
+                    <span className="text-lg font-bold text-success">{formatHours(timeRangeAnalysis.metrics.metaExcelencia)} ({timeRangeAnalysis.metrics.percentualExcelencia}%)</span>
                     <Info className="h-3 w-3 text-muted-foreground" />
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>85% das ocorrências devem ser resolvidas em até {formatHours(timeRangeAnalysis.metrics.metaExcelencia)}</p>
+                  <p>Meta fixa: resolver em até {formatHours(timeRangeAnalysis.metrics.metaExcelencia)}. Atualmente {timeRangeAnalysis.metrics.percentualExcelencia}% dentro da meta.</p>
+                </TooltipContent>
+              </Tooltip>
+              
+              <div className="w-px h-6 bg-border"></div>
+              
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-2 cursor-help">
+                    <div className="w-2 h-2 rounded-full bg-warning"></div>
+                    <span className="text-sm text-muted-foreground">SLA Padrão:</span>
+                    <span className="text-lg font-bold text-warning">{formatHours(timeRangeAnalysis.metrics.slaPadrao)} ({timeRangeAnalysis.metrics.percentualSLA}%)</span>
+                    <Info className="h-3 w-3 text-muted-foreground" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>SLA máximo: resolver em até {formatHours(timeRangeAnalysis.metrics.slaPadrao)}. Atualmente {timeRangeAnalysis.metrics.percentualSLA}% dentro do SLA.</p>
                 </TooltipContent>
               </Tooltip>
               
@@ -417,15 +454,32 @@ export const LongTailChart = memo(function LongTailChart({
                   }}
                 />
                 
-                {/* Linha de referência para P85 */}
+                {/* Linha de referência para Meta de Excelência (12h) */}
                 <ReferenceLine 
-                  y={timeRangeAnalysis.metrics.metaExcelencia} 
-                  stroke="hsl(var(--warning))" 
+                  x={timeRangeAnalysis.metrics.metaExcelencia} 
+                  stroke="hsl(var(--success))" 
                   strokeDasharray="8 4" 
                   strokeWidth={2}
                   label={{ 
-                    value: `Meta P85: ${formatHours(timeRangeAnalysis.metrics.metaExcelencia)}`, 
+                    value: `Meta Excelência: ${formatHours(timeRangeAnalysis.metrics.metaExcelencia)}`, 
                     position: "insideTopLeft",
+                    style: {
+                      fill: 'hsl(var(--success))',
+                      fontSize: '11px',
+                      fontWeight: 600
+                    }
+                  }}
+                />
+                
+                {/* Linha de referência para SLA Padrão (24h) */}
+                <ReferenceLine 
+                  x={timeRangeAnalysis.metrics.slaPadrao} 
+                  stroke="hsl(var(--warning))" 
+                  strokeDasharray="5 5" 
+                  strokeWidth={2}
+                  label={{ 
+                    value: `SLA: ${formatHours(timeRangeAnalysis.metrics.slaPadrao)}`, 
+                    position: "insideTopRight",
                     style: {
                       fill: 'hsl(var(--warning))',
                       fontSize: '11px',
@@ -434,17 +488,17 @@ export const LongTailChart = memo(function LongTailChart({
                   }}
                 />
                 
-                {/* Linha de referência para mediana */}
+                {/* Linha de referência para Aging Crítico (120h) */}
                 <ReferenceLine 
-                  y={timeRangeAnalysis.metrics.tempoMediano} 
-                  stroke="hsl(var(--success))" 
-                  strokeDasharray="5 5" 
+                  x={120} 
+                  stroke="hsl(var(--destructive))" 
+                  strokeDasharray="3 3" 
                   strokeWidth={2}
                   label={{ 
-                    value: `Mediana: ${formatHours(timeRangeAnalysis.metrics.tempoMediano)}`, 
-                    position: "insideTopRight",
+                    value: `Crítico: 5d`, 
+                    position: "insideBottomRight",
                     style: {
-                      fill: 'hsl(var(--success))',
+                      fill: 'hsl(var(--destructive))',
                       fontSize: '11px',
                       fontWeight: 600
                     }
