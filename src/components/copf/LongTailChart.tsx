@@ -703,7 +703,7 @@ export const LongTailChart = memo(function LongTailChart({
           <Collapsible open={!isGuideCollapsed} onOpenChange={(open) => setIsGuideCollapsed(!open)}>
             <Card className="bg-gradient-to-r from-info/5 to-info/10 border-info/20">
               <CollapsibleTrigger asChild>
-                <CardHeader className="cursor-pointer hover:bg-info/5 transition-colors">
+                <CardHeader className="pb-3 cursor-pointer hover:bg-info/5 transition-colors">
                   <div className="flex items-center justify-between">
                     <div className="flex items-start gap-3">
                       <div className="p-2.5 rounded-xl bg-info/10">
