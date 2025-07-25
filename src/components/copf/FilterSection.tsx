@@ -790,76 +790,79 @@ export function FilterSection({ className }: FilterSectionProps) {
                     </div>
                   </div>
 
-                  {/* Severidade */}
-                  <div className="group space-y-3">
-                    <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                      <div className="w-1 h-4 bg-destructive/60 rounded-full"></div>
-                      Severidade
-                    </Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" className="w-full h-10 justify-between hover:bg-destructive/5 hover:border-destructive/30 transition-all duration-200 group-hover:shadow-sm">
-                          {severityFilterMulti.length > 0 ? (
-                            <div className="flex items-center gap-2">
-                              <Badge variant="secondary" className="h-5 text-xs bg-destructive/10 text-destructive">
-                                {severityFilterMulti.length}
-                              </Badge>
-                              <span className="text-sm">
-                                {severityFilterMulti.length === 1 ? 
-                                  (['critical', 'high', 'medium', 'low'].includes(severityFilterMulti[0]) ? 
-                                    { critical: 'Crítico', high: 'Alto', medium: 'Médio', low: 'Baixo' }[severityFilterMulti[0] as 'critical' | 'high' | 'medium' | 'low'] : 
-                                    severityFilterMulti[0]
-                                  ) : 
-                                  `${severityFilterMulti.length} severidades`
-                                }
-                              </span>
-                            </div>
-                          ) : "Todas as severidades"}
-                          <div className="w-4 h-4 opacity-50">⌄</div>
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
-                        <Command>
-                          <CommandInput placeholder="Buscar severidade..." className="h-9" />
-                          <CommandEmpty>Nenhuma severidade encontrada.</CommandEmpty>
-                          <CommandList>
-                            <CommandGroup>
-                              {[
-                                { value: 'critical', label: 'Crítico' },
-                                { value: 'high', label: 'Alto' },
-                                { value: 'medium', label: 'Médio' },
-                                { value: 'low', label: 'Baixo' }
-                              ].map(severity => (
-                                <CommandItem key={severity.value} onSelect={() => {
-                                  const isSelected = severityFilterMulti.includes(severity.value);
-                                  if (isSelected) {
-                                    updateFilter('severityFilterMulti', severityFilterMulti.filter(s => s !== severity.value));
-                                  } else {
-                                    updateFilter('severityFilterMulti', [...severityFilterMulti, severity.value]);
+                  {/* Severidade e Número de Série na mesma linha */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Severidade */}
+                    <div className="group space-y-3">
+                      <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                        <div className="w-1 h-4 bg-destructive/60 rounded-full"></div>
+                        Severidade
+                      </Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" className="w-full h-10 justify-between hover:bg-destructive/5 hover:border-destructive/30 transition-all duration-200 group-hover:shadow-sm">
+                            {severityFilterMulti.length > 0 ? (
+                              <div className="flex items-center gap-2">
+                                <Badge variant="secondary" className="h-5 text-xs bg-destructive/10 text-destructive">
+                                  {severityFilterMulti.length}
+                                </Badge>
+                                <span className="text-sm">
+                                  {severityFilterMulti.length === 1 ? 
+                                    (['critical', 'high', 'medium', 'low'].includes(severityFilterMulti[0]) ? 
+                                      { critical: 'Crítico', high: 'Alto', medium: 'Médio', low: 'Baixo' }[severityFilterMulti[0] as 'critical' | 'high' | 'medium' | 'low'] : 
+                                      severityFilterMulti[0]
+                                    ) : 
+                                    `${severityFilterMulti.length} severidades`
                                   }
-                                }}>
-                                  <Check className={cn("mr-2 h-4 w-4", severityFilterMulti.includes(severity.value) ? "opacity-100" : "opacity-0")} />
-                                  {severity.label}
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          </CommandList>
-                        </Command>
-                      </PopoverContent>
-                    </Popover>
-                  </div>
+                                </span>
+                              </div>
+                            ) : "Todas as severidades"}
+                            <div className="w-4 h-4 opacity-50">⌄</div>
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                          <Command>
+                            <CommandInput placeholder="Buscar severidade..." className="h-9" />
+                            <CommandEmpty>Nenhuma severidade encontrada.</CommandEmpty>
+                            <CommandList>
+                              <CommandGroup>
+                                {[
+                                  { value: 'critical', label: 'Crítico' },
+                                  { value: 'high', label: 'Alto' },
+                                  { value: 'medium', label: 'Médio' },
+                                  { value: 'low', label: 'Baixo' }
+                                ].map(severity => (
+                                  <CommandItem key={severity.value} onSelect={() => {
+                                    const isSelected = severityFilterMulti.includes(severity.value);
+                                    if (isSelected) {
+                                      updateFilter('severityFilterMulti', severityFilterMulti.filter(s => s !== severity.value));
+                                    } else {
+                                      updateFilter('severityFilterMulti', [...severityFilterMulti, severity.value]);
+                                    }
+                                  }}>
+                                    <Check className={cn("mr-2 h-4 w-4", severityFilterMulti.includes(severity.value) ? "opacity-100" : "opacity-0")} />
+                                    {severity.label}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                    </div>
 
-                  {/* Número de Série */}
-                  <div className="space-y-3">
-                    <Label className="text-sm font-medium text-muted-foreground">
-                      Número de Série
-                    </Label>
-                    <Input
-                      placeholder="Ex: ATM001-SP-001"
-                      value={serialNumberFilter}
-                      onChange={(e) => updateFilter('serialNumberFilter', e.target.value)}
-                      className="h-10"
-                    />
+                    {/* Número de Série */}
+                    <div className="space-y-3">
+                      <Label className="text-sm font-medium text-muted-foreground">
+                        Número de Série
+                      </Label>
+                      <Input
+                        placeholder="Ex: ATM001-SP-001"
+                        value={serialNumberFilter}
+                        onChange={(e) => updateFilter('serialNumberFilter', e.target.value)}
+                        className="h-10"
+                      />
+                    </div>
                   </div>
                 </CollapsibleContent>
               </div>
