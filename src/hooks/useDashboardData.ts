@@ -236,14 +236,14 @@ export function useDashboardData() {
   }, [])
 
   useEffect(() => {
-    // Simular carregamento
+    // Simular carregamento inicial apenas
     const timer = setTimeout(() => {
       setOccurrences(generateMockData())
       setIsLoading(false)
     }, 1000)
 
     return () => clearTimeout(timer)
-  }, [])
+  }, []) // Dependência vazia para executar apenas na montagem
 
   // Dados processados para gráficos - Memoizados para performance
   const severityData: ChartData[] = useMemo(() => [

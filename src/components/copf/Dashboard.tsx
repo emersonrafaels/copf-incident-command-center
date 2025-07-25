@@ -152,8 +152,8 @@ export function Dashboard() {
       if (statusFilterMulti.length > 0 && !statusFilterMulti.includes(occurrence.status)) return false;
       if (vendorFilterMulti.length > 0 && !vendorFilterMulti.includes(occurrence.vendor)) return false;
       if (transportadoraFilterMulti.length > 0) {
-        const transportadora = occurrence.vendor.includes('Express') ? 'Express Logística' : occurrence.vendor.includes('Tech') ? 'TechTransporte' : 'LogiCorp';
-        if (!transportadoraFilterMulti.includes(transportadora)) return false;
+        // Usar o campo transportadora do objeto de dados
+        if (!occurrence.transportadora || !transportadoraFilterMulti.includes(occurrence.transportadora)) return false;
       }
 
       // Filtro de série
