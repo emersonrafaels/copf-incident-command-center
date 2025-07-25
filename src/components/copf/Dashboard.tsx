@@ -347,6 +347,9 @@ export function Dashboard() {
         />
       </div>
 
+      {/* Long Tail Analysis */}
+      <LongTailChart occurrences={filteredOccurrences} />
+
       {/* Mapa de Criticidade */}
       <div className="space-y-6">
         <h2 className="text-responsive-2xl font-bold text-foreground">Mapa de Criticidade por Equipamento</h2>
@@ -520,22 +523,6 @@ export function Dashboard() {
             <MetricCard title="Agências Afetadas" value={20} change="2 novas esta semana" changeType="neutral" icon={<MapPin className="h-5 w-5" />} description="De 2360 totais" />
           </div>}
 
-        {/* Criticality Heatmap */}
-        <CriticalityHeatmap occurrences={filteredOccurrences} />
-
-        {/* Long Tail Analysis */}
-        {isLoading ? <div className="responsive-grid responsive-grid-2">
-            {Array.from({
-          length: 4
-        }).map((_, i) => <Card key={i} className="animate-pulse">
-                <CardHeader>
-                  <Skeleton className="h-6 w-40" />
-                </CardHeader>
-                <CardContent>
-                  <Skeleton className="h-[300px] w-full" />
-                </CardContent>
-              </Card>)}
-          </div> : <LongTailChart occurrences={filteredOccurrences} />}
       </div>
 
       {/* Occurrence Details Modal */}
