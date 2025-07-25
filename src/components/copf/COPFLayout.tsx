@@ -1,16 +1,35 @@
-import { ReactNode } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { COPFSidebar } from "./COPFSidebar";
 import { Button } from "@/components/ui/button";
 import { Bell, Moon, Sun, User } from "lucide-react";
-import { useState } from "react";
+import { format } from "date-fns";
 interface COPFLayoutProps {
   children: ReactNode;
 }
+
 export function COPFLayout({
   children
 }: COPFLayoutProps) {
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+
+  useEffect(() => {
+    // Atualizar a data quando o layout for montado
+    setLastUpdate(new Date());
+    
+    // Escutar eventos de refresh do dashboard
+    const handleRefresh = () => {
+      setLastUpdate(new Date());
+    };
+    
+    window.addEventListener('dashboard-refresh', handleRefresh);
+    
+    return () => {
+      window.removeEventListener('dashboard-refresh', handleRefresh);
+    };
+  }, []);
+
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
     document.documentElement.classList.toggle("dark");
@@ -43,10 +62,12 @@ export function COPFLayout({
               </div>
 
               <div className="flex items-center gap-2">
-                {/* Status Indicator */}
-                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 border border-success/20">
-                  <div className="w-2 h-2 rounded-full bg-success animate-pulse"></div>
-                  <span className="text-xs font-medium text-success-foreground">Sistema Online</span>
+                {/* Last Update Indicator */}
+                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/30 border border-muted/20">
+                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+                  <span className="text-xs font-medium text-muted-foreground">
+                    Atualizado: {format(lastUpdate, 'dd/MM HH:mm')}
+                  </span>
                 </div>
 
                 {/* Notifications */}

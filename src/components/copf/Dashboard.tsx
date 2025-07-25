@@ -115,6 +115,7 @@ export function Dashboard() {
   };
   const handleRefresh = () => {
     refreshData();
+    window.dispatchEvent(new CustomEvent('dashboard-refresh'));
     toast({
       title: "Dados atualizados",
       description: "Dashboard atualizado com as informações mais recentes."
