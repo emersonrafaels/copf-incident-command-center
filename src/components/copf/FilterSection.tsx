@@ -270,293 +270,301 @@ export function FilterSection({ className, showSerialNumber = false }: FilterSec
                   </Button>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {/* Agência */}
-                    <div className="group space-y-3">
-                      <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                        <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
-                        Agência
-                      </Label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
-                            {agenciaFilter.length > 0 ? (
-                              <div className="flex items-center gap-2">
-                                <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
-                                  {agenciaFilter.length}
-                                </Badge>
-                                <span className="text-sm">
-                                  {agenciaFilter.length === 1 ? `Agência ${agenciaFilter[0]}` : `${agenciaFilter.length} agências`}
-                                </span>
-                              </div>
-                            ) : "Todas as agências"}
-                            <div className="w-4 h-4 opacity-50">⌄</div>
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
-                          <Command>
-                            <CommandInput placeholder="Buscar agência..." className="h-9" />
-                            <CommandEmpty>Nenhuma agência encontrada.</CommandEmpty>
-                            <CommandList>
-                              <CommandGroup className="max-h-64 overflow-y-auto">
-                                {uniqueAgencies.map(agency => (
-                                  <CommandItem key={agency} onSelect={() => {
-                                    const isSelected = agenciaFilter.includes(agency);
-                                    if (isSelected) {
-                                      updateFilter('agenciaFilter', agenciaFilter.filter(a => a !== agency));
-                                    } else {
-                                      updateFilter('agenciaFilter', [...agenciaFilter, agency]);
-                                    }
-                                  }}>
-                                    <Check className={cn("mr-2 h-4 w-4", agenciaFilter.includes(agency) ? "opacity-100" : "opacity-0")} />
-                                    Agência {agency}
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
+                  <div className="space-y-6">
+                    {/* Tipo da Agência - Primeiro filtro */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div className="group space-y-3">
+                        <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                          <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                          Tipo da Agência
+                        </Label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                              {tipoAgenciaFilter.length > 0 ? (
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                                    {tipoAgenciaFilter.length}
+                                  </Badge>
+                                  <span className="text-sm">
+                                    {tipoAgenciaFilter.length === 1 ? 
+                                      (tipoAgenciaFilter[0] === 'convencional' ? 'Convencional' : 'Terceirizada') : 
+                                      `${tipoAgenciaFilter.length} tipos`}
+                                  </span>
+                                </div>
+                              ) : "Todos os tipos"}
+                              <div className="w-4 h-4 opacity-50">⌄</div>
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                            <Command>
+                              <CommandList>
+                                <CommandGroup>
+                                  {['convencional', 'terceirizada'].map(tipo => (
+                                    <CommandItem key={tipo} onSelect={() => {
+                                      const isSelected = tipoAgenciaFilter.includes(tipo);
+                                      if (isSelected) {
+                                        updateFilter('tipoAgenciaFilter', tipoAgenciaFilter.filter(t => t !== tipo));
+                                      } else {
+                                        updateFilter('tipoAgenciaFilter', [...tipoAgenciaFilter, tipo]);
+                                      }
+                                    }}>
+                                      <Check className={cn("mr-2 h-4 w-4", tipoAgenciaFilter.includes(tipo) ? "opacity-100" : "opacity-0")} />
+                                      {tipo === 'convencional' ? 'Convencional' : 'Terceirizada'}
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                      </div>
                     </div>
 
-                    {/* UF */}
-                    <div className="group space-y-3">
-                      <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                        <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
-                        Estado (UF)
-                      </Label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
-                            {ufFilter.length > 0 ? (
-                              <div className="flex items-center gap-2">
-                                <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
-                                  {ufFilter.length}
-                                </Badge>
-                                <span className="text-sm">
-                                  {ufFilter.length === 1 ? ufFilter[0] : `${ufFilter.length} estados`}
-                                </span>
-                              </div>
-                            ) : "Todos os estados"}
-                            <div className="w-4 h-4 opacity-50">⌄</div>
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
-                          <Command>
-                            <CommandInput placeholder="Buscar estado..." className="h-9" />
-                            <CommandEmpty>Nenhum estado encontrado.</CommandEmpty>
-                            <CommandList>
-                              <CommandGroup className="max-h-64 overflow-y-auto">
-                                {availableUFs.map(uf => (
-                                  <CommandItem key={uf} onSelect={() => {
-                                    const isSelected = ufFilter.includes(uf);
-                                    if (isSelected) {
-                                      updateFilter('ufFilter', ufFilter.filter(u => u !== uf));
-                                    } else {
-                                      updateFilter('ufFilter', [...ufFilter, uf]);
-                                    }
-                                  }}>
-                                    <Check className={cn("mr-2 h-4 w-4", ufFilter.includes(uf) ? "opacity-100" : "opacity-0")} />
-                                    {uf}
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
+                    {/* Linha com Agência, UF, Município */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {/* Agência */}
+                      <div className="group space-y-3">
+                        <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                          <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                          Agência
+                        </Label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                              {agenciaFilter.length > 0 ? (
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                                    {agenciaFilter.length}
+                                  </Badge>
+                                  <span className="text-sm">
+                                    {agenciaFilter.length === 1 ? `Agência ${agenciaFilter[0]}` : `${agenciaFilter.length} agências`}
+                                  </span>
+                                </div>
+                              ) : "Todas as agências"}
+                              <div className="w-4 h-4 opacity-50">⌄</div>
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                            <Command>
+                              <CommandInput placeholder="Buscar agência..." className="h-9" />
+                              <CommandEmpty>Nenhuma agência encontrada.</CommandEmpty>
+                              <CommandList>
+                                <CommandGroup className="max-h-64 overflow-y-auto">
+                                  {uniqueAgencies.map(agency => (
+                                    <CommandItem key={agency} onSelect={() => {
+                                      const isSelected = agenciaFilter.includes(agency);
+                                      if (isSelected) {
+                                        updateFilter('agenciaFilter', agenciaFilter.filter(a => a !== agency));
+                                      } else {
+                                        updateFilter('agenciaFilter', [...agenciaFilter, agency]);
+                                      }
+                                    }}>
+                                      <Check className={cn("mr-2 h-4 w-4", agenciaFilter.includes(agency) ? "opacity-100" : "opacity-0")} />
+                                      Agência {agency}
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+
+                      {/* UF */}
+                      <div className="group space-y-3">
+                        <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                          <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                          Estado (UF)
+                        </Label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                              {ufFilter.length > 0 ? (
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                                    {ufFilter.length}
+                                  </Badge>
+                                  <span className="text-sm">
+                                    {ufFilter.length === 1 ? ufFilter[0] : `${ufFilter.length} estados`}
+                                  </span>
+                                </div>
+                              ) : "Todos os estados"}
+                              <div className="w-4 h-4 opacity-50">⌄</div>
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                            <Command>
+                              <CommandInput placeholder="Buscar estado..." className="h-9" />
+                              <CommandEmpty>Nenhum estado encontrado.</CommandEmpty>
+                              <CommandList>
+                                <CommandGroup className="max-h-64 overflow-y-auto">
+                                  {availableUFs.map(uf => (
+                                    <CommandItem key={uf} onSelect={() => {
+                                      const isSelected = ufFilter.includes(uf);
+                                      if (isSelected) {
+                                        updateFilter('ufFilter', ufFilter.filter(u => u !== uf));
+                                      } else {
+                                        updateFilter('ufFilter', [...ufFilter, uf]);
+                                      }
+                                    }}>
+                                      <Check className={cn("mr-2 h-4 w-4", ufFilter.includes(uf) ? "opacity-100" : "opacity-0")} />
+                                      {uf}
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+
+                      {/* Município */}
+                      <div className="group space-y-3">
+                        <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                          <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                          Município
+                        </Label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                              {municipioFilter.length > 0 ? (
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                                    {municipioFilter.length}
+                                  </Badge>
+                                  <span className="text-sm">
+                                    {municipioFilter.length === 1 ? municipioFilter[0] : `${municipioFilter.length} municípios`}
+                                  </span>
+                                </div>
+                              ) : "Todos os municípios"}
+                              <div className="w-4 h-4 opacity-50">⌄</div>
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                            <Command>
+                              <CommandInput placeholder="Buscar município..." className="h-9" />
+                              <CommandEmpty>Nenhum município encontrado.</CommandEmpty>
+                              <CommandList>
+                                <CommandGroup className="max-h-64 overflow-y-auto">
+                                  {availableMunicipios.map(municipio => (
+                                    <CommandItem key={municipio} onSelect={() => {
+                                      const isSelected = municipioFilter.includes(municipio);
+                                      if (isSelected) {
+                                        updateFilter('municipioFilter', municipioFilter.filter(m => m !== municipio));
+                                      } else {
+                                        updateFilter('municipioFilter', [...municipioFilter, municipio]);
+                                      }
+                                    }}>
+                                      <Check className={cn("mr-2 h-4 w-4", municipioFilter.includes(municipio) ? "opacity-100" : "opacity-0")} />
+                                      {municipio}
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                      </div>
                     </div>
 
-                    {/* Município */}
-                    <div className="group space-y-3">
-                      <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                        <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
-                        Município
-                      </Label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
-                            {municipioFilter.length > 0 ? (
-                              <div className="flex items-center gap-2">
-                                <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
-                                  {municipioFilter.length}
-                                </Badge>
-                                <span className="text-sm">
-                                  {municipioFilter.length === 1 ? municipioFilter[0] : `${municipioFilter.length} municípios`}
-                                </span>
-                              </div>
-                            ) : "Todos os municípios"}
-                            <div className="w-4 h-4 opacity-50">⌄</div>
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
-                          <Command>
-                            <CommandInput placeholder="Buscar município..." className="h-9" />
-                            <CommandEmpty>Nenhum município encontrado.</CommandEmpty>
-                            <CommandList>
-                              <CommandGroup className="max-h-64 overflow-y-auto">
-                                {availableMunicipios.map(municipio => (
-                                  <CommandItem key={municipio} onSelect={() => {
-                                    const isSelected = municipioFilter.includes(municipio);
-                                    if (isSelected) {
-                                      updateFilter('municipioFilter', municipioFilter.filter(m => m !== municipio));
-                                    } else {
-                                      updateFilter('municipioFilter', [...municipioFilter, municipio]);
-                                    }
-                                  }}>
-                                    <Check className={cn("mr-2 h-4 w-4", municipioFilter.includes(municipio) ? "opacity-100" : "opacity-0")} />
-                                    {municipio}
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
-                    </div>
+                    {/* Linha com DINEG e SUPT */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* DINEG */}
+                      <div className="group space-y-3">
+                        <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                          <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                          DINEG
+                        </Label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                              {dinegFilter.length > 0 ? (
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                                    {dinegFilter.length}
+                                  </Badge>
+                                  <span className="text-sm">
+                                    {dinegFilter.length === 1 ? `DINEG ${dinegFilter[0]}` : `${dinegFilter.length} DINEGs`}
+                                  </span>
+                                </div>
+                              ) : "Todas as DINEGs"}
+                              <div className="w-4 h-4 opacity-50">⌄</div>
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                            <Command>
+                              <CommandInput placeholder="Buscar DINEG..." className="h-9" />
+                              <CommandEmpty>Nenhuma DINEG encontrada.</CommandEmpty>
+                              <CommandList>
+                                <CommandGroup>
+                                  {availableDinegs.map(dineg => (
+                                    <CommandItem key={dineg} onSelect={() => {
+                                      const isSelected = dinegFilter.includes(dineg);
+                                      if (isSelected) {
+                                        updateFilter('dinegFilter', dinegFilter.filter(d => d !== dineg));
+                                      } else {
+                                        updateFilter('dinegFilter', [...dinegFilter, dineg]);
+                                      }
+                                    }}>
+                                      <Check className={cn("mr-2 h-4 w-4", dinegFilter.includes(dineg) ? "opacity-100" : "opacity-0")} />
+                                      DINEG {dineg}
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                      </div>
 
-                    {/* DINEG */}
-                    <div className="group space-y-3">
-                      <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                        <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
-                        DINEG
-                      </Label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
-                            {dinegFilter.length > 0 ? (
-                              <div className="flex items-center gap-2">
-                                <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
-                                  {dinegFilter.length}
-                                </Badge>
-                                <span className="text-sm">
-                                  {dinegFilter.length === 1 ? `DINEG ${dinegFilter[0]}` : `${dinegFilter.length} DINEGs`}
-                                </span>
-                              </div>
-                            ) : "Todas as DINEGs"}
-                            <div className="w-4 h-4 opacity-50">⌄</div>
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
-                          <Command>
-                            <CommandInput placeholder="Buscar DINEG..." className="h-9" />
-                            <CommandEmpty>Nenhuma DINEG encontrada.</CommandEmpty>
-                            <CommandList>
-                              <CommandGroup>
-                                {availableDinegs.map(dineg => (
-                                  <CommandItem key={dineg} onSelect={() => {
-                                    const isSelected = dinegFilter.includes(dineg);
-                                    if (isSelected) {
-                                      updateFilter('dinegFilter', dinegFilter.filter(d => d !== dineg));
-                                    } else {
-                                      updateFilter('dinegFilter', [...dinegFilter, dineg]);
-                                    }
-                                  }}>
-                                    <Check className={cn("mr-2 h-4 w-4", dinegFilter.includes(dineg) ? "opacity-100" : "opacity-0")} />
-                                    DINEG {dineg}
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-
-                    {/* SUPT */}
-                    <div className="group space-y-3">
-                      <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                        <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
-                        Supt
-                      </Label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
-                            {suptFilter.length > 0 ? (
-                              <div className="flex items-center gap-2">
-                                <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
-                                  {suptFilter.length}
-                                </Badge>
-                                <span className="text-sm">
-                                  {suptFilter.length === 1 ? `Supt ${suptFilter[0]}` : `${suptFilter.length} Supts`}
-                                </span>
-                              </div>
-                            ) : "Todas as Supts"}
-                            <div className="w-4 h-4 opacity-50">⌄</div>
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
-                          <Command>
-                            <CommandInput placeholder="Buscar Supt..." className="h-9" />
-                            <CommandEmpty>Nenhuma Supt encontrada.</CommandEmpty>
-                            <CommandList>
-                              <CommandGroup>
-                                {getAvailableSupts().map(supt => (
-                                  <CommandItem key={supt} onSelect={() => {
-                                    const isSelected = suptFilter.includes(supt);
-                                    if (isSelected) {
-                                      updateFilter('suptFilter', suptFilter.filter(s => s !== supt));
-                                    } else {
-                                      updateFilter('suptFilter', [...suptFilter, supt]);
-                                    }
-                                  }}>
-                                    <Check className={cn("mr-2 h-4 w-4", suptFilter.includes(supt) ? "opacity-100" : "opacity-0")} />
-                                    Supt {supt}
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-
-                    {/* Tipo da Agência */}
-                    <div className="group space-y-3">
-                      <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                        <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
-                        Tipo da Agência
-                      </Label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
-                            {tipoAgenciaFilter.length > 0 ? (
-                              <div className="flex items-center gap-2">
-                                <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
-                                  {tipoAgenciaFilter.length}
-                                </Badge>
-                                <span className="text-sm">
-                                  {tipoAgenciaFilter.length === 1 ? 
-                                    (tipoAgenciaFilter[0] === 'convencional' ? 'Convencional' : 'Terceirizada') : 
-                                    `${tipoAgenciaFilter.length} tipos`}
-                                </span>
-                              </div>
-                            ) : "Todos os tipos"}
-                            <div className="w-4 h-4 opacity-50">⌄</div>
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
-                          <Command>
-                            <CommandList>
-                              <CommandGroup>
-                                {['convencional', 'terceirizada'].map(tipo => (
-                                  <CommandItem key={tipo} onSelect={() => {
-                                    const isSelected = tipoAgenciaFilter.includes(tipo);
-                                    if (isSelected) {
-                                      updateFilter('tipoAgenciaFilter', tipoAgenciaFilter.filter(t => t !== tipo));
-                                    } else {
-                                      updateFilter('tipoAgenciaFilter', [...tipoAgenciaFilter, tipo]);
-                                    }
-                                  }}>
-                                    <Check className={cn("mr-2 h-4 w-4", tipoAgenciaFilter.includes(tipo) ? "opacity-100" : "opacity-0")} />
-                                    {tipo === 'convencional' ? 'Convencional' : 'Terceirizada'}
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
+                      {/* SUPT */}
+                      <div className="group space-y-3">
+                        <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                          <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                          Supt
+                        </Label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                              {suptFilter.length > 0 ? (
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                                    {suptFilter.length}
+                                  </Badge>
+                                  <span className="text-sm">
+                                    {suptFilter.length === 1 ? `Supt ${suptFilter[0]}` : `${suptFilter.length} Supts`}
+                                  </span>
+                                </div>
+                              ) : "Todas as Supts"}
+                              <div className="w-4 h-4 opacity-50">⌄</div>
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                            <Command>
+                              <CommandInput placeholder="Buscar Supt..." className="h-9" />
+                              <CommandEmpty>Nenhuma Supt encontrada.</CommandEmpty>
+                              <CommandList>
+                                <CommandGroup>
+                                  {getAvailableSupts().map(supt => (
+                                    <CommandItem key={supt} onSelect={() => {
+                                      const isSelected = suptFilter.includes(supt);
+                                      if (isSelected) {
+                                        updateFilter('suptFilter', suptFilter.filter(s => s !== supt));
+                                      } else {
+                                        updateFilter('suptFilter', [...suptFilter, supt]);
+                                      }
+                                    }}>
+                                      <Check className={cn("mr-2 h-4 w-4", suptFilter.includes(supt) ? "opacity-100" : "opacity-0")} />
+                                      Supt {supt}
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                      </div>
                     </div>
                   </div>
                 </CollapsibleContent>
