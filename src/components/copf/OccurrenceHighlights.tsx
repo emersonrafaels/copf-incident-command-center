@@ -25,22 +25,32 @@ export function OccurrenceHighlights({
   // Função para obter a variante correta do badge de severidade
   const getSeverityVariant = (severity: string) => {
     switch (severity) {
-      case 'critical': return 'critical';
-      case 'high': return 'high';
-      case 'medium': return 'medium';
-      case 'low': return 'low';
-      default: return 'outline';
+      case 'critical':
+        return 'critical';
+      case 'high':
+        return 'high';
+      case 'medium':
+        return 'medium';
+      case 'low':
+        return 'low';
+      default:
+        return 'outline';
     }
   };
 
   // Função para obter o label traduzido da severidade
   const getSeverityLabel = (severity: string) => {
     switch (severity) {
-      case 'critical': return 'Crítica';
-      case 'high': return 'Alta';
-      case 'medium': return 'Média';
-      case 'low': return 'Baixa';
-      default: return severity;
+      case 'critical':
+        return 'Crítica';
+      case 'high':
+        return 'Alta';
+      case 'medium':
+        return 'Média';
+      case 'low':
+        return 'Baixa';
+      default:
+        return severity;
     }
   };
 
@@ -138,7 +148,7 @@ export function OccurrenceHighlights({
           </div>
           <div>
             <h2 className="text-xl font-semibold text-foreground">Highlights Operacionais</h2>
-            <p className="text-sm text-muted-foreground">Visão em tempo real das ocorrências prioritárias</p>
+            
           </div>
         </div>
         <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/30 px-3 py-1 rounded-full">
