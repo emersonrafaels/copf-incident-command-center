@@ -22,6 +22,28 @@ export function OccurrenceHighlights({
     updateFilter
   } = useFilters();
 
+  // Função para obter a variante correta do badge de severidade
+  const getSeverityVariant = (severity: string) => {
+    switch (severity) {
+      case 'critical': return 'critical';
+      case 'high': return 'high';
+      case 'medium': return 'medium';
+      case 'low': return 'low';
+      default: return 'outline';
+    }
+  };
+
+  // Função para obter o label traduzido da severidade
+  const getSeverityLabel = (severity: string) => {
+    switch (severity) {
+      case 'critical': return 'Crítica';
+      case 'high': return 'Alta';
+      case 'medium': return 'Média';
+      case 'low': return 'Baixa';
+      default: return severity;
+    }
+  };
+
   // Calcular SLA baseado na severidade
   const calculateSLA = (occurrence: OccurrenceData) => {
     const createdDate = new Date(occurrence.createdAt);
@@ -160,8 +182,8 @@ export function OccurrenceHighlights({
                       {occ.agency} • {format(new Date(occ.createdAt), 'HH:mm')}
                     </p>
                   </div>
-                  <Badge variant={occ.severity === 'critical' ? 'destructive' : occ.severity === 'high' ? 'secondary' : 'outline'} className="text-xs">
-                    {occ.severity}
+                  <Badge variant={getSeverityVariant(occ.severity)} className="text-xs">
+                    {getSeverityLabel(occ.severity)}
                   </Badge>
                 </div>)}
           </CardContent>
@@ -239,8 +261,8 @@ export function OccurrenceHighlights({
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-sm font-medium">{occ.equipment}</span>
                         <StatusBadge status={occ.status} />
-                        <Badge variant="destructive" className="text-xs">
-                          {occ.severity}
+                        <Badge variant={getSeverityVariant(occ.severity)} className="text-xs">
+                          {getSeverityLabel(occ.severity)}
                         </Badge>
                       </div>
                       <p className="text-xs text-muted-foreground">
