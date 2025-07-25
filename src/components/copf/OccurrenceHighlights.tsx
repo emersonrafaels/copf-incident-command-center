@@ -81,14 +81,14 @@ export function OccurrenceHighlights({
 
     // Ocorrências que vencem hoje
     const dueToday = occurrences.filter(occ => {
-      if (occ.status === 'encerrada' || occ.status === 'cancelada') return false;
+      if (occ.status === 'encerrado' || occ.status === 'cancelado') return false;
       const sla = calculateSLA(occ);
       return isToday(sla.endDate);
     }).slice(0, 3); // Limitar a 3 cards
 
     // Ocorrências críticas vencendo (próximas 4 horas ou vencidas)
     const criticalDue = occurrences.filter(occ => {
-      if (occ.status === 'encerrada' || occ.status === 'cancelada') return false;
+      if (occ.status === 'encerrado' || occ.status === 'cancelado') return false;
       if (occ.severity !== 'critical' && occ.severity !== 'high') return false;
       const sla = calculateSLA(occ);
       return sla.hoursRemaining <= 4; // Vence em 4h ou já venceu
