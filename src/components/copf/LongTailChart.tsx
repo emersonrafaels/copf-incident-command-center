@@ -114,8 +114,12 @@ export const LongTailChart = memo(function LongTailChart({
         metrics: {
           total: 0,
           tempoMediano: 0,
-          metaExcelencia: 0,
-          agingCritico: 0
+          metaExcelencia: 12, // Meta fixa
+          slaPadrao: 24, // SLA fixo
+          agingCritico: 0,
+          percentualExcelencia: 0,
+          percentualSLA: 0,
+          percentualCritico: 0
         },
         insight: "Nenhuma ocorrência em aberto para análise...",
         priority: 'low' as const
