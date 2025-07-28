@@ -1,18 +1,24 @@
 import { COPFLayout } from "@/components/copf/COPFLayout";
 import { FilterSection } from "@/components/copf/FilterSection";
+import { CriticalityHeatmap } from "@/components/copf/CriticalityHeatmap";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { BarChart3, PieChart, TrendingUp, Download, Calendar, Clock, Target, Zap, CheckCircle, AlertCircle, Activity, Filter } from "lucide-react";
+import { BarChart3, PieChart, TrendingUp, Download, Calendar, Clock, Target, Zap, CheckCircle, AlertCircle, Activity, Filter, MapPin } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MetricCard } from "@/components/copf/MetricCard";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Cell } from "recharts";
 import { useState, useMemo } from "react";
+import { useDashboardData } from "@/hooks/useDashboardData";
+import { useFilters } from "@/contexts/FiltersContext";
 
 const Relatorios = () => {
+  // Importar dados das ocorrências do hook
+  const { occurrences } = useDashboardData();
+  const { segmentFilterMulti } = useFilters();
   const [segmentoFilter, setSegmentoFilter] = useState("all");
   const [equipamentoFilter, setEquipamentoFilter] = useState("all");
   const [ufFilter, setUfFilter] = useState("all");
@@ -85,9 +91,10 @@ const Relatorios = () => {
         <FilterSection />
 
         <Tabs defaultValue="overview" className="space-y-8">
-          <TabsList className="grid w-full grid-cols-4 h-12 bg-muted/50 p-1">
+          <TabsList className="grid w-full grid-cols-5 h-12 bg-muted/50 p-1">
             <TabsTrigger value="overview" className="transition-all duration-200">Visão Geral</TabsTrigger>
             <TabsTrigger value="performance" className="transition-all duration-200">Performance</TabsTrigger>
+            <TabsTrigger value="aa-ab" className="transition-all duration-200">Criticidade AA/AB</TabsTrigger>
             <TabsTrigger value="trends" className="transition-all duration-200">Tendências</TabsTrigger>
             <TabsTrigger value="sla" className="transition-all duration-200">SLA</TabsTrigger>
           </TabsList>
@@ -302,6 +309,76 @@ const Relatorios = () => {
                   </div>
                 </CardContent>
               </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="aa-ab" className="space-y-8 animate-fade-in">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+                    <div className="p-2 rounded-lg bg-gradient-primary">
+                      <MapPin className="h-5 w-5 text-white" />
+                    </div>
+                    Mapa de Criticidade por Equipamento
+                  </h2>
+                  <p className="text-muted-foreground mt-1">Análise detalhada de criticidade por segmento AA e AB</p>
+                </div>
+              </div>
+
+              <Tabs defaultValue="all" className="space-y-6">
+                <TabsList className="grid w-full grid-cols-3 max-w-md">
+                  <TabsTrigger value="all">Todos</TabsTrigger>
+                  <TabsTrigger value="aa">Segmento AA</TabsTrigger>
+                  <TabsTrigger value="ab">Segmento AB</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="all">
+                  <Card className="border-l-4 border-l-primary">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Activity className="h-5 w-5 text-primary" />
+                        Criticidade - Todos os Segmentos
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <CriticalityHeatmap occurrences={occurrences} />
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="aa">
+                  <Card className="border-l-4 border-l-secondary">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Activity className="h-5 w-5 text-secondary" />
+                        Criticidade - Segmento AA
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <CriticalityHeatmap 
+                        occurrences={occurrences.filter(o => o.segment === 'AA')} 
+                      />
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="ab">
+                  <Card className="border-l-4 border-l-accent">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Activity className="h-5 w-5 text-accent" />
+                        Criticidade - Segmento AB
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <CriticalityHeatmap 
+                        occurrences={occurrences.filter(o => o.segment === 'AB')} 
+                      />
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
             </div>
           </TabsContent>
 

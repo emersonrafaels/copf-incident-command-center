@@ -4,7 +4,7 @@ import { MetricCard } from "./MetricCard";
 import { StatusBadge } from "./StatusBadge";
 import { LongTailChart } from "./LongTailChart";
 import { OccurrenceModal } from "./OccurrenceModal";
-import { CriticalityHeatmap } from "./CriticalityHeatmap";
+
 import { FilterSection } from "./FilterSection";
 import { OccurrenceHighlights } from "./OccurrenceHighlights";
 import { VendorEquipmentMatrix } from "./VendorEquipmentMatrix";
@@ -524,34 +524,17 @@ export function Dashboard() {
         </div>
       </div>
 
-      {/* Mapa de Criticidade */}
-      <div className="animate-fade-in space-y-6" style={{
-      animationDelay: '0.3s'
-    }}>
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-gradient-primary">
-                <MapPin className="h-5 w-5 text-white" />
-              </div>
-              Mapa de Criticidade por Equipamento
-            </h2>
-            <p className="text-muted-foreground mt-1">Distribuição de criticidade por tipo de equipamento</p>
-          </div>
-        </div>
-        <CriticalityHeatmap occurrences={filteredOccurrences} />
-      </div>
 
       {/* Long Tail Analysis */}
       <div className="animate-fade-in" style={{
-      animationDelay: '0.4s'
+      animationDelay: '0.3s'
     }}>
         <LongTailChart occurrences={occurrences} filteredOccurrences={filteredOccurrences} />
       </div>
 
       {/* Highlights Operacionais */}
       <div className="animate-fade-in" style={{
-      animationDelay: '0.5s'
+      animationDelay: '0.4s'
     }}>
         <OccurrenceHighlights 
           occurrences={filteredOccurrences} 
