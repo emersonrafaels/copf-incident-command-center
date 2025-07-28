@@ -355,7 +355,7 @@ export function useDashboardData() {
   const metrics = useMemo(() => {
     const resolvedCount = occurrences.filter(o => o.status === 'encerrado').length
     const totalCount = occurrences.length
-    const pendingCount = occurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_andamento').length
+    const pendingCount = occurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_andamento' || o.status === 'com_impedimentos').length
     
     // Calcular reincidências (mesmo motivo, mesmo equipamento, em até 4 dias)
     const reincidenceCount = occurrences.reduce((count, occurrence, index) => {
@@ -422,6 +422,6 @@ export function useDashboardData() {
         setOccurrences(generateMockData())
         setIsLoading(false)
       }, 500)
-    }, [generateMockData])
+    }, [])
   }
 }
