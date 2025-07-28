@@ -45,9 +45,10 @@ export function useDashboardData() {
   const [isLoading, setIsLoading] = useState(true)
   const { filterPeriod } = useFilters()
 
-  // Dados mock estáticos para ~1200 ocorrências
-  const generateMockData = useMemo(() => {
-    const today = new Date();
+  // Dados mock estáticos para ~1200 ocorrências - fixo para evitar mudanças na navegação
+  const generateMockData = () => {
+    // Data fixa para garantir consistência
+    const today = new Date('2024-01-15T10:00:00.000Z');
     const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
     const twoDaysAgo = new Date(today.getTime() - 2 * 24 * 60 * 60 * 1000);
     const threeDaysAgo = new Date(today.getTime() - 3 * 24 * 60 * 60 * 1000);
@@ -170,47 +171,44 @@ export function useDashboardData() {
             vendor = segmentVendors[i % segmentVendors.length];
           }
 
-          // Status distribuído
-          const status = statuses[i % statuses.length] as any;
+          // Status distribuído com seed fixo
+          const status = statuses[(occurrenceCounter + i) % statuses.length] as any;
           
-          // Datas estratégicas:
+          // Datas estratégicas com seed fixo:
           let createdAt: Date;
           let resolvedAt: string | undefined;
           
-          // Distribuição de datas:
-          // 10% criadas hoje
-          // 5% que vencem hoje (criadas 23h atrás para critical/high, 71h atrás para medium/low)
-          // 15% em atraso (criadas há mais de 24h para critical/high, mais de 72h para medium/low)
-          // 70% distribuídas nos últimos 30 dias
+          // Distribuição de datas baseada em seed fixo:
+          const seed = (occurrenceCounter + i + groupIndex) % 100;
           
-          if (i % 10 === 0) {
+          if (seed < 10) {
             // 10% criadas hoje
-            createdAt = new Date(today.getTime() - Math.random() * 12 * 60 * 60 * 1000); // Últimas 12h
-          } else if (i % 20 === 1) {
+            createdAt = new Date(today.getTime() - (seed * 60 * 60 * 1000)); // 0-9h atrás
+          } else if (seed < 15) {
             // 5% que vencem hoje - críticas/altas criadas há ~23h, médias/baixas há ~71h
-            const severity = severities[i % severities.length] as any;
+            const severity = severities[(occurrenceCounter + i) % severities.length] as any;
             if (severity === 'critical' || severity === 'high') {
               createdAt = new Date(today.getTime() - 23 * 60 * 60 * 1000); // 23h atrás
             } else {
               createdAt = new Date(today.getTime() - 71 * 60 * 60 * 1000); // 71h atrás
             }
-          } else if (i % 7 === 2) {
+          } else if (seed < 30) {
             // ~15% em atraso
-            const severity = severities[i % severities.length] as any;
+            const severity = severities[(occurrenceCounter + i) % severities.length] as any;
             if (severity === 'critical' || severity === 'high') {
-              createdAt = new Date(today.getTime() - (26 + Math.random() * 48) * 60 * 60 * 1000); // 26-74h atrás
+              createdAt = new Date(today.getTime() - (26 + (seed * 2)) * 60 * 60 * 1000); // 26-86h atrás
             } else {
-              createdAt = new Date(today.getTime() - (74 + Math.random() * 48) * 60 * 60 * 1000); // 74-122h atrás
+              createdAt = new Date(today.getTime() - (74 + (seed * 2)) * 60 * 60 * 1000); // 74-134h atrás
             }
           } else {
             // 70% distribuídas nos últimos 30 dias
-            const daysAgo = Math.random() * 30;
+            const daysAgo = (seed - 30) * 0.4; // 0-28 dias
             createdAt = new Date(today.getTime() - daysAgo * 24 * 60 * 60 * 1000);
           }
           
           // Resolver ocorrências encerradas
           if (status === 'encerrado') {
-            const durationHours = 2 + Math.random() * 46; // 2-48 horas
+            const durationHours = 2 + ((occurrenceCounter + i) % 46); // 2-48 horas determinístico
             resolvedAt = new Date(createdAt.getTime() + durationHours * 60 * 60 * 1000).toISOString();
           }
 
@@ -223,7 +221,7 @@ export function useDashboardData() {
             equipment,
             serialNumber: `${segment}${String(occurrenceCounter).padStart(4, '0')}-${structure.estado}-${agencyNum}`,
             description: descriptions[segment][i % descriptions[segment].length],
-            severity: severities[i % severities.length] as any,
+            severity: severities[(occurrenceCounter + i) % severities.length] as any,
             status,
             createdAt: createdAt.toISOString(),
             resolvedAt,
@@ -242,7 +240,7 @@ export function useDashboardData() {
       });
     });
 
-    // Adicionar reincidências específicas (50 total)
+    // Adicionar reincidências específicas (50 total) com seed fixo
     const reincidenceTemplates = [
       { agency: 'AG0001 - Centro (São Paulo)', equipment: 'ATM Saque', description: 'ATM não está dispensando cédulas - erro de hardware na gaveta' },
       { agency: 'AG0015 - Centro (São Paulo)', equipment: 'Impressora', description: 'Impressora com papel atolado constantemente' },
@@ -253,7 +251,7 @@ export function useDashboardData() {
 
     for (let i = 0; i < 50; i++) {
       const template = reincidenceTemplates[i % reincidenceTemplates.length];
-      const daysAgo = Math.random() * 3; // Até 3 dias atrás
+      const daysAgo = (i % 3) * 0.5; // 0, 0.5, 1 dia atrás - determinístico
       const createdAt = new Date(today.getTime() - daysAgo * 24 * 60 * 60 * 1000);
       
       mockOccurrences.push({
@@ -277,18 +275,18 @@ export function useDashboardData() {
     }
 
     return mockOccurrences;
-  }, [])
+  }
 
-  // Regenerar dados quando o filtro de período mudar
+  // Inicializar dados uma única vez
   useEffect(() => {
     setIsLoading(true)
     const timer = setTimeout(() => {
-      setOccurrences(generateMockData)
+      setOccurrences(generateMockData())
       setIsLoading(false)
     }, 500)
 
     return () => clearTimeout(timer)
-  }, [generateMockData])
+  }, [])
 
   // Dados processados para gráficos - Memoizados para performance
   const severityData: ChartData[] = useMemo(() => [
@@ -421,7 +419,7 @@ export function useDashboardData() {
     refreshData: useCallback(() => {
       setIsLoading(true)
       setTimeout(() => {
-        setOccurrences(generateMockData)
+        setOccurrences(generateMockData())
         setIsLoading(false)
       }, 500)
     }, [generateMockData])
