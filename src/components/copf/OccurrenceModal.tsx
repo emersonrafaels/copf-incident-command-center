@@ -440,7 +440,7 @@ export function OccurrenceModal({
                     </div>
                   </div>
 
-                  <div className="flex gap-2">
+                    <div className="flex gap-2">
                     <Button 
                       onClick={handleSendToVendor}
                       disabled={isSendingMessage}
@@ -449,6 +449,16 @@ export function OccurrenceModal({
                     >
                       <Send className="mr-2 h-4 w-4" />
                       {isSendingMessage ? 'Enviando...' : 'Enviar Mensagem'}
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        window.open(`/ocorrencia/${occurrence.id}`, '_blank');
+                      }}
+                    >
+                      <Eye className="mr-2 h-4 w-4" />
+                      Visualizar Ocorrência Completa
                     </Button>
                     <Button 
                       variant="outline" 
