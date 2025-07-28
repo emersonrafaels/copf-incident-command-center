@@ -43,7 +43,7 @@ export function COPFLayout({
         <div className="flex-1 flex flex-col min-w-0 pl-6">
           {/* Header */}
           <header className="h-14 sm:h-16 border-b bg-gradient-to-r from-card/80 via-card/90 to-card/80 backdrop-blur-md sticky top-0 z-50 shadow-elegant">
-            <div className="flex items-center justify-between h-full px-responsive">
+            <div className="flex items-center justify-between h-full px-responsive pl-6">
               <div className="flex items-center gap-responsive-sm min-w-0 flex-1">
                 <SidebarTrigger className="hover:bg-primary/10 transition-colors shrink-0" />
                 <div className="hidden sm:block min-w-0 flex-1">
