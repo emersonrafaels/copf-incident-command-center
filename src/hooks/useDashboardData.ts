@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { formatHours } from '@/lib/timeUtils'
+import { useFilters } from '@/contexts/FiltersContext'
 
 export interface OccurrenceData {
   id: string
@@ -42,9 +43,23 @@ export interface MTTRData {
 export function useDashboardData() {
   const [occurrences, setOccurrences] = useState<OccurrenceData[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const { filterPeriod } = useFilters()
 
-  // Dados mock estáticos para garantir consistência entre navegações
+  // Dados mock responsivos ao período de filtro
   const generateMockData = useMemo(() => {
+    // Definir multiplicador baseado no período
+    const getPeriodMultiplier = (period: string) => {
+      switch (period) {
+        case '1-day': return 0.3
+        case '7-days': return 1
+        case '30-days': return 4.2
+        case '90-days': return 12.5
+        case '1-year': return 52
+        default: return 1
+      }
+    }
+
+    const multiplier = getPeriodMultiplier(filterPeriod)
     // Estrutura hierárquica completa
     const hierarchyStructure = [
       // SP - DINEG 2
@@ -113,13 +128,15 @@ export function useDashboardData() {
     // Gerar ocorrências baseadas na estrutura hierárquica
     hierarchyStructure.forEach((structure, groupIndex) => {
       structure.agencias.forEach((agencyNum, agencyIndex) => {
-        // Número fixo de ocorrências para garantir consistência
-        let occurrenceCount;
+        // Número de ocorrências baseado no período
+        let baseOccurrenceCount;
         if (structure.tipo === 'terceirizada') {
-          occurrenceCount = 10; // Fixo para terceirizadas
+          baseOccurrenceCount = 10; // Base para terceirizadas
         } else {
-          occurrenceCount = 5; // Fixo para outras
+          baseOccurrenceCount = 5; // Base para outras
         }
+        
+        const occurrenceCount = Math.max(1, Math.round(baseOccurrenceCount * multiplier))
         
         for (let i = 0; i < occurrenceCount; i++) {
           // Distribuição fixa entre segmentos AA e AB
@@ -157,8 +174,12 @@ export function useDashboardData() {
           const statuses = ['a_iniciar', 'em_andamento', 'encerrado', 'com_impedimentos', 'cancelado'];
           const status = statuses[i % statuses.length] as ('a_iniciar' | 'em_andamento' | 'encerrado' | 'com_impedimentos' | 'cancelado');
           
-          // Data fixa baseada no índice
-          const daysAgo = (i % 7) + 1; // Entre 1 e 7 dias atrás
+          // Data baseada no período e índice
+          const maxDaysAgo = filterPeriod === '1-day' ? 1 : 
+                            filterPeriod === '7-days' ? 7 :
+                            filterPeriod === '30-days' ? 30 :
+                            filterPeriod === '90-days' ? 90 : 365;
+          const daysAgo = (i % maxDaysAgo) + 1;
           const createdAt = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000);
           
           // Gerar resolvedAt para ocorrências encerradas de forma fixa
@@ -229,17 +250,19 @@ export function useDashboardData() {
     });
 
     return mockOccurrences;
-  }, [])
+  }, [filterPeriod])
 
+
+  // Regenerar dados quando o filtro de período mudar
   useEffect(() => {
-    // Simular carregamento inicial apenas
+    setIsLoading(true)
     const timer = setTimeout(() => {
       setOccurrences(generateMockData)
       setIsLoading(false)
-    }, 1000)
+    }, 500)
 
     return () => clearTimeout(timer)
-  }, [generateMockData])
+  }, [filterPeriod, generateMockData])
 
   // Dados processados para gráficos - Memoizados para performance
   const severityData: ChartData[] = useMemo(() => [
@@ -265,15 +288,22 @@ export function useDashboardData() {
     }
   ], [occurrences])
 
-  const timelineData: TimelineData[] = [
-    { date: '01/01', ocorrencias: 45, resolvidas: 38 },
-    { date: '02/01', ocorrencias: 52, resolvidas: 44 },
-    { date: '03/01', ocorrencias: 48, resolvidas: 41 },
-    { date: '04/01', ocorrencias: 61, resolvidas: 55 },
-    { date: '05/01', ocorrencias: 55, resolvidas: 48 },
-    { date: '06/01', ocorrencias: 67, resolvidas: 59 },
-    { date: '07/01', ocorrencias: 59, resolvidas: 52 }
-  ]
+  const timelineData: TimelineData[] = useMemo(() => {
+    const multiplier = filterPeriod === '1-day' ? 0.3 : 
+                      filterPeriod === '7-days' ? 1 :
+                      filterPeriod === '30-days' ? 4.2 :
+                      filterPeriod === '90-days' ? 12.5 : 52;
+
+    return [
+      { date: '01/01', ocorrencias: Math.round(45 * multiplier), resolvidas: Math.round(38 * multiplier) },
+      { date: '02/01', ocorrencias: Math.round(52 * multiplier), resolvidas: Math.round(44 * multiplier) },
+      { date: '03/01', ocorrencias: Math.round(48 * multiplier), resolvidas: Math.round(41 * multiplier) },
+      { date: '04/01', ocorrencias: Math.round(61 * multiplier), resolvidas: Math.round(55 * multiplier) },
+      { date: '05/01', ocorrencias: Math.round(55 * multiplier), resolvidas: Math.round(48 * multiplier) },
+      { date: '06/01', ocorrencias: Math.round(67 * multiplier), resolvidas: Math.round(59 * multiplier) },
+      { date: '07/01', ocorrencias: Math.round(59 * multiplier), resolvidas: Math.round(52 * multiplier) }
+    ]
+  }, [filterPeriod])
 
   const mttrData: MTTRData[] = [
     { mes: 'Jul', mttr: 5.2 },
