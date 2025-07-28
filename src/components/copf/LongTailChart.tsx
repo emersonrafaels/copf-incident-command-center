@@ -109,19 +109,19 @@ export const LongTailChart = memo(function LongTailChart({
   const timeRangeAnalysis = useMemo(() => {
     // Usar ocorrências filtradas se disponível, senão usar todas
     const sourceOccurrences = filteredOccurrences || occurrences;
-    
+
     // Por padrão, analisar apenas ocorrências em aberto (não canceladas/encerradas)
-    const activeOccurrences = sourceOccurrences.filter(occ => 
-      occ.status === 'a_iniciar' || occ.status === 'em_andamento'
-    );
+    const activeOccurrences = sourceOccurrences.filter(occ => occ.status === 'a_iniciar' || occ.status === 'em_andamento');
     if (activeOccurrences.length === 0) {
       return {
         data: [],
         metrics: {
           total: 0,
           tempoMediano: 0,
-          metaExcelencia: 12, // Meta fixa
-          slaPadrao: 24, // SLA fixo
+          metaExcelencia: 12,
+          // Meta fixa
+          slaPadrao: 24,
+          // SLA fixo
           agingCritico: 0,
           percentualExcelencia: 0,
           percentualSLA: 0,
@@ -196,15 +196,14 @@ export const LongTailChart = memo(function LongTailChart({
     // Calcular percentuais de performance
     const dentroMetaExcelencia = durations.filter(d => d.durationHours <= META_EXCELENCIA).length;
     const dentroSLA = durations.filter(d => d.durationHours <= SLA_PADRAO).length;
-    const percentualExcelencia = Math.round((dentroMetaExcelencia / durations.length) * 100);
-    const percentualSLA = Math.round((dentroSLA / durations.length) * 100);
-    const percentualCritico = Math.round((agingCritico / durations.length) * 100);
+    const percentualExcelencia = Math.round(dentroMetaExcelencia / durations.length * 100);
+    const percentualSLA = Math.round(dentroSLA / durations.length * 100);
+    const percentualCritico = Math.round(agingCritico / durations.length * 100);
 
     // Gerar insight operacional
     let insight = `${durations.length} ocorrências em aberto | Tempo Mediano: ${formatHours(tempoMediano)} | Meta Excelência: ${formatHours(META_EXCELENCIA)} (${percentualExcelencia}% dentro)`;
     let priority: 'high' | 'medium' | 'low' = 'medium';
     let actionSuggestion = "";
-    
     if (percentualCritico > 25) {
       insight += ` | CRÍTICO: ${agingCritico} acima de 5 dias (${percentualCritico}%)`;
       priority = 'high';
@@ -221,7 +220,6 @@ export const LongTailChart = memo(function LongTailChart({
       priority = 'low';
       actionSuggestion = "Performance saudável. Manter monitoramento atual.";
     }
-    
     return {
       data: timeRangeData,
       metrics: {
@@ -278,8 +276,7 @@ export const LongTailChart = memo(function LongTailChart({
         </CardContent>
       </Card>;
   }
-  return (
-    <div className="space-y-8 animate-fade-in">
+  return <div className="space-y-8 animate-fade-in">
       {/* Seção Header */}
       <div className="space-y-2">
         <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
@@ -377,11 +374,11 @@ export const LongTailChart = memo(function LongTailChart({
           <ChartContainer config={chartConfig} className="h-[400px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={timeRangeAnalysis.data} margin={{
-                top: 30,
-                right: 20,
-                left: 40,
-                bottom: 50
-              }}>
+              top: 30,
+              right: 20,
+              left: 40,
+              bottom: 50
+            }}>
                 <defs>
                   <linearGradient id="barGradient1" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#22c55e" stopOpacity={0.9} />
@@ -398,94 +395,73 @@ export const LongTailChart = memo(function LongTailChart({
                 </defs>
                 
                 <CartesianGrid strokeDasharray="2 2" stroke="hsl(var(--border))" opacity={0.3} />
-                <XAxis 
-                  dataKey="rangeLabel" 
-                  stroke="hsl(var(--muted-foreground))" 
-                  tick={{
-                    fill: 'hsl(var(--muted-foreground))',
-                    fontSize: 11,
-                    fontWeight: 500
-                  }} 
-                  angle={-45} 
-                  textAnchor="end" 
-                  height={80} 
-                  interval={0}
-                  axisLine={{
-                    stroke: 'hsl(var(--border))',
-                    strokeWidth: 1
-                  }}
-                  tickLine={{
-                    stroke: 'hsl(var(--border))',
-                    strokeWidth: 1
-                  }}
-                  label={{ 
-                    value: 'Faixas de Tempo de Aging', 
-                    position: 'insideBottom', 
-                    offset: -5,
-                    style: { 
-                      textAnchor: 'middle',
-                      fill: 'hsl(var(--foreground))',
-                      fontSize: '12px',
-                      fontWeight: 600
-                    }
-                  }}
-                />
-                <YAxis 
-                  stroke="hsl(var(--muted-foreground))" 
-                  tick={{
-                    fill: 'hsl(var(--muted-foreground))',
-                    fontSize: 11,
-                    fontWeight: 500
-                  }}
-                  axisLine={{
-                    stroke: 'hsl(var(--border))',
-                    strokeWidth: 1
-                  }}
-                  tickLine={{
-                    stroke: 'hsl(var(--border))',
-                    strokeWidth: 1
-                  }}
-                  label={{ 
-                    value: 'Quantidade de Ocorrências', 
-                    angle: -90, 
-                    position: 'insideLeft',
-                    style: { 
-                      textAnchor: 'middle',
-                      fill: 'hsl(var(--foreground))',
-                      fontSize: '12px',
-                      fontWeight: 600
-                    }
-                  }}
-                />
+                <XAxis dataKey="rangeLabel" stroke="hsl(var(--muted-foreground))" tick={{
+                fill: 'hsl(var(--muted-foreground))',
+                fontSize: 11,
+                fontWeight: 500
+              }} angle={-45} textAnchor="end" height={80} interval={0} axisLine={{
+                stroke: 'hsl(var(--border))',
+                strokeWidth: 1
+              }} tickLine={{
+                stroke: 'hsl(var(--border))',
+                strokeWidth: 1
+              }} label={{
+                value: 'Faixas de Tempo de Aging',
+                position: 'insideBottom',
+                offset: -5,
+                style: {
+                  textAnchor: 'middle',
+                  fill: 'hsl(var(--foreground))',
+                  fontSize: '12px',
+                  fontWeight: 600
+                }
+              }} />
+                <YAxis stroke="hsl(var(--muted-foreground))" tick={{
+                fill: 'hsl(var(--muted-foreground))',
+                fontSize: 11,
+                fontWeight: 500
+              }} axisLine={{
+                stroke: 'hsl(var(--border))',
+                strokeWidth: 1
+              }} tickLine={{
+                stroke: 'hsl(var(--border))',
+                strokeWidth: 1
+              }} label={{
+                value: 'Quantidade de Ocorrências',
+                angle: -90,
+                position: 'insideLeft',
+                style: {
+                  textAnchor: 'middle',
+                  fill: 'hsl(var(--foreground))',
+                  fontSize: '12px',
+                  fontWeight: 600
+                }
+              }} />
                 
-                <ChartTooltipContent 
-                  formatter={(value, name, props) => {
-                    const data = props.payload;
-                    const percentage = ((Number(value) / timeRangeAnalysis.metrics.total) * 100).toFixed(1);
-                    const rangeLabel = data?.rangeLabel || '';
-                    const category = data?.category || '';
-                    
-                    // Texto explicativo baseado na categoria
-                    let categoryText = '';
-                    let statusColor = '';
-                    let actionText = '';
-                    
-                    if (category === 'within_target') {
-                      categoryText = 'Performance Excelente';
-                      statusColor = 'text-green-600';
-                      actionText = 'Dentro da meta de excelência - manter padrão atual';
-                    } else if (category === 'above_target') {
-                      categoryText = 'Necessita Atenção';
-                      statusColor = 'text-orange-600';
-                      actionText = 'Acima da meta - revisar processos de resolução';
-                    } else if (category === 'critical') {
-                      categoryText = 'Aging Crítico';
-                      statusColor = 'text-red-600';
-                      actionText = 'Ação imediata necessária - escalar para gestão';
-                    }
-                    
-                    return [
-                      <div key="tooltip-content" className="space-y-3 min-w-[280px]">
+                <ChartTooltipContent formatter={(value, name, props) => {
+                const data = props.payload;
+                const percentage = (Number(value) / timeRangeAnalysis.metrics.total * 100).toFixed(1);
+                const rangeLabel = data?.rangeLabel || '';
+                const category = data?.category || '';
+
+                // Texto explicativo baseado na categoria
+                let categoryText = '';
+                let statusColor = '';
+                let actionText = '';
+                if (category === 'within_target') {
+                  categoryText = 'Performance Excelente';
+                  statusColor = 'text-green-600';
+                  actionText = 'Dentro da meta de excelência - manter padrão atual';
+                } else if (category === 'above_target') {
+                  categoryText = 'Necessita Atenção';
+                  statusColor = 'text-orange-600';
+                  actionText = 'Acima da meta - revisar processos de resolução';
+                } else if (category === 'critical') {
+                  categoryText = 'Aging Crítico';
+                  statusColor = 'text-red-600';
+                  actionText = 'Ação imediata necessária - escalar para gestão';
+                }
+                return [<div key="tooltip-content" className="space-y-3 min-w-[280px]">
                         <div className="border-b border-border pb-2">
                           <div className="font-bold text-base">{value} ocorrências</div>
                           <div className="text-sm text-muted-foreground">
@@ -516,60 +492,35 @@ export const LongTailChart = memo(function LongTailChart({
                             <span>Clique para filtrar estas ocorrências na tabela</span>
                           </div>
                         </div>
-                      </div>, 
-                      ''
-                    ];
-                  }} 
-                  labelFormatter={() => ''} 
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '12px',
-                    boxShadow: '0 12px 32px -8px hsl(var(--primary) / 0.25)',
-                    padding: '16px',
-                    maxWidth: '350px'
-                  }}
-                  itemStyle={{
-                    color: 'hsl(var(--foreground))',
-                    fontWeight: 500,
-                    padding: 0
-                  }}
-                />
+                      </div>, ''];
+              }} labelFormatter={() => ''} contentStyle={{
+                backgroundColor: 'hsl(var(--card))',
+                border: '1px solid hsl(var(--border))',
+                borderRadius: '12px',
+                boxShadow: '0 12px 32px -8px hsl(var(--primary) / 0.25)',
+                padding: '16px',
+                maxWidth: '350px'
+              }} itemStyle={{
+                color: 'hsl(var(--foreground))',
+                fontWeight: 500,
+                padding: 0
+              }} />
                 
-                <Bar 
-                  dataKey="count" 
-                  radius={[6, 6, 0, 0]}
-                  cursor="pointer"
-                  onClick={(data, index) => {
-                    if (data) {
-                      handleBarClick(data);
-                    }
-                  }}
-                >
-                  {timeRangeAnalysis.data.map((entry, index) => (
-                    <Cell 
-                      key={`cell-${index}`} 
-                      fill={entry.color}
-                      stroke="hsl(var(--border))"
-                      strokeWidth={1}
-                      className="transition-all duration-200 hover:opacity-80"
-                    />
-                  ))}
+                <Bar dataKey="count" radius={[6, 6, 0, 0]} cursor="pointer" onClick={(data, index) => {
+                if (data) {
+                  handleBarClick(data);
+                }
+              }}>
+                  {timeRangeAnalysis.data.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} stroke="hsl(var(--border))" strokeWidth={1} className="transition-all duration-200 hover:opacity-80" />)}
                   
                   {/* Números nas barras */}
-                  <LabelList 
-                    dataKey="count" 
-                    position="top" 
-                    style={{ 
-                      fill: 'hsl(var(--foreground))', 
-                      fontSize: '12px', 
-                      fontWeight: 700,
-                      textAnchor: 'middle',
-                      textShadow: '0 1px 2px hsl(var(--background))'
-                    }}
-                    offset={8}
-                    formatter={(value) => value > 0 ? String(value) : ''}
-                  />
+                  <LabelList dataKey="count" position="top" style={{
+                  fill: 'hsl(var(--foreground))',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  textAnchor: 'middle',
+                  textShadow: '0 1px 2px hsl(var(--background))'
+                }} offset={8} formatter={value => value > 0 ? String(value) : ''} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -586,12 +537,12 @@ export const LongTailChart = memo(function LongTailChart({
             {/* Estatísticas resumidas em grid compacto */}
             <div className="grid grid-cols-3 gap-3 p-3 bg-muted/20 rounded-lg">
               <div className="text-center">
-                <div className="text-xl font-bold text-green-600">{Math.round((timeRangeAnalysis.metrics.percentualExcelencia / 100) * timeRangeAnalysis.metrics.total)}</div>
+                <div className="text-xl font-bold text-green-600">{Math.round(timeRangeAnalysis.metrics.percentualExcelencia / 100 * timeRangeAnalysis.metrics.total)}</div>
                 <div className="text-xs text-muted-foreground font-medium">Excelência</div>
                 <div className="text-xs text-muted-foreground">≤ {formatHours(timeRangeAnalysis.metrics.metaExcelencia)}</div>
               </div>
               <div className="text-center">
-                <div className="text-xl font-bold text-orange-600">{Math.round(((timeRangeAnalysis.metrics.percentualSLA - timeRangeAnalysis.metrics.percentualExcelencia) / 100) * timeRangeAnalysis.metrics.total)}</div>
+                <div className="text-xl font-bold text-orange-600">{Math.round((timeRangeAnalysis.metrics.percentualSLA - timeRangeAnalysis.metrics.percentualExcelencia) / 100 * timeRangeAnalysis.metrics.total)}</div>
                 <div className="text-xs text-muted-foreground font-medium">Atenção</div>
                 <div className="text-xs text-muted-foreground">{formatHours(timeRangeAnalysis.metrics.metaExcelencia)} - 5d</div>
               </div>
@@ -627,30 +578,13 @@ export const LongTailChart = memo(function LongTailChart({
       {/* Cards de Análise em Grid */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* Card de Análise Operacional e Resumo Executivo - colapsável */}
-        <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
-          <Collapsible open={!isAnalysisCollapsed} onOpenChange={(open) => setIsAnalysisCollapsed(!open)}>
+        <div className="animate-fade-in" style={{
+        animationDelay: '0.1s'
+      }}>
+          <Collapsible open={!isAnalysisCollapsed} onOpenChange={open => setIsAnalysisCollapsed(!open)}>
             <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
               <CollapsibleTrigger asChild>
-                <CardHeader className="pb-3 cursor-pointer hover:bg-primary/5 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-xl bg-primary/10">
-                        <Clock className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-lg font-semibold">Análise de Performance</CardTitle>
-                        <p className="text-sm text-muted-foreground">Resumo executivo e insights detalhados</p>
-                      </div>
-                    </div>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      {isAnalysisCollapsed ? (
-                        <ChevronDown className="h-4 w-4" />
-                      ) : (
-                        <ChevronUp className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                </CardHeader>
+                
               </CollapsibleTrigger>
               
               <CollapsibleContent className="animate-accordion-down">
@@ -669,23 +603,16 @@ export const LongTailChart = memo(function LongTailChart({
                           <p>
                             <span className="font-medium text-success">{timeRangeAnalysis.metrics.percentualExcelencia}%</span> das ocorrências estão dentro da meta de excelência (≤ {formatHours(timeRangeAnalysis.metrics.metaExcelencia)}), demonstrando {timeRangeAnalysis.metrics.percentualExcelencia >= 70 ? 'boa' : 'baixa'} performance operacional.
                           </p>
-                          {timeRangeAnalysis.metrics.agingCritico > 0 && (
-                            <p className="text-destructive font-medium">
+                          {timeRangeAnalysis.metrics.agingCritico > 0 && <p className="text-destructive font-medium">
                               ⚠️ Atenção: <span className="font-bold">{timeRangeAnalysis.metrics.agingCritico}</span> ocorrências ({timeRangeAnalysis.metrics.percentualCritico}%) com aging crítico ({">"} 5 dias) requerem ação imediata.
-                            </p>
-                          )}
+                            </p>}
                         </div>
                         
                         {/* Botão para metodologia */}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setShowMethodologyModal(true);
-                          }}
-                          className="flex items-center gap-2 text-primary border-primary/20 hover:bg-primary/5"
-                        >
+                        <Button variant="outline" size="sm" onClick={e => {
+                        e.stopPropagation();
+                        setShowMethodologyModal(true);
+                      }} className="flex items-center gap-2 text-primary border-primary/20 hover:bg-primary/5">
                           <BookOpen className="h-4 w-4" />
                           Metodologia Completa
                         </Button>
@@ -699,8 +626,10 @@ export const LongTailChart = memo(function LongTailChart({
         </div>
 
         {/* Como usar esta análise - colapsável */}
-        <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
-          <Collapsible open={!isGuideCollapsed} onOpenChange={(open) => setIsGuideCollapsed(!open)}>
+        <div className="animate-fade-in" style={{
+        animationDelay: '0.2s'
+      }}>
+          <Collapsible open={!isGuideCollapsed} onOpenChange={open => setIsGuideCollapsed(!open)}>
             <Card className="bg-gradient-to-r from-info/5 to-info/10 border-info/20">
               <CollapsibleTrigger asChild>
                 <CardHeader className="pb-3 cursor-pointer hover:bg-info/5 transition-colors">
@@ -718,11 +647,7 @@ export const LongTailChart = memo(function LongTailChart({
                       </div>
                     </div>
                     <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      {isGuideCollapsed ? (
-                        <ChevronDown className="h-4 w-4" />
-                      ) : (
-                        <ChevronUp className="h-4 w-4" />
-                      )}
+                      {isGuideCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
                     </Button>
                   </div>
                 </CardHeader>
@@ -909,8 +834,7 @@ export const LongTailChart = memo(function LongTailChart({
 
 
               {/* Ação Recomendada Atual */}
-              {timeRangeAnalysis.actionSuggestion && (
-                <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
+              {timeRangeAnalysis.actionSuggestion && <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
                   <div className="flex items-center gap-2 mb-2">
                     <ArrowRight className="h-5 w-5 text-primary" />
                     <h4 className="font-semibold text-primary">Recomendação para sua Situação Atual</h4>
@@ -926,12 +850,10 @@ export const LongTailChart = memo(function LongTailChart({
                       <li>Monitore semanalmente a evolução dos indicadores</li>
                     </ul>
                   </div>
-                </div>
-              )}
+                </div>}
             </div>
           </ScrollArea>
         </DialogContent>
       </Dialog>
-    </div>
-  );
+    </div>;
 });
