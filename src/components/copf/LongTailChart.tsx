@@ -276,6 +276,84 @@ export const LongTailChart = memo(function LongTailChart({
     };
   }, [occurrences, filteredOccurrences]);
 
+  // Processar dados para gráfico de agências top 10 com equipamentos
+  const agenciesStackedData = useMemo(() => {
+    const sourceOccurrences = filteredOccurrences || occurrences;
+    
+    // Agrupar por agência
+    const agencyGroups = sourceOccurrences.reduce((groups, occ) => {
+      if (!groups[occ.agency]) {
+        groups[occ.agency] = [];
+      }
+      groups[occ.agency].push(occ);
+      return groups;
+    }, {} as Record<string, OccurrenceData[]>);
+
+    // Obter top 10 agências por quantidade total
+    const agenciesWithCount = Object.entries(agencyGroups)
+      .map(([agencia, occs]) => ({
+        agencia,
+        total: occs.length,
+        occurrences: occs
+      }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 10);
+
+    // Processar dados para stacked chart
+    return agenciesWithCount.map(({ agencia, total, occurrences }) => {
+      // Agrupar por equipamento
+      const equipmentCounts = occurrences.reduce((counts, occ) => {
+        const equipment = occ.equipment || 'Não informado';
+        counts[equipment] = (counts[equipment] || 0) + 1;
+        return counts;
+      }, {} as Record<string, number>);
+
+      // Converter para percentuais
+      const equipmentData: Record<string, number> = {};
+      Object.entries(equipmentCounts).forEach(([equipment, count]) => {
+        equipmentData[equipment] = Math.round((count / total) * 100);
+      });
+
+      return {
+        agencia,
+        total,
+        ...equipmentData
+      };
+    });
+  }, [occurrences, filteredOccurrences]);
+
+  // Obter todos os equipamentos únicos para as cores
+  const allEquipments = useMemo(() => {
+    const equipments = new Set<string>();
+    const sourceOccurrences = filteredOccurrences || occurrences;
+    sourceOccurrences.forEach(occ => {
+      equipments.add(occ.equipment || 'Não informado');
+    });
+    return Array.from(equipments);
+  }, [occurrences, filteredOccurrences]);
+
+  // Cores para equipamentos
+  const equipmentColors = useMemo(() => {
+    const colors = [
+      '#3b82f6', // blue
+      '#10b981', // emerald
+      '#f59e0b', // amber
+      '#ef4444', // red
+      '#8b5cf6', // violet
+      '#06b6d4', // cyan
+      '#84cc16', // lime
+      '#f97316', // orange
+      '#ec4899', // pink
+      '#6b7280', // gray
+    ];
+    
+    const colorMap: Record<string, string> = {};
+    allEquipments.forEach((equipment, index) => {
+      colorMap[equipment] = colors[index % colors.length];
+    });
+    return colorMap;
+  }, [allEquipments]);
+
   // Handler para navegar para ocorrências com aging crítico
   const handleFilterAgingCritico = () => {
     clearAllFilters();
@@ -777,6 +855,163 @@ export const LongTailChart = memo(function LongTailChart({
           </ScrollArea>
         </DialogContent>
       </Dialog>
+
+      {/* Gráfico de Agências Top 10 com Equipamentos */}
+      {agenciesStackedData.length > 0 && (
+        <Card className="bg-gradient-subtle border-0 shadow-elegant">
+          <CardHeader className="pb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-gradient-primary">
+                <Users className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <CardTitle className="text-xl font-semibold text-foreground">
+                  Top 10 Agências por Volume de Ocorrências
+                </CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Distribuição percentual por tipo de equipamento
+                </p>
+              </div>
+            </div>
+          </CardHeader>
+          
+          <CardContent className="p-4">
+            <ChartContainer config={chartConfig} className="h-[500px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart 
+                  data={agenciesStackedData} 
+                  layout="horizontal"
+                  margin={{
+                    top: 20,
+                    right: 30,
+                    left: 100,
+                    bottom: 50
+                  }}
+                >
+                  <CartesianGrid strokeDasharray="2 2" stroke="hsl(var(--border))" opacity={0.3} />
+                  <XAxis 
+                    type="number"
+                    domain={[0, 100]}
+                    stroke="hsl(var(--muted-foreground))" 
+                    tick={{
+                      fill: 'hsl(var(--muted-foreground))',
+                      fontSize: 11,
+                      fontWeight: 500
+                    }}
+                    label={{
+                      value: 'Percentual (%)',
+                      position: 'insideBottom',
+                      offset: -5,
+                      style: {
+                        textAnchor: 'middle',
+                        fill: 'hsl(var(--foreground))',
+                        fontSize: '12px',
+                        fontWeight: 600
+                      }
+                    }}
+                  />
+                  <YAxis 
+                    type="category"
+                    dataKey="agencia"
+                    stroke="hsl(var(--muted-foreground))" 
+                    tick={{
+                      fill: 'hsl(var(--muted-foreground))',
+                      fontSize: 10,
+                      fontWeight: 500
+                    }}
+                    width={90}
+                  />
+                  
+                  <ChartTooltipContent 
+                    formatter={(value, name, props) => {
+                      const agencia = props.payload?.agencia;
+                      const total = props.payload?.total;
+                      return [
+                        <div key="tooltip-content" className="space-y-2 min-w-[200px]">
+                          <div className="border-b border-border pb-2">
+                            <div className="font-bold text-base">{agencia}</div>
+                            <div className="text-sm text-muted-foreground">
+                              Total: {total} ocorrências
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-1">
+                            <div className="text-sm font-medium text-foreground">Equipamento: {name}</div>
+                            <div className="text-sm text-muted-foreground">{value}% do total da agência</div>
+                          </div>
+                        </div>,
+                        ''
+                      ];
+                    }}
+                    labelFormatter={() => ''}
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '12px',
+                      boxShadow: '0 12px 32px -8px hsl(var(--primary) / 0.25)',
+                      padding: '16px',
+                      maxWidth: '300px'
+                    }}
+                  />
+                  
+                  {allEquipments.map((equipment, index) => (
+                    <Bar
+                      key={equipment}
+                      dataKey={equipment}
+                      stackId="equipment"
+                      fill={equipmentColors[equipment]}
+                      radius={index === 0 ? [4, 0, 0, 4] : index === allEquipments.length - 1 ? [0, 4, 4, 0] : [0, 0, 0, 0]}
+                    />
+                  ))}
+                </BarChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+            
+            {/* Legenda dos equipamentos */}
+            <div className="mt-4 p-3 bg-card/30 rounded-lg border border-border/30">
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                {allEquipments.map((equipment) => (
+                  <div key={equipment} className="flex items-center gap-2 text-xs">
+                    <div 
+                      className="w-3 h-3 rounded" 
+                      style={{ backgroundColor: equipmentColors[equipment] }}
+                    ></div>
+                    <span className="text-foreground font-medium">{equipment}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Estatísticas resumidas */}
+            <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 p-3 bg-muted/20 rounded-lg">
+              <div className="text-center">
+                <div className="text-lg font-bold text-primary">
+                  {agenciesStackedData.reduce((acc, agency) => acc + agency.total, 0)}
+                </div>
+                <div className="text-xs text-muted-foreground font-medium">Total Geral</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-bold text-muted-foreground">
+                  {agenciesStackedData.length}
+                </div>
+                <div className="text-xs text-muted-foreground font-medium">Agências</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-bold text-muted-foreground">
+                  {Math.round(agenciesStackedData.reduce((acc, agency) => acc + agency.total, 0) / agenciesStackedData.length)}
+                </div>
+                <div className="text-xs text-muted-foreground font-medium">Média/Agência</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-bold text-muted-foreground">
+                  {allEquipments.length}
+                </div>
+                <div className="text-xs text-muted-foreground font-medium">Tipos Equip.</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 });
