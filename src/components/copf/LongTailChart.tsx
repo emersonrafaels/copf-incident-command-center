@@ -1,4 +1,3 @@
-
 import React, { memo, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, ReferenceLine, Cell, LabelList } from 'recharts';
@@ -348,7 +347,7 @@ export const LongTailChart = memo(function LongTailChart({
             </div>
             <Button variant="premium" size="sm" onClick={handleFilterAgingCritico} className="flex items-center gap-2 shadow-card-hover">
               <AlertTriangle className="h-4 w-4" />
-              Ver Zona Crítica (>3 dias)
+              Ver Zona Crítica (&gt;3 dias)
             </Button>
           </div>
 
@@ -398,7 +397,7 @@ export const LongTailChart = memo(function LongTailChart({
                 <TooltipTrigger asChild>
                   <div className="flex items-center gap-2 cursor-help">
                     <div className="w-2 h-2 rounded-full bg-destructive"></div>
-                    <span className="text-sm text-muted-foreground">Zona Crítica (>3 dias):</span>
+                    <span className="text-sm text-muted-foreground">Zona Crítica (&gt;3 dias):</span>
                     <span className="text-lg font-bold text-destructive">{timeRangeAnalysis.metrics.agingCritico}</span>
                     <Info className="h-3 w-3 text-muted-foreground" />
                   </div>
@@ -660,7 +659,7 @@ export const LongTailChart = memo(function LongTailChart({
               <div className="text-center">
                 <div className="text-lg font-bold text-red-600">{timeRangeAnalysis.metrics.agingCritico}</div>
                 <div className="text-xs text-muted-foreground font-medium">Crítico</div>
-                <div className="text-xs text-muted-foreground">> 3 dias</div>
+                <div className="text-xs text-muted-foreground">&gt; 3 dias</div>
               </div>
             </div>
             
@@ -684,7 +683,7 @@ export const LongTailChart = memo(function LongTailChart({
               <div className="flex items-center gap-1.5 text-xs">
                 <div className="w-3 h-3 rounded bg-gradient-to-b from-red-500 to-red-600"></div>
                 <span className="text-foreground font-medium">Crítico</span>
-                <span className="text-muted-foreground">> 3d</span>
+                <span className="text-muted-foreground">&gt; 3d</span>
               </div>
             </div>
           </div>
@@ -767,7 +766,7 @@ export const LongTailChart = memo(function LongTailChart({
                     <h5 className="text-sm font-medium text-foreground mb-2">Próximos Passos com Nova Estrutura:</h5>
                     <ul className="list-disc list-inside text-xs text-muted-foreground space-y-1">
                       <li>Foque na melhoria das faixas de excelência (0-8h) para aumentar performance</li>
-                      <li>Monitore especialmente a zona crítica (>3 dias) para evitar impactos</li>
+                      <li>Monitore especialmente a zona crítica (&gt;3 dias) para evitar impactos</li>
                       <li>Use as faixas intermediárias para identificar gargalos específicos</li>
                       <li>Estabeleça metas progressivas por faixa de tempo</li>
                     </ul>
