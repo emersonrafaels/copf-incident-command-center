@@ -115,7 +115,7 @@ export function COPFLayout({
           </main>
 
           {/* Footer */}
-          <footer className="border-t bg-gradient-to-r from-card/80 via-card/90 to-card/80 backdrop-blur-md">
+          <footer className="border-t bg-gradient-to-r from-card/80 via-card/90 to-card/80 backdrop-blur-md ml-2">
             <div className="px-responsive py-responsive-sm">
               <div className="flex flex-col sm:flex-row items-center justify-between gap-responsive-sm">
                 <div className="flex items-center gap-responsive-sm">

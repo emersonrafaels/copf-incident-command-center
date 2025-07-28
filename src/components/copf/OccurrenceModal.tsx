@@ -299,6 +299,20 @@ export function OccurrenceModal({
                   )}
                 </div>
               </div>
+
+              {/* Botão para visualizar ocorrência completa */}
+              <div className="mt-6 pt-4 border-t">
+                <Button 
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    window.open(`/ocorrencia/${occurrence.id}`, '_blank');
+                  }}
+                >
+                  <Eye className="mr-2 h-4 w-4" />
+                  Visualizar Ocorrência Completa
+                </Button>
+              </div>
             </>
           ) : (
             // Modo Comunicação - Apenas envio de mensagem
