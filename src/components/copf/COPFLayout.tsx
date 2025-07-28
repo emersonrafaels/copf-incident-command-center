@@ -37,10 +37,10 @@ export function COPFLayout({
     document.documentElement.classList.toggle("dark");
   };
   return <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background app-container">
+      <div className="min-h-screen flex w-full bg-background">
         <COPFSidebar />
         
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 ml-0">
           {/* Header */}
           <header className="h-14 sm:h-16 border-b bg-gradient-to-r from-card/80 via-card/90 to-card/80 backdrop-blur-md sticky top-0 z-50 shadow-elegant">
             <div className="flex items-center justify-between h-full px-responsive">

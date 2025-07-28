@@ -198,8 +198,8 @@ export function OccurrenceHighlights({
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <ScrollArea className="h-[240px]">
-              <div className="space-y-3">
+            <ScrollArea className="h-[240px] w-full">
+              <div className="space-y-3 pr-3">
                 {highlights.enteredToday.length === 0 ? (
                   <div className="text-center py-8">
                     <Calendar className="w-12 h-12 mx-auto text-muted-foreground/30 mb-2" />
@@ -261,8 +261,8 @@ export function OccurrenceHighlights({
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <ScrollArea className="h-[240px]">
-              <div className="space-y-3">
+            <ScrollArea className="h-[240px] w-full">
+              <div className="space-y-3 pr-3">
                 {highlights.dueToday.length === 0 ? (
                   <div className="text-center py-8">
                     <Clock className="w-12 h-12 mx-auto text-muted-foreground/30 mb-2" />
@@ -322,8 +322,8 @@ export function OccurrenceHighlights({
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <ScrollArea className="h-[240px]">
-              <div className="space-y-3">
+            <ScrollArea className="h-[240px] w-full">
+              <div className="space-y-3 pr-3">
                 {highlights.overdueOccurrences.length === 0 ? (
                   <div className="text-center py-8">
                     <AlertTriangle className="w-12 h-12 mx-auto text-muted-foreground/30 mb-2" />

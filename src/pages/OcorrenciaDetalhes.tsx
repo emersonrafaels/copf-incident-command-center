@@ -420,13 +420,27 @@ export default function OcorrenciaDetalhes() {
                   )}
                 </div>
 
-                <Button 
-                  onClick={handleSendToVendor}
-                  disabled={isSending || !vendorMessage.trim()}
-                  className="w-full"
-                >
-                  {isSending ? 'Enviando...' : 'Enviar Mensagem'}
-                </Button>
+                <div className="space-y-2">
+                  <Button 
+                    onClick={handleSendToVendor}
+                    disabled={isSending || !vendorMessage.trim()}
+                    className="w-full"
+                  >
+                    {isSending ? 'Enviando...' : 'Enviar Mensagem'}
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => {
+                      toast({
+                        title: "Priorização enviada",
+                        description: "A solicitação de priorização foi enviada com sucesso"
+                      });
+                    }}
+                  >
+                    Enviar Priorização
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
