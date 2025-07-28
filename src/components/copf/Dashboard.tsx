@@ -46,11 +46,6 @@ export function Dashboard() {
   const { toast: toastHook } = useToast();
   const [selectedOccurrence, setSelectedOccurrence] = useState<any>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [filterPeriod, setFilterPeriod] = useState('7-days');
-  const [customDateRange, setCustomDateRange] = useState<{
-    from?: Date;
-    to?: Date;
-  }>({});
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   // Usar filtros do contexto
@@ -68,7 +63,10 @@ export function Dashboard() {
     serialNumberFilter,
     overrideFilter,
     vendorPriorityFilter,
-    hasActiveFilters
+    hasActiveFilters,
+    filterPeriod,
+    customDateRange,
+    updateFilter
   } = filters;
   const handleExport = async () => {
     toast('Exportação iniciada - Gerando PDF da dashboard...');
@@ -304,7 +302,7 @@ export function Dashboard() {
             {/* Action Controls */}
             <div className="flex flex-wrap gap-3">
               {/* Filtro de Período */}
-              <Select value={filterPeriod} onValueChange={setFilterPeriod}>
+              <Select value={filterPeriod} onValueChange={(value) => updateFilter('filterPeriod', value)}>
                 <SelectTrigger className="w-auto min-w-[180px] bg-card border-border/50 hover:border-primary/30 transition-colors shadow-card-default">
                   <Calendar className="h-4 w-4 mr-2 text-primary" />
                   <SelectValue />
@@ -334,7 +332,7 @@ export function Dashboard() {
                   from: customDateRange.from,
                   to: customDateRange.to
                 }} onSelect={range => {
-                  setCustomDateRange(range || {});
+                  updateFilter('customDateRange', range || {});
                   if (range?.from && range?.to) {
                     setShowDatePicker(false);
                   }

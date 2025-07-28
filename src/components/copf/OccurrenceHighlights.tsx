@@ -115,14 +115,18 @@ export function OccurrenceHighlights({
     clearAllFilters();
     setTimeout(() => {
       if (type === 'entered') {
-        const todayParam = format(new Date(), 'yyyy-MM-dd');
-        navigate(`/ocorrencias?created_date=${todayParam}`);
+        // Para entrada hoje, filtrar status ativos
+        updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento', 'com_impedimentos']);
       } else if (type === 'due') {
-        const todayParam = format(new Date(), 'yyyy-MM-dd');
-        navigate(`/ocorrencias?sla_date=${todayParam}&sla_status=due_today`);
+        // Para vence hoje, filtrar por status ativos e usar filtro específico
+        updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento', 'com_impedimentos']);
+        updateFilter('statusSlaFilter', ['vence_hoje']);
       } else if (type === 'overdue') {
-        navigate('/ocorrencias?sla_status=overdue');
+        // Para vencidas, usar filtro de override
+        updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento', 'com_impedimentos']);
+        updateFilter('overrideFilter', true);
       }
+      navigate('/ocorrencias');
     }, 100);
   };
 
