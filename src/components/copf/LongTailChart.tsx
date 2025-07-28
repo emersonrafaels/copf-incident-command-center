@@ -1,3 +1,4 @@
+
 import React, { memo, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, ReferenceLine, Cell, LabelList } from 'recharts';
@@ -15,19 +16,22 @@ import { useFilters } from '@/contexts/FiltersContext';
 import { toast } from 'sonner';
 import { OccurrenceData } from '@/hooks/useDashboardData';
 import { formatHours } from '@/lib/timeUtils';
+
 interface LongTailChartProps {
   occurrences: OccurrenceData[];
   filteredOccurrences?: OccurrenceData[];
 }
+
 interface TimeRangeData {
   range: string;
   rangeLabel: string;
   count: number;
   color: string;
-  category: 'within_target' | 'above_target' | 'critical';
+  category: 'excellent' | 'acceptable' | 'near_limit' | 'within_sla' | 'above_sla' | 'needs_attention' | 'critical';
   minHours: number;
   maxHours: number;
 }
+
 const chartConfig = {
   count: {
     label: "Quantidade de Ocorrências",
@@ -35,63 +39,87 @@ const chartConfig = {
   }
 };
 
-// Definir faixas de tempo em horas
-const TIME_RANGES = [{
-  range: '0-0.5',
-  minHours: 0,
-  maxHours: 0.5,
-  label: '0 - 0,5h'
-}, {
-  range: '0.5-1',
-  minHours: 0.5,
-  maxHours: 1,
-  label: '0,5 - 1h'
-}, {
-  range: '1-2',
-  minHours: 1,
-  maxHours: 2,
-  label: '1 - 2h'
-}, {
-  range: '2-4',
-  minHours: 2,
-  maxHours: 4,
-  label: '2 - 4h'
-}, {
-  range: '4-8',
-  minHours: 4,
-  maxHours: 8,
-  label: '4 - 8h'
-}, {
-  range: '8-12',
-  minHours: 8,
-  maxHours: 12,
-  label: '8 - 12h'
-}, {
-  range: '12-24',
-  minHours: 12,
-  maxHours: 24,
-  label: '12 - 24h'
-}, {
-  range: '24-48',
-  minHours: 24,
-  maxHours: 48,
-  label: '1 - 2 dias'
-}, {
-  range: '48-72',
-  minHours: 48,
-  maxHours: 72,
-  label: '2 - 3 dias'
-}, {
-  range: '72-120',
-  minHours: 72,
-  maxHours: 120,
-  label: '3 - 5 dias'
-}, {
-  range: '120+',
-  minHours: 120,
-  maxHours: Infinity,
-  label: '> 5 dias'
-}];
+// Faixas de tempo otimizadas conforme especificado
+const TIME_RANGES = [
+  {
+    range: '0-0.5',
+    minHours: 0,
+    maxHours: 0.5,
+    label: '0 - 0,5h',
+    category: 'excellent' as const
+  },
+  {
+    range: '0.5-1',
+    minHours: 0.5,
+    maxHours: 1,
+    label: '0,5 - 1h',
+    category: 'excellent' as const
+  },
+  {
+    range: '1-2',
+    minHours: 1,
+    maxHours: 2,
+    label: '1 - 2h',
+    category: 'acceptable' as const
+  },
+  {
+    range: '2-4',
+    minHours: 2,
+    maxHours: 4,
+    label: '2 - 4h',
+    category: 'acceptable' as const
+  },
+  {
+    range: '4-8',
+    minHours: 4,
+    maxHours: 8,
+    label: '4 - 8h',
+    category: 'acceptable' as const
+  },
+  {
+    range: '8-12',
+    minHours: 8,
+    maxHours: 12,
+    label: '8 - 12h',
+    category: 'near_limit' as const
+  },
+  {
+    range: '12-24',
+    minHours: 12,
+    maxHours: 24,
+    label: '12 - 24h',
+    category: 'within_sla' as const
+  },
+  {
+    range: '24-48',
+    minHours: 24,
+    maxHours: 48,
+    label: '1 - 2 dias',
+    category: 'above_sla' as const
+  },
+  {
+    range: '48-72',
+    minHours: 48,
+    maxHours: 72,
+    label: '2 - 3 dias',
+    category: 'needs_attention' as const
+  },
+  {
+    range: '72-120',
+    minHours: 72,
+    maxHours: 120,
+    label: '3 - 5 dias',
+    category: 'critical' as const
+  },
+  {
+    range: '120+',
+    minHours: 120,
+    maxHours: Infinity,
+    label: '> 5 dias',
+    category: 'critical' as const
+  }
+];
+
 export const LongTailChart = memo(function LongTailChart({
   occurrences,
   filteredOccurrences
@@ -119,9 +147,7 @@ export const LongTailChart = memo(function LongTailChart({
           total: 0,
           tempoMediano: 0,
           metaExcelencia: 12,
-          // Meta fixa
           slaPadrao: 24,
-          // SLA fixo
           agingCritico: 0,
           percentualExcelencia: 0,
           percentualSLA: 0,
@@ -143,16 +169,16 @@ export const LongTailChart = memo(function LongTailChart({
       };
     });
 
-    // Metas fixas de negócio (em horas)
+    // Metas de negócio otimizadas
     const META_EXCELENCIA = 12; // 12 horas - meta de alta performance
     const SLA_PADRAO = 24; // 24 horas (1 dia) - SLA padrão
-    const AGING_CRITICO_THRESHOLD = 120; // 120 horas (5 dias) - aging crítico
+    const AGING_CRITICO_THRESHOLD = 72; // 72 horas (3 dias) - aging crítico
 
-    // Calcular tempo mediano real (apenas para comparação)
+    // Calcular tempo mediano real
     const sortedDurations = durations.map(d => d.durationHours).sort((a, b) => a - b);
     const tempoMediano = sortedDurations[Math.floor(sortedDurations.length * 0.5)] || 0;
 
-    // Agrupar por faixas de tempo
+    // Agrupar por faixas de tempo com nova categorização
     const timeRangeData: TimeRangeData[] = TIME_RANGES.map(range => {
       const count = durations.filter(d => {
         if (range.maxHours === Infinity) {
@@ -161,65 +187,78 @@ export const LongTailChart = memo(function LongTailChart({
         return d.durationHours >= range.minHours && d.durationHours < range.maxHours;
       }).length;
 
-      // Definir categoria e cor baseado na faixa
-      let category: 'within_target' | 'above_target' | 'critical' = 'within_target';
-      let color = '#22c55e'; // Verde - dentro do padrão
-
-      if (range.minHours >= 120) {
-        // > 5 dias
-        category = 'critical';
-        color = '#ef4444'; // Vermelho - aging crítico
-      } else if (range.minHours >= META_EXCELENCIA) {
-        // Acima da Meta de Excelência (12h)
-        category = 'above_target';
-        color = '#f59e0b'; // Laranja - acima da meta
-      } else if (range.minHours >= 8) {
-        // Entre 8h e Meta de Excelência
-        category = 'above_target';
-        color = '#f97316'; // Laranja mais escuro
+      // Definir cor baseada na categoria
+      let color = '#10b981'; // Verde padrão
+      switch (range.category) {
+        case 'excellent':
+          color = '#10b981'; // Verde - excelência
+          break;
+        case 'acceptable':
+          color = '#22c55e'; // Verde claro - aceitável
+          break;
+        case 'near_limit':
+          color = '#eab308'; // Amarelo - próximo ao limite
+          break;
+        case 'within_sla':
+          color = '#f59e0b'; // Laranja claro - dentro do SLA
+          break;
+        case 'above_sla':
+          color = '#f97316'; // Laranja - acima do SLA básico
+          break;
+        case 'needs_attention':
+          color = '#ea580c'; // Laranja escuro - necessita atenção
+          break;
+        case 'critical':
+          color = '#ef4444'; // Vermelho - zona crítica
+          break;
       }
+
       return {
         range: range.range,
         rangeLabel: range.label,
         count,
         color,
-        category,
+        category: range.category,
         minHours: range.minHours,
         maxHours: range.maxHours
       };
     }).filter(item => item.count > 0); // Filtrar faixas vazias
 
-    // Contar ocorrências acima do aging esperado (> 5 dias)
-    const agingCritico = durations.filter(d => d.durationHours > 120).length;
-    const agingPercentage = Math.round(agingCritico / durations.length * 100);
+    // Calcular métricas baseadas nas novas faixas
+    const excelencia = durations.filter(d => d.durationHours <= 1).length; // 0-1h
+    const aceitavel = durations.filter(d => d.durationHours > 1 && d.durationHours <= 8).length; // 1-8h
+    const proximoLimite = durations.filter(d => d.durationHours > 8 && d.durationHours <= 12).length; // 8-12h
+    const dentroSLA = durations.filter(d => d.durationHours > 12 && d.durationHours <= 24).length; // 12-24h
+    const acimaSLA = durations.filter(d => d.durationHours > 24 && d.durationHours <= 48).length; // 24-48h
+    const necessitaAtencao = durations.filter(d => d.durationHours > 48 && d.durationHours <= 72).length; // 48-72h
+    const agingCritico = durations.filter(d => d.durationHours > 72).length; // >72h
 
-    // Calcular percentuais de performance
-    const dentroMetaExcelencia = durations.filter(d => d.durationHours <= META_EXCELENCIA).length;
-    const dentroSLA = durations.filter(d => d.durationHours <= SLA_PADRAO).length;
-    const percentualExcelencia = Math.round(dentroMetaExcelencia / durations.length * 100);
-    const percentualSLA = Math.round(dentroSLA / durations.length * 100);
+    const percentualExcelencia = Math.round((excelencia + aceitavel) / durations.length * 100);
+    const percentualSLA = Math.round((excelencia + aceitavel + proximoLimite + dentroSLA) / durations.length * 100);
     const percentualCritico = Math.round(agingCritico / durations.length * 100);
 
-    // Gerar insight operacional
-    let insight = `${durations.length} ocorrências em aberto | Tempo Mediano: ${formatHours(tempoMediano)} | Meta Excelência: ${formatHours(META_EXCELENCIA)} (${percentualExcelencia}% dentro)`;
+    // Gerar insight operacional aprimorado
+    let insight = `${durations.length} ocorrências em aberto | Tempo Mediano: ${formatHours(tempoMediano)} | Excelência: ${percentualExcelencia}% (≤8h)`;
     let priority: 'high' | 'medium' | 'low' = 'medium';
     let actionSuggestion = "";
-    if (percentualCritico > 25) {
-      insight += ` | CRÍTICO: ${agingCritico} acima de 5 dias (${percentualCritico}%)`;
+
+    if (percentualCritico > 20) {
+      insight += ` | CRÍTICO: ${agingCritico} na zona crítica (${percentualCritico}%)`;
       priority = 'high';
-      actionSuggestion = "Situação crítica: alto número de ocorrências com aging > 5 dias. Ação imediata necessária.";
-    } else if (percentualExcelencia < 70) {
-      insight += ` | ${agingCritico} aging crítico (${percentualCritico}%)`;
+      actionSuggestion = "Situação crítica: alto número de ocorrências na zona crítica (>3 dias). Ação imediata necessária.";
+    } else if (percentualExcelencia < 60) {
+      insight += ` | ${agingCritico} zona crítica (${percentualCritico}%)`;
       priority = 'high';
-      actionSuggestion = "Performance abaixo da meta de excelência. Revisar processos de resolução.";
+      actionSuggestion = "Performance abaixo da excelência. Revisar processos para melhorar resolução rápida.";
     } else if (agingCritico > 0) {
-      insight += ` | ${agingCritico} aging crítico`;
-      actionSuggestion = "Investigar causas das ocorrências que excedem 5 dias em aberto.";
+      insight += ` | ${agingCritico} zona crítica`;
+      actionSuggestion = "Investigar causas das ocorrências que excedem 3 dias em aberto.";
     } else {
-      insight += " | Performance dentro das metas";
+      insight += " | Performance excelente";
       priority = 'low';
-      actionSuggestion = "Performance saudável. Manter monitoramento atual.";
+      actionSuggestion = "Performance saudável. Manter padrão atual de excelência.";
     }
+
     return {
       data: timeRangeData,
       metrics: {
@@ -243,9 +282,8 @@ export const LongTailChart = memo(function LongTailChart({
     clearAllFilters();
     setTimeout(() => {
       updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento']);
-      // Navegar com filtro específico para aging > 120 horas (5 dias)
-      navigate('/ocorrencias?aging_min=120');
-      toast.success('Mostrando ocorrências acima do aging esperado (5 dias)');
+      navigate('/ocorrencias?aging_min=72');
+      toast.success('Mostrando ocorrências na zona crítica (>3 dias)');
     }, 100);
   };
 
@@ -254,7 +292,6 @@ export const LongTailChart = memo(function LongTailChart({
     clearAllFilters();
     setTimeout(() => {
       updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento']);
-      // Adicionar filtro customizado por range de horas
       navigate(`/ocorrencias?aging_min=${data.minHours}&aging_max=${data.maxHours === Infinity ? 999999 : data.maxHours}`);
       toast.success(`Filtrando ocorrências entre ${data.rangeLabel}`);
     }, 100);
@@ -262,7 +299,8 @@ export const LongTailChart = memo(function LongTailChart({
 
   // Renderização condicional
   if (timeRangeAnalysis.data.length === 0) {
-    return <Card>
+    return (
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5" />
@@ -274,9 +312,12 @@ export const LongTailChart = memo(function LongTailChart({
             Nenhuma ocorrência em aberto para análise...
           </div>
         </CardContent>
-      </Card>;
+      </Card>
+    );
   }
-  return <div className="space-y-8 animate-fade-in">
+
+  return (
+    <div className="space-y-8 animate-fade-in">
       {/* Seção Header */}
       <div className="space-y-2">
         <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
@@ -307,7 +348,7 @@ export const LongTailChart = memo(function LongTailChart({
             </div>
             <Button variant="premium" size="sm" onClick={handleFilterAgingCritico} className="flex items-center gap-2 shadow-card-hover">
               <AlertTriangle className="h-4 w-4" />
-              Ver Aging Crítico ({">"}5 dias)
+              Ver Zona Crítica (>3 dias)
             </Button>
           </div>
 
@@ -341,13 +382,13 @@ export const LongTailChart = memo(function LongTailChart({
                 <TooltipTrigger asChild>
                   <div className="flex items-center gap-2 cursor-help">
                     <div className="w-2 h-2 rounded-full bg-success"></div>
-                    <span className="text-sm text-muted-foreground">Meta de Excelência:</span>
-                    <span className="text-lg font-bold text-success">{formatHours(timeRangeAnalysis.metrics.metaExcelencia)}</span>
+                    <span className="text-sm text-muted-foreground">Excelência:</span>
+                    <span className="text-lg font-bold text-success">{timeRangeAnalysis.metrics.percentualExcelencia}%</span>
                     <Info className="h-3 w-3 text-muted-foreground" />
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Meta fixa: resolver em até {formatHours(timeRangeAnalysis.metrics.metaExcelencia)}. Atualmente {timeRangeAnalysis.metrics.percentualExcelencia}% dentro da meta.</p>
+                  <p>Percentual de ocorrências resolvidas rapidamente (≤8h)</p>
                 </TooltipContent>
               </Tooltip>
               
@@ -357,13 +398,13 @@ export const LongTailChart = memo(function LongTailChart({
                 <TooltipTrigger asChild>
                   <div className="flex items-center gap-2 cursor-help">
                     <div className="w-2 h-2 rounded-full bg-destructive"></div>
-                    <span className="text-sm text-muted-foreground">Aging Crítico ({">"}5 dias):</span>
+                    <span className="text-sm text-muted-foreground">Zona Crítica (>3 dias):</span>
                     <span className="text-lg font-bold text-destructive">{timeRangeAnalysis.metrics.agingCritico}</span>
                     <Info className="h-3 w-3 text-muted-foreground" />
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Ocorrências em aberto há mais de 5 dias (120 horas)</p>
+                  <p>Ocorrências em aberto há mais de 3 dias (72 horas)</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -374,15 +415,15 @@ export const LongTailChart = memo(function LongTailChart({
           <ChartContainer config={chartConfig} className="h-[400px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={timeRangeAnalysis.data} margin={{
-              top: 30,
-              right: 20,
-              left: 40,
-              bottom: 50
-            }}>
+                top: 30,
+                right: 20,
+                left: 40,
+                bottom: 50
+              }}>
                 <defs>
                   <linearGradient id="barGradient1" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#22c55e" stopOpacity={0.9} />
-                    <stop offset="100%" stopColor="#22c55e" stopOpacity={0.6} />
+                    <stop offset="0%" stopColor="#10b981" stopOpacity={0.9} />
+                    <stop offset="100%" stopColor="#10b981" stopOpacity={0.6} />
                   </linearGradient>
                   <linearGradient id="barGradient2" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#f97316" stopOpacity={0.9} />
@@ -395,73 +436,118 @@ export const LongTailChart = memo(function LongTailChart({
                 </defs>
                 
                 <CartesianGrid strokeDasharray="2 2" stroke="hsl(var(--border))" opacity={0.3} />
-                <XAxis dataKey="rangeLabel" stroke="hsl(var(--muted-foreground))" tick={{
-                fill: 'hsl(var(--muted-foreground))',
-                fontSize: 11,
-                fontWeight: 500
-              }} angle={-45} textAnchor="end" height={80} interval={0} axisLine={{
-                stroke: 'hsl(var(--border))',
-                strokeWidth: 1
-              }} tickLine={{
-                stroke: 'hsl(var(--border))',
-                strokeWidth: 1
-              }} label={{
-                value: 'Faixas de Tempo de Aging',
-                position: 'insideBottom',
-                offset: -5,
-                style: {
-                  textAnchor: 'middle',
-                  fill: 'hsl(var(--foreground))',
-                  fontSize: '12px',
-                  fontWeight: 600
-                }
-              }} />
-                <YAxis stroke="hsl(var(--muted-foreground))" tick={{
-                fill: 'hsl(var(--muted-foreground))',
-                fontSize: 11,
-                fontWeight: 500
-              }} axisLine={{
-                stroke: 'hsl(var(--border))',
-                strokeWidth: 1
-              }} tickLine={{
-                stroke: 'hsl(var(--border))',
-                strokeWidth: 1
-              }} label={{
-                value: 'Quantidade de Ocorrências',
-                angle: -90,
-                position: 'insideLeft',
-                style: {
-                  textAnchor: 'middle',
-                  fill: 'hsl(var(--foreground))',
-                  fontSize: '12px',
-                  fontWeight: 600
-                }
-              }} />
+                <XAxis 
+                  dataKey="rangeLabel" 
+                  stroke="hsl(var(--muted-foreground))" 
+                  tick={{
+                    fill: 'hsl(var(--muted-foreground))',
+                    fontSize: 11,
+                    fontWeight: 500
+                  }} 
+                  angle={-45} 
+                  textAnchor="end" 
+                  height={80} 
+                  interval={0} 
+                  axisLine={{
+                    stroke: 'hsl(var(--border))',
+                    strokeWidth: 1
+                  }} 
+                  tickLine={{
+                    stroke: 'hsl(var(--border))',
+                    strokeWidth: 1
+                  }} 
+                  label={{
+                    value: 'Faixas de Tempo de Aging',
+                    position: 'insideBottom',
+                    offset: -5,
+                    style: {
+                      textAnchor: 'middle',
+                      fill: 'hsl(var(--foreground))',
+                      fontSize: '12px',
+                      fontWeight: 600
+                    }
+                  }} 
+                />
+                <YAxis 
+                  stroke="hsl(var(--muted-foreground))" 
+                  tick={{
+                    fill: 'hsl(var(--muted-foreground))',
+                    fontSize: 11,
+                    fontWeight: 500
+                  }} 
+                  axisLine={{
+                    stroke: 'hsl(var(--border))',
+                    strokeWidth: 1
+                  }} 
+                  tickLine={{
+                    stroke: 'hsl(var(--border))',
+                    strokeWidth: 1
+                  }} 
+                  label={{
+                    value: 'Quantidade de Ocorrências',
+                    angle: -90,
+                    position: 'insideLeft',
+                    style: {
+                      textAnchor: 'middle',
+                      fill: 'hsl(var(--foreground))',
+                      fontSize: '12px',
+                      fontWeight: 600
+                    }
+                  }} 
+                />
                 
-                <ChartTooltipContent formatter={(value, name, props) => {
-                const data = props.payload;
-                const percentage = (Number(value) / timeRangeAnalysis.metrics.total * 100).toFixed(1);
-                const rangeLabel = data?.rangeLabel || '';
-                const category = data?.category || '';
+                <ChartTooltipContent 
+                  formatter={(value, name, props) => {
+                    const data = props.payload;
+                    const percentage = (Number(value) / timeRangeAnalysis.metrics.total * 100).toFixed(1);
+                    const rangeLabel = data?.rangeLabel || '';
+                    const category = data?.category || '';
 
-                // Texto explicativo baseado na categoria
-                let categoryText = '';
-                let statusColor = '';
-                let actionText = '';
-                if (category === 'within_target') {
-                  categoryText = 'Performance Excelente';
-                  statusColor = 'text-green-600';
-                  actionText = 'Dentro da meta de excelência - manter padrão atual';
-                } else if (category === 'above_target') {
-                  categoryText = 'Necessita Atenção';
-                  statusColor = 'text-orange-600';
-                  actionText = 'Acima da meta - revisar processos de resolução';
-                } else if (category === 'critical') {
-                  categoryText = 'Aging Crítico';
-                  statusColor = 'text-red-600';
-                  actionText = 'Ação imediata necessária - escalar para gestão';
-                }
-                return [<div key="tooltip-content" className="space-y-3 min-w-[280px]">
+                    // Texto explicativo baseado na nova categorização
+                    let categoryText = '';
+                    let statusColor = '';
+                    let actionText = '';
+                    
+                    switch (category) {
+                      case 'excellent':
+                        categoryText = 'Excelência Operacional';
+                        statusColor = 'text-green-600';
+                        actionText = 'Resoluções ultra-rápidas - manter este padrão excepcional';
+                        break;
+                      case 'acceptable':
+                        categoryText = 'Padrão Aceitável';
+                        statusColor = 'text-green-600';
+                        actionText = 'Dentro dos padrões aceitáveis - performance saudável';
+                        break;
+                      case 'near_limit':
+                        categoryText = 'Próximo ao Limite';
+                        statusColor = 'text-yellow-600';
+                        actionText = 'Próximo ao limite da meta de excelência - monitorar';
+                        break;
+                      case 'within_sla':
+                        categoryText = 'Dentro do SLA';
+                        statusColor = 'text-orange-600';
+                        actionText = 'Dentro do SLA padrão (1 dia) - acelerar quando possível';
+                        break;
+                      case 'above_sla':
+                        categoryText = 'Acima do SLA Básico';
+                        statusColor = 'text-orange-600';
+                        actionText = 'Acima do SLA básico - necessita priorização';
+                        break;
+                      case 'needs_attention':
+                        categoryText = 'Necessita Atenção';
+                        statusColor = 'text-red-600';
+                        actionText = 'Necessita atenção imediata - revisar processos';
+                        break;
+                      case 'critical':
+                        categoryText = 'Zona Crítica';
+                        statusColor = 'text-red-600';
+                        actionText = 'Zona crítica - escalação imediata necessária';
+                        break;
+                    }
+
+                    return [
+                      <div key="tooltip-content" className="space-y-3 min-w-[280px]">
                         <div className="border-b border-border pb-2">
                           <div className="font-bold text-base">{value} ocorrências</div>
                           <div className="text-sm text-muted-foreground">
@@ -476,7 +562,7 @@ export const LongTailChart = memo(function LongTailChart({
                           </div>
                           
                           <div>
-                            <div className="text-sm font-medium text-foreground">Status:</div>
+                            <div className="text-sm font-medium text-foreground">Categoria:</div>
                             <div className={`text-sm font-medium ${statusColor}`}>{categoryText}</div>
                           </div>
                           
@@ -492,35 +578,49 @@ export const LongTailChart = memo(function LongTailChart({
                             <span>Clique para filtrar estas ocorrências na tabela</span>
                           </div>
                         </div>
-                      </div>, ''];
-              }} labelFormatter={() => ''} contentStyle={{
-                backgroundColor: 'hsl(var(--card))',
-                border: '1px solid hsl(var(--border))',
-                borderRadius: '12px',
-                boxShadow: '0 12px 32px -8px hsl(var(--primary) / 0.25)',
-                padding: '16px',
-                maxWidth: '350px'
-              }} itemStyle={{
-                color: 'hsl(var(--foreground))',
-                fontWeight: 500,
-                padding: 0
-              }} />
+                      </div>,
+                      ''
+                    ];
+                  }} 
+                  labelFormatter={() => ''} 
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '12px',
+                    boxShadow: '0 12px 32px -8px hsl(var(--primary) / 0.25)',
+                    padding: '16px',
+                    maxWidth: '350px'
+                  }} 
+                  itemStyle={{
+                    color: 'hsl(var(--foreground))',
+                    fontWeight: 500,
+                    padding: 0
+                  }} 
+                />
                 
                 <Bar dataKey="count" radius={[6, 6, 0, 0]} cursor="pointer" onClick={(data, index) => {
-                if (data) {
-                  handleBarClick(data);
-                }
-              }}>
-                  {timeRangeAnalysis.data.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} stroke="hsl(var(--border))" strokeWidth={1} className="transition-all duration-200 hover:opacity-80" />)}
+                  if (data) {
+                    handleBarClick(data);
+                  }
+                }}>
+                  {timeRangeAnalysis.data.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} stroke="hsl(var(--border))" strokeWidth={1} className="transition-all duration-200 hover:opacity-80" />
+                  ))}
                   
                   {/* Números nas barras */}
-                  <LabelList dataKey="count" position="top" style={{
-                  fill: 'hsl(var(--foreground))',
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  textAnchor: 'middle',
-                  textShadow: '0 1px 2px hsl(var(--background))'
-                }} offset={8} formatter={value => value > 0 ? String(value) : ''} />
+                  <LabelList 
+                    dataKey="count" 
+                    position="top" 
+                    style={{
+                      fill: 'hsl(var(--foreground))',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      textAnchor: 'middle',
+                      textShadow: '0 1px 2px hsl(var(--background))'
+                    }} 
+                    offset={8} 
+                    formatter={(value: any) => value > 0 ? String(value) : ''} 
+                  />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -534,49 +634,62 @@ export const LongTailChart = memo(function LongTailChart({
               <span className="text-xs font-medium text-foreground">Clique nas barras para filtrar as ocorrências</span>
             </div>
             
-            {/* Estatísticas resumidas em grid compacto */}
-            <div className="grid grid-cols-3 gap-3 p-3 bg-muted/20 rounded-lg">
+            {/* Estatísticas resumidas em grid com nova categorização */}
+            <div className="grid grid-cols-4 gap-2 p-3 bg-muted/20 rounded-lg">
               <div className="text-center">
-                <div className="text-xl font-bold text-green-600">{Math.round(timeRangeAnalysis.metrics.percentualExcelencia / 100 * timeRangeAnalysis.metrics.total)}</div>
+                <div className="text-lg font-bold text-green-600">
+                  {timeRangeAnalysis.data.filter(d => d.category === 'excellent' || d.category === 'acceptable').reduce((acc, d) => acc + d.count, 0)}
+                </div>
                 <div className="text-xs text-muted-foreground font-medium">Excelência</div>
-                <div className="text-xs text-muted-foreground">≤ {formatHours(timeRangeAnalysis.metrics.metaExcelencia)}</div>
+                <div className="text-xs text-muted-foreground">≤ 8h</div>
               </div>
               <div className="text-center">
-                <div className="text-xl font-bold text-orange-600">{Math.round((timeRangeAnalysis.metrics.percentualSLA - timeRangeAnalysis.metrics.percentualExcelencia) / 100 * timeRangeAnalysis.metrics.total)}</div>
+                <div className="text-lg font-bold text-yellow-600">
+                  {timeRangeAnalysis.data.filter(d => d.category === 'near_limit' || d.category === 'within_sla').reduce((acc, d) => acc + d.count, 0)}
+                </div>
+                <div className="text-xs text-muted-foreground font-medium">SLA</div>
+                <div className="text-xs text-muted-foreground">8h - 1d</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-bold text-orange-600">
+                  {timeRangeAnalysis.data.filter(d => d.category === 'above_sla' || d.category === 'needs_attention').reduce((acc, d) => acc + d.count, 0)}
+                </div>
                 <div className="text-xs text-muted-foreground font-medium">Atenção</div>
-                <div className="text-xs text-muted-foreground">{formatHours(timeRangeAnalysis.metrics.metaExcelencia)} - 5d</div>
+                <div className="text-xs text-muted-foreground">1d - 3d</div>
               </div>
               <div className="text-center">
-                <div className="text-xl font-bold text-red-600">{timeRangeAnalysis.metrics.agingCritico}</div>
+                <div className="text-lg font-bold text-red-600">{timeRangeAnalysis.metrics.agingCritico}</div>
                 <div className="text-xs text-muted-foreground font-medium">Crítico</div>
-                <div className="text-xs text-muted-foreground">{">"} 5 dias</div>
+                <div className="text-xs text-muted-foreground">> 3 dias</div>
               </div>
             </div>
             
-            {/* Legendas das cores compactas */}
-            <div className="flex items-center justify-center gap-4 p-3 bg-card/30 rounded-lg border border-border/30">
+            {/* Legendas das cores aprimoradas */}
+            <div className="flex items-center justify-center gap-3 p-3 bg-card/30 rounded-lg border border-border/30 flex-wrap">
               <div className="flex items-center gap-1.5 text-xs">
                 <div className="w-3 h-3 rounded bg-gradient-to-b from-green-500 to-green-600"></div>
                 <span className="text-foreground font-medium">Excelência</span>
-                <span className="text-muted-foreground">≤ {formatHours(timeRangeAnalysis.metrics.metaExcelencia)}</span>
+                <span className="text-muted-foreground">0-8h</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs">
+                <div className="w-3 h-3 rounded bg-gradient-to-b from-yellow-500 to-yellow-600"></div>
+                <span className="text-foreground font-medium">SLA</span>
+                <span className="text-muted-foreground">8h-1d</span>
               </div>
               <div className="flex items-center gap-1.5 text-xs">
                 <div className="w-3 h-3 rounded bg-gradient-to-b from-orange-500 to-orange-600"></div>
                 <span className="text-foreground font-medium">Atenção</span>
-                <span className="text-muted-foreground">{formatHours(timeRangeAnalysis.metrics.metaExcelencia)} - 5d</span>
+                <span className="text-muted-foreground">1d-3d</span>
               </div>
               <div className="flex items-center gap-1.5 text-xs">
                 <div className="w-3 h-3 rounded bg-gradient-to-b from-red-500 to-red-600"></div>
                 <span className="text-foreground font-medium">Crítico</span>
-                <span className="text-muted-foreground">{">"} 5 dias</span>
+                <span className="text-muted-foreground">> 3d</span>
               </div>
             </div>
           </div>
         </CardContent>
       </Card>
-
-      {/* Cards de Análise em Grid */}
-      
 
       {/* Modal de Metodologia e Recomendações */}
       <Dialog open={showMethodologyModal} onOpenChange={setShowMethodologyModal}>
@@ -595,125 +708,55 @@ export const LongTailChart = memo(function LongTailChart({
               <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
                 <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
                   <Info className="h-5 w-5 text-primary" />
-                  Conceito da Análise Long Tail
+                  Nova Estrutura de Faixas de Tempo
                 </h3>
                 <p className="text-sm text-muted-foreground mb-3">
-                  A análise Long Tail identifica a distribuição de ocorrências por faixas de tempo de abertura (aging), 
-                  revelando padrões de concentração e outliers que requerem intervenção estratégica. 
-                  Esta metodologia permite identificar gargalos operacionais e priorizar ações de melhoria.
+                  A análise foi otimizada com faixas mais granulares para melhor identificação de padrões 
+                  e oportunidades de melhoria operacional.
                 </p>
                 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                  <div className="text-center p-3 bg-card/50 rounded-lg">
-                    <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  <div className="space-y-3">
+                    <h4 className="font-medium text-green-700">Excelência (0-8h)</h4>
+                    <div className="space-y-1 text-xs">
+                      <div className="flex justify-between">
+                        <span>0-0.5h:</span>
+                        <span className="text-green-600">Resolução ultra-rápida</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>0.5-1h:</span>
+                        <span className="text-green-600">Excelência operacional</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>1-8h:</span>
+                        <span className="text-green-600">Padrão aceitável</span>
+                      </div>
                     </div>
-                    <div className="text-sm font-medium text-foreground">Eficiência</div>
-                    <div className="text-xs text-muted-foreground">≤ 12h</div>
                   </div>
-                  <div className="text-center p-3 bg-card/50 rounded-lg">
-                    <div className="w-8 h-8 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <Clock className="h-4 w-4 text-orange-600" />
-                    </div>
-                    <div className="text-sm font-medium text-foreground">Atenção</div>
-                    <div className="text-xs text-muted-foreground">12h - 5d</div>
-                  </div>
-                  <div className="text-center p-3 bg-card/50 rounded-lg">
-                    <div className="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <AlertCircle className="h-4 w-4 text-red-600" />
-                    </div>
-                    <div className="text-sm font-medium text-foreground">Crítico</div>
-                    <div className="text-xs text-muted-foreground">{">"}5 dias</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Seção: Recomendações Estratégicas */}
-              <div>
-                <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <Target className="h-5 w-5 text-primary" />
-                  Recomendações Estratégicas por Cenário
-                </h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   
-                  {/* Cenário: Performance Excelente */}
-                  <div className="p-4 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                      <h4 className="font-medium text-green-800 dark:text-green-300">Performance Excelente ({">"}70% Meta)</h4>
-                    </div>
-                    <div className="space-y-2 text-sm">
-                      <p className="text-green-700 dark:text-green-400">
-                        <strong>Ação:</strong> Manter padrão atual e documentar boas práticas
-                      </p>
-                      <ul className="list-disc list-inside text-xs text-green-600 dark:text-green-500 ml-2 space-y-1">
-                        <li>Redução contínua do tempo médio de resolução</li>
-                        <li>Maior satisfação do cliente interno</li>
-                        <li>Modelo para replicação em outras áreas</li>
-                      </ul>
-                    </div>
-                  </div>
-
-                  {/* Cenário: Performance Moderada */}
-                  <div className="p-4 bg-orange-50 dark:bg-orange-950/20 rounded-lg border border-orange-200 dark:border-orange-800">
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-                      <h4 className="font-medium text-orange-800 dark:text-orange-300">Performance Moderada (40-70% Meta)</h4>
-                    </div>
-                    <div className="space-y-2 text-sm">
-                      <p className="text-orange-700 dark:text-orange-400">
-                        <strong>Ação:</strong> Revisar processos e identificar gargalos específicos
-                      </p>
-                      <ul className="list-disc list-inside text-xs text-orange-600 dark:text-orange-500 ml-2 space-y-1">
-                        <li>Otimização de fluxos de comunicação</li>
-                        <li>Redução de retrabalho em 20%</li>
-                        <li>Melhoria no SLA de fornecedores</li>
-                      </ul>
-                    </div>
-                  </div>
-
-                  {/* Cenário: Performance Crítica */}
-                  <div className="p-4 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                      <h4 className="font-medium text-red-800 dark:text-red-300">Performance Crítica ({"<"}40% Meta)</h4>
-                    </div>
-                    <div className="space-y-2 text-sm">
-                      <p className="text-red-700 dark:text-red-400">
-                        <strong>Ação:</strong> Intervenção imediata e reestruturação operacional
-                      </p>
-                      <ul className="list-disc list-inside text-xs text-red-600 dark:text-red-500 ml-2 space-y-1">
-                        <li>Escalação imediata de ocorrências antigas</li>
-                        <li>Revisão completa com fornecedores</li>
-                        <li>Implementação de monitoramento em tempo real</li>
-                      </ul>
-                    </div>
-                  </div>
-
-                  {/* Cenário: Aging Crítico Alto */}
-                  <div className="p-4 bg-purple-50 dark:bg-purple-950/20 rounded-lg border border-purple-200 dark:border-purple-800">
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                      <h4 className="font-medium text-purple-800 dark:text-purple-300">Aging Crítico Elevado ({">"}10 ocorrências)</h4>
-                    </div>
-                    <div className="space-y-2 text-sm">
-                      <p className="text-purple-700 dark:text-purple-400">
-                        <strong>Ação:</strong> Força-tarefa dedicada e revisão de contratos
-                      </p>
-                      <ul className="list-disc list-inside text-xs text-purple-600 dark:text-purple-500 ml-2 space-y-1">
-                        <li>Redução imediata de 80% das ocorrências antigas</li>
-                        <li>Prevenção de novos casos críticos</li>
-                        <li>Fortalecimento da governança</li>
-                      </ul>
+                  <div className="space-y-3">
+                    <h4 className="font-medium text-red-700">Atenção e Crítico (1d+)</h4>
+                    <div className="space-y-1 text-xs">
+                      <div className="flex justify-between">
+                        <span>1-2 dias:</span>
+                        <span className="text-orange-600">Acima do SLA básico</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>2-3 dias:</span>
+                        <span className="text-red-600">Necessita atenção</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>3+ dias:</span>
+                        <span className="text-red-600">Zona crítica</span>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-
 
               {/* Ação Recomendada Atual */}
-              {timeRangeAnalysis.actionSuggestion && <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
+              {timeRangeAnalysis.actionSuggestion && (
+                <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
                   <div className="flex items-center gap-2 mb-2">
                     <ArrowRight className="h-5 w-5 text-primary" />
                     <h4 className="font-semibold text-primary">Recomendação para sua Situação Atual</h4>
@@ -721,18 +764,20 @@ export const LongTailChart = memo(function LongTailChart({
                   <p className="text-sm text-muted-foreground mb-3">{timeRangeAnalysis.actionSuggestion}</p>
                   
                   <div className="bg-card/50 p-3 rounded border">
-                    <h5 className="text-sm font-medium text-foreground mb-2">Próximos Passos Sugeridos:</h5>
+                    <h5 className="text-sm font-medium text-foreground mb-2">Próximos Passos com Nova Estrutura:</h5>
                     <ul className="list-disc list-inside text-xs text-muted-foreground space-y-1">
-                      <li>Clique nas barras críticas (vermelhas) para filtrar e analisar casos específicos</li>
-                      <li>Identifique padrões comuns entre fornecedores ou tipos de equipamento</li>
-                      <li>Defina plano de ação com prazos específicos para cada faixa de aging</li>
-                      <li>Monitore semanalmente a evolução dos indicadores</li>
+                      <li>Foque na melhoria das faixas de excelência (0-8h) para aumentar performance</li>
+                      <li>Monitore especialmente a zona crítica (>3 dias) para evitar impactos</li>
+                      <li>Use as faixas intermediárias para identificar gargalos específicos</li>
+                      <li>Estabeleça metas progressivas por faixa de tempo</li>
                     </ul>
                   </div>
-                </div>}
+                </div>
+              )}
             </div>
           </ScrollArea>
         </DialogContent>
       </Dialog>
-    </div>;
+    </div>
+  );
 });
