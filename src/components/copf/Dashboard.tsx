@@ -470,7 +470,6 @@ export function Dashboard() {
               value={cardMetrics.pendingOccurrences}
               icon={<Clock className="h-4 w-4" />} 
               description="Em andamento ou aguardando"
-              variant="warning"
               isLoading={isLoading}
             />
           </div>
@@ -482,7 +481,6 @@ export function Dashboard() {
               value={cardMetrics.reincidentOccurrences}
               icon={<AlertTriangle className="h-4 w-4" />} 
               description="Ocorrências repetidas"
-              variant="destructive"
               isLoading={isLoading}
             />
           </div>
@@ -494,7 +492,6 @@ export function Dashboard() {
               value={cardMetrics.overdueOccurrences}
               icon={<AlertTriangle className="h-4 w-4" />} 
               description="Acima do prazo limite"
-              variant="destructive"
               isLoading={isLoading}
             />
           </div>
@@ -524,7 +521,6 @@ export function Dashboard() {
               value={metrics?.avgMTTR || "4.2h"}
               icon={<Clock className="h-4 w-4" />} 
               description="Tempo médio de resolução"
-              variant="success"
               isLoading={isLoading}
             />
           </div>
