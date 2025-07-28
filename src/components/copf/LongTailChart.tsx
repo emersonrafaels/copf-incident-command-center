@@ -1,12 +1,12 @@
 import React, { memo, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, ReferenceLine, Cell, LabelList, Tooltip } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, ReferenceLine, Cell, LabelList, Tooltip as RechartsTooltip } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { TooltipContent as UITooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { OperationalNarrativeCard } from './OperationalNarrativeCard';
@@ -468,7 +468,7 @@ export const LongTailChart = memo(function LongTailChart({
               </div>
               <div className="w-px h-6 bg-border"></div>
               
-              <UITooltipContent>
+              <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="flex items-center gap-2 cursor-help">
                     <div className="w-2 h-2 rounded-full bg-muted-foreground"></div>
@@ -477,14 +477,14 @@ export const LongTailChart = memo(function LongTailChart({
                     <Info className="h-3 w-3 text-muted-foreground" />
                   </div>
                 </TooltipTrigger>
-                <UITooltipContent>
+                <TooltipContent>
                   <p>50% das ocorrências estão em aberto há até {formatHours(timeRangeAnalysis.metrics.tempoMediano)}</p>
-                </UITooltipContent>
-              </UITooltipContent>
+                </TooltipContent>
+              </Tooltip>
               
               <div className="w-px h-6 bg-border"></div>
               
-              <UITooltipContent>
+              <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="flex items-center gap-2 cursor-help">
                     <div className="w-2 h-2 rounded-full bg-success"></div>
@@ -493,14 +493,14 @@ export const LongTailChart = memo(function LongTailChart({
                     <Info className="h-3 w-3 text-muted-foreground" />
                   </div>
                 </TooltipTrigger>
-                <UITooltipContent>
+                <TooltipContent>
                   <p>Percentual de ocorrências resolvidas rapidamente (≤8h)</p>
-                </UITooltipContent>
-              </UITooltipContent>
+                </TooltipContent>
+              </Tooltip>
               
               <div className="w-px h-6 bg-border"></div>
               
-              <UITooltipContent>
+              <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="flex items-center gap-2 cursor-help">
                     <div className="w-2 h-2 rounded-full bg-destructive"></div>
@@ -509,10 +509,10 @@ export const LongTailChart = memo(function LongTailChart({
                     <Info className="h-3 w-3 text-muted-foreground" />
                   </div>
                 </TooltipTrigger>
-                <UITooltipContent>
+                <TooltipContent>
                   <p>Ocorrências em aberto há mais de 3 dias (72 horas)</p>
-                </UITooltipContent>
-              </UITooltipContent>
+                </TooltipContent>
+              </Tooltip>
             </TooltipProvider>
           </div>
         </CardHeader>
@@ -957,7 +957,7 @@ export const LongTailChart = memo(function LongTailChart({
                     width={110}
                   />
                   
-                  <Tooltip
+                  <RechartsTooltip
                     content={({ active, payload, label }) => {
                       if (!active || !payload || payload.length === 0) return null;
                       
