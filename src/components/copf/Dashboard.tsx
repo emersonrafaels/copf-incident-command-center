@@ -25,7 +25,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Check } from "lucide-react";
-import { useOptimizedDashboardData } from "@/hooks/useOptimizedDashboardData";
+import { useDashboardData } from "@/hooks/useDashboardData";
 import { useToast } from "@/hooks/use-toast";
 import { useFilters } from "@/contexts/FiltersContext";
 import { AlertTriangle, CheckCircle2, Clock, TrendingUp, MapPin, Users, Calendar, Download, RefreshCw, CalendarDays, Truck } from "lucide-react";
@@ -40,14 +40,13 @@ export function Dashboard() {
   const {
     occurrences,
     isLoading,
-    error,
     severityData,
     timelineData,
     mttrData,
     equipmentData,
     metrics,
     refreshData
-  } = useOptimizedDashboardData();
+  } = useDashboardData();
   const { toast: toastHook } = useToast();
   const [selectedOccurrence, setSelectedOccurrence] = useState<any>(null);
   const [modalOpen, setModalOpen] = useState(false);
