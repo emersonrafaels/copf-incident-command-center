@@ -1,6 +1,7 @@
 import { ReactNode, useState, useEffect } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { COPFSidebar } from "./COPFSidebar";
+import { NotificationPanel } from "./NotificationPanel";
 import { Button } from "@/components/ui/button";
 import { Bell, Moon, Sun, User } from "lucide-react";
 import { format } from "date-fns";
@@ -13,6 +14,7 @@ export function COPFLayout({
 }: COPFLayoutProps) {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+  const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
     // Atualizar a data quando o layout for montado
@@ -71,10 +73,15 @@ export function COPFLayout({
                 </div>
 
                 {/* Notifications */}
-                <Button variant="ghost" size="icon" className="relative hover:bg-primary/10 transition-all duration-200 h-8 w-8 sm:h-10 sm:w-10">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="relative hover:bg-primary/10 transition-all duration-200 h-8 w-8 sm:h-10 sm:w-10"
+                  onClick={() => setShowNotifications(!showNotifications)}
+                >
                   <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
                   <span className="absolute -top-0.5 -right-0.5 h-4 w-4 sm:h-5 sm:w-5 bg-gradient-primary text-white rounded-full text-responsive-xs flex items-center justify-center font-bold shadow-lg">
-                    3
+                    2
                   </span>
                 </Button>
 
@@ -133,6 +140,12 @@ export function COPFLayout({
             </div>
           </footer>
         </div>
+        
+        {/* Notification Panel */}
+        <NotificationPanel 
+          isOpen={showNotifications} 
+          onClose={() => setShowNotifications(false)} 
+        />
       </div>
     </SidebarProvider>;
 }

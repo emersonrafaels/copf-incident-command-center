@@ -7,6 +7,7 @@ import { OccurrenceModal } from "./OccurrenceModal";
 import { CriticalityHeatmap } from "./CriticalityHeatmap";
 import { FilterSection } from "./FilterSection";
 import { OccurrenceHighlights } from "./OccurrenceHighlights";
+import { VendorEquipmentMatrix } from "./VendorEquipmentMatrix";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
