@@ -14,11 +14,13 @@ import { format, differenceInHours, isToday, startOfDay, endOfDay, isSameDay } f
 interface OccurrenceHighlightsProps {
   occurrences: OccurrenceData[];
   onOccurrenceClick: (occurrence: OccurrenceData) => void;
+  onNavigateToOccurrences?: (filter: 'total' | 'pending' | 'reincidence' | 'overdue' | 'agencies' | 'mttr' | 'entered-today' | 'due-today' | 'overdue-today') => void;
 }
 
 export function OccurrenceHighlights({
   occurrences,
-  onOccurrenceClick
+  onOccurrenceClick,
+  onNavigateToOccurrences
 }: OccurrenceHighlightsProps) {
   const navigate = useNavigate();
   const {
@@ -112,22 +114,29 @@ export function OccurrenceHighlights({
   }, [occurrences]);
 
   const handleViewAll = (type: 'entered' | 'due' | 'overdue') => {
-    clearAllFilters();
-    setTimeout(() => {
+    if (onNavigateToOccurrences) {
+      // Usar função do dashboard se disponível
       if (type === 'entered') {
-        // Para entrada hoje, filtrar status ativos
-        updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento', 'com_impedimentos']);
+        onNavigateToOccurrences('entered-today');
       } else if (type === 'due') {
-        // Para vence hoje, filtrar por status ativos e usar filtro específico
-        updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento', 'com_impedimentos']);
-        updateFilter('statusSlaFilter', ['vence_hoje']);
+        onNavigateToOccurrences('due-today');
       } else if (type === 'overdue') {
-        // Para vencidas, usar filtro de override
-        updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento', 'com_impedimentos']);
-        updateFilter('overrideFilter', true);
+        onNavigateToOccurrences('overdue-today');
       }
-      navigate('/ocorrencias');
-    }, 100);
+    } else {
+      // Fallback para navegação direta
+      clearAllFilters();
+      setTimeout(() => {
+        if (type === 'entered') {
+          navigate('/ocorrencias', { state: { filterType: 'entered-today' } });
+        } else if (type === 'due') {
+          navigate('/ocorrencias', { state: { filterType: 'due-today' } });
+        } else if (type === 'overdue') {
+          updateFilter('statusSlaFilter', ['vencido']);
+          navigate('/ocorrencias', { state: { filterType: 'overdue-today' } });
+        }
+      }, 100);
+    }
   };
 
   const renderTimeRemaining = (occurrence: OccurrenceData) => {

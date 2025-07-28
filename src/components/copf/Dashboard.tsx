@@ -112,7 +112,7 @@ export function Dashboard() {
   };
 
   // Handlers para navegar com filtros específicos
-  const handleNavigateToOccurrences = (filter: 'total' | 'pending' | 'reincidence' | 'overdue' | 'agencies' | 'mttr') => {
+  const handleNavigateToOccurrences = (filter: 'total' | 'pending' | 'reincidence' | 'overdue' | 'agencies' | 'mttr' | 'entered-today' | 'due-today' | 'overdue-today') => {
     filters.clearAllFilters();
     
     setTimeout(() => {
@@ -121,14 +121,24 @@ export function Dashboard() {
           // Sem filtros específicos - mostra todas
           break;
         case 'pending':
-          filters.updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento']);
+          filters.updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento', 'com_impedimentos']);
           break;
         case 'reincidence':
-          // Não há filtro direto para reincidência, navega para todas
+          filters.updateFilter('reincidentFilter', true);
           break;
         case 'overdue':
-          filters.updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento']);
           filters.updateFilter('overrideFilter', true);
+          filters.updateFilter('statusSlaFilter', ['vencido']);
+          break;
+        case 'entered-today':
+          // Filtro para ocorrências que entraram hoje será implementado na página de ocorrências
+          // usando a data de abertura
+          break;
+        case 'due-today':
+          // Filtro para ocorrências que vencem hoje será implementado na página de ocorrências
+          break;
+        case 'overdue-today':
+          filters.updateFilter('statusSlaFilter', ['vencido']);
           break;
         case 'agencies':
           // Sem filtros específicos - mostra todas
@@ -519,7 +529,11 @@ export function Dashboard() {
       <div className="animate-fade-in" style={{
       animationDelay: '0.5s'
     }}>
-        <OccurrenceHighlights occurrences={filteredOccurrences} onOccurrenceClick={handleOccurrenceClick} />
+        <OccurrenceHighlights 
+          occurrences={filteredOccurrences} 
+          onOccurrenceClick={handleOccurrenceClick}
+          onNavigateToOccurrences={handleNavigateToOccurrences}
+        />
       </div>
 
       {/* Dashboard Content Wrapper for PDF Export */}
