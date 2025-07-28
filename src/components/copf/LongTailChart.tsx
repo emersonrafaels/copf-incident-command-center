@@ -299,60 +299,82 @@ export const LongTailChart = memo(function LongTailChart({
       .sort((a, b) => b.total - a.total)
       .slice(0, 10);
 
+    // Obter equipamentos mais relevantes (top 5)
+    const allEquipmentCounts = sourceOccurrences.reduce((counts, occ) => {
+      const equipment = occ.equipment || 'Não informado';
+      counts[equipment] = (counts[equipment] || 0) + 1;
+      return counts;
+    }, {} as Record<string, number>);
+
+    const topEquipments = Object.entries(allEquipmentCounts)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 5)
+      .map(([equipment]) => equipment);
+
     // Processar dados para stacked chart
     return agenciesWithCount.map(({ agencia, total, occurrences }) => {
       // Agrupar por equipamento
       const equipmentCounts = occurrences.reduce((counts, occ) => {
         const equipment = occ.equipment || 'Não informado';
-        counts[equipment] = (counts[equipment] || 0) + 1;
+        if (topEquipments.includes(equipment)) {
+          counts[equipment] = (counts[equipment] || 0) + 1;
+        } else {
+          counts['Outros'] = (counts['Outros'] || 0) + 1;
+        }
         return counts;
       }, {} as Record<string, number>);
 
-      // Converter para percentuais
+      // Converter para valores absolutos (não percentuais para melhor visualização)
       const equipmentData: Record<string, number> = {};
-      Object.entries(equipmentCounts).forEach(([equipment, count]) => {
-        equipmentData[equipment] = Math.round((count / total) * 100);
+      [...topEquipments, 'Outros'].forEach((equipment) => {
+        equipmentData[equipment] = equipmentCounts[equipment] || 0;
       });
 
       return {
-        agencia,
+        agencia: agencia.length > 15 ? agencia.substring(0, 15) + '...' : agencia,
         total,
         ...equipmentData
       };
     });
   }, [occurrences, filteredOccurrences]);
 
-  // Obter todos os equipamentos únicos para as cores
-  const allEquipments = useMemo(() => {
-    const equipments = new Set<string>();
+  // Obter equipamentos únicos para o gráfico stacked (top 5 + outros)
+  const stackedEquipments = useMemo(() => {
     const sourceOccurrences = filteredOccurrences || occurrences;
-    sourceOccurrences.forEach(occ => {
-      equipments.add(occ.equipment || 'Não informado');
-    });
-    return Array.from(equipments);
+    
+    // Contar equipamentos
+    const allEquipmentCounts = sourceOccurrences.reduce((counts, occ) => {
+      const equipment = occ.equipment || 'Não informado';
+      counts[equipment] = (counts[equipment] || 0) + 1;
+      return counts;
+    }, {} as Record<string, number>);
+
+    // Obter top 5 equipamentos
+    const topEquipments = Object.entries(allEquipmentCounts)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 5)
+      .map(([equipment]) => equipment);
+    
+    return [...topEquipments, 'Outros'];
   }, [occurrences, filteredOccurrences]);
 
-  // Cores para equipamentos
-  const equipmentColors = useMemo(() => {
+  // Cores para equipamentos do gráfico stacked
+  const stackedEquipmentColors = useMemo(() => {
     const colors = [
       '#3b82f6', // blue
       '#10b981', // emerald
       '#f59e0b', // amber
       '#ef4444', // red
       '#8b5cf6', // violet
-      '#06b6d4', // cyan
-      '#84cc16', // lime
-      '#f97316', // orange
-      '#ec4899', // pink
-      '#6b7280', // gray
+      '#6b7280', // gray para "Outros"
     ];
     
     const colorMap: Record<string, string> = {};
-    allEquipments.forEach((equipment, index) => {
+    stackedEquipments.forEach((equipment, index) => {
       colorMap[equipment] = colors[index % colors.length];
     });
     return colorMap;
-  }, [allEquipments]);
+  }, [stackedEquipments]);
 
   // Handler para navegar para ocorrências com aging crítico
   const handleFilterAgingCritico = () => {
@@ -869,7 +891,7 @@ export const LongTailChart = memo(function LongTailChart({
                   Top 10 Agências por Volume de Ocorrências
                 </CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Distribuição percentual por tipo de equipamento
+                  Distribuição por tipo de equipamento
                 </p>
               </div>
             </div>
@@ -889,26 +911,25 @@ export const LongTailChart = memo(function LongTailChart({
                   }}
                 >
                   <CartesianGrid strokeDasharray="2 2" stroke="hsl(var(--border))" opacity={0.3} />
-                  <XAxis 
-                    type="number"
-                    domain={[0, 100]}
-                    stroke="hsl(var(--muted-foreground))" 
-                    tick={{
-                      fill: 'hsl(var(--muted-foreground))',
+                   <XAxis 
+                     type="number"
+                     stroke="hsl(var(--muted-foreground))" 
+                     tick={{
+                       fill: 'hsl(var(--muted-foreground))',
                       fontSize: 11,
                       fontWeight: 500
-                    }}
-                    label={{
-                      value: 'Percentual (%)',
-                      position: 'insideBottom',
-                      offset: -5,
-                      style: {
-                        textAnchor: 'middle',
-                        fill: 'hsl(var(--foreground))',
-                        fontSize: '12px',
-                        fontWeight: 600
-                      }
-                    }}
+                     }}
+                     label={{
+                       value: 'Quantidade de Ocorrências',
+                       position: 'insideBottom',
+                       offset: -5,
+                       style: {
+                         textAnchor: 'middle',
+                         fill: 'hsl(var(--foreground))',
+                         fontSize: '12px',
+                         fontWeight: 600
+                       }
+                     }}
                   />
                   <YAxis 
                     type="category"
@@ -935,9 +956,9 @@ export const LongTailChart = memo(function LongTailChart({
                             </div>
                           </div>
                           
-                          <div className="space-y-1">
-                            <div className="text-sm font-medium text-foreground">Equipamento: {name}</div>
-                            <div className="text-sm text-muted-foreground">{value}% do total da agência</div>
+                           <div className="space-y-1">
+                             <div className="text-sm font-medium text-foreground">Equipamento: {name}</div>
+                             <div className="text-sm text-muted-foreground">{value} ocorrências</div>
                           </div>
                         </div>,
                         ''
@@ -954,15 +975,15 @@ export const LongTailChart = memo(function LongTailChart({
                     }}
                   />
                   
-                  {allEquipments.map((equipment, index) => (
-                    <Bar
-                      key={equipment}
-                      dataKey={equipment}
-                      stackId="equipment"
-                      fill={equipmentColors[equipment]}
-                      radius={index === 0 ? [4, 0, 0, 4] : index === allEquipments.length - 1 ? [0, 4, 4, 0] : [0, 0, 0, 0]}
-                    />
-                  ))}
+                   {stackedEquipments.map((equipment, index) => (
+                     <Bar
+                       key={equipment}
+                       dataKey={equipment}
+                       stackId="equipment"
+                       fill={stackedEquipmentColors[equipment]}
+                       radius={index === 0 ? [4, 0, 0, 4] : index === stackedEquipments.length - 1 ? [0, 4, 4, 0] : [0, 0, 0, 0]}
+                     />
+                   ))}
                 </BarChart>
               </ResponsiveContainer>
             </ChartContainer>
@@ -970,15 +991,15 @@ export const LongTailChart = memo(function LongTailChart({
             {/* Legenda dos equipamentos */}
             <div className="mt-4 p-3 bg-card/30 rounded-lg border border-border/30">
               <div className="flex flex-wrap items-center justify-center gap-3">
-                {allEquipments.map((equipment) => (
-                  <div key={equipment} className="flex items-center gap-2 text-xs">
-                    <div 
-                      className="w-3 h-3 rounded" 
-                      style={{ backgroundColor: equipmentColors[equipment] }}
-                    ></div>
-                    <span className="text-foreground font-medium">{equipment}</span>
-                  </div>
-                ))}
+                 {stackedEquipments.map((equipment) => (
+                   <div key={equipment} className="flex items-center gap-2 text-xs">
+                     <div 
+                       className="w-3 h-3 rounded" 
+                       style={{ backgroundColor: stackedEquipmentColors[equipment] }}
+                     ></div>
+                     <span className="text-foreground font-medium">{equipment}</span>
+                   </div>
+                 ))}
               </div>
             </div>
             
@@ -1003,9 +1024,9 @@ export const LongTailChart = memo(function LongTailChart({
                 <div className="text-xs text-muted-foreground font-medium">Média/Agência</div>
               </div>
               <div className="text-center">
-                <div className="text-lg font-bold text-muted-foreground">
-                  {allEquipments.length}
-                </div>
+                 <div className="text-lg font-bold text-muted-foreground">
+                   {stackedEquipments.length}
+                 </div>
                 <div className="text-xs text-muted-foreground font-medium">Tipos Equip.</div>
               </div>
             </div>
