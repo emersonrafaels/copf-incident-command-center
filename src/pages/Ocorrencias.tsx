@@ -192,17 +192,15 @@ const Ocorrencias = () => {
         const isToday = today.toDateString() === occCreatedDate.toDateString();
         if (!isToday) return false;
       } else if (filterType === 'due-today') {
-        // Vencem hoje - calcula SLA e verifica se vence hoje
+        // Vencem hoje - SLA vence hoje (independente se já venceu ou não no mesmo dia)
         const occCreatedDate = new Date(occurrence.createdAt);
-        const hoursDiff = (Date.now() - occCreatedDate.getTime()) / (1000 * 60 * 60);
         const slaLimit = occurrence.severity === 'critical' || occurrence.severity === 'high' ? 24 : 72;
         const slaEndDate = new Date(occCreatedDate.getTime() + slaLimit * 60 * 60 * 1000);
         
         const isDueToday = slaEndDate.toDateString() === new Date().toDateString();
         const isNotCompleted = occurrence.status !== 'encerrado' && occurrence.status !== 'cancelado';
-        const isNotOverdue = hoursDiff <= slaLimit;
         
-        if (!(isDueToday && isNotCompleted && isNotOverdue)) return false;
+        if (!(isDueToday && isNotCompleted)) return false;
       } else if (filterType === 'overdue-today') {
         // Em atraso - não encerradas e com SLA vencido
         const occCreatedDate = new Date(occurrence.createdAt);
@@ -233,11 +231,10 @@ const Ocorrencias = () => {
       const slaEndDate = new Date(occCreatedDate.getTime() + slaLimit * 60 * 60 * 1000);
 
       if (slaStatus === 'due_today') {
-        // Vencem hoje - em andamento e vencem hoje
+        // Vencem hoje - SLA vence hoje (independente se já venceu ou não no mesmo dia)
         const isDueToday = slaEndDate.toDateString() === new Date().toDateString();
         const isNotCompleted = occurrence.status !== 'encerrado' && occurrence.status !== 'cancelado';
-        const isNotOverdue = hoursDiff <= slaLimit;
-        if (!(isDueToday && isNotCompleted && isNotOverdue)) return false;
+        if (!(isDueToday && isNotCompleted)) return false;
       } else if (slaStatus === 'overdue') {
         // Vencidas - não encerradas e vencidas
         const isNotCompleted = occurrence.status !== 'encerrado' && occurrence.status !== 'cancelado';

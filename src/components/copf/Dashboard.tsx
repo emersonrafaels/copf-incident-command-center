@@ -123,35 +123,48 @@ export function Dashboard() {
       switch (filter) {
         case 'total':
           // Sem filtros específicos - mostra todas
+          navigate('/ocorrencias');
           break;
         case 'pending':
           filters.updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento', 'com_impedimentos']);
+          navigate('/ocorrencias');
           break;
         case 'reincidence':
           filters.updateFilter('reincidentFilter', true);
+          navigate('/ocorrencias');
           break;
         case 'overdue':
           filters.updateFilter('overrideFilter', true);
           filters.updateFilter('statusSlaFilter', ['vencido']);
+          navigate('/ocorrencias');
           break;
         case 'entered-today':
-          // Filtro para ocorrências que entraram hoje será implementado na página de ocorrências
-          // usando a data de abertura
+          // Navegar diretamente com filtro via state para data de abertura = hoje
+          navigate('/ocorrencias', { 
+            state: { filterType: 'entered-today' } 
+          });
           break;
         case 'due-today':
-          // Filtro para ocorrências que vencem hoje será implementado na página de ocorrências
+          // Navegar diretamente com filtro via state para SLA vence hoje
+          navigate('/ocorrencias', { 
+            state: { filterType: 'due-today' } 
+          });
           break;
         case 'overdue-today':
-          filters.updateFilter('statusSlaFilter', ['vencido']);
+          // Navegar diretamente com filtro via state para SLA vencido
+          navigate('/ocorrencias', { 
+            state: { filterType: 'overdue-today' } 
+          });
           break;
         case 'agencies':
           // Sem filtros específicos - mostra todas
+          navigate('/ocorrencias');
           break;
         case 'mttr':
           filters.updateFilter('statusFilterMulti', ['encerrado']);
+          navigate('/ocorrencias');
           break;
       }
-      navigate('/ocorrencias');
       toast('Filtros aplicados - navegando para página de ocorrências');
     }, 100);
   };
