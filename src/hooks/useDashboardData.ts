@@ -45,344 +45,238 @@ export function useDashboardData() {
   const [isLoading, setIsLoading] = useState(true)
   const { filterPeriod } = useFilters()
 
-  // Dados mock estáticos para garantir compatibilidade dashboard/ocorrências
+  // Dados mock estáticos para ~1200 ocorrências
   const generateMockData = useMemo(() => {
     const today = new Date();
     const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
     const twoDaysAgo = new Date(today.getTime() - 2 * 24 * 60 * 60 * 1000);
     const threeDaysAgo = new Date(today.getTime() - 3 * 24 * 60 * 60 * 1000);
+    const oneWeekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const twoWeeksAgo = new Date(today.getTime() - 14 * 24 * 60 * 60 * 1000);
 
-    const staticOccurrences: OccurrenceData[] = [
-      // Ocorrências que entraram hoje (5 total)
-      {
-        id: 'COPF-2024-001',
-        agency: 'AG0001 - Centro (São Paulo)',
-        segment: 'AA',
-        equipment: 'ATM Saque',
-        serialNumber: 'AA001-SP-0001',
-        description: 'ATM não está dispensando cédulas - erro de hardware na gaveta',
-        severity: 'critical',
-        status: 'a_iniciar',
-        createdAt: today.toISOString(),
-        assignedTo: 'João Silva - NOC',
-        vendor: 'Diebold Nixdorf',
-        tipoAgencia: 'convencional',
-        estado: 'SP',
-        municipio: 'São Paulo',
-        dineg: '2',
-        vip: true
-      },
-      {
-        id: 'COPF-2024-002',
-        agency: 'AG0015 - Centro (São Paulo)',
-        segment: 'AB',
-        equipment: 'Impressora',
-        serialNumber: 'AB002-SP-0015',
-        description: 'Impressora com papel atolado constantemente',
-        severity: 'high',
-        status: 'em_andamento',
-        createdAt: today.toISOString(),
-        assignedTo: 'Maria Santos - Facilities',
-        vendor: 'HP',
-        tipoAgencia: 'convencional',
-        estado: 'SP',
-        municipio: 'São Paulo',
-        dineg: '2',
-        vip: true
-      },
-      {
-        id: 'COPF-2024-003',
-        agency: 'AG1001 - Centro (Rio de Janeiro)',
-        segment: 'AA',
-        equipment: 'ATM Depósito',
-        serialNumber: 'AA003-RJ-1001',
-        description: 'ATM não aceita depósitos - problemas no mecanismo de captura',
-        severity: 'high',
-        status: 'com_impedimentos',
-        createdAt: today.toISOString(),
-        assignedTo: 'Carlos Oliveira - Redes',
-        vendor: 'NCR Corporation',
-        tipoAgencia: 'convencional',
-        estado: 'RJ',
-        municipio: 'Rio de Janeiro',
-        dineg: '4',
-        vip: true
-      },
-      {
-        id: 'COPF-2024-004',
-        agency: 'AG2001 - Centro (Belo Horizonte)',
-        segment: 'AB',
-        equipment: 'Desktop',
-        serialNumber: 'AB004-MG-2001',
-        description: 'Desktop com lentidão extrema',
-        severity: 'medium',
-        status: 'em_andamento',
-        createdAt: today.toISOString(),
-        assignedTo: 'Ana Costa - POS',
-        vendor: 'Dell Technologies',
-        tipoAgencia: 'convencional',
-        estado: 'MG',
-        municipio: 'Belo Horizonte',
-        dineg: '8',
-        vip: true
-      },
-      {
-        id: 'COPF-2024-005',
-        agency: 'AG3001 - Centro (Porto Alegre)',
-        segment: 'AB',
-        equipment: 'Monitor LCD/LED',
-        serialNumber: 'AB005-RS-3001',
-        description: 'Monitor com falha na exibição',
-        severity: 'low',
-        status: 'a_iniciar',
-        createdAt: today.toISOString(),
-        assignedTo: 'Roberto Lima - Suporte',
-        vendor: 'Dell Technologies',
-        tipoAgencia: 'convencional',
-        estado: 'RS',
-        municipio: 'Porto Alegre',
-        dineg: '80',
-        vip: true
-      },
-
-      // Ocorrências pendentes antigas (8 total - incluindo as 5 de hoje)
-      {
-        id: 'COPF-2024-006',
-        agency: 'AG0045 - Centro (São Paulo)',
-        segment: 'AA',
-        equipment: 'Cassete',
-        serialNumber: 'AA006-SP-0045',
-        description: 'Cassete com defeito no sensor de notas',
-        severity: 'critical',
-        status: 'em_andamento',
-        createdAt: yesterday.toISOString(),
-        assignedTo: 'João Silva - NOC',
-        vendor: 'Diebold Nixdorf',
-        transportadora: 'Express Logística',
-        tipoAgencia: 'terceirizada',
-        estado: 'SP',
-        municipio: 'São Paulo',
-        dineg: '2',
-        vip: false
-      },
-      {
-        id: 'COPF-2024-007',
-        agency: 'AG1045 - Centro (Rio de Janeiro)',
-        segment: 'AB',
-        equipment: 'Notebook',
-        serialNumber: 'AB007-RJ-1045',
-        description: 'Notebook apresentando tela azul',
-        severity: 'high',
-        status: 'com_impedimentos',
-        createdAt: twoDaysAgo.toISOString(),
-        assignedTo: 'Maria Santos - Facilities',
-        vendor: 'Fornecedor A',
-        transportadora: 'Express Logística',
-        tipoAgencia: 'terceirizada',
-        estado: 'RJ',
-        municipio: 'Rio de Janeiro',
-        dineg: '4',
-        vip: false
-      },
-      {
-        id: 'COPF-2024-008',
-        agency: 'AG2045 - Centro (Belo Horizonte)',
-        segment: 'AB',
-        equipment: 'Leitor biométrico',
-        serialNumber: 'AB008-MG-2045',
-        description: 'Leitor biométrico não funciona',
-        severity: 'medium',
-        status: 'a_iniciar',
-        createdAt: threeDaysAgo.toISOString(),
-        assignedTo: 'Carlos Oliveira - Redes',
-        vendor: 'Fornecedor B',
-        transportadora: 'Express Logística',
-        tipoAgencia: 'terceirizada',
-        estado: 'MG',
-        municipio: 'Belo Horizonte',
-        dineg: '8',
-        vip: false
-      },
-
-      // Ocorrências resolvidas (4 total)
-      {
-        id: 'COPF-2024-009',
-        agency: 'AG0067 - Centro (São Paulo)',
-        segment: 'AA',
-        equipment: 'ATM Saque',
-        serialNumber: 'AA009-SP-0067',
-        description: 'Problema no leitor de cartão magnético',
-        severity: 'high',
-        status: 'encerrado',
-        createdAt: new Date(today.getTime() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-        resolvedAt: new Date(today.getTime() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-        assignedTo: 'Ana Costa - POS',
-        vendor: 'Itautec',
-        transportadora: 'TechTransporte',
-        tipoAgencia: 'terceirizada',
-        estado: 'SP',
-        municipio: 'São Paulo',
-        dineg: '2',
-        vip: false
-      },
-      {
-        id: 'COPF-2024-010',
-        agency: 'AG1067 - Centro (Rio de Janeiro)',
-        segment: 'AB',
-        equipment: 'Scanner de Cheque',
-        serialNumber: 'AB010-RJ-1067',
-        description: 'Scanner não consegue ler documentos',
-        severity: 'medium',
-        status: 'encerrado',
-        createdAt: new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000).toISOString(),
-        resolvedAt: new Date(today.getTime() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-        assignedTo: 'Roberto Lima - Suporte',
-        vendor: 'Fornecedor D',
-        transportadora: 'TechTransporte',
-        tipoAgencia: 'terceirizada',
-        estado: 'RJ',
-        municipio: 'Rio de Janeiro',
-        dineg: '4',
-        vip: false
-      },
-      {
-        id: 'COPF-2024-011',
-        agency: 'AG2067 - Centro (Belo Horizonte)',
-        segment: 'AB',
-        equipment: 'Impressora térmica',
-        serialNumber: 'AB011-MG-2067',
-        description: 'Impressora com papel atolado constantemente',
-        severity: 'low',
-        status: 'encerrado',
-        createdAt: new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-        resolvedAt: new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000).toISOString(),
-        assignedTo: 'João Silva - NOC',
-        vendor: 'Fornecedor E',
-        transportadora: 'TechTransporte',
-        tipoAgencia: 'terceirizada',
-        estado: 'MG',
-        municipio: 'Belo Horizonte',
-        dineg: '8',
-        vip: false
-      },
-      {
-        id: 'COPF-2024-012',
-        agency: 'AG3045 - Centro (Porto Alegre)',
-        segment: 'AA',
-        equipment: 'ATM Depósito',
-        serialNumber: 'AA012-RS-3045',
-        description: 'Erro de conectividade com o servidor central',
-        severity: 'critical',
-        status: 'encerrado',
-        createdAt: new Date(today.getTime() - 8 * 24 * 60 * 60 * 1000).toISOString(),
-        resolvedAt: new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-        assignedTo: 'Maria Santos - Facilities',
-        vendor: 'Fornecedor F',
-        transportadora: 'LogiCorp',
-        tipoAgencia: 'terceirizada',
-        estado: 'RS',
-        municipio: 'Porto Alegre',
-        dineg: '80',
-        vip: false
-      },
-
-      // Reincidências (3 total - mesmo equipamento, agência e descrição)
-      {
-        id: 'COPF-2024-013',
-        agency: 'AG0001 - Centro (São Paulo)',
-        segment: 'AA',
-        equipment: 'ATM Saque',
-        serialNumber: 'AA013-SP-0001',
-        description: 'ATM não está dispensando cédulas - erro de hardware na gaveta',
-        severity: 'high',
-        status: 'em_andamento',
-        createdAt: new Date(today.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        assignedTo: 'Carlos Oliveira - Redes',
-        vendor: 'Diebold Nixdorf',
-        tipoAgencia: 'convencional',
-        estado: 'SP',
-        municipio: 'São Paulo',
-        dineg: '2',
-        vip: true
-      },
-      {
-        id: 'COPF-2024-014',
-        agency: 'AG0015 - Centro (São Paulo)',
-        segment: 'AB',
-        equipment: 'Impressora',
-        serialNumber: 'AB014-SP-0015',
-        description: 'Impressora com papel atolado constantemente',
-        severity: 'medium',
-        status: 'a_iniciar',
-        createdAt: yesterday.toISOString(),
-        assignedTo: 'Ana Costa - POS',
-        vendor: 'HP',
-        tipoAgencia: 'convencional',
-        estado: 'SP',
-        municipio: 'São Paulo',
-        dineg: '2',
-        vip: true
-      },
-      {
-        id: 'COPF-2024-015',
-        agency: 'AG2067 - Centro (Belo Horizonte)',
-        segment: 'AB',
-        equipment: 'Impressora térmica',
-        serialNumber: 'AB015-MG-2067',
-        description: 'Impressora com papel atolado constantemente',
-        severity: 'low',
-        status: 'com_impedimentos',
-        createdAt: twoDaysAgo.toISOString(),
-        assignedTo: 'Roberto Lima - Suporte',
-        vendor: 'Fornecedor E',
-        transportadora: 'TechTransporte',
-        tipoAgencia: 'terceirizada',
-        estado: 'MG',
-        municipio: 'Belo Horizonte',
-        dineg: '8',
-        vip: false
-      },
-
-      // SLA em atraso (2 total - criadas há mais de 24h e ainda pendentes)
-      {
-        id: 'COPF-2024-016',
-        agency: 'AG4001 - Centro (Salvador)',
-        segment: 'AA',
-        equipment: 'ATM Saque',
-        serialNumber: 'AA016-BA-4001',
-        description: 'Display do ATM com falha na exibição',
-        severity: 'critical',
-        status: 'em_andamento',
-        createdAt: new Date(today.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 dias atrás - SLA vencido
-        assignedTo: 'João Silva - NOC',
-        vendor: 'Diebold Nixdorf',
-        tipoAgencia: 'convencional',
-        estado: 'BA',
-        municipio: 'Salvador',
-        dineg: '3',
-        vip: true
-      },
-      {
-        id: 'COPF-2024-017',
-        agency: 'AG4015 - Centro (Salvador)',
-        segment: 'AB',
-        equipment: 'PIN PAD',
-        serialNumber: 'AB017-BA-4015',
-        description: 'PIN PAD com botões travados',
-        severity: 'high',
-        status: 'a_iniciar',
-        createdAt: new Date(today.getTime() - 30 * 60 * 60 * 1000).toISOString(), // 30 horas atrás - SLA vencido
-        assignedTo: 'Maria Santos - Facilities',
-        vendor: 'Gertec',
-        tipoAgencia: 'convencional',
-        estado: 'BA',
-        municipio: 'Salvador',
-        dineg: '3',
-        vip: true
-      }
+    // Estrutura expandida para gerar ~1200 ocorrências
+    const hierarchyStructure = [
+      // SP - DINEG 2 (20 agências)
+      { estado: 'SP', municipio: 'São Paulo', dineg: '2', agencias: ['0001', '0002', '0003', '0004', '0005', '0015', '0016', '0017', '0018', '0032'], tipo: 'convencional', vip: true },
+      { estado: 'SP', municipio: 'São Paulo', dineg: '2', agencias: ['0045', '0046', '0047', '0067', '0068', '0069', '0089', '0090', '0091', '0095'], tipo: 'terceirizada', vip: false },
+      { estado: 'SP', municipio: 'Campinas', dineg: '2', agencias: ['0101', '0102', '0103', '0115', '0116', '0132', '0133', '0134', '0135', '0136'], tipo: 'pab', vip: true },
+      { estado: 'SP', municipio: 'Santos', dineg: '2', agencias: ['0201', '0202', '0203', '0215', '0216', '0217', '0218', '0219', '0220', '0221'], tipo: 'pae', vip: false },
+      
+      // RJ - DINEG 4 (20 agências)
+      { estado: 'RJ', municipio: 'Rio de Janeiro', dineg: '4', agencias: ['1001', '1002', '1003', '1015', '1016', '1017', '1032', '1033', '1034', '1035'], tipo: 'convencional', vip: true },
+      { estado: 'RJ', municipio: 'Rio de Janeiro', dineg: '4', agencias: ['1045', '1046', '1047', '1067', '1068', '1070', '1071', '1075', '1076', '1080'], tipo: 'terceirizada', vip: false },
+      { estado: 'RJ', municipio: 'Niterói', dineg: '4', agencias: ['1101', '1102', '1103', '1115', '1116', '1117', '1118', '1119', '1120', '1121'], tipo: 'pab', vip: true },
+      { estado: 'RJ', municipio: 'Nova Iguaçu', dineg: '4', agencias: ['1401', '1402', '1403', '1410', '1411', '1412', '1413', '1414', '1415', '1416'], tipo: 'terceirizada', vip: false },
+      
+      // MG - DINEG 8 (20 agências)
+      { estado: 'MG', municipio: 'Belo Horizonte', dineg: '8', agencias: ['2001', '2002', '2003', '2015', '2016', '2017', '2032', '2033', '2034', '2035'], tipo: 'convencional', vip: true },
+      { estado: 'MG', municipio: 'Belo Horizonte', dineg: '8', agencias: ['2045', '2046', '2047', '2067', '2068', '2070', '2071', '2075', '2076', '2077'], tipo: 'terceirizada', vip: false },
+      { estado: 'MG', municipio: 'Uberlândia', dineg: '8', agencias: ['2101', '2102', '2103', '2115', '2116', '2117', '2118', '2119', '2120', '2121'], tipo: 'pab', vip: true },
+      { estado: 'MG', municipio: 'Juiz de Fora', dineg: '8', agencias: ['2301', '2302', '2303', '2315', '2316', '2317', '2318', '2319', '2320', '2321'], tipo: 'terceirizada', vip: false },
+      
+      // RS - DINEG 80 (20 agências)
+      { estado: 'RS', municipio: 'Porto Alegre', dineg: '80', agencias: ['3001', '3002', '3003', '3015', '3016', '3017', '3032', '3033', '3034', '3035'], tipo: 'convencional', vip: true },
+      { estado: 'RS', municipio: 'Porto Alegre', dineg: '80', agencias: ['3045', '3046', '3047', '3050', '3051', '3055', '3056', '3057', '3058', '3059'], tipo: 'terceirizada', vip: false },
+      { estado: 'RS', municipio: 'Caxias do Sul', dineg: '80', agencias: ['3101', '3102', '3103', '3104', '3105', '3106', '3107', '3108', '3109', '3110'], tipo: 'pab', vip: true },
+      { estado: 'RS', municipio: 'Canoas', dineg: '80', agencias: ['3301', '3302', '3303', '3310', '3311', '3312', '3313', '3314', '3315', '3316'], tipo: 'terceirizada', vip: false },
+      
+      // BA - DINEG 3 (20 agências)
+      { estado: 'BA', municipio: 'Salvador', dineg: '3', agencias: ['4001', '4002', '4003', '4015', '4016', '4017', '4032', '4033', '4034', '4035'], tipo: 'convencional', vip: true },
+      { estado: 'BA', municipio: 'Salvador', dineg: '3', agencias: ['4045', '4046', '4047', '4067', '4068', '4070', '4071', '4072', '4073', '4074'], tipo: 'terceirizada', vip: false },
+      { estado: 'BA', municipio: 'Feira de Santana', dineg: '3', agencias: ['4101', '4102', '4103', '4115', '4116', '4117', '4118', '4119', '4120', '4121'], tipo: 'terceirizada', vip: true },
+      
+      // PR - DINEG 5 (20 agências)
+      { estado: 'PR', municipio: 'Curitiba', dineg: '5', agencias: ['5001', '5002', '5003', '5015', '5016', '5017', '5032', '5033', '5034', '5035'], tipo: 'convencional', vip: true },
+      { estado: 'PR', municipio: 'Curitiba', dineg: '5', agencias: ['5045', '5046', '5047', '5067', '5068', '5070', '5071', '5072', '5073', '5074'], tipo: 'terceirizada', vip: false },
+      { estado: 'PR', municipio: 'Londrina', dineg: '5', agencias: ['5101', '5102', '5103', '5115', '5116', '5117', '5118', '5119', '5120', '5121'], tipo: 'pab', vip: true },
     ];
 
-    return staticOccurrences;
+    // Equipamentos por segmento
+    const equipmentsBySegment = {
+      AA: ['ATM Saque', 'ATM Depósito', 'Cassete'],
+      AB: ['Notebook', 'Desktop', 'Leitor de Cheques/documentos', 'Leitor biométrico', 'PIN PAD', 'Scanner de Cheque', 'Impressora', 'Impressora térmica', 'Impressora multifuncional', 'Monitor LCD/LED', 'Teclado', 'Servidor', 'Televisão', 'Senheiro', 'TCR', 'Classificadora', 'Fragmentadora de Papel']
+    };
+
+    // Transportadoras
+    const transportadoras = ['Express Logística', 'TechTransporte', 'LogiCorp'];
+    const fornecedoresPorTransportadora = {
+      'Express Logística': ['Fornecedor A', 'Fornecedor B', 'Fornecedor C'],
+      'TechTransporte': ['Fornecedor D', 'Fornecedor E'],
+      'LogiCorp': ['Fornecedor F', 'Fornecedor G', 'Fornecedor H']
+    };
+
+    // Fornecedores por segmento
+    const allVendors = {
+      AA: ['Diebold Nixdorf', 'NCR Corporation', 'Itautec'],
+      AB: ['Dell Technologies', 'HP', 'Lenovo', 'Gertec', 'Bematech', 'Epson', 'Canon']
+    };
+
+    // Descrições por segmento
+    const descriptions = {
+      AA: [
+        'ATM não está dispensando cédulas - erro de hardware na gaveta',
+        'ATM não aceita depósitos - problemas no mecanismo de captura',
+        'Erro de conectividade com o servidor central',
+        'Cassete com defeito no sensor de notas',
+        'Falha na autenticação biométrica',
+        'Problema no leitor de cartão magnético',
+        'Display do ATM com falha na exibição',
+        'Teclado numérico não responsivo'
+      ],
+      AB: [
+        'Impressora com papel atolado constantemente',
+        'Perda total de conectividade - link primário inoperante', 
+        'Terminal não reconhece cartões chip',
+        'Monitor com falha na exibição',
+        'Teclado com teclas não responsivas',
+        'Servidor com alta latência',
+        'Scanner não consegue ler documentos',
+        'Leitor biométrico não funciona',
+        'Televisão sem sinal',
+        'Classificadora com erro de contagem',
+        'Notebook apresentando tela azul',
+        'Desktop com lentidão extrema',
+        'PIN PAD com botões travados'
+      ]
+    };
+
+    const statuses = ['a_iniciar', 'em_andamento', 'encerrado', 'com_impedimentos', 'cancelado'];
+    const severities = ['critical', 'high', 'medium', 'low'];
+    const assignees = ['João Silva - NOC', 'Maria Santos - Facilities', 'Carlos Oliveira - Redes', 'Ana Costa - POS', 'Roberto Lima - Suporte'];
+
+    const mockOccurrences: OccurrenceData[] = [];
+    let occurrenceCounter = 1;
+
+    // Gerar ocorrências para cada estrutura
+    hierarchyStructure.forEach((structure, groupIndex) => {
+      structure.agencias.forEach((agencyNum, agencyIndex) => {
+        // Cada agência terá entre 5-7 ocorrências para chegar em ~1200
+        const occurrenceCount = 6;
+        
+        for (let i = 0; i < occurrenceCount; i++) {
+          const segment = (i % 3 === 0) ? 'AB' : 'AA'; // 33% AB, 67% AA
+          const equipmentList = equipmentsBySegment[segment];
+          const equipment = equipmentList[i % equipmentList.length];
+          
+          // Determinar fornecedor
+          let vendor: string;
+          let transportadora: string | undefined;
+          
+          if (structure.tipo === 'terceirizada') {
+            transportadora = transportadoras[groupIndex % transportadoras.length];
+            vendor = fornecedoresPorTransportadora[transportadora][i % fornecedoresPorTransportadora[transportadora].length];
+          } else {
+            const segmentVendors = allVendors[segment];
+            vendor = segmentVendors[i % segmentVendors.length];
+          }
+
+          // Status distribuído
+          const status = statuses[i % statuses.length] as any;
+          
+          // Datas estratégicas:
+          let createdAt: Date;
+          let resolvedAt: string | undefined;
+          
+          // Distribuição de datas:
+          // 10% criadas hoje
+          // 5% que vencem hoje (criadas 23h atrás para critical/high, 71h atrás para medium/low)
+          // 15% em atraso (criadas há mais de 24h para critical/high, mais de 72h para medium/low)
+          // 70% distribuídas nos últimos 30 dias
+          
+          if (i % 10 === 0) {
+            // 10% criadas hoje
+            createdAt = new Date(today.getTime() - Math.random() * 12 * 60 * 60 * 1000); // Últimas 12h
+          } else if (i % 20 === 1) {
+            // 5% que vencem hoje - críticas/altas criadas há ~23h, médias/baixas há ~71h
+            const severity = severities[i % severities.length] as any;
+            if (severity === 'critical' || severity === 'high') {
+              createdAt = new Date(today.getTime() - 23 * 60 * 60 * 1000); // 23h atrás
+            } else {
+              createdAt = new Date(today.getTime() - 71 * 60 * 60 * 1000); // 71h atrás
+            }
+          } else if (i % 7 === 2) {
+            // ~15% em atraso
+            const severity = severities[i % severities.length] as any;
+            if (severity === 'critical' || severity === 'high') {
+              createdAt = new Date(today.getTime() - (26 + Math.random() * 48) * 60 * 60 * 1000); // 26-74h atrás
+            } else {
+              createdAt = new Date(today.getTime() - (74 + Math.random() * 48) * 60 * 60 * 1000); // 74-122h atrás
+            }
+          } else {
+            // 70% distribuídas nos últimos 30 dias
+            const daysAgo = Math.random() * 30;
+            createdAt = new Date(today.getTime() - daysAgo * 24 * 60 * 60 * 1000);
+          }
+          
+          // Resolver ocorrências encerradas
+          if (status === 'encerrado') {
+            const durationHours = 2 + Math.random() * 46; // 2-48 horas
+            resolvedAt = new Date(createdAt.getTime() + durationHours * 60 * 60 * 1000).toISOString();
+          }
+
+          const occurrenceId = `COPF-2024-${String(occurrenceCounter).padStart(4, '0')}`;
+          
+          mockOccurrences.push({
+            id: occurrenceId,
+            agency: `AG${agencyNum} - Centro (${structure.municipio})`,
+            segment,
+            equipment,
+            serialNumber: `${segment}${String(occurrenceCounter).padStart(4, '0')}-${structure.estado}-${agencyNum}`,
+            description: descriptions[segment][i % descriptions[segment].length],
+            severity: severities[i % severities.length] as any,
+            status,
+            createdAt: createdAt.toISOString(),
+            resolvedAt,
+            assignedTo: assignees[i % assignees.length],
+            vendor,
+            transportadora,
+            tipoAgencia: structure.tipo,
+            estado: structure.estado,
+            municipio: structure.municipio,
+            dineg: structure.dineg,
+            vip: structure.vip
+          });
+          
+          occurrenceCounter++;
+        }
+      });
+    });
+
+    // Adicionar reincidências específicas (50 total)
+    const reincidenceTemplates = [
+      { agency: 'AG0001 - Centro (São Paulo)', equipment: 'ATM Saque', description: 'ATM não está dispensando cédulas - erro de hardware na gaveta' },
+      { agency: 'AG0015 - Centro (São Paulo)', equipment: 'Impressora', description: 'Impressora com papel atolado constantemente' },
+      { agency: 'AG1001 - Centro (Rio de Janeiro)', equipment: 'ATM Depósito', description: 'ATM não aceita depósitos - problemas no mecanismo de captura' },
+      { agency: 'AG2001 - Centro (Belo Horizonte)', equipment: 'Desktop', description: 'Desktop com lentidão extrema' },
+      { agency: 'AG3001 - Centro (Porto Alegre)', equipment: 'Monitor LCD/LED', description: 'Monitor com falha na exibição' },
+    ];
+
+    for (let i = 0; i < 50; i++) {
+      const template = reincidenceTemplates[i % reincidenceTemplates.length];
+      const daysAgo = Math.random() * 3; // Até 3 dias atrás
+      const createdAt = new Date(today.getTime() - daysAgo * 24 * 60 * 60 * 1000);
+      
+      mockOccurrences.push({
+        id: `COPF-2024-REC-${String(i + 1).padStart(3, '0')}`,
+        agency: template.agency,
+        segment: template.equipment.includes('ATM') ? 'AA' : 'AB',
+        equipment: template.equipment,
+        serialNumber: `REC${String(i + 1).padStart(3, '0')}-${template.agency.substring(3, 5)}`,
+        description: template.description,
+        severity: severities[i % severities.length] as any,
+        status: ['a_iniciar', 'em_andamento', 'com_impedimentos'][i % 3] as any,
+        createdAt: createdAt.toISOString(),
+        assignedTo: assignees[i % assignees.length],
+        vendor: template.equipment.includes('ATM') ? 'Diebold Nixdorf' : 'HP',
+        tipoAgencia: 'convencional',
+        estado: template.agency.includes('São Paulo') ? 'SP' : template.agency.includes('Rio') ? 'RJ' : template.agency.includes('Belo') ? 'MG' : 'RS',
+        municipio: template.agency.includes('São Paulo') ? 'São Paulo' : template.agency.includes('Rio') ? 'Rio de Janeiro' : template.agency.includes('Belo') ? 'Belo Horizonte' : 'Porto Alegre',
+        dineg: template.agency.includes('São Paulo') ? '2' : template.agency.includes('Rio') ? '4' : template.agency.includes('Belo') ? '8' : '80',
+        vip: true
+      });
+    }
+
+    return mockOccurrences;
   }, [])
 
   // Regenerar dados quando o filtro de período mudar
