@@ -89,9 +89,9 @@ const mapDatabaseToOccurrence = (dbRecord: any): OccurrenceData => {
   // Mapear segmento do banco para AA/AB
   const segmentMap: Record<string, OccurrenceData['segment']> = {
     'atm': 'AA',
-    'pos': 'AB', 
-    'rede': 'AA',
-    'datacenter': 'AA'
+    'pos': 'AA', 
+    'rede': 'AB',
+    'datacenter': 'AB'
   }
   
   return {
