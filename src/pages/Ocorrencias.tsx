@@ -12,11 +12,12 @@ import { useDashboardData } from "@/hooks/useDashboardData";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useFilters } from "@/contexts/FiltersContext";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import * as XLSX from 'xlsx';
 
 const Ocorrencias = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const {
     occurrences,
     isLoading
@@ -33,7 +34,8 @@ const Ocorrencias = () => {
     municipioFilter,
     overrideFilter,
     vendorPriorityFilter,
-    reincidentFilter
+    reincidentFilter,
+    statusSlaFilter
   } = useFilters();
   const [searchParams] = useSearchParams();
   
@@ -50,6 +52,9 @@ const Ocorrencias = () => {
   const createdDate = searchParams.get('created_date');
   const slaDate = searchParams.get('sla_date');
   const slaStatus = searchParams.get('sla_status');
+  
+  // Filtros especiais vindos do dashboard via navigation state
+  const filterType = location.state?.filterType;
 
   // Usar filtros do contexto
   const {
@@ -114,6 +119,54 @@ const Ocorrencias = () => {
       if (!isHighPriority) return false;
     }
 
+    // Filtro de reincidência
+    if (reincidentFilter) {
+      // Buscar ocorrências com mesmo motivo, equipamento e agência
+      const sameReasonEquipment = occurrences.filter(other => 
+        other.id !== occurrence.id &&
+        other.description === occurrence.description &&
+        other.equipment === occurrence.equipment &&
+        other.agency === occurrence.agency
+      );
+      
+      if (sameReasonEquipment.length === 0) {
+        return false; // Não é reincidência se não há outras ocorrências similares
+      }
+      
+      // Verificar se há reincidência recente (até 4 dias)
+      const hasRecentRecurrence = sameReasonEquipment.some(other => {
+        const daysDiff = Math.abs(new Date(occurrence.createdAt).getTime() - new Date(other.createdAt).getTime()) / (1000 * 60 * 60 * 24);
+        return daysDiff <= 4;
+      });
+      
+      if (!hasRecentRecurrence) {
+        return false; // Só considera reincidência se for dentro de 4 dias
+      }
+    }
+
+    // Filtro de Status SLA
+    if (statusSlaFilter.length > 0) {
+      const occCreatedDate = new Date(occurrence.createdAt);
+      const hoursDiff = (Date.now() - occCreatedDate.getTime()) / (1000 * 60 * 60);
+      const slaLimit = occurrence.severity === 'critical' || occurrence.severity === 'high' ? 24 : 72;
+      const slaEndDate = new Date(occCreatedDate.getTime() + slaLimit * 60 * 60 * 1000);
+      
+      let currentSlaStatus = '';
+      if (occurrence.status === 'encerrado' || occurrence.status === 'cancelado') {
+        currentSlaStatus = 'no_prazo'; // Se encerrado, considera no prazo
+      } else if (hoursDiff > slaLimit) {
+        currentSlaStatus = 'vencido'; // Vencido
+      } else if (slaEndDate.toDateString() === new Date().toDateString()) {
+        currentSlaStatus = 'critico'; // Vence hoje (crítico)
+      } else {
+        currentSlaStatus = 'no_prazo'; // No prazo
+      }
+      
+      if (!statusSlaFilter.includes(currentSlaStatus)) {
+        return false;
+      }
+    }
+
     // Filtro de aging (quando vindo do gráfico Long Tail)
     if (agingMin !== null || agingMax !== null) {
       const createdDate = new Date(occurrence.createdAt);
@@ -130,7 +183,40 @@ const Ocorrencias = () => {
       }
     }
 
-    // Filtros dos highlights
+    // Filtros dos highlights vindos do dashboard
+    if (filterType) {
+      if (filterType === 'entered-today') {
+        // Entraram hoje - filtra por data de criação
+        const today = new Date();
+        const occCreatedDate = new Date(occurrence.createdAt);
+        const isToday = today.toDateString() === occCreatedDate.toDateString();
+        if (!isToday) return false;
+      } else if (filterType === 'due-today') {
+        // Vencem hoje - calcula SLA e verifica se vence hoje
+        const occCreatedDate = new Date(occurrence.createdAt);
+        const hoursDiff = (Date.now() - occCreatedDate.getTime()) / (1000 * 60 * 60);
+        const slaLimit = occurrence.severity === 'critical' || occurrence.severity === 'high' ? 24 : 72;
+        const slaEndDate = new Date(occCreatedDate.getTime() + slaLimit * 60 * 60 * 1000);
+        
+        const isDueToday = slaEndDate.toDateString() === new Date().toDateString();
+        const isNotCompleted = occurrence.status !== 'encerrado' && occurrence.status !== 'cancelado';
+        const isNotOverdue = hoursDiff <= slaLimit;
+        
+        if (!(isDueToday && isNotCompleted && isNotOverdue)) return false;
+      } else if (filterType === 'overdue-today') {
+        // Em atraso - não encerradas e com SLA vencido
+        const occCreatedDate = new Date(occurrence.createdAt);
+        const hoursDiff = (Date.now() - occCreatedDate.getTime()) / (1000 * 60 * 60);
+        const slaLimit = occurrence.severity === 'critical' || occurrence.severity === 'high' ? 24 : 72;
+        
+        const isNotCompleted = occurrence.status !== 'encerrado' && occurrence.status !== 'cancelado';
+        const isOverdue = hoursDiff > slaLimit;
+        
+        if (!(isNotCompleted && isOverdue)) return false;
+      }
+    }
+
+    // Filtros dos highlights (mantendo compatibilidade com query params)
     // Filtro por data de criação (entraram hoje)
     if (createdDate) {
       const filterDate = new Date(createdDate);
