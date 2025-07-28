@@ -29,8 +29,11 @@ export default function OcorrenciaDetalhes() {
   const [attachments, setAttachments] = useState<File[]>([]);
 
   useEffect(() => {
+    console.log('Procurando ocorrência com ID:', id);
+    console.log('Ocorrências disponíveis:', occurrences?.length);
     if (occurrences && id) {
       const found = occurrences.find(occ => occ.id === id);
+      console.log('Ocorrência encontrada:', found);
       setOccurrence(found);
       if (found) {
         setSelectedPriority('medium'); // Default priority

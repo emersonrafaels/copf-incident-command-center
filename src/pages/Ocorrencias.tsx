@@ -669,23 +669,16 @@ const Ocorrencias = () => {
                         {new Date(occurrence.createdAt).toLocaleString('pt-BR')}
                       </TableCell>
                       <TableCell className="text-sm">{occurrence.vendor}</TableCell>
-                      <TableCell>
-                        <div className="flex gap-1">
-                          <Button variant="ghost" size="sm" onClick={() => navigate(`/ocorrencia/${occurrence.id}`)} title="Visualizar detalhes">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="h-8 px-3" 
-                            onClick={() => navigate(`/ocorrencia/${occurrence.id}`)}
-                            title="Gerenciar ocorrência"
-                          >
-                            <MessageSquare className="h-4 w-4 mr-1" />
-                            <span className="text-xs">Ações</span>
-                          </Button>
-                        </div>
-                      </TableCell>
+                       <TableCell>
+                         <Button 
+                           variant="ghost" 
+                           size="sm" 
+                           onClick={() => navigate(`/ocorrencia/${occurrence.id}`)} 
+                           title="Visualizar detalhes da ocorrência"
+                         >
+                           <Eye className="h-4 w-4" />
+                         </Button>
+                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
