@@ -1,13 +1,17 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, Suspense, lazy } from "react";
 import { useNavigate } from "react-router-dom";
-import { MetricCard } from "./MetricCard";
+import { OptimizedMetricCard } from "./OptimizedMetricCard";
+import { OptimizedInteractiveCharts } from "./OptimizedInteractiveCharts";
 import { StatusBadge } from "./StatusBadge";
 import { LongTailChart } from "./LongTailChart";
 import { OccurrenceModal } from "./OccurrenceModal";
 
 import { FilterSection } from "./FilterSection";
+
+// Lazy loading de componentes pesados
+const EnhancedInteractiveCharts = lazy(() => import('./EnhancedInteractiveCharts').then(module => ({ default: module.EnhancedInteractiveCharts })))
+const VendorEquipmentMatrix = lazy(() => import('./VendorEquipmentMatrix').then(module => ({ default: module.VendorEquipmentMatrix })))
 import { OccurrenceHighlights } from "./OccurrenceHighlights";
-import { VendorEquipmentMatrix } from "./VendorEquipmentMatrix";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +25,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Check } from "lucide-react";
-import { useDashboardData } from "@/hooks/useDashboardData";
+import { useOptimizedDashboardData } from "@/hooks/useOptimizedDashboardData";
 import { useToast } from "@/hooks/use-toast";
 import { useFilters } from "@/contexts/FiltersContext";
 import { AlertTriangle, CheckCircle2, Clock, TrendingUp, MapPin, Users, Calendar, Download, RefreshCw, CalendarDays, Truck } from "lucide-react";
@@ -36,13 +40,14 @@ export function Dashboard() {
   const {
     occurrences,
     isLoading,
+    error,
     severityData,
     timelineData,
     mttrData,
     equipmentData,
     metrics,
     refreshData
-  } = useDashboardData();
+  } = useOptimizedDashboardData();
   const { toast: toastHook } = useToast();
   const [selectedOccurrence, setSelectedOccurrence] = useState<any>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -436,91 +441,81 @@ export function Dashboard() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* 1. Total de Ocorrências */}
-          <MetricCard 
-            title="Total de Ocorrências" 
-            value={cardMetrics.totalOccurrences.toString()} 
-            icon={<AlertTriangle className="h-4 w-4" />} 
-            change={`${Math.round(cardMetrics.totalOccurrences / occurrences.length * 100)}% do total`} 
-            changeType="neutral" 
-            clickable={true}
-            onClick={() => handleNavigateToOccurrences('total')}
-          />
+          <div onClick={() => handleNavigateToOccurrences('total')} className="cursor-pointer">
+            <OptimizedMetricCard 
+              title="Total de Ocorrências" 
+              value={cardMetrics.totalOccurrences}
+              icon={<AlertTriangle className="h-4 w-4" />} 
+              description={`${Math.round(cardMetrics.totalOccurrences / occurrences.length * 100)}% do total`}
+              isLoading={isLoading}
+            />
+          </div>
           
           {/* 2. Ocorrências Pendentes */}
-          <MetricCard 
-            title="Ocorrências Pendentes" 
-            value={cardMetrics.pendingOccurrences.toString()} 
-            icon={<Clock className="h-4 w-4" />} 
-            change="+12% desde ontem" 
-            changeType="neutral" 
-            clickable={true}
-            onClick={() => handleNavigateToOccurrences('pending')}
-          />
+          <div onClick={() => handleNavigateToOccurrences('pending')} className="cursor-pointer">
+            <OptimizedMetricCard 
+              title="Ocorrências Pendentes" 
+              value={cardMetrics.pendingOccurrences}
+              icon={<Clock className="h-4 w-4" />} 
+              description="Em andamento ou aguardando"
+              variant="warning"
+              isLoading={isLoading}
+            />
+          </div>
           
           {/* 3. Reincidências */}
-          <MetricCard 
-            title="Reincidências" 
-            value={cardMetrics.reincidentOccurrences.toString()}
-            icon={<AlertTriangle className="h-4 w-4" />} 
-            change="-5% desde ontem" 
-            changeType="positive" 
-            clickable={true}
-            onClick={() => handleNavigateToOccurrences('reincidence')}
-          />
+          <div onClick={() => handleNavigateToOccurrences('reincidence')} className="cursor-pointer">
+            <OptimizedMetricCard 
+              title="Reincidências" 
+              value={cardMetrics.reincidentOccurrences}
+              icon={<AlertTriangle className="h-4 w-4" />} 
+              description="Ocorrências repetidas"
+              variant="destructive"
+              isLoading={isLoading}
+            />
+          </div>
           
           {/* 4. Ocorrências com SLA em atraso */}
-          <MetricCard 
-            title="SLA em Atraso" 
-            value={cardMetrics.overdueOccurrences.toString()} 
-            icon={<AlertTriangle className="h-4 w-4" />} 
-            change="-8% desde ontem" 
-            changeType="positive" 
-            clickable={true}
-            onClick={() => handleNavigateToOccurrences('overdue')}
-          />
+          <div onClick={() => handleNavigateToOccurrences('overdue')} className="cursor-pointer">
+            <OptimizedMetricCard 
+              title="SLA em Atraso" 
+              value={cardMetrics.overdueOccurrences}
+              icon={<AlertTriangle className="h-4 w-4" />} 
+              description="Acima do prazo limite"
+              variant="destructive"
+              isLoading={isLoading}
+            />
+          </div>
           
           {/* 5. Agências Afetadas + VIP */}
-          <MetricCard 
-            title="Agências Afetadas" 
-            value={(() => {
-              const affectedAgencies = new Set(filteredOccurrences.map(o => o.agency));
-              const vipAgencies = Array.from(affectedAgencies).filter(agency => {
-                const agencyNumber = agency.match(/\d+/)?.[0] || '0';
-                return agencyNumber.endsWith('0') || agencyNumber.endsWith('5');
-              });
-              console.log('DEBUG - Agências afetadas:', {
-                filteredOccurrences: filteredOccurrences.length,
-                affectedAgencies: affectedAgencies.size,
-                vipAgencies: vipAgencies.length,
-                agencies: Array.from(affectedAgencies),
-                vipList: vipAgencies
-              });
-              return `${affectedAgencies.size} (${vipAgencies.length} VIPs)`;
-            })()} 
-            icon={<MapPin className="h-4 w-4" />} 
-            change="+3% desde ontem" 
-            changeType="neutral" 
-            clickable={true}
-            onClick={() => handleNavigateToOccurrences('agencies')}
-          />
+          <div onClick={() => handleNavigateToOccurrences('agencies')} className="cursor-pointer">
+            <OptimizedMetricCard 
+              title="Agências Afetadas" 
+              value={(() => {
+                const affectedAgencies = new Set(filteredOccurrences.map(o => o.agency));
+                const vipAgencies = Array.from(affectedAgencies).filter(agency => {
+                  const agencyNumber = agency.match(/\d+/)?.[0] || '0';
+                  return agencyNumber.endsWith('0') || agencyNumber.endsWith('5');
+                });
+                return `${affectedAgencies.size} (${vipAgencies.length} VIP)`;
+              })()}
+              icon={<MapPin className="h-4 w-4" />} 
+              description="Pontos com ocorrências"
+              isLoading={isLoading}
+            />
+          </div>
           
           {/* 6. MTTR */}
-          <MetricCard 
-            title="MTTR" 
-            value={(() => {
-              console.log('DEBUG - MTTR:', {
-                metrics: metrics,
-                avgMTTR: metrics?.avgMTTR,
-                fallback: "4.2h"
-              });
-              return metrics?.avgMTTR || "4.2h";
-            })()} 
-            icon={<Clock className="h-4 w-4" />} 
-            change="-0.3h desde ontem" 
-            changeType="positive" 
-            clickable={true}
-            onClick={() => handleNavigateToOccurrences('mttr')}
-          />
+          <div onClick={() => handleNavigateToOccurrences('mttr')} className="cursor-pointer">
+            <OptimizedMetricCard 
+              title="MTTR" 
+              value={metrics?.avgMTTR || "4.2h"}
+              icon={<Clock className="h-4 w-4" />} 
+              description="Tempo médio de resolução"
+              variant="success"
+              isLoading={isLoading}
+            />
+          </div>
         </div>
       </div>
 
