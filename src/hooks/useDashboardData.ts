@@ -43,8 +43,8 @@ export function useDashboardData() {
   const [occurrences, setOccurrences] = useState<OccurrenceData[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
-  // Dados mock mais realistas - Memoizado para performance
-  const generateMockData = useCallback(() => {
+  // Dados mock estáticos para garantir consistência entre navegações
+  const generateMockData = useMemo(() => {
     // Estrutura hierárquica completa
     const hierarchyStructure = [
       // SP - DINEG 2
@@ -113,37 +113,36 @@ export function useDashboardData() {
     // Gerar ocorrências baseadas na estrutura hierárquica
     hierarchyStructure.forEach((structure, groupIndex) => {
       structure.agencias.forEach((agencyNum, agencyIndex) => {
-        // Aumentar significativamente as ocorrências para agências terceirizadas
+        // Número fixo de ocorrências para garantir consistência
         let occurrenceCount;
         if (structure.tipo === 'terceirizada') {
-          occurrenceCount = Math.floor(Math.random() * 6) + 8; // 8-13 ocorrências (mais que o dobro)
+          occurrenceCount = 10; // Fixo para terceirizadas
         } else {
-          occurrenceCount = Math.floor(Math.random() * 4) + 4; // 4-7 ocorrências (padrão)
+          occurrenceCount = 5; // Fixo para outras
         }
         
         for (let i = 0; i < occurrenceCount; i++) {
-          // Alternar entre segmentos AA e AB para distribuição equilibrada
+          // Distribuição fixa entre segmentos AA e AB
           const segment = (i % 3 === 0) ? 'AB' : 'AA'; // 33% AB, 67% AA
           const equipmentList = equipmentsBySegment[segment];
-          const equipment = equipmentList[Math.floor(Math.random() * equipmentList.length)];
+          const equipment = equipmentList[i % equipmentList.length]; // Distribuição fixa
           
-          // Determinar fornecedor baseado no tipo e garantir distribuição
+          // Determinar fornecedor baseado no tipo
           let vendor: string;
           let transportadora: string | undefined;
           
           if (structure.tipo === 'terceirizada') {
-            // Para pontos terceirizados, definir transportadora
-            transportadora = transportadoras[Math.floor(Math.random() * transportadoras.length)];
-            vendor = fornecedoresPorTransportadora[transportadora][Math.floor(Math.random() * fornecedoresPorTransportadora[transportadora].length)];
+            // Para pontos terceirizados, definir transportadora de forma fixa
+            transportadora = transportadoras[groupIndex % transportadoras.length];
+            vendor = fornecedoresPorTransportadora[transportadora][i % fornecedoresPorTransportadora[transportadora].length];
           } else if (structure.tipo === 'convencional') {
-            // Para pontos convencionais, garantir dados para Express Logística + Fornecedor A
-            if (groupIndex % 3 === 0 || Math.random() < 0.3) { // 30% chance + garantia estrutural
+            // Para pontos convencionais, distribuição fixa
+            if (groupIndex % 3 === 0) {
               transportadora = 'Express Logística';
               vendor = 'Fornecedor A';
             } else {
-              // Alternar outras transportadoras
-              transportadora = transportadoras[Math.floor(Math.random() * transportadoras.length)];
-              vendor = fornecedoresPorTransportadora[transportadora][Math.floor(Math.random() * fornecedoresPorTransportadora[transportadora].length)];
+              transportadora = transportadoras[groupIndex % transportadoras.length];
+              vendor = fornecedoresPorTransportadora[transportadora][i % fornecedoresPorTransportadora[transportadora].length];
             }
           } else {
             // Para PAB/PAE usar fornecedores do segmento
@@ -154,32 +153,22 @@ export function useDashboardData() {
 
           const occurrenceId = `COPF-2024-${String(groupIndex + 1).padStart(2, '0')}-${agencyNum}-${String(i + 1).padStart(3, '0')}`;
           
-          const status = ['a_iniciar', 'em_andamento', 'encerrado', 'com_impedimentos', 'cancelado'][Math.floor(Math.random() * 5)] as ('a_iniciar' | 'em_andamento' | 'encerrado' | 'com_impedimentos' | 'cancelado');
-          const createdAt = new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000);
+          // Status fixo baseado no índice para consistência
+          const statuses = ['a_iniciar', 'em_andamento', 'encerrado', 'com_impedimentos', 'cancelado'];
+          const status = statuses[i % statuses.length] as ('a_iniciar' | 'em_andamento' | 'encerrado' | 'com_impedimentos' | 'cancelado');
           
-          // Gerar resolvedAt para ocorrências encerradas com distribuição Long Tail realística
+          // Data fixa baseada no índice
+          const daysAgo = (i % 7) + 1; // Entre 1 e 7 dias atrás
+          const createdAt = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000);
+          
+          // Gerar resolvedAt para ocorrências encerradas de forma fixa
           let resolvedAt: string | undefined;
           if (status === 'encerrado') {
-            // Distribuição Long Tail: maioria resolvida rápido, alguns outliers
-            const randomValue = Math.random();
-            let durationHours: number;
-            
-            if (randomValue < 0.4) { // 40% resolvidas em até 2h
-              durationHours = Math.random() * 2;
-            } else if (randomValue < 0.7) { // 30% entre 2-8h  
-              durationHours = 2 + Math.random() * 6;
-            } else if (randomValue < 0.9) { // 20% entre 8-24h
-              durationHours = 8 + Math.random() * 16;
-            } else if (randomValue < 0.98) { // 8% entre 1-5 dias
-              durationHours = 24 + Math.random() * 96;
-            } else { // 2% acima de 5 dias (Long do Long Tail)
-              durationHours = 120 + Math.random() * 240; // 5-15 dias
-            }
-            
+            const durationHours = (i % 48) + 1; // Entre 1 e 48 horas
             resolvedAt = new Date(createdAt.getTime() + durationHours * 60 * 60 * 1000).toISOString();
           }
 
-          // Descrições variadas baseadas no segmento
+          // Descrições fixas baseadas no segmento e índice
           const descriptions = {
             AA: [
               'ATM não está dispensando cédulas - erro de hardware na gaveta',
@@ -208,20 +197,27 @@ export function useDashboardData() {
             ]
           };
 
+          // Severidade fixa baseada no índice
+          const severities = ['critical', 'high', 'medium', 'low'];
+          const severity = severities[i % severities.length] as ('critical' | 'high' | 'medium' | 'low');
+
+          // Responsável fixo baseado no índice
+          const assignees = ['João Silva - NOC', 'Maria Santos - Facilities', 'Carlos Oliveira - Redes', 'Ana Costa - POS', 'Roberto Lima - Suporte'];
+
           mockOccurrences.push({
             id: occurrenceId,
             agency: `AG${agencyNum} - Centro (${structure.municipio})`,
             segment,
             equipment,
             serialNumber: `${segment}${String(i + 1).padStart(3, '0')}-${structure.estado}-${agencyNum}`,
-            description: descriptions[segment][Math.floor(Math.random() * descriptions[segment].length)],
-            severity: ['critical', 'high', 'medium', 'low'][Math.floor(Math.random() * 4)] as ('critical' | 'high' | 'medium' | 'low'),
+            description: descriptions[segment][i % descriptions[segment].length],
+            severity,
             status,
             createdAt: createdAt.toISOString(),
             resolvedAt,
-            assignedTo: ['João Silva - NOC', 'Maria Santos - Facilities', 'Carlos Oliveira - Redes', 'Ana Costa - POS', 'Roberto Lima - Suporte'][Math.floor(Math.random() * 5)],
+            assignedTo: assignees[i % assignees.length],
             vendor,
-            transportadora: transportadora, // Hierarquia: transportadora > fornecedor para terceirizados
+            transportadora: transportadora,
             tipoAgencia: structure.tipo,
             estado: structure.estado,
             municipio: structure.municipio,
@@ -238,12 +234,12 @@ export function useDashboardData() {
   useEffect(() => {
     // Simular carregamento inicial apenas
     const timer = setTimeout(() => {
-      setOccurrences(generateMockData())
+      setOccurrences(generateMockData)
       setIsLoading(false)
     }, 1000)
 
     return () => clearTimeout(timer)
-  }, []) // Dependência vazia para executar apenas na montagem
+  }, [generateMockData])
 
   // Dados processados para gráficos - Memoizados para performance
   const severityData: ChartData[] = useMemo(() => [
@@ -369,7 +365,7 @@ export function useDashboardData() {
     refreshData: useCallback(() => {
       setIsLoading(true)
       setTimeout(() => {
-        setOccurrences(generateMockData())
+        setOccurrences(generateMockData)
         setIsLoading(false)
       }, 500)
     }, [generateMockData])
