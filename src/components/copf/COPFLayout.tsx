@@ -40,7 +40,7 @@ export function COPFLayout({
       <div className="min-h-screen flex w-full bg-background">
         <COPFSidebar />
         
-        <div className="flex-1 flex flex-col min-w-0 pl-2">
+        <div className="flex-1 flex flex-col min-w-0 pl-6">
           {/* Header */}
           <header className="h-14 sm:h-16 border-b bg-gradient-to-r from-card/80 via-card/90 to-card/80 backdrop-blur-md sticky top-0 z-50 shadow-elegant">
             <div className="flex items-center justify-between h-full px-responsive">
@@ -115,7 +115,7 @@ export function COPFLayout({
           </main>
 
           {/* Footer */}
-          <footer className="border-t bg-gradient-to-r from-card/80 via-card/90 to-card/80 backdrop-blur-md ml-2">
+          <footer className="border-t bg-gradient-to-r from-card/80 via-card/90 to-card/80 backdrop-blur-md ml-6">
             <div className="px-responsive py-responsive-sm">
               <div className="flex flex-col sm:flex-row items-center justify-between gap-responsive-sm">
                 <div className="flex items-center gap-responsive-sm">
