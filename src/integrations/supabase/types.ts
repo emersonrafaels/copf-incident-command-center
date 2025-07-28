@@ -14,7 +14,87 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      occurrences: {
+        Row: {
+          agencia: string
+          created_at: string
+          data_limite_sla: string | null
+          data_ocorrencia: string
+          data_resolucao: string | null
+          descricao: string
+          equipamento: string
+          fornecedor: string
+          id: string
+          numero_serie: string
+          observacoes: string | null
+          override: boolean
+          prioridade: string
+          prioridade_fornecedor: string | null
+          reincidencia: boolean
+          segmento: string
+          severidade: string
+          status: string
+          supt: string
+          tipo_agencia: string
+          uf: string
+          updated_at: string
+          usuario_responsavel: string | null
+          vip: boolean
+        }
+        Insert: {
+          agencia: string
+          created_at?: string
+          data_limite_sla?: string | null
+          data_ocorrencia?: string
+          data_resolucao?: string | null
+          descricao: string
+          equipamento: string
+          fornecedor: string
+          id?: string
+          numero_serie: string
+          observacoes?: string | null
+          override?: boolean
+          prioridade: string
+          prioridade_fornecedor?: string | null
+          reincidencia?: boolean
+          segmento: string
+          severidade: string
+          status: string
+          supt: string
+          tipo_agencia: string
+          uf: string
+          updated_at?: string
+          usuario_responsavel?: string | null
+          vip?: boolean
+        }
+        Update: {
+          agencia?: string
+          created_at?: string
+          data_limite_sla?: string | null
+          data_ocorrencia?: string
+          data_resolucao?: string | null
+          descricao?: string
+          equipamento?: string
+          fornecedor?: string
+          id?: string
+          numero_serie?: string
+          observacoes?: string | null
+          override?: boolean
+          prioridade?: string
+          prioridade_fornecedor?: string | null
+          reincidencia?: boolean
+          segmento?: string
+          severidade?: string
+          status?: string
+          supt?: string
+          tipo_agencia?: string
+          uf?: string
+          updated_at?: string
+          usuario_responsavel?: string | null
+          vip?: boolean
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
