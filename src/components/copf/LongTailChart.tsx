@@ -632,25 +632,7 @@ export const LongTailChart = memo(function LongTailChart({
           <Collapsible open={!isGuideCollapsed} onOpenChange={open => setIsGuideCollapsed(!open)}>
             <Card className="bg-gradient-to-r from-info/5 to-info/10 border-info/20">
               <CollapsibleTrigger asChild>
-                <CardHeader className="pb-3 cursor-pointer hover:bg-info/5 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-start gap-3">
-                      <div className="p-2.5 rounded-xl bg-info/10">
-                        <Info className="h-5 w-5 text-info flex-shrink-0" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="text-lg font-semibold text-foreground mb-1 flex items-center gap-2">
-                          Guia de Interpretação
-                          <Badge variant="outline" className="text-xs">Interativo</Badge>
-                        </h4>
-                        <p className="text-sm text-muted-foreground">Como entender e usar os insights</p>
-                      </div>
-                    </div>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      {isGuideCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                </CardHeader>
+                
               </CollapsibleTrigger>
               
               <CollapsibleContent className="animate-accordion-down">
