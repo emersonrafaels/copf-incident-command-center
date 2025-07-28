@@ -256,22 +256,69 @@ export default function OcorrenciaDetalhes() {
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-64">
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <div className="flex items-start space-x-3 p-3 bg-muted rounded-md">
                       <div className="w-2 h-2 bg-primary rounded-full mt-2" />
                       <div className="flex-1">
-                        <p className="text-sm font-medium">Ocorrência criada</p>
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-medium">Ocorrência criada</p>
+                          <Badge variant="outline" className="text-xs">
+                            Abertura da Ocorrência
+                          </Badge>
+                        </div>
                         <p className="text-xs text-muted-foreground">
                           {formatDate(occurrence.createdAt)} • Sistema
                         </p>
                       </div>
                     </div>
+                    
                     <div className="flex items-start space-x-3 p-3 bg-muted rounded-md">
-                      <div className="w-2 h-2 bg-orange-500 rounded-full mt-2" />
+                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2" />
                       <div className="flex-1">
-                        <p className="text-sm font-medium">Atribuída ao fornecedor</p>
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-medium">Atribuída ao fornecedor</p>
+                          <Badge variant="secondary" className="text-xs">
+                            Mensagem (Sistema)
+                          </Badge>
+                        </div>
                         <p className="text-xs text-muted-foreground">
                           {formatDate(occurrence.createdAt)} • {occurrence.assignedTo}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start space-x-3 p-3 bg-muted rounded-md">
+                      <div className="w-2 h-2 bg-green-500 rounded-full mt-2" />
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-medium">Mensagem enviada ao fornecedor</p>
+                          <Badge variant="default" className="text-xs">
+                            Mensagem - Operação
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {formatDate(occurrence.createdAt)} • Operação COPF
+                        </p>
+                        <p className="text-xs text-gray-600 mt-1 italic">
+                          "Equipamento apresentando falha intermitente. Solicitamos verificação urgente."
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start space-x-3 p-3 bg-muted rounded-md">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full mt-2" />
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-medium">Resposta do fornecedor</p>
+                          <Badge variant="destructive" className="text-xs">
+                            Mensagem - Fornecedor
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {formatDate(occurrence.createdAt)} • {occurrence.vendor}
+                        </p>
+                        <p className="text-xs text-gray-600 mt-1 italic">
+                          "Técnico será enviado para verificação no período da tarde."
                         </p>
                       </div>
                     </div>
@@ -286,15 +333,22 @@ export default function OcorrenciaDetalhes() {
             {/* Prioridade */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center">
-                  <AlertTriangle className="h-5 w-5 mr-2" />
-                  Prioridade
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <AlertTriangle className="h-5 w-5 mr-2" />
+                    Prioridade
+                  </div>
+                  {!occurrence.prioritized && (
+                    <Badge variant="outline" className="text-orange-600 border-orange-600">
+                      Não Priorizada
+                    </Badge>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <Select value={selectedPriority} onValueChange={handlePriorityChange}>
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder="Selecionar prioridade..." />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="low">Baixa</SelectItem>
@@ -303,10 +357,15 @@ export default function OcorrenciaDetalhes() {
                     <SelectItem value="urgent">Urgente</SelectItem>
                   </SelectContent>
                 </Select>
-                <div className="mt-2">
+                <div className="mt-2 flex items-center justify-between">
                   <Badge variant={getPriorityVariant(selectedPriority)}>
                     {getPriorityLabel(selectedPriority)}
                   </Badge>
+                  {occurrence.prioritized && (
+                    <Badge variant="secondary" className="text-green-600">
+                      Priorizada
+                    </Badge>
+                  )}
                 </div>
               </CardContent>
             </Card>
