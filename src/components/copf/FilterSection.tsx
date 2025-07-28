@@ -50,15 +50,58 @@ export function FilterSection({ className, showSerialNumber = false }: FilterSec
     clearAllFilters
   } = useFilters();
 
-  // Obter equipamentos únicos dos dados reais
-  const uniqueEquipments = Array.from(new Set(occurrences.map(o => o.equipment))).sort();
+  // Mapeamento de equipamentos por segmento conforme especificação
+  const equipmentsBySegment = {
+    AA: [
+      'ATM Saque',
+      'ATM Depósito', 
+      'Cassete'
+    ],
+    AB: [
+      'Notebook',
+      'Desktop',
+      'Leitor de Cheques/documentos',
+      'Leitor biométrico',
+      'PIN PAD',
+      'Scanner de Cheque',
+      'Impressora',
+      'Impressora térmica',
+      'Impressora multifuncional',
+      'Monitor LCD/LED',
+      'Teclado',
+      'Servidor',
+      'Televisão',
+      'Senheiro',
+      'TCR',
+      'Classificadora',
+      'Fragmentadora de Papel'
+    ]
+  };
+
+  // Obter equipamentos únicos dos dados reais + equipamentos por segmento
+  const getFilteredEquipments = () => {
+    if (segmentFilterMulti.length === 0) {
+      // Quando nenhum segmento selecionado, mostrar todos os equipamentos possíveis
+      const allEquipments = Object.values(equipmentsBySegment).flat();
+      const dataEquipments = Array.from(new Set(occurrences.map(o => o.equipment)));
+      return Array.from(new Set([...allEquipments, ...dataEquipments])).sort();
+    } else {
+      const filteredEquipments = segmentFilterMulti.flatMap(segment => 
+        equipmentsBySegment[segment as 'AA' | 'AB'] || []
+      );
+      return Array.from(new Set(filteredEquipments)).sort();
+    }
+  };
+
+  const uniqueEquipments = getFilteredEquipments();
   const uniqueVendors = Array.from(new Set(occurrences.map(o => o.vendor))).sort();
 
   // Dados de transportadoras e seus fornecedores
   const transportadoraFornecedores = {
-    'Express Logística': ['Fornecedor A', 'Fornecedor B', 'Fornecedor C'],
-    'TechTransporte': ['Fornecedor D', 'Fornecedor E'],
-    'LogiCorp': ['Fornecedor F', 'Fornecedor G', 'Fornecedor H']
+    'Protege': ['STM', 'NCR', 'Diebold'],
+    'TBFort': ['Artis', 'Azmachi'],
+    'Prosegur': ['Lexmark', 'Nextvision'],
+    'Brinks': ['STM', 'Diebold', 'NCR']
   };
   const uniqueTransportadoras = Object.keys(transportadoraFornecedores);
 
