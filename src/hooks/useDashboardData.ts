@@ -59,14 +59,18 @@ const mapDatabaseToOccurrence = (dbRecord: any): OccurrenceData => {
     'critica': 'critical'
   }
 
-  // Determinar segmento baseado no equipamento
-  const isAASegment = dbRecord.equipamento?.toLowerCase().includes('atm') || 
-                     dbRecord.equipamento?.toLowerCase().includes('cassete')
+  // Mapear segmento do banco para AA/AB - ATM=AA (90%), POS=AB (10%)
+  const segmentMap: Record<string, OccurrenceData['segment']> = {
+    'atm': 'AA',
+    'pos': 'AB', 
+    'rede': 'AA',
+    'datacenter': 'AA'
+  }
   
   return {
     id: dbRecord.id,
     agency: `${dbRecord.agencia} - Centro`,
-    segment: isAASegment ? 'AA' : 'AB',
+    segment: segmentMap[dbRecord.segmento] || 'AB',
     equipment: dbRecord.equipamento,
     serialNumber: dbRecord.numero_serie,
     description: dbRecord.descricao,
