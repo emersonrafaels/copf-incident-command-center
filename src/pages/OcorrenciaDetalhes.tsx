@@ -183,12 +183,15 @@ export default function OcorrenciaDetalhes() {
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            <Badge variant={getSeverityVariant(occurrence.severity)}>
-              {getSeverityLabel(occurrence.severity)}
-            </Badge>
-            <Badge variant={occurrence.status === 'open' ? 'destructive' : 'default'}>
-              {occurrence.status === 'open' ? 'Aberta' : 'Fechada'}
-            </Badge>
+             <Badge variant={getSeverityVariant(occurrence.severity)}>
+               {getSeverityLabel(occurrence.severity)}
+             </Badge>
+             <Badge variant={occurrence.status === 'a_iniciar' || occurrence.status === 'em_andamento' ? 'destructive' : 'default'}>
+               {occurrence.status === 'a_iniciar' ? 'A Iniciar' : 
+                occurrence.status === 'em_andamento' ? 'Em Andamento' : 
+                occurrence.status === 'encerrado' ? 'Encerrada' : 
+                occurrence.status === 'com_impedimentos' ? 'Com Impedimentos' : 'Cancelada'}
+             </Badge>
           </div>
         </div>
 
@@ -203,32 +206,32 @@ export default function OcorrenciaDetalhes() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label className="font-medium">Agência</Label>
-                    <p className="text-sm">{occurrence.agencia}</p>
-                  </div>
-                  <div>
-                    <Label className="font-medium">UF</Label>
-                    <p className="text-sm">{occurrence.uf}</p>
-                  </div>
-                  <div>
-                    <Label className="font-medium">Equipamento</Label>
-                    <p className="text-sm">{occurrence.equipment}</p>
-                  </div>
-                  <div>
-                    <Label className="font-medium">Fornecedor</Label>
-                    <p className="text-sm">{occurrence.vendor}</p>
-                  </div>
-                  <div>
-                    <Label className="font-medium">Número de Série</Label>
-                    <p className="text-sm">{occurrence.serialNumber}</p>
-                  </div>
-                  <div>
-                    <Label className="font-medium">SLA</Label>
-                    <p className="text-sm">{formatDate(occurrence.slaDate)}</p>
-                  </div>
-                </div>
+                 <div className="grid grid-cols-2 gap-4">
+                   <div>
+                     <Label className="font-medium">Agência</Label>
+                     <p className="text-sm">{occurrence.agency}</p>
+                   </div>
+                   <div>
+                     <Label className="font-medium">UF</Label>
+                     <p className="text-sm">{occurrence.estado}</p>
+                   </div>
+                   <div>
+                     <Label className="font-medium">Equipamento</Label>
+                     <p className="text-sm">{occurrence.equipment}</p>
+                   </div>
+                   <div>
+                     <Label className="font-medium">Fornecedor</Label>
+                     <p className="text-sm">{occurrence.vendor}</p>
+                   </div>
+                   <div>
+                     <Label className="font-medium">Número de Série</Label>
+                     <p className="text-sm">{occurrence.serialNumber}</p>
+                   </div>
+                   <div>
+                     <Label className="font-medium">Abertura</Label>
+                     <p className="text-sm">{formatDate(occurrence.createdAt)}</p>
+                   </div>
+                 </div>
                 <Separator />
                 <div>
                   <Label className="font-medium">Descrição do Problema</Label>
