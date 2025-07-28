@@ -208,6 +208,55 @@ export function Dashboard() {
     return filtered;
   }, [occurrences, segmentFilterMulti, equipmentFilterMulti, statusFilterMulti, vendorFilterMulti, transportadoraFilterMulti, serialNumberFilter, agenciaFilter, ufFilter, tipoAgenciaFilter, pontoVipFilter, overrideFilter, vendorPriorityFilter]);
 
+  // Cálculos memoizados para garantir consistência com a página de ocorrências
+  const cardMetrics = useMemo(() => {
+    // 1. Total de ocorrências (já está correto)
+    const totalOccurrences = filteredOccurrences.length;
+
+    // 2. Ocorrências pendentes (A iniciar, Em andamento, Com Impedimentos)
+    const pendingOccurrences = filteredOccurrences.filter(o => 
+      o.status === 'a_iniciar' || o.status === 'em_andamento' || o.status === 'com_impedimentos'
+    ).length;
+
+    // 3. Reincidências - usar mesma lógica que será usada na página de ocorrências
+    const reincidentOccurrences = filteredOccurrences.reduce((count, occurrence, index) => {
+      const sameReasonEquipment = filteredOccurrences.filter((other, otherIndex) => 
+        otherIndex !== index &&
+        other.description === occurrence.description &&
+        other.equipment === occurrence.equipment &&
+        other.agency === occurrence.agency
+      );
+      
+      if (sameReasonEquipment.length > 0) {
+        const hasRecentRecurrence = sameReasonEquipment.some(other => {
+          const daysDiff = Math.abs(new Date(occurrence.createdAt).getTime() - new Date(other.createdAt).getTime()) / (1000 * 60 * 60 * 24);
+          return daysDiff <= 4;
+        });
+        
+        if (hasRecentRecurrence) {
+          return count + 1;
+        }
+      }
+      return count;
+    }, 0);
+
+    // 4. SLA em atraso - usar mesma lógica que será usada na página de ocorrências
+    const overdueOccurrences = filteredOccurrences.filter(o => {
+      if (o.status === 'encerrado') return false;
+      const createdDate = new Date(o.createdAt);
+      const hoursDiff = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60);
+      const slaLimit = o.severity === 'critical' || o.severity === 'high' ? 24 : 72;
+      return hoursDiff > slaLimit;
+    }).length;
+
+    return {
+      totalOccurrences,
+      pendingOccurrences,
+      reincidentOccurrences,
+      overdueOccurrences
+    };
+  }, [filteredOccurrences]);
+
   // Mapeamento de equipamentos por segmento
   const equipmentsBySegment = {
     AA: ['ATM Saque', 'ATM Depósito', 'Cassete'],
@@ -389,9 +438,9 @@ export function Dashboard() {
           {/* 1. Total de Ocorrências */}
           <MetricCard 
             title="Total de Ocorrências" 
-            value={filteredOccurrences.length.toString()} 
+            value={cardMetrics.totalOccurrences.toString()} 
             icon={<AlertTriangle className="h-4 w-4" />} 
-            change={`${Math.round(filteredOccurrences.length / occurrences.length * 100)}% do total`} 
+            change={`${Math.round(cardMetrics.totalOccurrences / occurrences.length * 100)}% do total`} 
             changeType="neutral" 
             clickable={true}
             onClick={() => handleNavigateToOccurrences('total')}
@@ -400,7 +449,7 @@ export function Dashboard() {
           {/* 2. Ocorrências Pendentes */}
           <MetricCard 
             title="Ocorrências Pendentes" 
-            value={filteredOccurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_andamento').length.toString()} 
+            value={cardMetrics.pendingOccurrences.toString()} 
             icon={<Clock className="h-4 w-4" />} 
             change="+12% desde ontem" 
             changeType="neutral" 
@@ -411,26 +460,7 @@ export function Dashboard() {
           {/* 3. Reincidências */}
           <MetricCard 
             title="Reincidências" 
-            value={filteredOccurrences.reduce((count, occurrence, index) => {
-              const sameReasonEquipment = filteredOccurrences.filter((other, otherIndex) => 
-                otherIndex !== index &&
-                other.description === occurrence.description &&
-                other.equipment === occurrence.equipment &&
-                other.agency === occurrence.agency
-              );
-              
-              if (sameReasonEquipment.length > 0) {
-                const hasRecentRecurrence = sameReasonEquipment.some(other => {
-                  const daysDiff = Math.abs(new Date(occurrence.createdAt).getTime() - new Date(other.createdAt).getTime()) / (1000 * 60 * 60 * 24);
-                  return daysDiff <= 4;
-                });
-                
-                if (hasRecentRecurrence) {
-                  return count + 1;
-                }
-              }
-              return count;
-            }, 0).toString()} 
+            value={cardMetrics.reincidentOccurrences.toString()}
             icon={<AlertTriangle className="h-4 w-4" />} 
             change="-5% desde ontem" 
             changeType="positive" 
@@ -441,13 +471,7 @@ export function Dashboard() {
           {/* 4. Ocorrências com SLA em atraso */}
           <MetricCard 
             title="SLA em Atraso" 
-            value={filteredOccurrences.filter(o => {
-              if (o.status === 'encerrado') return false;
-              const createdDate = new Date(o.createdAt);
-              const hoursDiff = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60);
-              const slaLimit = o.severity === 'critical' || o.severity === 'high' ? 24 : 72;
-              return hoursDiff > slaLimit;
-            }).length.toString()} 
+            value={cardMetrics.overdueOccurrences.toString()} 
             icon={<AlertTriangle className="h-4 w-4" />} 
             change="-8% desde ontem" 
             changeType="positive" 
