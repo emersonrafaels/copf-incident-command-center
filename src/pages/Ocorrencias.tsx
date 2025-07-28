@@ -14,10 +14,11 @@ import { useDashboardData } from "@/hooks/useDashboardData";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useFilters } from "@/contexts/FiltersContext";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import * as XLSX from 'xlsx';
 const Ocorrencias = () => {
+  const navigate = useNavigate();
   const {
     occurrences,
     isLoading
@@ -724,17 +725,9 @@ const Ocorrencias = () => {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-48">
-                                <DropdownMenuItem onClick={() => handlePrioritize(occurrence, 'priority_only')}>
-                                  <Zap className="mr-2 h-4 w-4" />
-                                  Apenas Priorizar
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handlePrioritize(occurrence, 'priority_with_message')}>
+                                <DropdownMenuItem onClick={() => navigate(`/ocorrencia/${occurrence.id}`)}>
                                   <MessageSquare className="mr-2 h-4 w-4" />
-                                  Priorizar + Mensagem
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleSendMessage(occurrence)}>
-                                  <MessageSquare className="mr-2 h-4 w-4" />
-                                  Apenas Mensagem
+                                  Gerenciar Ocorrência
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>

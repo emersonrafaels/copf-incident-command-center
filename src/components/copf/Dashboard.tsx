@@ -46,7 +46,7 @@ export function Dashboard() {
   const { toast: toastHook } = useToast();
   const [selectedOccurrence, setSelectedOccurrence] = useState<any>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [filterPeriod, setFilterPeriod] = useState('30-days');
+  const [filterPeriod, setFilterPeriod] = useState('7-days');
   const [customDateRange, setCustomDateRange] = useState<{
     from?: Date;
     to?: Date;
