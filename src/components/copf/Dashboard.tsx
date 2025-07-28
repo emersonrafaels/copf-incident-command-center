@@ -118,56 +118,75 @@ export function Dashboard() {
 
   // Handlers para navegar com filtros específicos
   const handleNavigateToOccurrences = (filter: 'total' | 'pending' | 'reincidence' | 'overdue' | 'agencies' | 'mttr' | 'entered-today' | 'due-today' | 'overdue-today') => {
+    // Preservar filtros atuais que devem ser mantidos
+    const currentSegmentFilter = filters.segmentFilterMulti;
+    const currentEquipmentFilter = filters.equipmentFilterMulti;
+    const currentVendorFilter = filters.vendorFilterMulti;
+    const currentTransportadoraFilter = filters.transportadoraFilterMulti;
+    const currentSeverityFilter = filters.severityFilterMulti;
+    const currentAgenciaFilter = filters.agenciaFilter;
+    const currentUfFilter = filters.ufFilter;
+    const currentSerialFilter = filters.serialNumberFilter;
+    
+    // Limpar filtros específicos que serão substituídos
     filters.clearAllFilters();
     
     setTimeout(() => {
+      // Restaurar filtros de contexto que devem ser preservados
+      if (currentSegmentFilter.length > 0) filters.updateFilter('segmentFilterMulti', currentSegmentFilter);
+      if (currentEquipmentFilter.length > 0) filters.updateFilter('equipmentFilterMulti', currentEquipmentFilter);
+      if (currentVendorFilter.length > 0) filters.updateFilter('vendorFilterMulti', currentVendorFilter);
+      if (currentTransportadoraFilter.length > 0) filters.updateFilter('transportadoraFilterMulti', currentTransportadoraFilter);
+      if (currentSeverityFilter.length > 0) filters.updateFilter('severityFilterMulti', currentSeverityFilter);
+      if (currentAgenciaFilter.length > 0) filters.updateFilter('agenciaFilter', currentAgenciaFilter);
+      if (currentUfFilter.length > 0) filters.updateFilter('ufFilter', currentUfFilter);
+      if (currentSerialFilter) filters.updateFilter('serialNumberFilter', currentSerialFilter);
+      
+      // Aplicar filtros específicos do card clicado
       switch (filter) {
         case 'total':
-          // Sem filtros específicos - mostra todas
-          navigate('/ocorrencias');
+          // Sem filtros específicos adicionais - mantém apenas os filtros já aplicados
           break;
         case 'pending':
           filters.updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento', 'com_impedimentos']);
-          navigate('/ocorrencias');
           break;
         case 'reincidence':
           filters.updateFilter('reincidentFilter', true);
-          navigate('/ocorrencias');
           break;
         case 'overdue':
           filters.updateFilter('overrideFilter', true);
           filters.updateFilter('statusSlaFilter', ['vencido']);
-          navigate('/ocorrencias');
           break;
         case 'entered-today':
-          // Navegar diretamente com filtro via state para data de abertura = hoje
+          // Navegar com filtro específico via state
           navigate('/ocorrencias', { 
             state: { filterType: 'entered-today' } 
           });
-          break;
+          return; // Early return para evitar navegação dupla
         case 'due-today':
-          // Navegar diretamente com filtro via state para SLA vence hoje
+          // Navegar com filtro específico via state
           navigate('/ocorrencias', { 
             state: { filterType: 'due-today' } 
           });
-          break;
+          return; // Early return para evitar navegação dupla
         case 'overdue-today':
-          // Navegar diretamente com filtro via state para SLA vencido
+          // Navegar com filtro específico via state
           navigate('/ocorrencias', { 
             state: { filterType: 'overdue-today' } 
           });
-          break;
+          return; // Early return para evitar navegação dupla
         case 'agencies':
-          // Sem filtros específicos - mostra todas
-          navigate('/ocorrencias');
+          // Sem filtros específicos adicionais - mantém apenas os filtros já aplicados
           break;
         case 'mttr':
           filters.updateFilter('statusFilterMulti', ['encerrado']);
-          navigate('/ocorrencias');
           break;
       }
+      
+      // Navegar para a página de ocorrências
+      navigate('/ocorrencias');
       toast('Filtros aplicados - navegando para página de ocorrências');
-    }, 100);
+    }, 50);
   };
 
   // Filtrar ocorrências - Memoizado para performance
