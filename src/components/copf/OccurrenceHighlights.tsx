@@ -76,25 +76,28 @@ export function OccurrenceHighlights({
 
   const highlights = useMemo(() => {
     const today = new Date();
+    const startOfToday = startOfDay(today);
+    const endOfToday = endOfDay(today);
 
-    // Ocorrências que entraram hoje - usando isSameDay para comparação precisa
+    // Ocorrências que entraram hoje - filtro exato por data de abertura
     const enteredToday = occurrences.filter(occ => {
       const createdDate = new Date(occ.createdAt);
-      return isSameDay(createdDate, today);
+      return createdDate >= startOfToday && createdDate <= endOfToday;
     });
 
-    // Ocorrências que vencem hoje (em andamento e que ainda não venceram)
+    // Ocorrências que vencem hoje - SLA vence hoje (independente do status, exceto encerradas/canceladas)
     const dueToday = occurrences.filter(occ => {
       if (occ.status === 'encerrado' || occ.status === 'cancelado') return false;
       const sla = calculateSLA(occ);
-      return isSameDay(sla.endDate, today) && !sla.isExpired;
+      const slaEndDate = new Date(sla.endDate);
+      return slaEndDate >= startOfToday && slaEndDate <= endOfToday;
     });
 
-    // Ocorrências vencidas (todas não encerradas que estão vencidas)
+    // Ocorrências em atraso - SLA vencido (status SLA = "Vencido")
     const overdueOccurrences = occurrences.filter(occ => {
       if (occ.status === 'encerrado' || occ.status === 'cancelado') return false;
       const sla = calculateSLA(occ);
-      return sla.isExpired;
+      return sla.isExpired; // SLA vencido
     }).sort((a, b) => {
       const slaA = calculateSLA(a);
       const slaB = calculateSLA(b);
