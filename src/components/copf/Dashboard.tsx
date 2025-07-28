@@ -67,6 +67,7 @@ export function Dashboard() {
     serialNumberFilter,
     overrideFilter,
     vendorPriorityFilter,
+    reincidentFilter,
     hasActiveFilters,
     filterPeriod,
     customDateRange,
@@ -215,15 +216,27 @@ export function Dashboard() {
         if (!isOverdue) return false;
       }
 
-      // Filtro de priorizadas com fornecedor
+      // Filtro de reincidências (simular campo reincidencia)
+      if (reincidentFilter) {
+        // Lógica simplificada: equipamentos com mais de uma ocorrência na mesma agência
+        const hasReincidence = occurrences.some(other => 
+          other.id !== occurrence.id &&
+          other.equipment === occurrence.equipment && 
+          other.agency === occurrence.agency
+        );
+        if (!hasReincidence) return false;
+      }
+
+      // Filtro de priorizadas com fornecedor (simular campo prioridade_fornecedor)
       if (vendorPriorityFilter) {
-        const isHighPriority = occurrence.severity === 'critical' || occurrence.severity === 'high';
-        if (!isHighPriority) return false;
+        // Lógica simplificada: ocorrências críticas ou altas como prioridade P1
+        const isPriorityP1 = occurrence.severity === 'critical' || occurrence.severity === 'high';
+        if (!isPriorityP1) return false;
       }
       return true;
     });
     return filtered;
-  }, [occurrences, segmentFilterMulti, equipmentFilterMulti, statusFilterMulti, vendorFilterMulti, transportadoraFilterMulti, serialNumberFilter, agenciaFilter, ufFilter, tipoAgenciaFilter, pontoVipFilter, overrideFilter, vendorPriorityFilter]);
+  }, [occurrences, segmentFilterMulti, equipmentFilterMulti, statusFilterMulti, vendorFilterMulti, transportadoraFilterMulti, serialNumberFilter, agenciaFilter, ufFilter, tipoAgenciaFilter, pontoVipFilter, overrideFilter, vendorPriorityFilter, reincidentFilter]);
 
   // Cálculos memoizados para garantir consistência com a página de ocorrências
   const cardMetrics = useMemo(() => {

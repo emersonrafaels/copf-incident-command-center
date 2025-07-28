@@ -1,12 +1,12 @@
 import React, { memo, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, ReferenceLine, Cell, LabelList } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, ReferenceLine, Cell, LabelList, Tooltip } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { TooltipContent as UITooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { OperationalNarrativeCard } from './OperationalNarrativeCard';
@@ -280,12 +280,15 @@ export const LongTailChart = memo(function LongTailChart({
   const agenciesStackedData = useMemo(() => {
     const sourceOccurrences = filteredOccurrences || occurrences;
     
+    if (sourceOccurrences.length === 0) return [];
+    
     // Agrupar por agência
     const agencyGroups = sourceOccurrences.reduce((groups, occ) => {
-      if (!groups[occ.agency]) {
-        groups[occ.agency] = [];
+      const agencyName = occ.agency || 'Não informado';
+      if (!groups[agencyName]) {
+        groups[agencyName] = [];
       }
-      groups[occ.agency].push(occ);
+      groups[agencyName].push(occ);
       return groups;
     }, {} as Record<string, OccurrenceData[]>);
 
@@ -312,7 +315,7 @@ export const LongTailChart = memo(function LongTailChart({
       .map(([equipment]) => equipment);
 
     // Processar dados para stacked chart
-    return agenciesWithCount.map(({ agencia, total, occurrences }) => {
+    const chartData = agenciesWithCount.map(({ agencia, total, occurrences }) => {
       // Agrupar por equipamento
       const equipmentCounts = occurrences.reduce((counts, occ) => {
         const equipment = occ.equipment || 'Não informado';
@@ -324,18 +327,22 @@ export const LongTailChart = memo(function LongTailChart({
         return counts;
       }, {} as Record<string, number>);
 
-      // Converter para valores absolutos (não percentuais para melhor visualização)
+      // Criar objeto com todos os equipamentos (mesmo se zero)
       const equipmentData: Record<string, number> = {};
       [...topEquipments, 'Outros'].forEach((equipment) => {
         equipmentData[equipment] = equipmentCounts[equipment] || 0;
       });
 
       return {
-        agencia: agencia.length > 15 ? agencia.substring(0, 15) + '...' : agencia,
+        agencia: agencia.length > 20 ? agencia.substring(0, 17) + '...' : agencia,
+        agenciaCompleta: agencia,
         total,
         ...equipmentData
       };
     });
+
+    console.log('Agencies Stacked Data:', chartData);
+    return chartData;
   }, [occurrences, filteredOccurrences]);
 
   // Obter equipamentos únicos para o gráfico stacked (top 5 + outros)
@@ -461,7 +468,7 @@ export const LongTailChart = memo(function LongTailChart({
               </div>
               <div className="w-px h-6 bg-border"></div>
               
-              <Tooltip>
+              <UITooltipContent>
                 <TooltipTrigger asChild>
                   <div className="flex items-center gap-2 cursor-help">
                     <div className="w-2 h-2 rounded-full bg-muted-foreground"></div>
@@ -470,14 +477,14 @@ export const LongTailChart = memo(function LongTailChart({
                     <Info className="h-3 w-3 text-muted-foreground" />
                   </div>
                 </TooltipTrigger>
-                <TooltipContent>
+                <UITooltipContent>
                   <p>50% das ocorrências estão em aberto há até {formatHours(timeRangeAnalysis.metrics.tempoMediano)}</p>
-                </TooltipContent>
-              </Tooltip>
+                </UITooltipContent>
+              </UITooltipContent>
               
               <div className="w-px h-6 bg-border"></div>
               
-              <Tooltip>
+              <UITooltipContent>
                 <TooltipTrigger asChild>
                   <div className="flex items-center gap-2 cursor-help">
                     <div className="w-2 h-2 rounded-full bg-success"></div>
@@ -486,14 +493,14 @@ export const LongTailChart = memo(function LongTailChart({
                     <Info className="h-3 w-3 text-muted-foreground" />
                   </div>
                 </TooltipTrigger>
-                <TooltipContent>
+                <UITooltipContent>
                   <p>Percentual de ocorrências resolvidas rapidamente (≤8h)</p>
-                </TooltipContent>
-              </Tooltip>
+                </UITooltipContent>
+              </UITooltipContent>
               
               <div className="w-px h-6 bg-border"></div>
               
-              <Tooltip>
+              <UITooltipContent>
                 <TooltipTrigger asChild>
                   <div className="flex items-center gap-2 cursor-help">
                     <div className="w-2 h-2 rounded-full bg-destructive"></div>
@@ -502,10 +509,10 @@ export const LongTailChart = memo(function LongTailChart({
                     <Info className="h-3 w-3 text-muted-foreground" />
                   </div>
                 </TooltipTrigger>
-                <TooltipContent>
+                <UITooltipContent>
                   <p>Ocorrências em aberto há mais de 3 dias (72 horas)</p>
-                </TooltipContent>
-              </Tooltip>
+                </UITooltipContent>
+              </UITooltipContent>
             </TooltipProvider>
           </div>
         </CardHeader>
@@ -898,6 +905,13 @@ export const LongTailChart = memo(function LongTailChart({
           </CardHeader>
           
           <CardContent className="p-4">
+            <div className="mb-4 text-sm text-muted-foreground">
+              {agenciesStackedData.length > 0 ? 
+                `Mostrando ${agenciesStackedData.length} agências` : 
+                'Nenhum dado encontrado'
+              }
+            </div>
+
             <ChartContainer config={chartConfig} className="h-[500px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart 
@@ -906,30 +920,30 @@ export const LongTailChart = memo(function LongTailChart({
                   margin={{
                     top: 20,
                     right: 30,
-                    left: 100,
+                    left: 120,
                     bottom: 50
                   }}
                 >
                   <CartesianGrid strokeDasharray="2 2" stroke="hsl(var(--border))" opacity={0.3} />
-                   <XAxis 
-                     type="number"
-                     stroke="hsl(var(--muted-foreground))" 
-                     tick={{
-                       fill: 'hsl(var(--muted-foreground))',
+                  <XAxis 
+                    type="number"
+                    stroke="hsl(var(--muted-foreground))" 
+                    tick={{
+                      fill: 'hsl(var(--muted-foreground))',
                       fontSize: 11,
                       fontWeight: 500
-                     }}
-                     label={{
-                       value: 'Quantidade de Ocorrências',
-                       position: 'insideBottom',
-                       offset: -5,
-                       style: {
-                         textAnchor: 'middle',
-                         fill: 'hsl(var(--foreground))',
-                         fontSize: '12px',
-                         fontWeight: 600
-                       }
-                     }}
+                    }}
+                    label={{
+                      value: 'Quantidade de Ocorrências',
+                      position: 'insideBottom',
+                      offset: -5,
+                      style: {
+                        textAnchor: 'middle',
+                        fill: 'hsl(var(--foreground))',
+                        fontSize: '12px',
+                        fontWeight: 600
+                      }
+                    }}
                   />
                   <YAxis 
                     type="category"
@@ -940,50 +954,46 @@ export const LongTailChart = memo(function LongTailChart({
                       fontSize: 10,
                       fontWeight: 500
                     }}
-                    width={90}
+                    width={110}
                   />
                   
-                  <ChartTooltipContent 
-                    formatter={(value, name, props) => {
-                      const agencia = props.payload?.agencia;
-                      const total = props.payload?.total;
-                      return [
-                        <div key="tooltip-content" className="space-y-2 min-w-[200px]">
-                          <div className="border-b border-border pb-2">
-                            <div className="font-bold text-base">{agencia}</div>
-                            <div className="text-sm text-muted-foreground">
-                              Total: {total} ocorrências
+                  <Tooltip
+                    content={({ active, payload, label }) => {
+                      if (!active || !payload || payload.length === 0) return null;
+                      
+                      const data = payload[0]?.payload;
+                      return (
+                        <div className="bg-background border border-border rounded-lg p-3 shadow-lg">
+                          <p className="font-semibold text-foreground mb-2">
+                            {data?.agenciaCompleta || label}
+                          </p>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Total: {data?.total} ocorrências
+                          </p>
+                          {payload
+                            .filter(entry => Number(entry.value) > 0)
+                            .map((entry, index) => (
+                            <div key={index} className="flex items-center gap-2 text-sm">
+                              <div 
+                                className="w-3 h-3 rounded-sm" 
+                                style={{ backgroundColor: entry.color }}
+                              />
+                              <span>{entry.dataKey}: {entry.value}</span>
                             </div>
-                          </div>
-                          
-                           <div className="space-y-1">
-                             <div className="text-sm font-medium text-foreground">Equipamento: {name}</div>
-                             <div className="text-sm text-muted-foreground">{value} ocorrências</div>
-                          </div>
-                        </div>,
-                        ''
-                      ];
-                    }}
-                    labelFormatter={() => ''}
-                    contentStyle={{
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '12px',
-                      boxShadow: '0 12px 32px -8px hsl(var(--primary) / 0.25)',
-                      padding: '16px',
-                      maxWidth: '300px'
+                          ))}
+                        </div>
+                      );
                     }}
                   />
                   
-                   {stackedEquipments.map((equipment, index) => (
-                     <Bar
-                       key={equipment}
-                       dataKey={equipment}
-                       stackId="equipment"
-                       fill={stackedEquipmentColors[equipment]}
-                       radius={index === 0 ? [4, 0, 0, 4] : index === stackedEquipments.length - 1 ? [0, 4, 4, 0] : [0, 0, 0, 0]}
-                     />
-                   ))}
+                  {stackedEquipments && stackedEquipments.length > 0 && stackedEquipments.map((equipment, index) => (
+                    <Bar
+                      key={equipment}
+                      dataKey={equipment}
+                      stackId="equipment"
+                      fill={stackedEquipmentColors[equipment] || '#8b5cf6'}
+                    />
+                  ))}
                 </BarChart>
               </ResponsiveContainer>
             </ChartContainer>

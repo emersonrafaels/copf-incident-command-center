@@ -50,27 +50,8 @@ export function FilterSection({ className, showSerialNumber = false }: FilterSec
     clearAllFilters
   } = useFilters();
 
-  // Mapeamento de equipamentos por segmento
-  const equipmentsBySegment = {
-    AA: ['ATM Saque', 'ATM Depósito', 'Cassete'],
-    AB: ['Notebook', 'Desktop', 'Leitor de Cheques/documentos', 'Leitor biométrico', 'PIN PAD', 'Scanner de Cheque', 'Impressora', 'Impressora térmica', 'Impressora multifuncional', 'Monitor LCD/LED', 'Teclado', 'Servidor', 'Televisão', 'Senheiro', 'TCR', 'Classificadora', 'Fragmentadora de Papel']
-  };
-
-  // Obter equipamentos únicos baseado no segmento selecionado
-  const getFilteredEquipments = () => {
-    if (segmentFilterMulti.length === 0) {
-      // Quando nenhum segmento selecionado, mostrar todos os equipamentos possíveis
-      const allEquipments = Object.values(equipmentsBySegment).flat();
-      return Array.from(new Set(allEquipments)).sort();
-    } else {
-      const filteredEquipments = segmentFilterMulti.flatMap(segment => 
-        equipmentsBySegment[segment as 'AA' | 'AB'] || []
-      );
-      return Array.from(new Set(filteredEquipments)).sort();
-    }
-  };
-
-  const uniqueEquipments = getFilteredEquipments();
+  // Obter equipamentos únicos dos dados reais
+  const uniqueEquipments = Array.from(new Set(occurrences.map(o => o.equipment))).sort();
   const uniqueVendors = Array.from(new Set(occurrences.map(o => o.vendor))).sort();
 
   // Dados de transportadoras e seus fornecedores
