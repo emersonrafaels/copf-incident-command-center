@@ -59,7 +59,9 @@ export function FilterSection({ className, showSerialNumber = false }: FilterSec
   // Obter equipamentos únicos baseado no segmento selecionado
   const getFilteredEquipments = () => {
     if (segmentFilterMulti.length === 0) {
-      return Array.from(new Set(occurrences.map(o => o.equipment))).sort();
+      // Quando nenhum segmento selecionado, mostrar todos os equipamentos possíveis
+      const allEquipments = Object.values(equipmentsBySegment).flat();
+      return Array.from(new Set(allEquipments)).sort();
     } else {
       const filteredEquipments = segmentFilterMulti.flatMap(segment => 
         equipmentsBySegment[segment as 'AA' | 'AB'] || []
