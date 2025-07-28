@@ -76,28 +76,35 @@ export function OccurrenceHighlights({
 
   const highlights = useMemo(() => {
     const today = new Date();
-    const startOfToday = startOfDay(today);
-    const endOfToday = endOfDay(today);
 
-    // Ocorrências que entraram hoje - filtro exato por data de abertura
+    // Ocorrências que entraram hoje - mesma lógica da página de ocorrências
     const enteredToday = occurrences.filter(occ => {
-      const createdDate = new Date(occ.createdAt);
-      return createdDate >= startOfToday && createdDate <= endOfToday;
+      const occCreatedDate = new Date(occ.createdAt);
+      return today.toDateString() === occCreatedDate.toDateString();
     });
 
-    // Ocorrências que vencem hoje - SLA vence hoje (independente do status, exceto encerradas/canceladas)
+    // Ocorrências que vencem hoje - mesma lógica da página de ocorrências
     const dueToday = occurrences.filter(occ => {
-      if (occ.status === 'encerrado' || occ.status === 'cancelado') return false;
-      const sla = calculateSLA(occ);
-      const slaEndDate = new Date(sla.endDate);
-      return slaEndDate >= startOfToday && slaEndDate <= endOfToday;
+      const occCreatedDate = new Date(occ.createdAt);
+      const slaLimit = occ.severity === 'critical' || occ.severity === 'high' ? 24 : 72;
+      const slaEndDate = new Date(occCreatedDate.getTime() + slaLimit * 60 * 60 * 1000);
+      
+      const isDueToday = slaEndDate.toDateString() === new Date().toDateString();
+      const isNotCompleted = occ.status !== 'encerrado' && occ.status !== 'cancelado';
+      
+      return isDueToday && isNotCompleted;
     });
 
-    // Ocorrências em atraso - SLA vencido (status SLA = "Vencido")
+    // Ocorrências em atraso - mesma lógica da página de ocorrências
     const overdueOccurrences = occurrences.filter(occ => {
-      if (occ.status === 'encerrado' || occ.status === 'cancelado') return false;
-      const sla = calculateSLA(occ);
-      return sla.isExpired; // SLA vencido
+      const occCreatedDate = new Date(occ.createdAt);
+      const hoursDiff = (Date.now() - occCreatedDate.getTime()) / (1000 * 60 * 60);
+      const slaLimit = occ.severity === 'critical' || occ.severity === 'high' ? 24 : 72;
+      
+      const isNotCompleted = occ.status !== 'encerrado' && occ.status !== 'cancelado';
+      const isOverdue = hoursDiff > slaLimit;
+      
+      return isNotCompleted && isOverdue;
     }).sort((a, b) => {
       const slaA = calculateSLA(a);
       const slaB = calculateSLA(b);
