@@ -174,12 +174,15 @@ export function useDashboardData() {
           const statuses = ['a_iniciar', 'em_andamento', 'encerrado', 'com_impedimentos', 'cancelado'];
           const status = statuses[i % statuses.length] as ('a_iniciar' | 'em_andamento' | 'encerrado' | 'com_impedimentos' | 'cancelado');
           
-          // Data baseada no período e índice
+          // Data baseada no período e índice com algumas ocorrências criadas hoje
           const maxDaysAgo = filterPeriod === '1-day' ? 1 : 
                             filterPeriod === '7-days' ? 7 :
                             filterPeriod === '30-days' ? 30 :
                             filterPeriod === '90-days' ? 90 : 365;
-          const daysAgo = (i % maxDaysAgo) + 1;
+          
+          // 20% das ocorrências criadas hoje (índices 0, 5, 10, etc.)
+          const isCreatedToday = i % 5 === 0;
+          const daysAgo = isCreatedToday ? 0 : (i % maxDaysAgo) + 1;
           const createdAt = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000);
           
           // Gerar resolvedAt para ocorrências encerradas de forma fixa
@@ -248,6 +251,23 @@ export function useDashboardData() {
         }
       });
     });
+
+    // Adicionar algumas ocorrências reincidentes (10% do total)
+    const reincidenceCount = Math.max(2, Math.round(mockOccurrences.length * 0.1));
+    for (let i = 0; i < reincidenceCount; i++) {
+      const originalOccurrence = mockOccurrences[i % mockOccurrences.length];
+      
+      // Criar reincidência com dados similares mas datas diferentes
+      const reincidenceOccurrence = {
+        ...originalOccurrence,
+        id: `${originalOccurrence.id}-REC`,
+        createdAt: new Date(Date.now() - Math.random() * 3 * 24 * 60 * 60 * 1000).toISOString(), // Até 3 dias atrás
+        status: ['a_iniciar', 'em_andamento', 'com_impedimentos'][Math.floor(Math.random() * 3)] as 'a_iniciar' | 'em_andamento' | 'com_impedimentos',
+        resolvedAt: undefined
+      };
+      
+      mockOccurrences.push(reincidenceOccurrence);
+    }
 
     return mockOccurrences;
   }, [filterPeriod])
