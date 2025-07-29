@@ -36,7 +36,8 @@ export default function OcorrenciaDetalhes() {
     console.log('Procurando ocorrência com ID:', id);
     console.log('Ocorrências disponíveis:', occurrences?.length);
     if (occurrences && id) {
-      const found = occurrences.find(occ => occ.id === id);
+      // Buscar por ID real ou displayId
+      const found = occurrences.find(occ => occ.id === id || occ.displayId === id);
       console.log('Ocorrência encontrada:', found);
       setOccurrence(found);
       if (found) {

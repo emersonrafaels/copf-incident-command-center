@@ -35,7 +35,7 @@ const defaultMessages: Message[] = [
     content: 'Técnico especializado foi despachado para o local. Previsão de chegada: 25 minutos. Contato: (11) 99999-1234',
     category: 'response',
     sender: 'Diebold Nixdorf',
-    occurrenceId: 'COPF-2024-01-0001-001',
+    occurrenceId: '005a5717-dd52-463f-adfc-76fc27dfdff7',
     timestamp: new Date(Date.now() - 15 * 60 * 1000), // 15 min atrás
     isRead: false,
     priority: 'high'
@@ -47,7 +47,7 @@ const defaultMessages: Message[] = [
     content: 'Ocorrência resolvida com sucesso. Scanner de documentos testado e funcionando normalmente. Documentação técnica anexada.',
     category: 'resolution',
     sender: 'Dell Technologies',
-    occurrenceId: 'COPF-2024-02-1001-005',
+    occurrenceId: '9e3afd55-7042-476e-8cfc-c55cd0c9f288',
     timestamp: new Date(Date.now() - 45 * 60 * 1000), // 45 min atrás
     isRead: false,
     priority: 'medium'
@@ -59,7 +59,7 @@ const defaultMessages: Message[] = [
     content: 'Devido à complexidade do problema no servidor, solicitamos extensão do SLA em 3 horas. Equipe especializada de infraestrutura foi acionada.',
     category: 'escalation',
     sender: 'HP',
-    occurrenceId: 'COPF-2024-03-2001-012',
+    occurrenceId: '2eb390bf-d10f-4435-830d-75e6a1c2e846',
     timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2h atrás
     isRead: true,
     priority: 'critical'
@@ -71,7 +71,7 @@ const defaultMessages: Message[] = [
     content: 'Diagnóstico concluído. Problema na impressora térmica requer substituição do mecanismo de impressão. Peça será entregue em 4 horas.',
     category: 'status',
     sender: 'Epson',
-    occurrenceId: 'COPF-2024-01-0015-003',
+    occurrenceId: 'd6e3b297-6ba5-46e2-a971-d9881c70c60f',
     timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000), // 3h atrás
     isRead: true,
     priority: 'medium'
@@ -83,7 +83,7 @@ const defaultMessages: Message[] = [
     content: 'Recebemos a ocorrência de falha no monitor LCD. Nossa equipe técnica está investigando remotamente. Previsão de diagnóstico em 20 minutos.',
     category: 'response',
     sender: 'Lenovo',
-    occurrenceId: 'COPF-2024-02-1070-008',
+    occurrenceId: '82fae9a2-ad13-44db-8080-c220cbcc9f09',
     timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000), // 4h atrás
     isRead: true,
     priority: 'high'
