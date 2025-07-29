@@ -46,6 +46,7 @@ export function FilterSection({ className, showSerialNumber = false }: FilterSec
     reincidentFilter,
     statusSlaFilter,
     longTailFilter,
+    motivoFilter,
     hasActiveFilters,
     updateFilter,
     clearAllFilters
@@ -221,7 +222,8 @@ export function FilterSection({ className, showSerialNumber = false }: FilterSec
                         vencidas: overrideFilter,
                         priorizado: vendorPriorityFilter,
                         reincidentes: reincidentFilter,
-                        longTail: longTailFilter.length > 0
+                        longTail: longTailFilter.length > 0,
+                        motivo: motivoFilter.length > 0
                       }).filter(Boolean).length} filtro{Object.values({
                         agencia: agenciaFilter.length > 0,
                         uf: ufFilter.length > 0,
@@ -241,7 +243,8 @@ export function FilterSection({ className, showSerialNumber = false }: FilterSec
                         vencidas: overrideFilter,
                         priorizado: vendorPriorityFilter,
                         reincidentes: reincidentFilter,
-                        longTail: longTailFilter.length > 0
+                        longTail: longTailFilter.length > 0,
+                        motivo: motivoFilter.length > 0
                       }).filter(Boolean).length !== 1 ? 's' : ''} ativo{Object.values({
                         agencia: agenciaFilter.length > 0,
                         uf: ufFilter.length > 0,
@@ -261,7 +264,8 @@ export function FilterSection({ className, showSerialNumber = false }: FilterSec
                         vencidas: overrideFilter,
                         priorizado: vendorPriorityFilter,
                         reincidentes: reincidentFilter,
-                        longTail: longTailFilter.length > 0
+                        longTail: longTailFilter.length > 0,
+                        motivo: motivoFilter.length > 0
                       }).filter(Boolean).length !== 1 ? 's' : ''}
                     </Badge>
                     <Button
@@ -1202,8 +1206,66 @@ export function FilterSection({ className, showSerialNumber = false }: FilterSec
                              </Command>
                            </PopoverContent>
                          </Popover>
-                       </div>
-                     </div>
+                        </div>
+
+                        {/* Motivo da Ocorrência */}
+                        <div className="group space-y-3">
+                          <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                            <div className="w-1 h-4 bg-amber-500/60 rounded-full"></div>
+                            Motivo da Ocorrência
+                          </Label>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button variant="outline" className="w-full h-10 justify-between hover:bg-amber-500/5 hover:border-amber-500/30 transition-all duration-200 group-hover:shadow-sm">
+                                {motivoFilter.length > 0 ? (
+                                  <div className="flex items-center gap-2">
+                                    <Badge variant="secondary" className="h-5 text-xs bg-amber-500/10 text-amber-500">
+                                      {motivoFilter.length}
+                                    </Badge>
+                                    <span className="text-sm">
+                                      {motivoFilter.length === 1 ? 
+                                        (motivoFilter[0].length > 20 ? 
+                                          `${motivoFilter[0].substring(0, 20)}...` : 
+                                          motivoFilter[0]
+                                        ) : 
+                                        `${motivoFilter.length} motivos`
+                                      }
+                                    </span>
+                                  </div>
+                                ) : "Todos os motivos"}
+                                <div className="w-4 h-4 opacity-50">⌄</div>
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-80 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                              <Command>
+                                <CommandInput placeholder="Buscar motivo..." className="h-9" />
+                                <CommandEmpty>Nenhum motivo encontrado.</CommandEmpty>
+                                <CommandList className="max-h-60">
+                                  <CommandGroup>
+                                    {Array.from(new Set(occurrences.map(o => o.motivoOcorrencia || 'Não informado')))
+                                      .sort()
+                                      .map(motivo => (
+                                        <CommandItem key={motivo} onSelect={() => {
+                                          const isSelected = motivoFilter.includes(motivo);
+                                          if (isSelected) {
+                                            updateFilter('motivoFilter', motivoFilter.filter(m => m !== motivo));
+                                          } else {
+                                            updateFilter('motivoFilter', [...motivoFilter, motivo]);
+                                          }
+                                        }}>
+                                          <Check className={cn("mr-2 h-4 w-4", motivoFilter.includes(motivo) ? "opacity-100" : "opacity-0")} />
+                                          <span className="text-sm" title={motivo}>
+                                            {motivo.length > 50 ? `${motivo.substring(0, 50)}...` : motivo}
+                                          </span>
+                                        </CommandItem>
+                                      ))}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                      </div>
 
                      {/* Número de Série - Apenas na página Ocorrências */}
                      {showSerialNumber && (

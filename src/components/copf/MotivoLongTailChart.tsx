@@ -4,7 +4,8 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Toolti
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, TrendingDown } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { AlertTriangle, TrendingDown, Info } from 'lucide-react';
 import { useFilters } from '@/contexts/FiltersContext';
 import { toast } from 'sonner';
 import { OccurrenceData } from '@/hooks/useDashboardData';
@@ -162,10 +163,19 @@ export const MotivoLongTailChart = memo(function MotivoLongTailChart({
         <CardTitle className="flex items-center gap-2">
           <TrendingDown className="h-5 w-5 text-orange-500" />
           Long Tail - Motivos de Ocorrência
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="max-w-xs">
+                  Análise Long Tail dos motivos de ocorrência seguindo o princípio 80/20. As barras vermelhas representam os poucos motivos que causam a maioria dos problemas. A linha azul mostra o percentual acumulado, ajudando a identificar onde concentrar esforços de melhoria. Clique nas barras para filtrar por motivo específico.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Distribuição dos motivos mais frequentes de ocorrências técnicas
-        </p>
       </CardHeader>
       <CardContent>
         {/* Métricas resumo */}
