@@ -127,8 +127,7 @@ export const FiltersProvider: React.FC<{ children: ReactNode }> = ({ children })
     filters.suptFilter.length > 0 ||
     filters.statusSlaFilter.length > 0 ||
     filters.longTailFilter.length > 0 ||
-    filters.motivoFilter.length > 0 ||
-    filters.filterPeriod !== 'all';
+    filters.motivoFilter.length > 0;
 
   return (
     <FiltersContext.Provider
