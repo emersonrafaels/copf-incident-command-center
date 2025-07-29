@@ -336,7 +336,7 @@ export default function OcorrenciaDetalhes() {
                     <AlertTriangle className="h-5 w-5 mr-2" />
                     Priorização
                   </div>
-                  <Badge variant={isPrioritized ? 'default' : 'outline'} className={isPrioritized ? 'text-yellow-600 border-yellow-600' : 'text-gray-600 border-gray-600'}>
+                  <Badge variant={isPrioritized ? 'default' : 'secondary'}>
                     {isPrioritized ? 'Priorizada' : 'Normal'}
                   </Badge>
                 </CardTitle>
