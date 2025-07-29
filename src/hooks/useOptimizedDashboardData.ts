@@ -15,6 +15,8 @@ export interface OccurrenceData {
   status: 'a_iniciar' | 'em_andamento' | 'encerrado' | 'com_impedimentos' | 'cancelado'
   createdAt: string
   resolvedAt?: string
+  dataPrevisaoEncerramento?: string // Data/hora prevista pelo fornecedor para encerramento
+  dataEncerramento?: string // Data/hora real do encerramento
   assignedTo: string
   vendor: string
   transportadora?: string
@@ -105,6 +107,8 @@ const mapDatabaseToOccurrence = (dbRecord: any): OccurrenceData => {
     status: statusMap[dbRecord.status] || 'a_iniciar',
     createdAt: dbRecord.data_ocorrencia,
     resolvedAt: dbRecord.data_resolucao,
+    dataPrevisaoEncerramento: dbRecord.data_previsao_encerramento,
+    dataEncerramento: dbRecord.data_encerramento,
     assignedTo: dbRecord.usuario_responsavel || 'Não atribuído',
     vendor: dbRecord.fornecedor,
     transportadora: dbRecord.transportadora,
@@ -139,6 +143,8 @@ const fetchOptimizedOccurrences = async (limit: number = 1000): Promise<Occurren
       supt,
       data_ocorrencia,
       data_resolucao,
+      data_previsao_encerramento,
+      data_encerramento,
       data_limite_sla,
       usuario_responsavel,
       reincidencia
