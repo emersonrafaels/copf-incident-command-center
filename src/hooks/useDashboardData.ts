@@ -22,6 +22,7 @@ export interface OccurrenceData {
   municipio: string
   dineg: string
   vip: boolean
+  statusEquipamento: 'operante' | 'inoperante'
 }
 
 export interface ChartData {
@@ -96,7 +97,8 @@ const mapDatabaseToOccurrence = (dbRecord: any): OccurrenceData => {
     estado: dbRecord.uf,
     municipio: 'Centro', // Campo não existe ainda no banco
     dineg: dbRecord.supt,
-    vip: dbRecord.vip
+    vip: dbRecord.vip,
+    statusEquipamento: dbRecord.status_equipamento || 'operante'
   }
 }
 

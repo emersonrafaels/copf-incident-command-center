@@ -5,6 +5,7 @@ import { OptimizedInteractiveCharts } from "./OptimizedInteractiveCharts";
 import { StatusBadge } from "./StatusBadge";
 import { LongTailChart } from "./LongTailChart";
 import { OccurrenceModal } from "./OccurrenceModal";
+import { EquipmentStatusChart } from "./EquipmentStatusChart";
 
 import { FilterSection } from "./FilterSection";
 
@@ -64,6 +65,7 @@ export function Dashboard() {
     statusFilterMulti,
     vendorFilterMulti,
     transportadoraFilterMulti,
+    statusEquipamentoFilterMulti,
     serialNumberFilter,
     overrideFilter,
     vendorPriorityFilter,
@@ -173,6 +175,7 @@ export function Dashboard() {
       if (segmentFilterMulti.length > 0 && !segmentFilterMulti.includes(occurrence.segment)) return false;
       if (equipmentFilterMulti.length > 0 && !equipmentFilterMulti.includes(occurrence.equipment)) return false;
       if (statusFilterMulti.length > 0 && !statusFilterMulti.includes(occurrence.status)) return false;
+      if (statusEquipamentoFilterMulti.length > 0 && !statusEquipamentoFilterMulti.includes(occurrence.statusEquipamento)) return false;
       if (vendorFilterMulti.length > 0 && !vendorFilterMulti.includes(occurrence.vendor)) return false;
       if (transportadoraFilterMulti.length > 0) {
         // Verificar se a transportadora existe e não está vazia
@@ -264,7 +267,7 @@ export function Dashboard() {
       return true;
     });
     return filtered;
-  }, [occurrences, segmentFilterMulti, equipmentFilterMulti, statusFilterMulti, vendorFilterMulti, transportadoraFilterMulti, serialNumberFilter, agenciaFilter, ufFilter, tipoAgenciaFilter, pontoVipFilter, overrideFilter, vendorPriorityFilter, reincidentFilter, longTailFilter]);
+  }, [occurrences, segmentFilterMulti, equipmentFilterMulti, statusFilterMulti, statusEquipamentoFilterMulti, vendorFilterMulti, transportadoraFilterMulti, serialNumberFilter, agenciaFilter, ufFilter, tipoAgenciaFilter, pontoVipFilter, overrideFilter, vendorPriorityFilter, reincidentFilter, longTailFilter]);
 
   // Cálculos memoizados para garantir consistência com a página de ocorrências
   const cardMetrics = useMemo(() => {
@@ -307,11 +310,15 @@ export function Dashboard() {
       return hoursDiff > slaLimit;
     }).length;
 
+    // 5. Equipamentos inoperantes
+    const inoperantEquipments = filteredOccurrences.filter(o => o.statusEquipamento === 'inoperante').length;
+
     return {
       totalOccurrences,
       pendingOccurrences,
       reincidentOccurrences,
-      overdueOccurrences
+      overdueOccurrences,
+      inoperantEquipments
     };
   }, [filteredOccurrences]);
 
@@ -514,6 +521,17 @@ export function Dashboard() {
               isLoading={isLoading}
             />
           </div>
+
+          {/* 2.5. Equipamentos Inoperantes */}
+          <div className="cursor-pointer">
+            <OptimizedMetricCard 
+              title="Equipamentos Inoperantes" 
+              value={cardMetrics.inoperantEquipments}
+              icon={<AlertTriangle className="h-4 w-4" />} 
+              description="Equipamentos fora de operação"
+              isLoading={isLoading}
+            />
+          </div>
           
           {/* 3. Reincidências */}
           <div onClick={() => handleNavigateToOccurrences('reincidence')} className="cursor-pointer">
@@ -569,9 +587,16 @@ export function Dashboard() {
       </div>
 
 
-      {/* Long Tail Analysis */}
+      {/* Equipment Status Chart */}
       <div className="animate-fade-in" style={{
       animationDelay: '0.3s'
+    }}>
+        <EquipmentStatusChart occurrences={filteredOccurrences} />
+      </div>
+
+      {/* Long Tail Analysis */}
+      <div className="animate-fade-in" style={{
+      animationDelay: '0.35s'
     }}>
         <LongTailChart occurrences={occurrences} filteredOccurrences={filteredOccurrences} />
       </div>

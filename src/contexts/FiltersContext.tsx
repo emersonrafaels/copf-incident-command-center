@@ -17,6 +17,7 @@ export interface FiltersState {
   vendorFilterMulti: string[];
   transportadoraFilterMulti: string[];
   severityFilterMulti: string[];
+  statusEquipamentoFilterMulti: string[];
   
   // Filtros de localização
   agenciaFilter: string[];
@@ -62,6 +63,7 @@ const defaultFilters: FiltersState = {
   vendorFilterMulti: [],
   transportadoraFilterMulti: [],
   severityFilterMulti: [],
+  statusEquipamentoFilterMulti: [],
   
   agenciaFilter: [],
   ufFilter: [],
@@ -104,6 +106,7 @@ export const FiltersProvider: React.FC<{ children: ReactNode }> = ({ children })
     filters.vendorFilterMulti.length > 0 ||
     filters.transportadoraFilterMulti.length > 0 ||
     filters.severityFilterMulti.length > 0 ||
+    filters.statusEquipamentoFilterMulti.length > 0 ||
     filters.segmentFilter !== 'all' ||
     filters.equipmentFilter !== 'all' ||
     filters.serialNumberFilter !== '' ||

@@ -34,6 +34,7 @@ export type Database = {
           segmento: string
           severidade: string
           status: string
+          status_equipamento: string
           supt: string
           tipo_agencia: string
           transportadora: string
@@ -61,6 +62,7 @@ export type Database = {
           segmento: string
           severidade: string
           status: string
+          status_equipamento?: string
           supt: string
           tipo_agencia: string
           transportadora: string
@@ -88,6 +90,7 @@ export type Database = {
           segmento?: string
           severidade?: string
           status?: string
+          status_equipamento?: string
           supt?: string
           tipo_agencia?: string
           transportadora?: string
