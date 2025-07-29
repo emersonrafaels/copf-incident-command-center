@@ -506,7 +506,7 @@ export function Dashboard() {
             </div>
             Indicadores Principais
           </h2>
-          <p className="text-muted-foreground mt-1">Visão geral do status operacional em tempo real</p>
+          <p className="text-muted-foreground mt-1">Visão geral do status operacional do parque de pontos físicos</p>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
