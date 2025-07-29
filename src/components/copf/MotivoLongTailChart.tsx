@@ -1,6 +1,6 @@
 import React, { memo, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, Cell, LabelList } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, Cell, LabelList, ComposedChart, Line, ReferenceLine } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -17,8 +17,10 @@ interface MotivoLongTailChartProps {
 interface MotivoData {
   motivo: string;
   motivoCompleto: string;
+  motivoDisplay: string; // Versão melhor formatada para exibição
   count: number;
   percentage: number;
+  cumulativePercentage: number;
   color: string;
 }
 
@@ -47,16 +49,24 @@ export const MotivoLongTailChart = memo(function MotivoLongTailChart({
     // Converter para array e ordenar por quantidade (desc)
     const sortedMotivos = Array.from(motivoCounts.entries())
       .map(([motivo, count]) => ({
-        motivo: motivo.length > 30 ? motivo.substring(0, 30) + '...' : motivo,
         motivoCompleto: motivo,
         count,
         percentage: Math.round((count / sourceOccurrences.length) * 100)
       }))
       .sort((a, b) => b.count - a.count);
 
-    // Aplicar cores baseadas na posição (Long Tail)
+    // Calcular percentual acumulado e formatação de display
+    let cumulativeSum = 0;
     const data: MotivoData[] = sortedMotivos.map((item, index) => {
-      let color = '#10b981'; // Verde para os mais comuns
+      cumulativeSum += item.percentage;
+      
+      // Melhor formatação do texto para exibição
+      const motivoDisplay = item.motivoCompleto.length > 25 
+        ? item.motivoCompleto.substring(0, 25) + '...' 
+        : item.motivoCompleto;
+      
+      // Cores baseadas na posição (Long Tail)
+      let color = '#10b981'; // Verde para os menos comuns
       
       if (index < 3) {
         color = '#ef4444'; // Vermelho para os top 3 (mais problemáticos)
@@ -65,13 +75,14 @@ export const MotivoLongTailChart = memo(function MotivoLongTailChart({
       } else if (index < 15) {
         color = '#3b82f6'; // Azul para os próximos 7
       }
-      // Demais ficam verde (menos comuns)
 
       return {
-        motivo: item.motivo,
+        motivo: motivoDisplay, // Para exibição no eixo X
         motivoCompleto: item.motivoCompleto,
+        motivoDisplay: motivoDisplay,
         count: item.count,
         percentage: item.percentage,
+        cumulativePercentage: cumulativeSum,
         color
       };
     });
@@ -92,22 +103,32 @@ export const MotivoLongTailChart = memo(function MotivoLongTailChart({
     }, 100);
   };
 
-  // Custom Tooltip
+  // Custom Tooltip melhorado
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-background/95 backdrop-blur-sm border border-border/80 rounded-lg p-3 shadow-lg">
-          <p className="font-medium text-foreground text-sm">{data.motivoCompleto}</p>
-          <div className="space-y-1 mt-2">
-            <p className="text-sm">
-              <span className="inline-block w-3 h-3 rounded-sm mr-2" style={{ backgroundColor: data.color }}></span>
-              Ocorrências: {data.count}
+        <div className="bg-background/95 backdrop-blur-sm border border-border/80 rounded-lg p-4 shadow-lg max-w-xs">
+          <p className="font-medium text-foreground text-sm mb-2">{data.motivoCompleto}</p>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm flex items-center gap-2">
+                <span className="inline-block w-3 h-3 rounded-sm" style={{ backgroundColor: data.color }}></span>
+                Ocorrências:
+              </span>
+              <span className="font-medium">{data.count}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Percentual:</span>
+              <span className="font-medium">{data.percentage}%</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">% Acumulado:</span>
+              <span className="font-medium text-primary">{data.cumulativePercentage}%</span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border">
+              Clique para visualizar ocorrências
             </p>
-            <p className="text-xs text-muted-foreground">
-              Representa {data.percentage}% do total
-            </p>
-            <p className="text-xs text-muted-foreground">Clique para visualizar</p>
           </div>
         </div>
       );
@@ -166,30 +187,74 @@ export const MotivoLongTailChart = memo(function MotivoLongTailChart({
           </div>
         </div>
 
-        {/* Gráfico */}
-        <div className="h-96">
+        {/* Gráfico Composto com Eixo Duplo */}
+        <div className="h-[500px]">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart
+            <ComposedChart
               data={motivoData}
-              margin={{ top: 20, right: 30, left: 20, bottom: 100 }}
+              margin={{ top: 30, right: 50, left: 30, bottom: 120 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+              
+              {/* Eixo X com textos melhorados */}
               <XAxis 
                 dataKey="motivo"
-                tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
+                tick={{ 
+                  fontSize: 11, 
+                  fill: 'hsl(var(--muted-foreground))',
+                  fontWeight: 500
+                }}
                 angle={-45}
                 textAnchor="end"
                 height={120}
                 interval={0}
+                tickLine={{ stroke: 'hsl(var(--border))' }}
               />
+              
+              {/* Eixo Y Esquerdo - Contagem */}
               <YAxis 
-                tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
-                label={{ value: 'Nº de Ocorrências', angle: -90, position: 'insideLeft' }}
+                yAxisId="count"
+                orientation="left"
+                tick={{ 
+                  fontSize: 12, 
+                  fill: 'hsl(var(--muted-foreground))',
+                  fontWeight: 500
+                }}
+                label={{ 
+                  value: 'Nº de Ocorrências', 
+                  angle: -90, 
+                  position: 'insideLeft',
+                  style: { textAnchor: 'middle', fill: 'hsl(var(--foreground))' }
+                }}
+                tickLine={{ stroke: 'hsl(var(--border))' }}
               />
+              
+              {/* Eixo Y Direito - Percentual Acumulado */}
+              <YAxis 
+                yAxisId="percentage"
+                orientation="right"
+                domain={[0, 100]}
+                tick={{ 
+                  fontSize: 12, 
+                  fill: 'hsl(var(--primary))',
+                  fontWeight: 500
+                }}
+                label={{ 
+                  value: '% Acumulado', 
+                  angle: 90, 
+                  position: 'insideRight',
+                  style: { textAnchor: 'middle', fill: 'hsl(var(--primary))' }
+                }}
+                tickLine={{ stroke: 'hsl(var(--primary))' }}
+              />
+              
               <RechartsTooltip content={<CustomTooltip />} />
+              
+              {/* Barras de Ocorrências */}
               <Bar 
+                yAxisId="count"
                 dataKey="count"
-                radius={[4, 4, 0, 0]}
+                radius={[6, 6, 0, 0]}
                 className="cursor-pointer hover:opacity-80 transition-opacity"
                 onClick={(data, index) => handleBarClick(motivoData[index])}
               >
@@ -201,12 +266,46 @@ export const MotivoLongTailChart = memo(function MotivoLongTailChart({
                   position="top" 
                   style={{ 
                     fill: 'hsl(var(--foreground))', 
-                    fontSize: '10px', 
+                    fontSize: '11px', 
                     fontWeight: 'bold'
                   }} 
                 />
               </Bar>
-            </BarChart>
+              
+              {/* Linha de Percentual Acumulado */}
+              <Line
+                yAxisId="percentage"
+                type="monotone"
+                dataKey="cumulativePercentage"
+                stroke="hsl(var(--primary))"
+                strokeWidth={3}
+                dot={{ 
+                  fill: 'hsl(var(--primary))', 
+                  strokeWidth: 2, 
+                  r: 4,
+                  stroke: 'hsl(var(--background))'
+                }}
+                activeDot={{ 
+                  r: 6, 
+                  fill: 'hsl(var(--primary))',
+                  stroke: 'hsl(var(--background))',
+                  strokeWidth: 2
+                }}
+              />
+              
+              {/* Linha de referência 80% */}
+              <ReferenceLine 
+                yAxisId="percentage" 
+                y={80} 
+                stroke="hsl(var(--destructive))" 
+                strokeDasharray="5 5" 
+                label={{ 
+                  value: "80% Rule", 
+                  position: "top",
+                  style: { fill: 'hsl(var(--destructive))', fontSize: '12px' }
+                }}
+              />
+            </ComposedChart>
           </ResponsiveContainer>
         </div>
 
