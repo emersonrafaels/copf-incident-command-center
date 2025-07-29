@@ -681,19 +681,10 @@ export function Dashboard() {
       </div>
 
 
-      {/* Highlights Operacionais - Movido para cima para storytelling */}
-      <div className="animate-fade-in" style={{
+      {/* Seção de Análise Visual - Grid de Gráficos */}
+      <div className="space-y-8 animate-fade-in" style={{
       animationDelay: '0.3s'
     }}>
-        <OccurrenceHighlights 
-          occurrences={filteredOccurrences} 
-          onOccurrenceClick={handleOccurrenceClick}
-          onNavigateToOccurrences={handleNavigateToOccurrences}
-        />
-      </div>
-
-      {/* Seção de Análise Visual - Grid de Gráficos */}
-      <div className="space-y-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="p-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg">
@@ -752,6 +743,17 @@ export function Dashboard() {
             </CardContent>
           </Card>
         </div>
+      </div>
+
+      {/* Highlights Operacionais */}
+      <div className="animate-fade-in" style={{
+      animationDelay: '0.5s'
+    }}>
+        <OccurrenceHighlights 
+          occurrences={filteredOccurrences} 
+          onOccurrenceClick={handleOccurrenceClick}
+          onNavigateToOccurrences={handleNavigateToOccurrences}
+        />
       </div>
 
       {/* Dashboard Content Wrapper for PDF Export */}
