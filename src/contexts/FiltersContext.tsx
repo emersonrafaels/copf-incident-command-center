@@ -79,7 +79,7 @@ const defaultFilters: FiltersState = {
   statusSlaFilter: [],
   longTailFilter: [],
   
-  filterPeriod: 'all',
+  filterPeriod: '7-days',
   customDateRange: {}
 };
 
