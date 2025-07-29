@@ -102,12 +102,15 @@ export const SlaPrevisaoChart = memo(function SlaPrevisaoChart({
   const handleSegmentClick = (data: SlaPrevisaoData) => {
     clearAllFilters();
     setTimeout(() => {
-      // Aplicar filtros para ocorrências não encerradas
+      // Aplicar filtros para ocorrências não encerradas e não canceladas
       updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento', 'com_impedimentos']);
       
+      // Adicionar lógica específica para cada categoria quando possível
+      // Por enquanto, mostramos apenas ocorrências ativas
+      
       navigate('/ocorrencias');
-      toast.success(`Filtrando: ${data.category}`, {
-        description: `${data.count} ocorrências (${data.percentage}% do total)`
+      toast.success(`Categoria: ${data.category}`, {
+        description: `${data.count} ocorrências encontradas (${data.percentage}% das ocorrências ativas). Filtros específicos por previsão serão implementados.`
       });
     }, 100);
   };

@@ -1,8 +1,12 @@
 import React, { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.heat';
+import { useFilters } from '@/contexts/FiltersContext';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 // Fix para ícones do Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -112,6 +116,23 @@ const getMarkerIcon = (criticidade: string) => {
 };
 
 export const HeatMap: React.FC = () => {
+  const navigate = useNavigate();
+  const { clearAllFilters, updateFilter } = useFilters();
+
+  const handleMarkerClick = (point: HeatMapPoint) => {
+    // Extrair código da agência do nome completo
+    const agencyCode = point.agencia.split(' - ')[0];
+    
+    clearAllFilters();
+    setTimeout(() => {
+      updateFilter('agenciaFilter', [agencyCode]);
+      navigate('/ocorrencias');
+      toast.success(`Filtrando por agência: ${point.agencia}`, {
+        description: `${point.ocorrencias} ocorrências encontradas`
+      });
+    }, 100);
+  };
+
   return (
     <div className="h-full w-full rounded-lg overflow-hidden">
       <MapContainer
@@ -157,6 +178,13 @@ export const HeatMap: React.FC = () => {
                     <span className="font-medium">{Math.round(point.intensity * 100)}%</span>
                   </div>
                 </div>
+                <Button 
+                  size="sm" 
+                  className="w-full mt-2"
+                  onClick={() => handleMarkerClick(point)}
+                >
+                  Ver Ocorrências
+                </Button>
               </div>
             </Popup>
           </Marker>

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { AlertTriangle, Clock, RotateCcw, TrendingUp, Info, Calculator, ArrowUp, ArrowDown, Minus, Activity, ChevronDown } from "lucide-react";
 import { useFilters } from "@/contexts/FiltersContext";
+import { toast } from 'sonner';
 interface CriticalityData {
   equipment: string;
   segment: string;
@@ -65,8 +67,21 @@ const EQUIPMENT_BASELINES = {
 export function CriticalityHeatmap({
   occurrences
 }: CriticalityHeatmapProps) {
+  const navigate = useNavigate();
   const filters = useFilters();
   const [isOpen, setIsOpen] = useState(true);
+
+  const handleEquipmentClick = (item: CriticalityData) => {
+    filters.clearAllFilters();
+    setTimeout(() => {
+      filters.updateFilter('equipmentFilterMulti', [item.equipment]);
+      filters.updateFilter('segmentFilterMulti', [item.segment]);
+      navigate('/ocorrencias');
+      toast.success(`Filtrando por equipamento: ${item.equipment} (${item.segment})`, {
+        description: `${item.occurrenceCount} ocorrências encontradas`
+      });
+    }, 100);
+  };
 
   // Aplicar filtros às ocorrências antes do processamento
   const filteredOccurrences = useMemo(() => {
@@ -546,9 +561,11 @@ export function CriticalityHeatmap({
               {criticalityData.slice(0, 16).map((item, index) => <TooltipProvider key={`${item.equipment}-${item.segment}`}>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className={`group relative p-5 rounded-2xl border-2 cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-xl animate-fade-in ${getCriticalityColor(item.criticalityScore)} text-white overflow-hidden backdrop-blur-sm`} style={{
-                    animationDelay: `${index * 50}ms`
-                  }}>
+                       <div 
+                         className={`group relative p-5 rounded-2xl border-2 cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-xl animate-fade-in ${getCriticalityColor(item.criticalityScore)} text-white overflow-hidden backdrop-blur-sm`} 
+                         style={{ animationDelay: `${index * 50}ms` }}
+                         onClick={() => handleEquipmentClick(item)}
+                       >
                         {/* Background patterns */}
                         <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-black/10"></div>
                         <div className="absolute top-0 right-0 w-20 h-20 bg-white/5 rounded-full -translate-y-10 translate-x-10"></div>

@@ -154,7 +154,8 @@ export function TopAgenciesChart({ occurrences, filteredOccurrences }: TopAgenci
     
     // Aplicar novos filtros
     setTimeout(() => {
-      updateFilter('agenciaFilter', data.originalAgency);
+      // Usar array para agência para consistência
+      updateFilter('agenciaFilter', [data.originalAgency]);
       
       // Se clicar em um equipamento específico, filtrar por ele também
       if (equipmentType) {
