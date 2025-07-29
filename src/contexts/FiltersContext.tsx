@@ -79,7 +79,7 @@ const defaultFilters: FiltersState = {
   statusSlaFilter: [],
   longTailFilter: [],
   
-  filterPeriod: '7-days',
+  filterPeriod: 'all',
   customDateRange: {}
 };
 
@@ -124,7 +124,8 @@ export const FiltersProvider: React.FC<{ children: ReactNode }> = ({ children })
     filters.pontoVipFilter.length > 0 ||
     filters.suptFilter.length > 0 ||
     filters.statusSlaFilter.length > 0 ||
-    filters.longTailFilter.length > 0;
+    filters.longTailFilter.length > 0 ||
+    filters.filterPeriod !== 'all';
 
   return (
     <FiltersContext.Provider
