@@ -30,19 +30,14 @@ export function EquipmentStatusChart({ occurrences }: EquipmentStatusChartProps)
       return acc;
     }, {} as Record<string, any>);
 
-    // Converter para array e ordenar
+    // Converter para array e ordenar por volume total (decrescente)
     return Object.values(grouped)
-      .sort((a: any, b: any) => {
-        if (a.segmento !== b.segmento) {
-          return a.segmento.localeCompare(b.segmento);
-        }
-        return a.equipamento.localeCompare(b.equipamento);
-      })
       .map((item: any) => ({
         ...item,
         name: `${item.segmento} - ${item.equipamento}`,
         total: item.operante + item.inoperante
       }))
+      .sort((a: any, b: any) => b.total - a.total) // Ordenar do maior para o menor volume total
       .slice(0, 10); // Mostrar apenas os 10 principais
   }, [occurrences]);
 
