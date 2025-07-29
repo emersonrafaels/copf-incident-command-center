@@ -79,9 +79,17 @@ const mapDatabaseToOccurrence = (dbRecord: any): OccurrenceData => {
     'datacenter': 'AB'  // Equipamentos de datacenter/infraestrutura
   }
   
+  // Gerar ID amigável com prefixo COPF
+  const shortId = `COPF-${String(Math.floor(Math.random() * 99999)).padStart(5, '0')}`;
+  
+  // Formatar agência com padding e nome
+  const agencyNumber = String(dbRecord.agencia).padStart(4, '0');
+  const agencyNames = ['Centro', 'Norte', 'Sul', 'Leste', 'Oeste', 'Vila Nova', 'São Bento', 'Jardim', 'Parque'];
+  const agencyName = agencyNames[parseInt(agencyNumber) % agencyNames.length];
+  
   return {
-    id: dbRecord.id,
-    agency: `${dbRecord.agencia} - Centro`,
+    id: shortId,
+    agency: `${agencyNumber} - ${agencyName}`,
     segment: segmentMap[dbRecord.segmento] || 'AB',
     equipment: dbRecord.equipamento,
     serialNumber: dbRecord.numero_serie,

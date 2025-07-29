@@ -422,6 +422,8 @@ const Ocorrencias = () => {
         return new Date(occurrence.createdAt).getTime();
       case 'vendor':
         return occurrence.vendor.toLowerCase();
+      case 'statusEquipamento':
+        return occurrence.statusEquipamento === 'operante' ? 0 : 1; // Operante first, then inoperante
       default:
         return '';
     }
@@ -583,15 +585,15 @@ const Ocorrencias = () => {
                 <p className="text-muted-foreground">Carregando ocorrências...</p>
               </div>
             ) : (
-              <ScrollArea className="h-[600px]">
-                <Table>
+              <div className="overflow-x-auto">
+                <Table className="text-sm">
                   <TableHeader>
                     <TableRow>
                       <TableHead 
-                        className="cursor-pointer hover:bg-accent/50 transition-colors select-none"
+                        className="cursor-pointer hover:bg-accent/50 transition-colors select-none w-24"
                         onClick={() => handleSort('id')}
                       >
-                        <div className="flex items-center gap-1 text-sm font-medium">
+                        <div className="flex items-center gap-1 text-xs font-medium">
                           ID
                           <div className="flex flex-col opacity-40 hover:opacity-100 transition-opacity">
                             <ChevronUp className={`h-3 w-3 -mb-1 ${sortColumn === 'id' && sortDirection === 'asc' ? 'opacity-100 text-primary' : ''}`} />
@@ -600,10 +602,22 @@ const Ocorrencias = () => {
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer hover:bg-accent/50 transition-colors select-none"
+                        className="cursor-pointer hover:bg-accent/50 transition-colors select-none w-28"
+                        onClick={() => handleSort('createdAt')}
+                      >
+                        <div className="flex items-center gap-1 text-xs font-medium">
+                          Data/Hora
+                          <div className="flex flex-col opacity-40 hover:opacity-100 transition-opacity">
+                            <ChevronUp className={`h-3 w-3 -mb-1 ${sortColumn === 'createdAt' && sortDirection === 'asc' ? 'opacity-100 text-primary' : ''}`} />
+                            <ChevronDown className={`h-3 w-3 ${sortColumn === 'createdAt' && sortDirection === 'desc' ? 'opacity-100 text-primary' : ''}`} />
+                          </div>
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-accent/50 transition-colors select-none w-20"
                         onClick={() => handleSort('agency')}
                       >
-                        <div className="flex items-center gap-1 text-sm font-medium">
+                        <div className="flex items-center gap-1 text-xs font-medium">
                           Agência
                           <div className="flex flex-col opacity-40 hover:opacity-100 transition-opacity">
                             <ChevronUp className={`h-3 w-3 -mb-1 ${sortColumn === 'agency' && sortDirection === 'asc' ? 'opacity-100 text-primary' : ''}`} />
@@ -612,10 +626,10 @@ const Ocorrencias = () => {
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer hover:bg-accent/50 transition-colors select-none"
+                        className="cursor-pointer hover:bg-accent/50 transition-colors select-none w-16"
                         onClick={() => handleSort('segment')}
                       >
-                        <div className="flex items-center gap-1 text-sm font-medium">
+                        <div className="flex items-center gap-1 text-xs font-medium">
                           Segmento
                           <div className="flex flex-col opacity-40 hover:opacity-100 transition-opacity">
                             <ChevronUp className={`h-3 w-3 -mb-1 ${sortColumn === 'segment' && sortDirection === 'asc' ? 'opacity-100 text-primary' : ''}`} />
@@ -624,10 +638,10 @@ const Ocorrencias = () => {
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer hover:bg-accent/50 transition-colors select-none"
+                        className="cursor-pointer hover:bg-accent/50 transition-colors select-none w-24"
                         onClick={() => handleSort('equipment')}
                       >
-                        <div className="flex items-center gap-1 text-sm font-medium">
+                        <div className="flex items-center gap-1 text-xs font-medium">
                           Equipamento
                           <div className="flex flex-col opacity-40 hover:opacity-100 transition-opacity">
                             <ChevronUp className={`h-3 w-3 -mb-1 ${sortColumn === 'equipment' && sortDirection === 'asc' ? 'opacity-100 text-primary' : ''}`} />
@@ -636,22 +650,22 @@ const Ocorrencias = () => {
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer hover:bg-accent/50 transition-colors select-none"
-                        onClick={() => handleSort('serialNumber')}
+                        className="cursor-pointer hover:bg-accent/50 transition-colors select-none w-20"
+                        onClick={() => handleSort('statusEquipamento')}
                       >
-                        <div className="flex items-center gap-1 text-sm font-medium">
-                          Nº Série
+                        <div className="flex items-center gap-1 text-xs font-medium">
+                          Status Equip.
                           <div className="flex flex-col opacity-40 hover:opacity-100 transition-opacity">
-                            <ChevronUp className={`h-3 w-3 -mb-1 ${sortColumn === 'serialNumber' && sortDirection === 'asc' ? 'opacity-100 text-primary' : ''}`} />
-                            <ChevronDown className={`h-3 w-3 ${sortColumn === 'serialNumber' && sortDirection === 'desc' ? 'opacity-100 text-primary' : ''}`} />
+                            <ChevronUp className={`h-3 w-3 -mb-1 ${sortColumn === 'statusEquipamento' && sortDirection === 'asc' ? 'opacity-100 text-primary' : ''}`} />
+                            <ChevronDown className={`h-3 w-3 ${sortColumn === 'statusEquipamento' && sortDirection === 'desc' ? 'opacity-100 text-primary' : ''}`} />
                           </div>
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer hover:bg-accent/50 transition-colors select-none"
+                        className="cursor-pointer hover:bg-accent/50 transition-colors select-none w-18"
                         onClick={() => handleSort('severity')}
                       >
-                        <div className="flex items-center gap-1 text-sm font-medium">
+                        <div className="flex items-center gap-1 text-xs font-medium">
                            Criticidade
                           <div className="flex flex-col opacity-40 hover:opacity-100 transition-opacity">
                             <ChevronUp className={`h-3 w-3 -mb-1 ${sortColumn === 'severity' && sortDirection === 'asc' ? 'opacity-100 text-primary' : ''}`} />
@@ -660,22 +674,10 @@ const Ocorrencias = () => {
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer hover:bg-accent/50 transition-colors select-none"
-                        onClick={() => handleSort('status')}
-                      >
-                        <div className="flex items-center gap-1 text-sm font-medium">
-                          Status
-                          <div className="flex flex-col opacity-40 hover:opacity-100 transition-opacity">
-                            <ChevronUp className={`h-3 w-3 -mb-1 ${sortColumn === 'status' && sortDirection === 'asc' ? 'opacity-100 text-primary' : ''}`} />
-                            <ChevronDown className={`h-3 w-3 ${sortColumn === 'status' && sortDirection === 'desc' ? 'opacity-100 text-primary' : ''}`} />
-                          </div>
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer hover:bg-accent/50 transition-colors select-none"
+                        className="cursor-pointer hover:bg-accent/50 transition-colors select-none w-18"
                         onClick={() => handleSort('slaStatus')}
                       >
-                        <div className="flex items-center gap-1 text-sm font-medium">
+                        <div className="flex items-center gap-1 text-xs font-medium">
                           Status SLA
                           <div className="flex flex-col opacity-40 hover:opacity-100 transition-opacity">
                             <ChevronUp className={`h-3 w-3 -mb-1 ${sortColumn === 'slaStatus' && sortDirection === 'asc' ? 'opacity-100 text-primary' : ''}`} />
@@ -684,34 +686,10 @@ const Ocorrencias = () => {
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer hover:bg-accent/50 transition-colors bg-primary/5 select-none"
-                        onClick={() => handleSort('remainingTime')}
-                      >
-                        <div className="flex items-center gap-1 font-semibold">
-                          Tempo Restante
-                          <div className="flex flex-col opacity-60 hover:opacity-100 transition-opacity">
-                            <ChevronUp className={`h-3 w-3 -mb-1 ${sortColumn === 'remainingTime' && sortDirection === 'asc' ? 'opacity-100 text-primary' : 'text-primary'}`} />
-                            <ChevronDown className={`h-3 w-3 ${sortColumn === 'remainingTime' && sortDirection === 'desc' ? 'opacity-100 text-primary' : 'text-primary'}`} />
-                          </div>
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer hover:bg-accent/50 transition-colors select-none"
-                        onClick={() => handleSort('createdAt')}
-                      >
-                        <div className="flex items-center gap-1 text-sm font-medium">
-                          Data/Hora Abertura
-                          <div className="flex flex-col opacity-40 hover:opacity-100 transition-opacity">
-                            <ChevronUp className={`h-3 w-3 -mb-1 ${sortColumn === 'createdAt' && sortDirection === 'asc' ? 'opacity-100 text-primary' : ''}`} />
-                            <ChevronDown className={`h-3 w-3 ${sortColumn === 'createdAt' && sortDirection === 'desc' ? 'opacity-100 text-primary' : ''}`} />
-                          </div>
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer hover:bg-accent/50 transition-colors select-none"
+                        className="cursor-pointer hover:bg-accent/50 transition-colors select-none w-20"
                         onClick={() => handleSort('vendor')}
                       >
-                        <div className="flex items-center gap-1 text-sm font-medium">
+                        <div className="flex items-center gap-1 text-xs font-medium">
                           Fornecedor
                           <div className="flex flex-col opacity-40 hover:opacity-100 transition-opacity">
                             <ChevronUp className={`h-3 w-3 -mb-1 ${sortColumn === 'vendor' && sortDirection === 'asc' ? 'opacity-100 text-primary' : ''}`} />
@@ -719,54 +697,86 @@ const Ocorrencias = () => {
                           </div>
                         </div>
                       </TableHead>
-                      <TableHead>Ações</TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-accent/50 transition-colors select-none w-18"
+                        onClick={() => handleSort('status')}
+                      >
+                        <div className="flex items-center gap-1 text-xs font-medium">
+                          Status
+                          <div className="flex flex-col opacity-40 hover:opacity-100 transition-opacity">
+                            <ChevronUp className={`h-3 w-3 -mb-1 ${sortColumn === 'status' && sortDirection === 'asc' ? 'opacity-100 text-primary' : ''}`} />
+                            <ChevronDown className={`h-3 w-3 ${sortColumn === 'status' && sortDirection === 'desc' ? 'opacity-100 text-primary' : ''}`} />
+                          </div>
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-accent/50 transition-colors select-none w-20"
+                        onClick={() => handleSort('serialNumber')}
+                      >
+                        <div className="flex items-center gap-1 text-xs font-medium">
+                          N° Série
+                          <div className="flex flex-col opacity-40 hover:opacity-100 transition-opacity">
+                            <ChevronUp className={`h-3 w-3 -mb-1 ${sortColumn === 'serialNumber' && sortDirection === 'asc' ? 'opacity-100 text-primary' : ''}`} />
+                            <ChevronDown className={`h-3 w-3 ${sortColumn === 'serialNumber' && sortDirection === 'desc' ? 'opacity-100 text-primary' : ''}`} />
+                          </div>
+                        </div>
+                      </TableHead>
+                      <TableHead className="w-16">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                 <TableBody>
                   {sortedOccurrences.map(occurrence => (
-                    <TableRow key={occurrence.id}>
-                      <TableCell className="font-medium">{occurrence.id}</TableCell>
-                      <TableCell className="max-w-[200px] truncate">{occurrence.agency}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{occurrence.segment}</Badge>
+                    <TableRow key={occurrence.id} className="text-xs">
+                      <TableCell className="font-medium py-2">{occurrence.id}</TableCell>
+                      <TableCell className="py-2 text-xs">
+                        {new Date(occurrence.createdAt).toLocaleDateString('pt-BR', { 
+                          day: '2-digit', 
+                          month: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
                       </TableCell>
-                      <TableCell className="max-w-[150px] truncate">{occurrence.equipment}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{occurrence.serialNumber}</TableCell>
-                      <TableCell>
-                        <Badge variant={getSeverityVariant(occurrence.severity)}>
+                      <TableCell className="py-2 truncate max-w-[80px]">{occurrence.agency}</TableCell>
+                      <TableCell className="py-2">
+                        <Badge variant="outline" className="text-xs px-1 py-0">{occurrence.segment}</Badge>
+                      </TableCell>
+                      <TableCell className="py-2 truncate max-w-[100px]">{occurrence.equipment}</TableCell>
+                      <TableCell className="py-2">
+                        <Badge variant={occurrence.statusEquipamento === 'operante' ? 'default' : 'destructive'} className="text-xs px-1 py-0">
+                          {occurrence.statusEquipamento === 'operante' ? 'Operante' : 'Inoperante'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="py-2">
+                        <Badge variant={getSeverityVariant(occurrence.severity)} className="text-xs px-1 py-0">
                           {getSeverityLabel(occurrence.severity)}
                         </Badge>
                       </TableCell>
-                      <TableCell>
-                        <StatusBadge status={occurrence.status} />
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={getSlaStatusVariant(getSlaStatus(occurrence))}>
+                      <TableCell className="py-2">
+                        <Badge variant={getSlaStatusVariant(getSlaStatus(occurrence))} className="text-xs px-1 py-0">
                           {getSlaStatus(occurrence)}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-sm font-medium">
-                        {getRemainingTime(occurrence)}
+                      <TableCell className="py-2 text-xs">{occurrence.vendor}</TableCell>
+                      <TableCell className="py-2">
+                        <StatusBadge status={occurrence.status} />
                       </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {new Date(occurrence.createdAt).toLocaleString('pt-BR')}
-                      </TableCell>
-                      <TableCell className="text-sm">{occurrence.vendor}</TableCell>
-                       <TableCell>
+                      <TableCell className="py-2 text-xs truncate max-w-[80px]">{occurrence.serialNumber}</TableCell>
+                       <TableCell className="py-2">
                          <Button 
                            variant="ghost" 
                            size="sm" 
                            onClick={() => navigate(`/ocorrencia/${occurrence.id}`)} 
                            title="Visualizar detalhes da ocorrência"
+                           className="h-6 w-6 p-0"
                          >
-                           <Eye className="h-4 w-4" />
+                           <Eye className="h-3 w-3" />
                          </Button>
                        </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
-            </ScrollArea>
+              </div>
           )}
         </CardContent>
       </Card>
