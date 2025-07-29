@@ -18,7 +18,7 @@ import { OccurrenceData } from "@/hooks/useDashboardData";
 
 interface VendorMetricsMatrixProps {
   occurrences: OccurrenceData[];
-  onNavigateToOccurrences?: (filter: { vendor?: string; severity?: string; slaStatus?: string }) => void;
+  onNavigateToOccurrences?: (filter: { vendor?: string; equipment?: string; severity?: string; slaStatus?: string }) => void;
 }
 
 interface VendorMetrics {
@@ -336,7 +336,7 @@ export function VendorMetricsMatrix({ occurrences, onNavigateToOccurrences }: Ve
             Heatmap: Fornecedor × Equipamento
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Concentração de ocorrências por fornecedor e tipo de equipamento
+            Concentração de ocorrências por fornecedor e tipo de equipamento. Cada célula mostra a quantidade exata de ocorrências para o cruzamento fornecedor × equipamento. Cores mais intensas indicam maior concentração de problemas. Clique nas células para filtrar a listagem de ocorrências.
           </p>
         </CardHeader>
         <CardContent>
@@ -367,8 +367,8 @@ export function VendorMetricsMatrix({ occurrences, onNavigateToOccurrences }: Ve
                         key={equipment}
                         className="aspect-square flex items-center justify-center text-xs font-medium rounded cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all"
                         style={{ backgroundColor: getHeatmapColor(value, maxHeatmapValue) }}
-                        title={`${vendor} - ${equipment}: ${value} ocorrências`}
-                        onClick={() => onNavigateToOccurrences?.({ vendor })}
+                        title={`${vendor} - ${equipment}: ${value} ocorrências. Clique para filtrar por fornecedor e equipamento.`}
+                        onClick={() => onNavigateToOccurrences?.({ vendor, equipment })}
                       >
                         {value > 0 ? value : ''}
                       </div>
