@@ -269,8 +269,87 @@ export default function OcorrenciaDetalhes() {
                      <Label className="font-medium">Abertura</Label>
                      <p className="text-sm">{formatDate(occurrence.createdAt)}</p>
                    </div>
+                   
+                   {/* Data de Previsão/Encerramento baseada no status */}
+                   {occurrence.status === 'encerrado' && occurrence.resolvedAt ? (
+                     <div>
+                       <Label className="font-medium">Data de Encerramento</Label>
+                       <p className="text-sm">{formatDate(occurrence.resolvedAt)}</p>
+                     </div>
+                   ) : (
+                     <div>
+                       <Label className="font-medium">Previsão de Fechamento</Label>
+                       <p className="text-sm">
+                         {(() => {
+                           const createdDate = new Date(occurrence.createdAt);
+                           const slaHours = occurrence.severity === 'critical' || occurrence.severity === 'high' ? 24 : 72;
+                           const predictedDate = new Date(createdDate.getTime() + (slaHours * 60 * 60 * 1000));
+                           return formatDate(predictedDate.toISOString());
+                         })()}
+                       </p>
+                     </div>
+                   )}
                  </div>
-                <Separator />
+                 
+                 <Separator />
+                 
+                 {/* Campos específicos para agências (exceto PAB e PAE) */}
+                 {(() => {
+                   // Simular tipo de agência baseado no número
+                   const agencyNumber = occurrence.agency.match(/\d+/)?.[0] || '0';
+                   const agencyType = parseInt(agencyNumber) % 10 === 0 ? 'PAB' : 
+                                    parseInt(agencyNumber) % 10 === 5 ? 'PAE' : 'Convencional';
+                   
+                   if (agencyType !== 'PAB' && agencyType !== 'PAE') {
+                     return (
+                       <div>
+                         <h4 className="font-medium mb-3">Informações da Agência</h4>
+                         <div className="grid grid-cols-2 gap-4">
+                           <div>
+                             <Label className="font-medium">Última Reforma</Label>
+                             <p className="text-sm">
+                               {(() => {
+                                 const reforms = ['Plano Diretor', 'Espaço Itaú', 'Ainda Não Reformada'];
+                                 return reforms[parseInt(agencyNumber) % 3];
+                               })()}
+                             </p>
+                           </div>
+                           <div>
+                             <Label className="font-medium">Data da Última Reforma</Label>
+                             <p className="text-sm">
+                               {(() => {
+                                 const years = ['2022', '2023', '2024', '2025', 'Ainda Não Reformada'];
+                                 return years[parseInt(agencyNumber) % 5];
+                               })()}
+                             </p>
+                           </div>
+                           <div>
+                             <Label className="font-medium">Arquétipo Atual</Label>
+                             <p className="text-sm">
+                               {(() => {
+                                 const archetypes = ['Standard', 'Ultralight', 'Premium'];
+                                 return archetypes[parseInt(agencyNumber) % 3];
+                               })()}
+                             </p>
+                           </div>
+                           <div>
+                             <Label className="font-medium">Ponto VIP</Label>
+                             <p className="text-sm">
+                               {parseInt(agencyNumber) % 4 === 0 ? 'Sim' : 'Não'}
+                             </p>
+                           </div>
+                           <div>
+                             <Label className="font-medium">Tipo do Ponto</Label>
+                             <p className="text-sm">{agencyType}</p>
+                           </div>
+                         </div>
+                         <Separator className="mt-4" />
+                       </div>
+                     );
+                   }
+                   return null;
+                 })()}
+                 
                 <div>
                   <Label className="font-medium">Descrição do Problema</Label>
                   <p className="text-sm mt-1 p-3 bg-muted rounded-md">
