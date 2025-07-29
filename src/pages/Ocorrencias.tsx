@@ -87,9 +87,8 @@ const Ocorrencias = () => {
     const agencyUF = occurrence.agency.split(' - ')[1] || 'SP';
     const matchesUF = ufFilter.length === 0 || ufFilter.includes(agencyUF);
 
-    // Simular tipo de agência baseado na agência
-    const tipoAgencia = occurrence.agency.includes('Terceirizada') ? 'terceirizada' : 'convencional';
-    const matchesTipoAgencia = tipoAgenciaFilter.length === 0 || tipoAgenciaFilter.includes(tipoAgencia);
+    // Usar o campo tipoAgencia do objeto de dados (igual ao Dashboard)
+    const matchesTipoAgencia = tipoAgenciaFilter.length === 0 || tipoAgenciaFilter.includes(occurrence.tipoAgencia);
 
     // Simular ponto VIP (agências com número terminado em 0, 5 são VIP)
     const agencyNumber = occurrence.agency.match(/\d+/)?.[0] || '0';
