@@ -62,6 +62,7 @@ export default function OcorrenciaDetalhes() {
   const handlePriorityToggle = (checked: boolean) => {
     setIsPrioritized(checked);
     
+    // Create new history entry for priority change
     const newEntry = {
       id: Date.now().toString(),
       type: checked ? 'prioritized' : 'deprioritized',
