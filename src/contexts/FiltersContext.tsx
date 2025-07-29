@@ -35,6 +35,7 @@ export interface FiltersState {
   statusSlaFilter: string[];
   longTailFilter: string[];
   motivoFilter: string[];
+  previsaoSlaFilter: string[];
   
   // Filtros de período
   filterPeriod: string;
@@ -80,6 +81,7 @@ const defaultFilters: FiltersState = {
   statusSlaFilter: [],
   longTailFilter: [],
   motivoFilter: [],
+  previsaoSlaFilter: [],
   
   filterPeriod: '7-days',
   customDateRange: {}
@@ -127,7 +129,8 @@ export const FiltersProvider: React.FC<{ children: ReactNode }> = ({ children })
     filters.suptFilter.length > 0 ||
     filters.statusSlaFilter.length > 0 ||
     filters.longTailFilter.length > 0 ||
-    filters.motivoFilter.length > 0;
+    filters.motivoFilter.length > 0 ||
+    filters.previsaoSlaFilter.length > 0;
 
   return (
     <FiltersContext.Provider

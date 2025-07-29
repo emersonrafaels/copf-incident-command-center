@@ -42,6 +42,7 @@ const Ocorrencias = () => {
     reincidentFilter,
     statusSlaFilter,
     motivoFilter,
+    previsaoSlaFilter,
     updateFilter
   } = useFilters();
   const [searchParams] = useSearchParams();
@@ -276,7 +277,39 @@ const Ocorrencias = () => {
     // Filtro de motivo de ocorrência
     const matchesMotivo = motivoFilter.length === 0 || motivoFilter.includes(occurrence.motivoOcorrencia || 'Não informado');
 
-    return matchesSearch && matchesStatus && matchesSegment && matchesEquipment && matchesSerial && matchesVendor && matchesSeverity && matchesAgencia && matchesUF && matchesTipoAgencia && matchesPontoVip && matchesSupt && matchesStatusEquipamento && matchesTransportadora && matchesMotivo;
+    // Filtro de previsão vs SLA
+    const matchesPrevisaoSla = (() => {
+      if (previsaoSlaFilter.length === 0) return true;
+      
+      // Filtrar apenas ocorrências não encerradas e não canceladas
+      const isActive = occurrence.status !== 'encerrado' && occurrence.status !== 'cancelado';
+      if (!isActive) return false;
+      
+      const now = new Date();
+      const createdDate = new Date(occurrence.createdAt);
+      const slaLimitHours = occurrence.severity === 'critical' || occurrence.severity === 'high' ? 24 : 72;
+      const slaDeadline = new Date(createdDate.getTime() + (slaLimitHours * 60 * 60 * 1000));
+      
+      if (previsaoSlaFilter.includes('sem_previsao')) {
+        return !occurrence.dataPrevisaoEncerramento;
+      }
+      
+      if (previsaoSlaFilter.includes('com_previsao_dentro_sla')) {
+        if (!occurrence.dataPrevisaoEncerramento) return false;
+        const previsaoDate = new Date(occurrence.dataPrevisaoEncerramento);
+        return previsaoDate <= slaDeadline;
+      }
+      
+      if (previsaoSlaFilter.includes('previsao_alem_sla')) {
+        if (!occurrence.dataPrevisaoEncerramento) return false;
+        const previsaoDate = new Date(occurrence.dataPrevisaoEncerramento);
+        return previsaoDate > slaDeadline;
+      }
+      
+      return false;
+    })();
+
+    return matchesSearch && matchesStatus && matchesSegment && matchesEquipment && matchesSerial && matchesVendor && matchesSeverity && matchesAgencia && matchesUF && matchesTipoAgencia && matchesPontoVip && matchesSupt && matchesStatusEquipamento && matchesTransportadora && matchesMotivo && matchesPrevisaoSla;
   });
 
   const handleExportExcel = () => {

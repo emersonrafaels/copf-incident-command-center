@@ -105,12 +105,25 @@ export const SlaPrevisaoChart = memo(function SlaPrevisaoChart({
       // Aplicar filtros para ocorrências não encerradas e não canceladas
       updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento', 'com_impedimentos']);
       
-      // Adicionar lógica específica para cada categoria quando possível
-      // Por enquanto, mostramos apenas ocorrências ativas
+      // Aplicar filtro específico baseado na categoria
+      switch (data.category) {
+        case 'Com Previsão':
+          // Filtrar ocorrências que têm previsão e estão dentro do SLA
+          updateFilter('previsaoSlaFilter', ['com_previsao_dentro_sla']);
+          break;
+        case 'Sem Previsão':
+          // Filtrar ocorrências sem previsão de encerramento
+          updateFilter('previsaoSlaFilter', ['sem_previsao']);
+          break;
+        case 'Previsão > SLA':
+          // Filtrar ocorrências com previsão além do SLA
+          updateFilter('previsaoSlaFilter', ['previsao_alem_sla']);
+          break;
+      }
       
       navigate('/ocorrencias');
-      toast.success(`Categoria: ${data.category}`, {
-        description: `${data.count} ocorrências encontradas (${data.percentage}% das ocorrências ativas). Filtros específicos por previsão serão implementados.`
+      toast.success(`Filtro aplicado: ${data.category}`, {
+        description: `${data.count} ocorrências encontradas (${data.percentage}% das ocorrências ativas)`
       });
     }, 100);
   };
