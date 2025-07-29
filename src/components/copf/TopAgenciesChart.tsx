@@ -11,6 +11,11 @@ interface TopAgenciesChartProps {
 }
 
 export function TopAgenciesChart({ occurrences, filteredOccurrences }: TopAgenciesChartProps) {
+  // Mapeamento de equipamentos para segmentos
+  const getEquipmentSegment = (equipment: string): 'AA' | 'AB' => {
+    const aaEquipments = ['ATM Saque', 'ATM Depósito', 'Cassete'];
+    return aaEquipments.includes(equipment) ? 'AA' : 'AB';
+  };
   const chartData = useMemo(() => {
     const dataToUse = filteredOccurrences || occurrences;
     
@@ -27,16 +32,17 @@ export function TopAgenciesChart({ occurrences, filteredOccurrences }: TopAgenci
       
       acc[agencyKey].total++;
       
-      // Contar equipamentos por agência
-      if (!acc[agencyKey].equipments[occurrence.equipment]) {
-        acc[agencyKey].equipments[occurrence.equipment] = 0;
+      // Contar equipamentos por agência (com segmento)
+      const equipmentWithSegment = `${getEquipmentSegment(occurrence.equipment)} - ${occurrence.equipment}`;
+      if (!acc[agencyKey].equipments[equipmentWithSegment]) {
+        acc[agencyKey].equipments[equipmentWithSegment] = 0;
       }
-      acc[agencyKey].equipments[occurrence.equipment]++;
+      acc[agencyKey].equipments[equipmentWithSegment]++;
       
       return acc;
     }, {} as Record<string, any>);
 
-    // Pegar todos os equipamentos únicos
+    // Pegar todos os equipamentos únicos (com segmento)
     const allEquipments = new Set<string>();
     Object.values(agencyGroups).forEach((agency: any) => {
       Object.keys(agency.equipments).forEach(eq => allEquipments.add(eq));
@@ -47,14 +53,20 @@ export function TopAgenciesChart({ occurrences, filteredOccurrences }: TopAgenci
       .sort((a: any, b: any) => b.total - a.total)
       .slice(0, 10)
       .map((agency: any) => {
+        // Adicionar marcador VIP ao nome da agência
+        const isVip = (() => {
+          const number = agency.agency.match(/\d+/)?.[0] || '0';
+          return number.endsWith('0') || number.endsWith('5');
+        })();
+        
+        const agencyDisplayName = isVip ? `🏆 ${agency.agency}` : agency.agency;
+        
         const result: any = {
-          agency: agency.agency,
+          agency: agencyDisplayName,
+          originalAgency: agency.agency,
           total: agency.total,
           agencyNumber: agency.agency.match(/\d+/)?.[0] || '0',
-          isVip: (() => {
-            const number = agency.agency.match(/\d+/)?.[0] || '0';
-            return number.endsWith('0') || number.endsWith('5');
-          })()
+          isVip
         };
 
         // Adicionar cada equipamento como propriedade
@@ -91,7 +103,7 @@ export function TopAgenciesChart({ occurrences, filteredOccurrences }: TopAgenci
         <div className="bg-background/95 backdrop-blur-sm border border-border/80 rounded-lg p-4 shadow-lg min-w-[280px]">
           <div className="flex items-center gap-2 mb-3">
             <Building2 className="h-4 w-4 text-primary" />
-            <p className="font-semibold text-foreground">{label}</p>
+            <p className="font-semibold text-foreground">{data.originalAgency}</p>
             {isVip && (
               <Badge variant="secondary" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
                 VIP
