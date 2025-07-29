@@ -172,11 +172,8 @@ export function Dashboard() {
         filters.updateFilter('statusEquipamentoFilterMulti', ['inoperante']);
         break;
       case 'critical':
-        // Navegar com filtro específico via state
-        navigate('/ocorrencias', { 
-          state: { filterType: 'critical' } 
-        });
-        return; // Early return para evitar navegação dupla
+        filters.updateFilter('severityFilterMulti', ['critical']);
+        break;
     }
     
     // Navegar para a página de ocorrências

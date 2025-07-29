@@ -975,17 +975,23 @@ export function FilterSection({ className, showSerialNumber = false }: FilterSec
                    <div className="space-y-4">
                      {/* Primeira linha: Switches */}
                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                       <div className="flex items-center space-x-2 p-3 border border-border/50 rounded-lg bg-background/50 hover:bg-accent/10 transition-colors">
-                         <Switch
-                           id="override-filter"
-                           checked={overrideFilter}
-                           onCheckedChange={(checked) => updateFilter('overrideFilter', checked)}
-                           className="data-[state=checked]:bg-primary"
-                         />
-                          <Label htmlFor="override-filter" className="text-sm cursor-pointer select-none">
-                            Ocorrências em Atraso
-                          </Label>
-                       </div>
+                        <div className="flex items-center space-x-2 p-3 border border-border/50 rounded-lg bg-background/50 hover:bg-accent/10 transition-colors">
+                          <Switch
+                            id="due-today-filter"
+                            checked={statusSlaFilter.includes('critico')}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                updateFilter('statusSlaFilter', ['critico']);
+                              } else {
+                                updateFilter('statusSlaFilter', []);
+                              }
+                            }}
+                            className="data-[state=checked]:bg-primary"
+                          />
+                           <Label htmlFor="due-today-filter" className="text-sm cursor-pointer select-none">
+                             Ocorrências Vencem Hoje
+                           </Label>
+                        </div>
 
                        <div className="flex items-center space-x-2 p-3 border border-border/50 rounded-lg bg-background/50 hover:bg-accent/10 transition-colors">
                          <Switch
