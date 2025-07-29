@@ -246,13 +246,15 @@ export function Dashboard() {
       const pontoVipStatus = isVip ? 'sim' : 'nao';
       if (pontoVipFilter.length > 0 && !pontoVipFilter.includes(pontoVipStatus)) return false;
 
-      // Filtro de ocorrências vencidas
+      // Filtro de ocorrências que vencem hoje (próximas 24h)
       if (overrideFilter) {
+        if (occurrence.status === 'encerrado') return false;
         const createdDate = new Date(occurrence.createdAt);
-        const hoursDiff = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60);
+        const hoursElapsed = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60);
         const slaLimit = occurrence.severity === 'critical' || occurrence.severity === 'high' ? 24 : 72;
-        const isOverdue = hoursDiff > slaLimit && occurrence.status !== 'encerrado';
-        if (!isOverdue) return false;
+        const hoursUntilDue = slaLimit - hoursElapsed;
+        const dueToday = hoursUntilDue > 0 && hoursUntilDue <= 24; // Vence nas próximas 24 horas
+        if (!dueToday) return false;
       }
 
       // Filtro de reincidências (simular campo reincidencia)

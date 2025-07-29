@@ -122,13 +122,15 @@ const Ocorrencias = () => {
     else if (agencyNum >= 510 && agencyNum <= 599) agencySupt = agencyNum.toString().substring(0, 2);
     const matchesSupt = suptFilter.length === 0 || (agencySupt && suptFilter.includes(agencySupt));
 
-    // Filtro de ocorrências vencidas
+    // Filtro de ocorrências que vencem hoje (próximas 24h)
     if (overrideFilter) {
+      if (occurrence.status === 'encerrado') return false;
       const createdDate = new Date(occurrence.createdAt);
-      const hoursDiff = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60);
+      const hoursElapsed = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60);
       const slaLimit = occurrence.severity === 'critical' || occurrence.severity === 'high' ? 24 : 72;
-      const isOverdue = hoursDiff > slaLimit && occurrence.status !== 'encerrado';
-      if (!isOverdue) return false;
+      const hoursUntilDue = slaLimit - hoursElapsed;
+      const dueToday = hoursUntilDue > 0 && hoursUntilDue <= 24; // Vence nas próximas 24 horas
+      if (!dueToday) return false;
     }
 
     // Filtro de priorizadas com fornecedor
