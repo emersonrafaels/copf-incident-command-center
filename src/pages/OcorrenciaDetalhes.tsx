@@ -27,6 +27,7 @@ export default function OcorrenciaDetalhes() {
   const [vendorMessage, setVendorMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [isPrioritized, setIsPrioritized] = useState(false);
+  const [tempPriority, setTempPriority] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
   const [showTemplates, setShowTemplates] = useState(false);
   const [historyEntries, setHistoryEntries] = useState<any[]>([]);
@@ -39,7 +40,9 @@ export default function OcorrenciaDetalhes() {
       console.log('Ocorrência encontrada:', found);
       setOccurrence(found);
       if (found) {
-        setIsPrioritized(found.severity === 'critical' || found.severity === 'high');
+        const priority = found.severity === 'critical' || found.severity === 'high';
+        setIsPrioritized(priority);
+        setTempPriority(priority);
         // Histórico inicial mockado
         setHistoryEntries([
           {
@@ -60,23 +63,29 @@ export default function OcorrenciaDetalhes() {
   };
 
   const handlePriorityToggle = (checked: boolean) => {
-    setIsPrioritized(checked);
+    setTempPriority(checked);
+  };
+
+  const savePriority = () => {
+    if (tempPriority === isPrioritized) return;
+
+    setIsPrioritized(tempPriority);
     
     // Create new history entry for priority change
     const newEntry = {
       id: Date.now().toString(),
-      type: checked ? 'prioritized' : 'deprioritized',
+      type: tempPriority ? 'prioritized' : 'deprioritized',
       timestamp: new Date().toISOString(),
       author: 'Operação COPF',
-      description: checked ? 'Ocorrência priorizada' : 'Ocorrência despriorizada',
-      details: checked ? 'Ocorrência marcada como prioritária para atendimento urgente' : 'Prioridade removida da ocorrência'
+      description: tempPriority ? 'Ocorrência priorizada' : 'Ocorrência despriorizada',
+      details: tempPriority ? 'Ocorrência marcada como prioritária para atendimento urgente' : 'Prioridade removida da ocorrência'
     };
     
     setHistoryEntries(prev => [newEntry, ...prev]);
     
     toast({
-      title: checked ? "Ocorrência Priorizada" : "Prioridade Removida",
-      description: checked ? "A ocorrência foi marcada como prioritária" : "A prioridade foi removida da ocorrência"
+      title: tempPriority ? "Ocorrência Priorizada" : "Prioridade Removida",
+      description: tempPriority ? "A ocorrência foi marcada como prioritária" : "A prioridade foi removida da ocorrência"
     });
   };
 
@@ -342,27 +351,40 @@ export default function OcorrenciaDetalhes() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center space-x-3">
-                  <Switch
-                    id="priority-switch"
-                    checked={isPrioritized}
-                    onCheckedChange={handlePriorityToggle}
-                  />
-                  <Label htmlFor="priority-switch" className="text-sm font-medium">
-                    {isPrioritized ? 'Remover prioridade' : 'Priorizar ocorrência'}
-                  </Label>
-                </div>
-                {isPrioritized && (
-                  <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                    <div className="flex items-center">
-                      <Star className="h-4 w-4 text-yellow-600 mr-2" />
-                      <span className="text-sm font-medium text-yellow-800">Ocorrência Prioritária</span>
-                    </div>
-                    <p className="text-xs text-yellow-700 mt-1">
-                      Ao salvar como priorizada, essa ocorrência aparecerá priorizada para o fornecedor.
-                    </p>
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3">
+                    <Switch
+                      id="priority-switch"
+                      checked={tempPriority}
+                      onCheckedChange={handlePriorityToggle}
+                    />
+                    <Label htmlFor="priority-switch" className="text-sm font-medium">
+                      {tempPriority ? 'Remover prioridade' : 'Priorizar ocorrência'}
+                    </Label>
                   </div>
-                )}
+                  
+                  {tempPriority !== isPrioritized && (
+                    <Button 
+                      onClick={savePriority}
+                      size="sm"
+                      className="w-full"
+                    >
+                      Salvar Priorização
+                    </Button>
+                  )}
+                  
+                  {isPrioritized && (
+                    <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                      <div className="flex items-center">
+                        <Star className="h-4 w-4 text-yellow-600 mr-2" />
+                        <span className="text-sm font-medium text-yellow-800">Ocorrência Prioritária</span>
+                      </div>
+                      <p className="text-xs text-yellow-700 mt-1">
+                        Ao salvar como priorizada, essa ocorrência aparecerá priorizada para o fornecedor.
+                      </p>
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
 
