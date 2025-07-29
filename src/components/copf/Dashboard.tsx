@@ -13,6 +13,7 @@ import { FilterSection } from "./FilterSection";
 // Lazy loading de componentes pesados
 const EnhancedInteractiveCharts = lazy(() => import('./EnhancedInteractiveCharts').then(module => ({ default: module.EnhancedInteractiveCharts })))
 const VendorEquipmentMatrix = lazy(() => import('./VendorEquipmentMatrix').then(module => ({ default: module.VendorEquipmentMatrix })))
+const VendorMetricsMatrix = lazy(() => import('./VendorMetricsMatrix').then(module => ({ default: module.VendorMetricsMatrix })))
 import { OccurrenceHighlights } from "./OccurrenceHighlights";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -177,6 +178,26 @@ export function Dashboard() {
     }
     
     // Navegar para a página de ocorrências
+    navigate('/ocorrencias');
+    toast('Filtros aplicados - navegando para página de ocorrências');
+  };
+
+  // Handler para VendorMetricsMatrix
+  const handleVendorMetricsNavigation = (filter: { vendor?: string; severity?: string; slaStatus?: string }) => {
+    if (filter.vendor) {
+      filters.updateFilter('vendorFilterMulti', [filter.vendor]);
+    }
+    if (filter.severity) {
+      if (filter.severity.includes(',')) {
+        // Múltiplas severidades separadas por vírgula
+        filters.updateFilter('severityFilterMulti', filter.severity.split(','));
+      } else {
+        filters.updateFilter('severityFilterMulti', [filter.severity]);
+      }
+    }
+    if (filter.slaStatus) {
+      filters.updateFilter('statusSlaFilter', [filter.slaStatus]);
+    }
     navigate('/ocorrencias');
     toast('Filtros aplicados - navegando para página de ocorrências');
   };
@@ -806,6 +827,31 @@ export function Dashboard() {
               <AgingChart occurrences={occurrences} filteredOccurrences={filteredOccurrences} />
             </CardContent>
           </Card>
+        </div>
+
+        {/* VendorMetricsMatrix - Nova seção de análise por fornecedor */}
+        <div className="animate-fade-in" style={{
+          animationDelay: '0.5s'
+        }}>
+          <Suspense fallback={
+            <Card className="border-l-4 border-l-primary">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-5 w-5 rounded" />
+                  <Skeleton className="h-6 w-48" />
+                </div>
+                <Skeleton className="h-4 w-96" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-[400px] w-full rounded-lg" />
+              </CardContent>
+            </Card>
+          }>
+            <VendorMetricsMatrix 
+              occurrences={filteredOccurrences} 
+              onNavigateToOccurrences={handleVendorMetricsNavigation}
+            />
+          </Suspense>
         </div>
       </div>
 
