@@ -6,6 +6,7 @@ import { StatusBadge } from "./StatusBadge";
 import { LongTailChart } from "./LongTailChart";
 import { OccurrenceModal } from "./OccurrenceModal";
 import { EquipmentStatusChart } from "./EquipmentStatusChart";
+import { TopAgenciesChart } from "./TopAgenciesChart";
 
 import { FilterSection } from "./FilterSection";
 
@@ -679,11 +680,11 @@ export function Dashboard() {
         <EquipmentStatusChart occurrences={filteredOccurrences} />
       </div>
 
-      {/* Long Tail Analysis */}
+      {/* Top Agencies Chart */}
       <div className="animate-fade-in" style={{
       animationDelay: '0.35s'
     }}>
-        <LongTailChart occurrences={occurrences} filteredOccurrences={filteredOccurrences} />
+        <TopAgenciesChart occurrences={occurrences} filteredOccurrences={filteredOccurrences} />
       </div>
 
       {/* Highlights Operacionais */}
