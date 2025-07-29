@@ -57,6 +57,11 @@ export function Dashboard() {
 
   // Usar filtros do contexto
   const filters = useFilters();
+
+  // Limpar todos os filtros ao entrar no dashboard
+  useEffect(() => {
+    filters.clearAllFilters();
+  }, []);
   const {
     agenciaFilter,
     ufFilter,

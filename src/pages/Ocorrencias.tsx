@@ -29,6 +29,7 @@ const Ocorrencias = () => {
     statusFilterMulti, 
     vendorFilterMulti, 
     severityFilterMulti,
+    statusEquipamentoFilterMulti,
     agenciaFilter,
     ufFilter,
     municipioFilter,
@@ -243,7 +244,10 @@ const Ocorrencias = () => {
       }
     }
 
-    return matchesSearch && matchesStatus && matchesSegment && matchesEquipment && matchesSerial && matchesVendor && matchesAgencia && matchesUF && matchesTipoAgencia && matchesPontoVip && matchesSupt;
+    // Filtro de status do equipamento
+    const matchesStatusEquipamento = statusEquipamentoFilterMulti.length === 0 || statusEquipamentoFilterMulti.includes(occurrence.statusEquipamento);
+
+    return matchesSearch && matchesStatus && matchesSegment && matchesEquipment && matchesSerial && matchesVendor && matchesAgencia && matchesUF && matchesTipoAgencia && matchesPontoVip && matchesSupt && matchesStatusEquipamento;
   });
 
   const handleExportExcel = () => {
