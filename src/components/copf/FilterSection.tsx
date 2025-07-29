@@ -1131,12 +1131,12 @@ export function FilterSection({ className, showSerialNumber = false }: FilterSec
                          </Popover>
                        </div>
 
-                       {/* Long Tail */}
-                       <div className="group space-y-3">
-                         <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                           <Clock className="h-3 w-3 text-orange-500" />
-                           Long Tail
-                         </Label>
+                        {/* Aging */}
+                        <div className="group space-y-3">
+                          <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                            <Clock className="h-3 w-3 text-orange-500" />
+                            Aging
+                          </Label>
                          <Popover>
                            <PopoverTrigger asChild>
                              <Button variant="outline" className="w-full h-10 justify-between hover:bg-orange-500/5 hover:border-orange-500/30 transition-all duration-200 group-hover:shadow-sm">
@@ -1170,10 +1170,10 @@ export function FilterSection({ className, showSerialNumber = false }: FilterSec
                                       { value: '4-8h', label: '4-8h' },
                                       { value: '8-12h', label: '8-12h' },
                                       { value: '12-24h', label: '12-24h' },
-                                      { value: '1-2d', label: '1-2 dias' },
-                                      { value: '2-3d', label: '2-3 dias' },
-                                      { value: '3-5d', label: '3-5 dias' },
-                                      { value: '>5d', label: '>5 dias', highlight: true }
+                                      { value: '1-2 dias', label: '1-2 dias' },
+                                      { value: '2-3 dias', label: '2-3 dias' },
+                                      { value: '3-5 dias', label: '3-5 dias' },
+                                      { value: '>5 dias', label: '>5 dias', highlight: true }
                                    ].map(range => (
                                      <CommandItem key={range.value} onSelect={() => {
                                        const isSelected = longTailFilter.includes(range.value);

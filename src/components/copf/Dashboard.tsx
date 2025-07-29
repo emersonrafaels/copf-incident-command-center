@@ -239,7 +239,7 @@ export function Dashboard() {
         if (!hasReincidence) return false;
       }
       
-      // Filtro de Long Tail (tempo desde abertura) - apenas ocorrências ativas para consistência com LongTailChart
+      // Filtro de Aging (tempo desde abertura) - apenas ocorrências ativas para consistência com AgingChart
       if (longTailFilter.length > 0) {
         // Primeiro verificar se a ocorrência está ativa (não cancelada/encerrada)
         const isActiveOccurrence = occurrence.status === 'a_iniciar' || occurrence.status === 'em_andamento';
@@ -437,9 +437,9 @@ export function Dashboard() {
             <div className="flex flex-wrap gap-3">
               {/* Filtro de Período */}
               <Select value={filterPeriod} onValueChange={(value) => updateFilter('filterPeriod', value)}>
-                <SelectTrigger className="w-auto min-w-[180px] bg-card border-border/50 hover:border-primary/30 transition-colors shadow-card-default">
+                <SelectTrigger className="w-auto min-w-[180px] bg-card border-border/50 hover:border-primary/30 transition-colors shadow-card-default text-foreground">
                   <Calendar className="h-4 w-4 mr-2 text-primary" />
-                  <SelectValue />
+                  <SelectValue className="text-foreground" />
                 </SelectTrigger>
                 <SelectContent className="bg-card border-border/50">
                   <SelectItem value="7-days">Últimos 7 dias</SelectItem>
@@ -453,12 +453,12 @@ export function Dashboard() {
               {/* Seletor de data personalizado */}
               {filterPeriod === 'custom' && <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className={cn("w-auto justify-start text-left font-normal shadow-card-default hover:shadow-card-hover transition-all", !customDateRange.from && "text-muted-foreground")}>
+                    <Button variant="outline" size="sm" className={cn("w-auto justify-start text-left font-normal shadow-card-default hover:shadow-card-hover transition-all text-foreground", !customDateRange.from && "text-muted-foreground")}>
                       <CalendarDays className="h-4 w-4 mr-2 text-primary" />
                       {customDateRange.from ? customDateRange.to ? <>
-                          {format(customDateRange.from, "dd/MM/yyyy")} -{" "}
-                          {format(customDateRange.to, "dd/MM/yyyy")}
-                        </> : format(customDateRange.from, "dd/MM/yyyy") : <span>Selecionar período</span>}
+                          <span className="text-foreground">{format(customDateRange.from, "dd/MM/yyyy")} -{" "}
+                          {format(customDateRange.to, "dd/MM/yyyy")}</span>
+                        </> : <span className="text-foreground">{format(customDateRange.from, "dd/MM/yyyy")}</span> : <span className="text-muted-foreground">Selecionar período</span>}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0 bg-card border-border/50 shadow-elegant" align="start">
