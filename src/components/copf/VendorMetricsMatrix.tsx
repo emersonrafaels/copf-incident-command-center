@@ -1,4 +1,6 @@
 import { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { useFilters } from "@/contexts/FiltersContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,6 +45,8 @@ interface HeatmapCell {
 }
 
 export function VendorMetricsMatrix({ occurrences, onNavigateToOccurrences }: VendorMetricsMatrixProps) {
+  const navigate = useNavigate();
+  const { clearAllFilters, updateFilter } = useFilters();
   const vendorMetrics = useMemo(() => {
     const vendorMap = new Map<string, VendorMetrics>();
 
@@ -191,6 +195,21 @@ export function VendorMetricsMatrix({ occurrences, onNavigateToOccurrences }: Ve
     }
 
     onNavigateToOccurrences(filter);
+  };
+
+  const handleHeatmapCellClick = (vendor: string, equipment: string) => {
+    // Limpar todos os filtros primeiro
+    clearAllFilters();
+    
+    // Aguardar um tick para garantir que os filtros foram limpos
+    setTimeout(() => {
+      // Aplicar os filtros específicos
+      updateFilter('vendorFilterMulti', [vendor]);
+      updateFilter('equipmentFilterMulti', [equipment]);
+      
+      // Navegar para a página de ocorrências
+      navigate('/ocorrencias');
+    }, 100);
   };
 
   const getHeatmapColor = (value: number, maxValue: number) => {
@@ -379,7 +398,7 @@ export function VendorMetricsMatrix({ occurrences, onNavigateToOccurrences }: Ve
                         className="aspect-square flex items-center justify-center text-xs font-medium rounded cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all"
                         style={{ backgroundColor: getHeatmapColor(value, maxHeatmapValue) }}
                         title={`${vendor} - ${equipment}: ${value} ocorrências. Clique para filtrar por fornecedor e equipamento.`}
-                        onClick={() => onNavigateToOccurrences?.({ vendor, equipment })}
+                        onClick={() => handleHeatmapCellClick(vendor, equipment)}
                       >
                         {value > 0 ? value : ''}
                       </div>
