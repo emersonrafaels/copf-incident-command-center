@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { StatusBadge } from './StatusBadge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Clock, AlertTriangle, TrendingUp, ArrowRight, Calendar, Timer, AlertCircle } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Clock, AlertTriangle, TrendingUp, ArrowRight, Calendar, Timer, AlertCircle, Info } from 'lucide-react';
 import { OccurrenceData } from '@/hooks/useDashboardData';
 import { useFilters } from '@/contexts/FiltersContext';
 import { format, differenceInHours, isToday, startOfDay, endOfDay, isSameDay } from 'date-fns';
@@ -201,22 +202,52 @@ export function OccurrenceHighlights({
                   <Calendar className="h-5 w-5" />
                 </div>
                 <div>
-                  <span className="text-lg font-semibold">Entraram Hoje</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-semibold">Entraram Hoje</span>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Info className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Ocorrências registradas nas últimas 24 horas</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                   <p className="text-sm text-muted-foreground">Ocorrências criadas no dia atual</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="text-lg font-semibold px-3 py-1">
-                  {highlights.counts.enteredToday}
-                </Badge>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => handleViewAll('entered')} 
-                  className="text-blue-600 hover:text-blue-700"
-                >
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Badge variant="secondary" className="text-lg font-semibold px-3 py-1">
+                        {highlights.counts.enteredToday}
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Total de ocorrências registradas hoje</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => handleViewAll('entered')} 
+                        className="text-blue-600 hover:text-blue-700"
+                      >
+                        <ArrowRight className="w-4 h-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Ver todas as ocorrências que entraram hoje</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
             </CardTitle>
           </CardHeader>
@@ -264,22 +295,52 @@ export function OccurrenceHighlights({
                   <Clock className="h-5 w-5" />
                 </div>
                 <div>
-                  <span className="text-lg font-semibold">Vencem Hoje</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-semibold">Vencem Hoje</span>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Info className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Ocorrências em andamento com SLA expirando nas próximas 24 horas</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                   <p className="text-sm text-muted-foreground">Em andamento - SLA vence hoje</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="text-lg font-semibold px-3 py-1">
-                  {highlights.counts.dueToday}
-                </Badge>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => handleViewAll('due')} 
-                  className="text-orange-600 hover:text-orange-700"
-                >
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Badge variant="secondary" className="text-lg font-semibold px-3 py-1">
+                        {highlights.counts.dueToday}
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Ocorrências com SLA vencendo hoje</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => handleViewAll('due')} 
+                        className="text-orange-600 hover:text-orange-700"
+                      >
+                        <ArrowRight className="w-4 h-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Ver todas as ocorrências que vencem hoje</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
             </CardTitle>
           </CardHeader>
@@ -325,22 +386,52 @@ export function OccurrenceHighlights({
                   <AlertTriangle className="h-5 w-5" />
                 </div>
                 <div>
-                  <span className="text-lg font-semibold">Ocorrências em Atraso</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-semibold">Ocorrências em Atraso</span>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Info className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Ocorrências não encerradas que ultrapassaram o prazo do SLA</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                   <p className="text-sm text-muted-foreground">Não encerradas - SLA expirado</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Badge variant="destructive" className="text-lg font-semibold px-3 py-1">
-                  {highlights.counts.overdueOccurrences}
-                </Badge>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => handleViewAll('overdue')} 
-                  className="text-red-600 hover:text-red-700"
-                >
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Badge variant="destructive" className="text-lg font-semibold px-3 py-1">
+                        {highlights.counts.overdueOccurrences}
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Total de ocorrências em atraso</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => handleViewAll('overdue')} 
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <ArrowRight className="w-4 h-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Ver todas as ocorrências em atraso</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
             </CardTitle>
           </CardHeader>

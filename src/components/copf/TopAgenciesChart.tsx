@@ -1,9 +1,12 @@
 import React, { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Badge } from "@/components/ui/badge";
 import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { OccurrenceData } from '@/hooks/useDashboardData';
+import { useFilters } from '@/contexts/FiltersContext';
+import { useToast } from '@/hooks/use-toast';
 import { Building2, AlertTriangle, Info } from 'lucide-react';
 
 interface TopAgenciesChartProps {
@@ -12,6 +15,9 @@ interface TopAgenciesChartProps {
 }
 
 export function TopAgenciesChart({ occurrences, filteredOccurrences }: TopAgenciesChartProps) {
+  const navigate = useNavigate();
+  const { clearAllFilters, updateFilter } = useFilters();
+  const { toast } = useToast();
   // Mapeamento de equipamentos para segmentos
   const getEquipmentSegment = (equipment: string): 'AA' | 'AB' => {
     const aaEquipments = ['ATM Saque', 'ATM Depósito', 'Cassete'];
@@ -142,6 +148,32 @@ export function TopAgenciesChart({ occurrences, filteredOccurrences }: TopAgenci
     return null;
   };
 
+  const handleBarClick = (data: any, equipmentType?: string) => {
+    // Limpar filtros existentes
+    clearAllFilters();
+    
+    // Aplicar novos filtros
+    setTimeout(() => {
+      updateFilter('agenciaFilter', data.originalAgency);
+      
+      // Se clicar em um equipamento específico, filtrar por ele também
+      if (equipmentType) {
+        const [segment, equipment] = equipmentType.split(' - ');
+        updateFilter('segmentFilterMulti', [segment]);
+        updateFilter('equipmentFilterMulti', [equipment]);
+      }
+      
+      // Navegar para ocorrências
+      navigate('/ocorrencias');
+      
+      // Mostrar toast de confirmação
+      toast({
+        title: "Filtros aplicados",
+        description: `Visualizando ocorrências da agência ${data.originalAgency}${equipmentType ? ` - ${equipmentType}` : ''}`,
+      });
+    }, 100);
+  };
+
   return (
     <Card className="animate-fade-in border-border/50">
       <CardHeader>
@@ -154,7 +186,7 @@ export function TopAgenciesChart({ occurrences, filteredOccurrences }: TopAgenci
                 <Info className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors" />
               </TooltipTrigger>
               <TooltipContent>
-                <p>Este gráfico representa as top 10 agências com mais ocorrências respeitando o período e filtro atual.</p>
+                <p>Este gráfico representa as top 10 agências com mais ocorrências. Clique nas barras para filtrar por agência.</p>
               </TooltipContent>
             </UITooltip>
           </TooltipProvider>
@@ -192,6 +224,8 @@ export function TopAgenciesChart({ occurrences, filteredOccurrences }: TopAgenci
                   stackId="a"
                   fill={equipmentColors[index % equipmentColors.length]}
                   radius={index === chartData.allEquipments.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
+                  className="cursor-pointer hover:opacity-80 transition-opacity"
+                  onClick={(data) => handleBarClick(data, equipment)}
                 />
               ))}
             </BarChart>

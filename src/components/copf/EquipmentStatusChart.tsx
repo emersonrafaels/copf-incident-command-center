@@ -1,13 +1,21 @@
 import React, { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Info } from 'lucide-react';
 import { OccurrenceData } from '@/hooks/useDashboardData';
+import { useFilters } from '@/contexts/FiltersContext';
+import { useToast } from '@/hooks/use-toast';
 
 interface EquipmentStatusChartProps {
   occurrences: OccurrenceData[];
 }
 
 export function EquipmentStatusChart({ occurrences }: EquipmentStatusChartProps) {
+  const navigate = useNavigate();
+  const { clearAllFilters, updateFilter } = useFilters();
+  const { toast } = useToast();
   const chartData = useMemo(() => {
     // Agrupar por segmento e equipamento
     const grouped = occurrences.reduce((acc, occurrence) => {
@@ -66,12 +74,51 @@ export function EquipmentStatusChart({ occurrences }: EquipmentStatusChartProps)
     return null;
   };
 
+  const handleBarClick = (data: any, stackId: string) => {
+    const [segment, equipment] = data.name.split(' - ');
+    
+    // Limpar filtros existentes
+    clearAllFilters();
+    
+    // Aplicar novos filtros
+    setTimeout(() => {
+      updateFilter('segmentFilterMulti', [segment]);
+      updateFilter('equipmentFilterMulti', [equipment]);
+      
+      // Se clicar na parte operante ou inoperante, filtrar por status também
+      if (stackId === 'operante') {
+        updateFilter('statusEquipamentoFilterMulti', ['operante']);
+      } else if (stackId === 'inoperante') {
+        updateFilter('statusEquipamentoFilterMulti', ['inoperante']);
+      }
+      
+      // Navegar para ocorrências
+      navigate('/ocorrencias');
+      
+      // Mostrar toast de confirmação
+      toast({
+        title: "Filtros aplicados",
+        description: `Visualizando ocorrências de ${equipment} do segmento ${segment}${stackId ? ` - ${stackId}` : ''}`,
+      });
+    }, 100);
+  };
+
   return (
     <Card className="animate-fade-in border-border/50">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <div className="w-2 h-6 bg-gradient-to-b from-emerald-500 to-destructive rounded-sm"></div>
           Status dos Equipamentos por Segmento
+          <TooltipProvider>
+            <UITooltip>
+              <TooltipTrigger>
+                <Info className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Clique nas barras para filtrar ocorrências por segmento e equipamento</p>
+              </TooltipContent>
+            </UITooltip>
+          </TooltipProvider>
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -100,6 +147,8 @@ export function EquipmentStatusChart({ occurrences }: EquipmentStatusChartProps)
                 fill="hsl(142 76% 36%)"
                 radius={[0, 0, 0, 0]}
                 name="Operante"
+                className="cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={(data) => handleBarClick(data, 'operante')}
               />
               <Bar 
                 dataKey="inoperante" 
@@ -107,6 +156,8 @@ export function EquipmentStatusChart({ occurrences }: EquipmentStatusChartProps)
                 fill="hsl(var(--destructive))"
                 radius={[4, 4, 0, 0]}
                 name="Inoperante"
+                className="cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={(data) => handleBarClick(data, 'inoperante')}
               />
             </BarChart>
           </ResponsiveContainer>
