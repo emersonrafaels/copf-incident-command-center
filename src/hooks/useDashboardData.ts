@@ -41,6 +41,17 @@ export interface MTTRData {
   mttr: number
 }
 
+// Função para simular transportadora baseada na agência
+const getTransportadoraByAgency = (agencia: string): string => {
+  const agencyNumber = parseInt(agencia.match(/\d+/)?.[0] || '0');
+  // Simular diferentes transportadoras baseadas no número da agência
+  if (agencyNumber <= 500) return 'Brinks';
+  if (agencyNumber <= 1000) return 'Prosegur';
+  if (agencyNumber <= 1500) return 'Express Logística';
+  if (agencyNumber <= 2000) return 'TechTransporte';
+  return 'LogiCorp';
+};
+
 // Mapeamento dos campos do banco para a interface do frontend
 const mapDatabaseToOccurrence = (dbRecord: any): OccurrenceData => {
   // Mapear status do banco para formato esperado
@@ -80,7 +91,7 @@ const mapDatabaseToOccurrence = (dbRecord: any): OccurrenceData => {
     resolvedAt: dbRecord.data_resolucao,
     assignedTo: dbRecord.usuario_responsavel || 'Não atribuído',
     vendor: dbRecord.fornecedor,
-    transportadora: undefined, // Campo não existe ainda no banco
+    transportadora: getTransportadoraByAgency(dbRecord.agencia), // Simular transportadora baseada na agência
     tipoAgencia: dbRecord.tipo_agencia,
     estado: dbRecord.uf,
     municipio: 'Centro', // Campo não existe ainda no banco

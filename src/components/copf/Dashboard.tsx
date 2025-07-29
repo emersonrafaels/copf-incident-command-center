@@ -119,75 +119,51 @@ export function Dashboard() {
 
   // Handlers para navegar com filtros específicos
   const handleNavigateToOccurrences = (filter: 'total' | 'pending' | 'reincidence' | 'overdue' | 'agencies' | 'mttr' | 'entered-today' | 'due-today' | 'overdue-today') => {
-    // Preservar filtros atuais que devem ser mantidos
-    const currentSegmentFilter = filters.segmentFilterMulti;
-    const currentEquipmentFilter = filters.equipmentFilterMulti;
-    const currentVendorFilter = filters.vendorFilterMulti;
-    const currentTransportadoraFilter = filters.transportadoraFilterMulti;
-    const currentSeverityFilter = filters.severityFilterMulti;
-    const currentAgenciaFilter = filters.agenciaFilter;
-    const currentUfFilter = filters.ufFilter;
-    const currentSerialFilter = filters.serialNumberFilter;
+    console.log('Card clicked:', filter, 'Current filtered occurrences:', filteredOccurrences.length);
     
-    // Limpar filtros específicos que serão substituídos
-    filters.clearAllFilters();
+    // Aplicar filtros específicos do card clicado SEM limpar os filtros existentes
+    switch (filter) {
+      case 'total':
+        // Sem filtros específicos adicionais - mantém apenas os filtros já aplicados
+        break;
+      case 'pending':
+        filters.updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento', 'com_impedimentos']);
+        break;
+      case 'reincidence':
+        filters.updateFilter('reincidentFilter', true);
+        break;
+      case 'overdue':
+        filters.updateFilter('overrideFilter', true);
+        break;
+      case 'entered-today':
+        // Navegar com filtro específico via state
+        navigate('/ocorrencias', { 
+          state: { filterType: 'entered-today' } 
+        });
+        return; // Early return para evitar navegação dupla
+      case 'due-today':
+        // Navegar com filtro específico via state
+        navigate('/ocorrencias', { 
+          state: { filterType: 'due-today' } 
+        });
+        return; // Early return para evitar navegação dupla
+      case 'overdue-today':
+        // Navegar com filtro específico via state
+        navigate('/ocorrencias', { 
+          state: { filterType: 'overdue-today' } 
+        });
+        return; // Early return para evitar navegação dupla
+      case 'agencies':
+        // Sem filtros específicos adicionais - mantém apenas os filtros já aplicados
+        break;
+      case 'mttr':
+        filters.updateFilter('statusFilterMulti', ['encerrado']);
+        break;
+    }
     
-    setTimeout(() => {
-      // Restaurar filtros de contexto que devem ser preservados
-      if (currentSegmentFilter.length > 0) filters.updateFilter('segmentFilterMulti', currentSegmentFilter);
-      if (currentEquipmentFilter.length > 0) filters.updateFilter('equipmentFilterMulti', currentEquipmentFilter);
-      if (currentVendorFilter.length > 0) filters.updateFilter('vendorFilterMulti', currentVendorFilter);
-      if (currentTransportadoraFilter.length > 0) filters.updateFilter('transportadoraFilterMulti', currentTransportadoraFilter);
-      if (currentSeverityFilter.length > 0) filters.updateFilter('severityFilterMulti', currentSeverityFilter);
-      if (currentAgenciaFilter.length > 0) filters.updateFilter('agenciaFilter', currentAgenciaFilter);
-      if (currentUfFilter.length > 0) filters.updateFilter('ufFilter', currentUfFilter);
-      if (currentSerialFilter) filters.updateFilter('serialNumberFilter', currentSerialFilter);
-      
-      // Aplicar filtros específicos do card clicado
-      switch (filter) {
-        case 'total':
-          // Sem filtros específicos adicionais - mantém apenas os filtros já aplicados
-          break;
-        case 'pending':
-          filters.updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento', 'com_impedimentos']);
-          break;
-        case 'reincidence':
-          filters.updateFilter('reincidentFilter', true);
-          break;
-        case 'overdue':
-          filters.updateFilter('overrideFilter', true);
-          filters.updateFilter('statusSlaFilter', ['vencido']);
-          break;
-        case 'entered-today':
-          // Navegar com filtro específico via state
-          navigate('/ocorrencias', { 
-            state: { filterType: 'entered-today' } 
-          });
-          return; // Early return para evitar navegação dupla
-        case 'due-today':
-          // Navegar com filtro específico via state
-          navigate('/ocorrencias', { 
-            state: { filterType: 'due-today' } 
-          });
-          return; // Early return para evitar navegação dupla
-        case 'overdue-today':
-          // Navegar com filtro específico via state
-          navigate('/ocorrencias', { 
-            state: { filterType: 'overdue-today' } 
-          });
-          return; // Early return para evitar navegação dupla
-        case 'agencies':
-          // Sem filtros específicos adicionais - mantém apenas os filtros já aplicados
-          break;
-        case 'mttr':
-          filters.updateFilter('statusFilterMulti', ['encerrado']);
-          break;
-      }
-      
-      // Navegar para a página de ocorrências
-      navigate('/ocorrencias');
-      toast('Filtros aplicados - navegando para página de ocorrências');
-    }, 50);
+    // Navegar para a página de ocorrências
+    navigate('/ocorrencias');
+    toast('Filtros aplicados - navegando para página de ocorrências');
   };
 
   // Filtrar ocorrências - Memoizado para performance
@@ -199,18 +175,6 @@ export function Dashboard() {
       if (statusFilterMulti.length > 0 && !statusFilterMulti.includes(occurrence.status)) return false;
       if (vendorFilterMulti.length > 0 && !vendorFilterMulti.includes(occurrence.vendor)) return false;
       if (transportadoraFilterMulti.length > 0) {
-        // Debug: adicionar log para verificar filtro de transportadora
-        console.log('Transportadora Filter Debug:', {
-          occurrence: {
-            id: occurrence.id,
-            agency: occurrence.agency,
-            transportadora: occurrence.transportadora,
-            tipoAgencia: occurrence.tipoAgencia
-          },
-          filterValues: transportadoraFilterMulti,
-          tipoAgenciaFilter
-        });
-        
         // Verificar se a transportadora existe e não está vazia
         if (!occurrence.transportadora || occurrence.transportadora.trim() === '') return false;
         
