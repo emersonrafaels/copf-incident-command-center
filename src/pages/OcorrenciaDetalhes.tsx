@@ -43,14 +43,22 @@ export default function OcorrenciaDetalhes() {
         const priority = found.severity === 'critical' || found.severity === 'high';
         setIsPrioritized(priority);
         setTempPriority(priority);
-        // Histórico inicial mockado
+        // Histórico inicial com duas entradas obrigatórias
         setHistoryEntries([
+          {
+            id: '2',
+            type: 'assigned',
+            timestamp: found.createdAt,
+            author: 'Sistema COPF',
+            description: 'Atribuição da Ocorrência para o Fornecedor',
+            details: `Ocorrência atribuída para ${found.vendor}`
+          },
           {
             id: '1',
             type: 'created',
             timestamp: found.createdAt,
             author: 'Sistema COPF',
-            description: 'Ocorrência criada',
+            description: 'Abertura da Ocorrência',
             details: found.description
           }
         ]);
@@ -279,6 +287,7 @@ export default function OcorrenciaDetalhes() {
                       const getIcon = () => {
                         switch (entry.type) {
                           case 'created': return <Clock className="h-4 w-4" />;
+                          case 'assigned': return <User className="h-4 w-4" />;
                           case 'prioritized': return <Star className="h-4 w-4 text-yellow-500" />;
                           case 'deprioritized': return <Star className="h-4 w-4 text-gray-400" />;
                           case 'message': return <MessageSquare className="h-4 w-4" />;
@@ -288,6 +297,8 @@ export default function OcorrenciaDetalhes() {
 
                       const getBadgeVariant = () => {
                         switch (entry.type) {
+                          case 'created': return 'secondary';
+                          case 'assigned': return 'outline';
                           case 'prioritized': return 'default';
                           case 'deprioritized': return 'secondary';
                           case 'message': return 'outline';
@@ -297,7 +308,8 @@ export default function OcorrenciaDetalhes() {
 
                       const getBadgeText = () => {
                         switch (entry.type) {
-                          case 'created': return 'Criação';
+                          case 'created': return 'Abertura';
+                          case 'assigned': return 'Atribuição';
                           case 'prioritized': return 'Priorizada';
                           case 'deprioritized': return 'Despriorizada';
                           case 'message': return 'Mensagem';
