@@ -71,12 +71,12 @@ const mapDatabaseToOccurrence = (dbRecord: any): OccurrenceData => {
     'critica': 'critical'
   }
 
-  // Mapear segmento do banco para AA/AB - ATM=AA (90%), POS=AB (10%)
+  // Mapear segmento do banco para AA/AB - Correção baseada nos dados reais
   const segmentMap: Record<string, OccurrenceData['segment']> = {
-    'atm': 'AA',
-    'pos': 'AB', 
-    'rede': 'AA',
-    'datacenter': 'AA'
+    'atm': 'AA',        // ATMs: Saque, Depósito, Cassete
+    'pos': 'AA',        // POS também são ATMs  
+    'rede': 'AB',       // Equipamentos de rede nas agências
+    'datacenter': 'AB'  // Equipamentos de datacenter/infraestrutura
   }
   
   return {
