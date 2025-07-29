@@ -309,7 +309,7 @@ export const MotivoLongTailChart = memo(function MotivoLongTailChart({
                 stroke="hsl(var(--destructive))" 
                 strokeDasharray="5 5" 
                 label={{ 
-                  value: "80% Rule", 
+                  value: "80% Faixa", 
                   position: "top",
                   style: { fill: 'hsl(var(--destructive))', fontSize: '12px' }
                 }}
