@@ -36,68 +36,91 @@ export function TopAgenciesChart({ occurrences, filteredOccurrences }: TopAgenci
       return acc;
     }, {} as Record<string, any>);
 
+    // Pegar todos os equipamentos únicos
+    const allEquipments = new Set<string>();
+    Object.values(agencyGroups).forEach((agency: any) => {
+      Object.keys(agency.equipments).forEach(eq => allEquipments.add(eq));
+    });
+
     // Converter para array e pegar top 10
     const topAgencies = Object.values(agencyGroups)
       .sort((a: any, b: any) => b.total - a.total)
       .slice(0, 10)
       .map((agency: any) => {
-        // Pegar os top 3 equipamentos da agência
-        const topEquipments = Object.entries(agency.equipments)
-          .sort(([,a], [,b]) => (b as number) - (a as number))
-          .slice(0, 3)
-          .map(([equipment, count]) => ({ equipment, count }));
-
-        return {
-          ...agency,
-          topEquipments,
+        const result: any = {
+          agency: agency.agency,
+          total: agency.total,
           agencyNumber: agency.agency.match(/\d+/)?.[0] || '0',
           isVip: (() => {
             const number = agency.agency.match(/\d+/)?.[0] || '0';
             return number.endsWith('0') || number.endsWith('5');
           })()
         };
+
+        // Adicionar cada equipamento como propriedade
+        Array.from(allEquipments).forEach(equipment => {
+          result[equipment] = agency.equipments[equipment] || 0;
+        });
+
+        return result;
       });
 
-    return topAgencies;
+    return { chartData: topAgencies, allEquipments: Array.from(allEquipments) };
   }, [occurrences, filteredOccurrences]);
+
+  // Cores para os equipamentos
+  const equipmentColors = [
+    'hsl(var(--primary))',
+    'hsl(var(--destructive))', 
+    'hsl(var(--warning))',
+    'hsl(142 76% 36%)', // verde
+    'hsl(262 83% 58%)', // roxo
+    'hsl(217 91% 60%)', // azul
+    'hsl(27 96% 61%)',  // laranja
+    'hsl(173 58% 39%)', // teal
+    'hsl(43 74% 66%)',  // amarelo
+    'hsl(348 83% 47%)'  // rosa
+  ];
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
+      const isVip = data.isVip;
+      
       return (
         <div className="bg-background/95 backdrop-blur-sm border border-border/80 rounded-lg p-4 shadow-lg min-w-[280px]">
           <div className="flex items-center gap-2 mb-3">
             <Building2 className="h-4 w-4 text-primary" />
             <p className="font-semibold text-foreground">{label}</p>
-            {data.isVip && (
+            {isVip && (
               <Badge variant="secondary" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
                 VIP
               </Badge>
             )}
           </div>
           
-          <div className="space-y-3">
+          <div className="space-y-2">
             <div className="flex items-center justify-between border-b border-border/50 pb-2">
               <span className="text-sm text-muted-foreground">Total de Ocorrências:</span>
               <span className="font-medium text-foreground">{data.total}</span>
             </div>
             
-            <div>
-              <p className="text-sm font-medium text-muted-foreground mb-2">Principais Equipamentos:</p>
-              <div className="space-y-1">
-                {data.topEquipments.map((eq: any, index: number) => (
-                  <div key={eq.equipment} className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground flex items-center gap-1">
-                      <div className={`w-2 h-2 rounded-full ${
-                        index === 0 ? 'bg-destructive' : 
-                        index === 1 ? 'bg-orange-500' : 'bg-yellow-500'
-                      }`} />
-                      {eq.equipment}
-                    </span>
-                    <span className="text-xs font-medium">{eq.count}</span>
-                  </div>
-                ))}
-              </div>
+            <div className="space-y-1">
+              {payload
+                .filter((entry: any) => entry.value > 0)
+                .sort((a: any, b: any) => b.value - a.value)
+                .map((entry: any, index: number) => (
+                <div key={entry.dataKey} className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground flex items-center gap-2">
+                    <div 
+                      className="w-2 h-2 rounded-full" 
+                      style={{ backgroundColor: entry.color }}
+                    />
+                    {entry.dataKey}
+                  </span>
+                  <span className="text-xs font-medium">{entry.value}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -121,7 +144,7 @@ export function TopAgenciesChart({ occurrences, filteredOccurrences }: TopAgenci
         <div className="h-96 mb-6">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
-              data={chartData}
+              data={chartData.chartData}
               margin={{ top: 20, right: 30, left: 20, bottom: 80 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
@@ -138,72 +161,51 @@ export function TopAgenciesChart({ occurrences, filteredOccurrences }: TopAgenci
                 label={{ value: 'Nº de Ocorrências', angle: -90, position: 'insideLeft' }}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="total" radius={[4, 4, 0, 0]}>
-                {chartData.map((entry, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
-                    fill={entry.isVip ? 'hsl(var(--warning))' : 'hsl(var(--primary))'} 
-                  />
-                ))}
-              </Bar>
+              
+              {chartData.allEquipments.map((equipment, index) => (
+                <Bar 
+                  key={equipment}
+                  dataKey={equipment} 
+                  stackId="a"
+                  fill={equipmentColors[index % equipmentColors.length]}
+                  radius={index === chartData.allEquipments.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
+                />
+              ))}
             </BarChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Detalhamento das agências */}
+        {/* Legenda dos equipamentos */}
         <div className="space-y-4">
           <h4 className="text-sm font-semibold text-foreground border-b border-border/50 pb-2">
-            Detalhamento dos Equipamentos Problemáticos
+            Legenda dos Equipamentos
           </h4>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {chartData.slice(0, 6).map((agency, index) => (
-              <div key={agency.agency} className="bg-muted/20 rounded-lg p-3 border border-border/30">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-foreground">
-                      {index + 1}º - {agency.agency}
-                    </span>
-                    {agency.isVip && (
-                      <Badge variant="secondary" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20 text-xs">
-                        VIP
-                      </Badge>
-                    )}
-                  </div>
-                  <Badge variant="outline" className="text-xs">
-                    {agency.total} ocorrências
-                  </Badge>
-                </div>
-                
-                <div className="space-y-1">
-                  {agency.topEquipments.map((eq: any, eqIndex: number) => (
-                    <div key={eq.equipment} className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground flex items-center gap-1">
-                        <div className={`w-1.5 h-1.5 rounded-full ${
-                          eqIndex === 0 ? 'bg-destructive' : 
-                          eqIndex === 1 ? 'bg-orange-500' : 'bg-yellow-500'
-                        }`} />
-                        {eq.equipment}
-                      </span>
-                      <span className="font-medium">{eq.count}</span>
-                    </div>
-                  ))}
-                </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+            {chartData.allEquipments.map((equipment, index) => (
+              <div key={equipment} className="flex items-center gap-2">
+                <div 
+                  className="w-3 h-3 rounded-sm" 
+                  style={{ backgroundColor: equipmentColors[index % equipmentColors.length] }}
+                />
+                <span className="text-xs text-muted-foreground">{equipment}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="flex items-center justify-center gap-6 mt-6 pt-4 border-t border-border/50">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-primary rounded-sm"></div>
-            <span className="text-sm text-muted-foreground">Agência Convencional</span>
+        {/* Resumo das agências VIP */}
+        {chartData.chartData.some((agency: any) => agency.isVip) && (
+          <div className="mt-6 p-4 bg-yellow-500/5 border border-yellow-500/20 rounded-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <AlertTriangle className="h-4 w-4 text-yellow-600" />
+              <span className="text-sm font-medium text-yellow-800">Agências VIP Identificadas</span>
+            </div>
+            <p className="text-xs text-yellow-700">
+              As agências marcadas como VIP requerem atenção prioritária devido ao seu status estratégico.
+            </p>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-warning rounded-sm"></div>
-            <span className="text-sm text-muted-foreground">Agência VIP</span>
-          </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );
