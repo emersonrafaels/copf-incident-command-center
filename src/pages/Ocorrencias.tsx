@@ -73,8 +73,16 @@ const Ocorrencias = () => {
     if (filterType === 'critical') {
       // Aplicar filtro de criticidade para ocorrências críticas
       updateFilter('severityFilterMulti', ['critical']);
+    } else if (filterType === 'due-today') {
+      // Aplicar filtro de SLA crítico para ocorrências que vencem hoje
+      updateFilter('statusSlaFilter', ['critico']);
     }
-  }, [filterType, updateFilter]);
+    
+    // Compatibilidade com query params do highlights
+    if (slaStatus === 'due_today') {
+      updateFilter('statusSlaFilter', ['critico']);
+    }
+  }, [filterType, slaStatus, updateFilter]);
 
   // Filtrar ocorrências
   const filteredOccurrences = occurrences.filter(occurrence => {
