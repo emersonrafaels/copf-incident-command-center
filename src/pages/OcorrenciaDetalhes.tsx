@@ -49,7 +49,7 @@ export default function OcorrenciaDetalhes() {
             id: '2',
             type: 'assigned',
             timestamp: found.createdAt,
-            author: 'Sistema COPF',
+            author: 'Sistema',
             description: 'Atribuição da Ocorrência para o Fornecedor',
             details: `Ocorrência atribuída para ${found.vendor}`
           },
@@ -57,7 +57,7 @@ export default function OcorrenciaDetalhes() {
             id: '1',
             type: 'created',
             timestamp: found.createdAt,
-            author: 'Sistema COPF',
+            author: 'Sistema',
             description: 'Abertura da Ocorrência',
             details: found.description
           }
@@ -84,7 +84,7 @@ export default function OcorrenciaDetalhes() {
       id: Date.now().toString(),
       type: tempPriority ? 'prioritized' : 'deprioritized',
       timestamp: new Date().toISOString(),
-      author: 'Operação COPF',
+      author: 'Operação',
       description: tempPriority ? 'Ocorrência priorizada' : 'Ocorrência despriorizada',
       details: tempPriority ? 'Ocorrência marcada como prioritária para atendimento urgente' : 'Prioridade removida da ocorrência'
     };
@@ -113,6 +113,18 @@ export default function OcorrenciaDetalhes() {
     }
 
     setIsSending(true);
+    
+    // Adicionar mensagem ao histórico
+    const newEntry = {
+      id: Date.now().toString(),
+      type: 'message',
+      timestamp: new Date().toISOString(),
+      author: 'Operação',
+      description: 'Mensagem enviada para o fornecedor',
+      details: vendorMessage
+    };
+    
+    setHistoryEntries(prev => [newEntry, ...prev]);
     
     // Simular envio
     setTimeout(() => {
