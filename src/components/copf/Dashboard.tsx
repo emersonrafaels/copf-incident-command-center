@@ -14,6 +14,8 @@ import { FilterSection } from "./FilterSection";
 const EnhancedInteractiveCharts = lazy(() => import('./EnhancedInteractiveCharts').then(module => ({ default: module.EnhancedInteractiveCharts })))
 const VendorEquipmentMatrix = lazy(() => import('./VendorEquipmentMatrix').then(module => ({ default: module.VendorEquipmentMatrix })))
 const VendorMetricsMatrix = lazy(() => import('./VendorMetricsMatrix').then(module => ({ default: module.VendorMetricsMatrix })))
+const MotivoLongTailChart = lazy(() => import('./MotivoLongTailChart').then(module => ({ default: module.MotivoLongTailChart })))
+const SlaPrevisaoChart = lazy(() => import('./SlaPrevisaoChart').then(module => ({ default: module.SlaPrevisaoChart })))
 import { OccurrenceHighlights } from "./OccurrenceHighlights";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -852,6 +854,59 @@ export function Dashboard() {
               onNavigateToOccurrences={handleVendorMetricsNavigation}
             />
           </Suspense>
+        </div>
+
+        {/* Novos gráficos: Long Tail por Motivo e SLA Previsão */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+          {/* Long Tail - Motivos de Ocorrência */}
+          <div className="animate-fade-in" style={{
+            animationDelay: '0.55s'
+          }}>
+            <Suspense fallback={
+              <Card className="border-l-4 border-l-orange-500">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-5 w-5 rounded" />
+                    <Skeleton className="h-6 w-48" />
+                  </div>
+                  <Skeleton className="h-4 w-96" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-[400px] w-full rounded-lg" />
+                </CardContent>
+              </Card>
+            }>
+              <MotivoLongTailChart 
+                occurrences={occurrences} 
+                filteredOccurrences={filteredOccurrences}
+              />
+            </Suspense>
+          </div>
+
+          {/* Status de Previsão vs SLA */}
+          <div className="animate-fade-in" style={{
+            animationDelay: '0.6s'
+          }}>
+            <Suspense fallback={
+              <Card className="border-l-4 border-l-blue-500">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-5 w-5 rounded" />
+                    <Skeleton className="h-6 w-48" />
+                  </div>
+                  <Skeleton className="h-4 w-96" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-[400px] w-full rounded-lg" />
+                </CardContent>
+              </Card>
+            }>
+              <SlaPrevisaoChart 
+                occurrences={occurrences} 
+                filteredOccurrences={filteredOccurrences}
+              />
+            </Suspense>
+          </div>
         </div>
       </div>
 

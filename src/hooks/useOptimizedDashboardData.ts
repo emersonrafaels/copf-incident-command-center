@@ -11,6 +11,7 @@ export interface OccurrenceData {
   equipment: string
   serialNumber: string
   description: string
+  motivoOcorrencia: string // Motivo/causa raiz da ocorrência
   severity: 'critical' | 'high' | 'medium' | 'low'
   status: 'a_iniciar' | 'em_andamento' | 'encerrado' | 'com_impedimentos' | 'cancelado'
   createdAt: string
@@ -103,6 +104,7 @@ const mapDatabaseToOccurrence = (dbRecord: any): OccurrenceData => {
     equipment: dbRecord.equipamento,
     serialNumber: dbRecord.numero_serie,
     description: dbRecord.descricao,
+    motivoOcorrencia: dbRecord.motivo_ocorrencia || 'Não informado',
     severity: severityMap[dbRecord.severidade] || 'medium',
     status: statusMap[dbRecord.status] || 'a_iniciar',
     createdAt: dbRecord.data_ocorrencia,
@@ -131,6 +133,7 @@ const fetchOptimizedOccurrences = async (limit: number = 1000): Promise<Occurren
       equipamento,
       numero_serie,
       descricao,
+      motivo_ocorrencia,
       status,
       prioridade,
       severidade,

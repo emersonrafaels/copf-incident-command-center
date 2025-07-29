@@ -27,6 +27,7 @@ export type Database = {
           equipamento: string
           fornecedor: string
           id: string
+          motivo_ocorrencia: string | null
           numero_serie: string
           observacoes: string | null
           override: boolean
@@ -57,6 +58,7 @@ export type Database = {
           equipamento: string
           fornecedor: string
           id?: string
+          motivo_ocorrencia?: string | null
           numero_serie: string
           observacoes?: string | null
           override?: boolean
@@ -87,6 +89,7 @@ export type Database = {
           equipamento?: string
           fornecedor?: string
           id?: string
+          motivo_ocorrencia?: string | null
           numero_serie?: string
           observacoes?: string | null
           override?: boolean
