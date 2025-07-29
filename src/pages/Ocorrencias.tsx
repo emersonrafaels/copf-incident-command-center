@@ -82,7 +82,8 @@ const Ocorrencias = () => {
     const matchesSerial = !serialNumberFilter || occurrence.serialNumber.toLowerCase().includes(serialNumberFilter.toLowerCase());
 
     // Filtro de agência por número
-    const matchesAgencia = agenciaFilter.length === 0 || agenciaFilter.some(agency => occurrence.agency.includes(agency));
+    console.log('Ocorrencias: agenciaFilter type:', typeof agenciaFilter, 'value:', agenciaFilter);
+    const matchesAgencia = !Array.isArray(agenciaFilter) || agenciaFilter.length === 0 || agenciaFilter.some(agency => occurrence.agency.includes(agency));
 
     // Filtro de UF
     const agencyUF = occurrence.agency.split(' - ')[1] || 'SP';
