@@ -476,7 +476,7 @@ export function Dashboard() {
             <div className="flex flex-wrap gap-3">
               {/* Filtro de Período */}
               <Select value={filterPeriod} onValueChange={(value) => updateFilter('filterPeriod', value)}>
-                <SelectTrigger className="w-auto min-w-[180px] bg-card border-border/50 hover:border-primary/30 transition-colors shadow-card-default text-foreground">
+                <SelectTrigger className="w-auto min-w-[180px] bg-card border-border/50 hover:border-primary/30 transition-colors shadow-card-default text-foreground font-medium">
                   <Calendar className="h-4 w-4 mr-2 text-primary" />
                   <SelectValue className="text-foreground" />
                 </SelectTrigger>
