@@ -82,8 +82,9 @@ const mapDatabaseToOccurrence = (dbRecord: any): OccurrenceData => {
   // Gerar ID amigável com prefixo COPF
   const shortId = `COPF-${String(Math.floor(Math.random() * 99999)).padStart(5, '0')}`;
   
-  // Formatar agência com padding e nome
-  const agencyNumber = String(dbRecord.agencia).padStart(4, '0');
+  // Formatar agência com padding e nome - extrair apenas números
+  const agencyNumberMatch = String(dbRecord.agencia).match(/\d+/);
+  const agencyNumber = agencyNumberMatch ? agencyNumberMatch[0].padStart(4, '0') : '0001';
   const agencyNames = ['Centro', 'Norte', 'Sul', 'Leste', 'Oeste', 'Vila Nova', 'São Bento', 'Jardim', 'Parque'];
   const agencyName = agencyNames[parseInt(agencyNumber) % agencyNames.length];
   
