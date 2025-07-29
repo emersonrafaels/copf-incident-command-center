@@ -43,23 +43,26 @@ export default function OcorrenciaDetalhes() {
         const priority = found.severity === 'critical' || found.severity === 'high';
         setIsPrioritized(priority);
         setTempPriority(priority);
-        // Histórico inicial com duas entradas obrigatórias
+        // Histórico inicial com duas entradas obrigatórias (ordem crescente por timestamp)
+        const openingDate = new Date(found.createdAt);
+        const assignmentDate = new Date(openingDate.getTime() + 2 * 60 * 1000); // 2 minutos depois
+        
         setHistoryEntries([
-          {
-            id: '2',
-            type: 'assigned',
-            timestamp: found.createdAt,
-            author: 'Sistema',
-            description: 'Atribuição da Ocorrência para o Fornecedor',
-            details: `Ocorrência atribuída para ${found.vendor}`
-          },
           {
             id: '1',
             type: 'created',
-            timestamp: found.createdAt,
+            timestamp: openingDate.toISOString(),
             author: 'Sistema',
             description: 'Abertura da Ocorrência',
             details: found.description
+          },
+          {
+            id: '2',
+            type: 'assigned',
+            timestamp: assignmentDate.toISOString(),
+            author: 'Sistema',
+            description: 'Atribuição da Ocorrência para o Fornecedor',
+            details: `Ocorrência atribuída para ${found.vendor}`
           }
         ]);
       }
@@ -89,7 +92,7 @@ export default function OcorrenciaDetalhes() {
       details: tempPriority ? 'Ocorrência marcada como prioritária para atendimento urgente' : 'Prioridade removida da ocorrência'
     };
     
-    setHistoryEntries(prev => [newEntry, ...prev]);
+    setHistoryEntries(prev => [...prev, newEntry].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()));
     
     toast({
       title: tempPriority ? "Ocorrência Priorizada" : "Prioridade Removida",
@@ -124,7 +127,7 @@ export default function OcorrenciaDetalhes() {
       details: vendorMessage
     };
     
-    setHistoryEntries(prev => [newEntry, ...prev]);
+    setHistoryEntries(prev => [...prev, newEntry].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()));
     
     // Simular envio
     setTimeout(() => {
