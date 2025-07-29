@@ -30,9 +30,13 @@ const Ocorrencias = () => {
     vendorFilterMulti, 
     severityFilterMulti,
     statusEquipamentoFilterMulti,
+    transportadoraFilterMulti,
+    tipoAgenciaFilter,
     agenciaFilter,
     ufFilter,
     municipioFilter,
+    pontoVipFilter,
+    suptFilter,
     overrideFilter,
     vendorPriorityFilter,
     reincidentFilter,
@@ -59,11 +63,6 @@ const Ocorrencias = () => {
 
   // Usar filtros do contexto
   const {
-    agenciaFilter: _agenciaFilter,
-    ufFilter: _ufFilter,
-    tipoAgenciaFilter,
-    pontoVipFilter,
-    suptFilter,
     serialNumberFilter,
     hasActiveFilters
   } = useFilters();
@@ -82,7 +81,6 @@ const Ocorrencias = () => {
     const matchesSerial = !serialNumberFilter || occurrence.serialNumber.toLowerCase().includes(serialNumberFilter.toLowerCase());
 
     // Filtro de agência por número
-    console.log('Ocorrencias: agenciaFilter type:', typeof agenciaFilter, 'value:', agenciaFilter);
     const matchesAgencia = !Array.isArray(agenciaFilter) || agenciaFilter.length === 0 || agenciaFilter.some(agency => occurrence.agency.includes(agency));
 
     // Filtro de UF
@@ -248,7 +246,14 @@ const Ocorrencias = () => {
     // Filtro de status do equipamento
     const matchesStatusEquipamento = statusEquipamentoFilterMulti.length === 0 || statusEquipamentoFilterMulti.includes(occurrence.statusEquipamento);
 
-    return matchesSearch && matchesStatus && matchesSegment && matchesEquipment && matchesSerial && matchesVendor && matchesAgencia && matchesUF && matchesTipoAgencia && matchesPontoVip && matchesSupt && matchesStatusEquipamento;
+    // Filtro de transportadora (similar ao Dashboard)
+    const matchesTransportadora = transportadoraFilterMulti.length === 0 || (
+      occurrence.transportadora && 
+      occurrence.transportadora.trim() !== '' && 
+      transportadoraFilterMulti.includes(occurrence.transportadora)
+    );
+
+    return matchesSearch && matchesStatus && matchesSegment && matchesEquipment && matchesSerial && matchesVendor && matchesAgencia && matchesUF && matchesTipoAgencia && matchesPontoVip && matchesSupt && matchesStatusEquipamento && matchesTransportadora;
   });
 
   const handleExportExcel = () => {

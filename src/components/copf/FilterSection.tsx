@@ -122,7 +122,6 @@ export function FilterSection({ className, showSerialNumber = false }: FilterSec
   const estadosBrasil = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'];
 
   // Filtrar UFs baseadas nas agências selecionadas
-  console.log('FilterSection: agenciaFilter type:', typeof agenciaFilter, 'value:', agenciaFilter);
   const availableUFs = !Array.isArray(agenciaFilter) || agenciaFilter.length === 0 ? estadosBrasil : Array.from(new Set(agenciaFilter.map(agencyNumber => {
     // Lógica simplificada: agências 0-999 = SP, 1000-1999 = RJ, etc.
     const num = parseInt(agencyNumber);
