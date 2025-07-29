@@ -135,7 +135,7 @@ export function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-end pt-16 pr-4">
+    <div className="fixed top-16 right-4 z-50">
       <div className="w-96 max-w-full bg-card border border-border shadow-elegant rounded-xl animate-slide-in-right">
         <Card className="border-0">
           <CardHeader className="pb-3">
