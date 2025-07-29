@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { 
   AlertTriangle, 
   Clock, 
@@ -12,7 +13,8 @@ import {
   BarChart3,
   Activity,
   Timer,
-  CheckCircle2
+  CheckCircle2,
+  Info
 } from "lucide-react";
 import { OccurrenceData } from "@/hooks/useDashboardData";
 
@@ -334,10 +336,19 @@ export function VendorMetricsMatrix({ occurrences, onNavigateToOccurrences }: Ve
           <CardTitle className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-primary" />
             Heatmap: Fornecedor × Equipamento
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="max-w-xs">
+                    Concentração de ocorrências por fornecedor e tipo de equipamento. Cada célula mostra a quantidade exata de ocorrências para o cruzamento fornecedor × equipamento. Cores mais intensas indicam maior concentração de problemas. Clique nas células para filtrar a listagem de ocorrências.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Concentração de ocorrências por fornecedor e tipo de equipamento. Cada célula mostra a quantidade exata de ocorrências para o cruzamento fornecedor × equipamento. Cores mais intensas indicam maior concentração de problemas. Clique nas células para filtrar a listagem de ocorrências.
-          </p>
         </CardHeader>
         <CardContent>
           <div className="h-[500px] overflow-auto">
