@@ -117,8 +117,40 @@ export function VendorMetricsMatrix({ occurrences, onNavigateToOccurrences }: Ve
   }, [occurrences]);
 
   const heatmapData = useMemo(() => {
-    const equipmentSet = new Set(occurrences.map(o => o.equipment));
-    const equipments = Array.from(equipmentSet).slice(0, 10); // Limitar para melhor visualização
+    // Mapeamento de equipamentos por segmento
+    const equipmentsBySegment = {
+      AA: ['ATM Saque', 'ATM Depósito', 'Cassete'],
+      AB: ['Notebook', 'Desktop', 'Leitor de Cheques/documentos', 'Leitor biométrico', 'PIN PAD', 'Scanner de Cheque', 'Impressora', 'Impressora térmica', 'Impressora multifuncional', 'Monitor LCD/LED', 'Teclado', 'Servidor', 'Televisão', 'Senheiro', 'TCR', 'Classificadora', 'Fragmentadora de Papel']
+    };
+
+    // Calcular volume total por equipamento e adicionar prefixo do segmento
+    const equipmentVolumes = new Map<string, number>();
+    occurrences.forEach(o => {
+      const currentCount = equipmentVolumes.get(o.equipment) || 0;
+      equipmentVolumes.set(o.equipment, currentCount + 1);
+    });
+
+    // Criar lista de equipamentos com prefixos e ordenar por volume
+    const equipmentsWithPrefix = Array.from(equipmentVolumes.entries())
+      .map(([equipment, count]) => {
+        // Determinar segmento
+        let segment = '';
+        if (equipmentsBySegment.AA.includes(equipment)) {
+          segment = 'AA';
+        } else if (equipmentsBySegment.AB.includes(equipment)) {
+          segment = 'AB';
+        }
+        
+        return {
+          originalName: equipment,
+          displayName: segment ? `${segment} - ${equipment}` : equipment,
+          volume: count
+        };
+      })
+      .sort((a, b) => b.volume - a.volume); // Ordenar por volume decrescente
+
+    const equipments = equipmentsWithPrefix.map(e => e.originalName);
+    const equipmentsDisplay = equipmentsWithPrefix.map(e => e.displayName);
     const vendors = vendorMetrics.slice(0, 8).map(v => v.vendor); // Top 8 fornecedores
 
     const heatmap: HeatmapCell[] = [];
@@ -136,7 +168,7 @@ export function VendorMetricsMatrix({ occurrences, onNavigateToOccurrences }: Ve
       });
     });
 
-    return { heatmap, vendors, equipments };
+    return { heatmap, vendors, equipments, equipmentsDisplay };
   }, [occurrences, vendorMetrics]);
 
   const handleCardClick = (vendor: string, type: 'critical' | 'prioritized' | 'dueToday') => {
@@ -308,21 +340,21 @@ export function VendorMetricsMatrix({ occurrences, onNavigateToOccurrences }: Ve
           </p>
         </CardHeader>
         <CardContent>
-          <ScrollArea className="h-[500px] w-full">
-            <div className="min-w-[800px]">
+          <div className="h-[500px] overflow-auto">
+            <div className="min-w-fit overflow-x-auto" style={{ width: `${200 + (heatmapData.equipments.length * 120)}px` }}>
               {/* Header da tabela */}
-              <div className="grid gap-1 mb-2" style={{ gridTemplateColumns: `200px repeat(${heatmapData.equipments.length}, 1fr)` }}>
+              <div className="grid gap-1 mb-2" style={{ gridTemplateColumns: `200px repeat(${heatmapData.equipments.length}, 120px)` }}>
                 <div className="p-2 font-medium text-sm">Fornecedor</div>
-                {heatmapData.equipments.map(equipment => (
-                  <div key={equipment} className="p-2 text-xs font-medium text-center truncate" title={equipment}>
-                    {equipment}
+                {heatmapData.equipmentsDisplay.map((equipmentDisplay, index) => (
+                  <div key={heatmapData.equipments[index]} className="p-2 text-xs font-medium text-center" title={equipmentDisplay}>
+                    <div className="truncate">{equipmentDisplay}</div>
                   </div>
                 ))}
               </div>
 
               {/* Linhas do heatmap */}
               {heatmapData.vendors.map(vendor => (
-                <div key={vendor} className="grid gap-1 mb-1" style={{ gridTemplateColumns: `200px repeat(${heatmapData.equipments.length}, 1fr)` }}>
+                <div key={vendor} className="grid gap-1 mb-1" style={{ gridTemplateColumns: `200px repeat(${heatmapData.equipments.length}, 120px)` }}>
                   <div className="p-2 text-sm font-medium truncate" title={vendor}>
                     {vendor}
                   </div>
@@ -362,7 +394,7 @@ export function VendorMetricsMatrix({ occurrences, onNavigateToOccurrences }: Ve
                 </div>
               </div>
             </div>
-          </ScrollArea>
+          </div>
         </CardContent>
       </Card>
     </div>
