@@ -447,6 +447,10 @@ const Ocorrencias = () => {
         return slaLimit - hoursDiff; // Menor tempo restante = maior urgência
       case 'createdAt':
         return new Date(occurrence.createdAt).getTime();
+      case 'dataPrevisaoEncerramento':
+        return occurrence.dataPrevisaoEncerramento ? new Date(occurrence.dataPrevisaoEncerramento).getTime() : 0;
+      case 'dataEncerramento':
+        return occurrence.dataEncerramento ? new Date(occurrence.dataEncerramento).getTime() : 0;
       case 'vendor':
         return occurrence.vendor.toLowerCase();
       case 'statusEquipamento':
@@ -747,8 +751,32 @@ const Ocorrencias = () => {
                              <ChevronDown className={`h-3 w-3 ${sortColumn === 'serialNumber' && sortDirection === 'desc' ? 'opacity-100 text-primary' : ''}`} />
                            </div>
                          </div>
-                       </TableHead>
-                       <TableHead className="w-12">Ações</TableHead>
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-accent/50 transition-colors select-none w-24"
+                          onClick={() => handleSort('dataPrevisaoEncerramento')}
+                        >
+                          <div className="flex items-center gap-1 text-xs font-medium">
+                            Previsão Encerramento
+                            <div className="flex flex-col opacity-40 hover:opacity-100 transition-opacity">
+                              <ChevronUp className={`h-3 w-3 -mb-1 ${sortColumn === 'dataPrevisaoEncerramento' && sortDirection === 'asc' ? 'opacity-100 text-primary' : ''}`} />
+                              <ChevronDown className={`h-3 w-3 ${sortColumn === 'dataPrevisaoEncerramento' && sortDirection === 'desc' ? 'opacity-100 text-primary' : ''}`} />
+                            </div>
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-accent/50 transition-colors select-none w-24"
+                          onClick={() => handleSort('dataEncerramento')}
+                        >
+                          <div className="flex items-center gap-1 text-xs font-medium">
+                            Data Encerramento
+                            <div className="flex flex-col opacity-40 hover:opacity-100 transition-opacity">
+                              <ChevronUp className={`h-3 w-3 -mb-1 ${sortColumn === 'dataEncerramento' && sortDirection === 'asc' ? 'opacity-100 text-primary' : ''}`} />
+                              <ChevronDown className={`h-3 w-3 ${sortColumn === 'dataEncerramento' && sortDirection === 'desc' ? 'opacity-100 text-primary' : ''}`} />
+                            </div>
+                          </div>
+                        </TableHead>
+                        <TableHead className="w-12">Ações</TableHead>
                      </TableRow>
                    </TableHeader>
                  <TableBody>
@@ -789,18 +817,50 @@ const Ocorrencias = () => {
                       <TableCell className="py-2">
                         <StatusBadge status={occurrence.status} />
                       </TableCell>
-                      <TableCell className="py-2 text-xs truncate max-w-[80px]">{occurrence.serialNumber}</TableCell>
-                       <TableCell className="py-2">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => navigate(`/ocorrencia/${occurrence.id}`)} 
-                            title="Visualizar detalhes da ocorrência"
-                            className="h-6 w-6 p-0"
-                          >
-                            <Eye className="h-3 w-3" />
-                          </Button>
+                       <TableCell className="py-2 text-xs truncate max-w-[80px]">{occurrence.serialNumber}</TableCell>
+                       <TableCell className="py-2 text-xs">
+                         {occurrence.dataPrevisaoEncerramento ? (
+                           <div>
+                             {new Date(occurrence.dataPrevisaoEncerramento).toLocaleDateString('pt-BR', { 
+                               day: '2-digit', 
+                               month: '2-digit',
+                               year: '2-digit'
+                             })} {new Date(occurrence.dataPrevisaoEncerramento).toLocaleTimeString('pt-BR', {
+                               hour: '2-digit',
+                               minute: '2-digit'
+                             })}
+                           </div>
+                         ) : (
+                           <span className="text-muted-foreground">-</span>
+                         )}
                        </TableCell>
+                       <TableCell className="py-2 text-xs">
+                         {occurrence.dataEncerramento ? (
+                           <div>
+                             {new Date(occurrence.dataEncerramento).toLocaleDateString('pt-BR', { 
+                               day: '2-digit', 
+                               month: '2-digit',
+                               year: '2-digit'
+                             })} {new Date(occurrence.dataEncerramento).toLocaleTimeString('pt-BR', {
+                               hour: '2-digit',
+                               minute: '2-digit'
+                             })}
+                           </div>
+                         ) : (
+                           <span className="text-muted-foreground">-</span>
+                         )}
+                       </TableCell>
+                        <TableCell className="py-2">
+                           <Button 
+                             variant="ghost" 
+                             size="sm" 
+                             onClick={() => navigate(`/ocorrencia/${occurrence.id}`)} 
+                             title="Visualizar detalhes da ocorrência"
+                             className="h-6 w-6 p-0"
+                           >
+                             <Eye className="h-3 w-3" />
+                           </Button>
+                        </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

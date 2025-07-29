@@ -18,8 +18,10 @@ export type Database = {
         Row: {
           agencia: string
           created_at: string
+          data_encerramento: string | null
           data_limite_sla: string | null
           data_ocorrencia: string
+          data_previsao_encerramento: string | null
           data_resolucao: string | null
           descricao: string
           equipamento: string
@@ -46,8 +48,10 @@ export type Database = {
         Insert: {
           agencia: string
           created_at?: string
+          data_encerramento?: string | null
           data_limite_sla?: string | null
           data_ocorrencia?: string
+          data_previsao_encerramento?: string | null
           data_resolucao?: string | null
           descricao: string
           equipamento: string
@@ -74,8 +78,10 @@ export type Database = {
         Update: {
           agencia?: string
           created_at?: string
+          data_encerramento?: string | null
           data_limite_sla?: string | null
           data_ocorrencia?: string
+          data_previsao_encerramento?: string | null
           data_resolucao?: string | null
           descricao?: string
           equipamento?: string
