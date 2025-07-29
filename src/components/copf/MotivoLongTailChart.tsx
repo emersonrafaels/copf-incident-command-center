@@ -94,12 +94,11 @@ export const MotivoLongTailChart = memo(function MotivoLongTailChart({
   const handleBarClick = (data: MotivoData) => {
     clearAllFilters();
     setTimeout(() => {
-      // Filtro por motivo não está implementado no contexto, então mostramos todas as ocorrências
-      // com uma mensagem informativa sobre o motivo selecionado
+      // Aplicar filtro por motivo
+      updateFilter('motivoFilter', [data.motivoCompleto]);
+      
+      // Navegar para a página de ocorrências
       navigate('/ocorrencias');
-      toast.success(`Motivo selecionado: ${data.motivoCompleto}`, {
-        description: `Este motivo representa ${data.count} ocorrências (${data.percentage}% do total). Filtro específico por motivo será implementado em breve.`
-      });
     }, 100);
   };
 

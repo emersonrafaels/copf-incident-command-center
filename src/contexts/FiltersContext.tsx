@@ -34,6 +34,7 @@ export interface FiltersState {
   reincidentFilter: boolean;
   statusSlaFilter: string[];
   longTailFilter: string[];
+  motivoFilter: string[];
   
   // Filtros de período
   filterPeriod: string;
@@ -78,6 +79,7 @@ const defaultFilters: FiltersState = {
   reincidentFilter: false,
   statusSlaFilter: [],
   longTailFilter: [],
+  motivoFilter: [],
   
   filterPeriod: '7-days',
   customDateRange: {}
@@ -125,6 +127,7 @@ export const FiltersProvider: React.FC<{ children: ReactNode }> = ({ children })
     filters.suptFilter.length > 0 ||
     filters.statusSlaFilter.length > 0 ||
     filters.longTailFilter.length > 0 ||
+    filters.motivoFilter.length > 0 ||
     filters.filterPeriod !== 'all';
 
   return (
