@@ -122,7 +122,7 @@ export function Dashboard() {
   };
 
   // Handlers para navegar com filtros específicos
-  const handleNavigateToOccurrences = (filter: 'total' | 'pending' | 'reincidence' | 'overdue' | 'agencies' | 'mttr' | 'entered-today' | 'due-today' | 'overdue-today') => {
+  const handleNavigateToOccurrences = (filter: 'total' | 'pending' | 'reincidence' | 'overdue' | 'agencies' | 'mttr' | 'inoperant' | 'entered-today' | 'due-today' | 'overdue-today') => {
     console.log('Card clicked:', filter, 'Current filtered occurrences:', filteredOccurrences.length);
     
     // Aplicar filtros específicos do card clicado SEM limpar os filtros existentes
@@ -162,6 +162,9 @@ export function Dashboard() {
         break;
       case 'mttr':
         filters.updateFilter('statusFilterMulti', ['encerrado']);
+        break;
+      case 'inoperant':
+        filters.updateFilter('statusEquipamentoFilterMulti', ['inoperante']);
         break;
     }
     
@@ -549,7 +552,7 @@ export function Dashboard() {
           </div>
 
           {/* 2.5. Equipamentos Inoperantes */}
-          <div className="cursor-pointer">
+          <div onClick={() => handleNavigateToOccurrences('inoperant')} className="cursor-pointer">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
