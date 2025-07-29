@@ -4,7 +4,8 @@ import { useFilters } from '@/contexts/FiltersContext'
 import { supabase } from '@/integrations/supabase/client'
 
 export interface OccurrenceData {
-  id: string
+  id: string // Real UUID from database for navigation
+  displayId: string // COPF-formatted ID for display
   agency: string
   segment: 'AA' | 'AB'
   equipment: string
@@ -79,17 +80,19 @@ const mapDatabaseToOccurrence = (dbRecord: any): OccurrenceData => {
     'datacenter': 'AB'  // Equipamentos de datacenter/infraestrutura
   }
   
-  // Gerar ID amigável com prefixo COPF
+  // Gerar ID amigável com prefixo COPF para exibição
   const shortId = `COPF-${String(Math.floor(Math.random() * 99999)).padStart(5, '0')}`;
   
-  // Formatar agência com padding e nome - extrair apenas números
-  const agencyNumberMatch = String(dbRecord.agencia).match(/\d+/);
-  const agencyNumber = agencyNumberMatch ? agencyNumberMatch[0].padStart(4, '0') : '0001';
+  // Formatar agência - extrair números de strings como "AGENCIA_P001", "AGENCIA_T003", etc.
+  const agencyString = String(dbRecord.agencia || '');
+  const agencyNumberMatch = agencyString.match(/[PT]?(\d+)/);
+  const agencyNumber = agencyNumberMatch ? agencyNumberMatch[1].padStart(4, '0') : '0001';
   const agencyNames = ['Centro', 'Norte', 'Sul', 'Leste', 'Oeste', 'Vila Nova', 'São Bento', 'Jardim', 'Parque'];
   const agencyName = agencyNames[parseInt(agencyNumber) % agencyNames.length];
   
   return {
-    id: shortId,
+    id: dbRecord.id, // Use real UUID from database for navigation
+    displayId: shortId, // COPF ID for display only
     agency: `${agencyNumber} - ${agencyName}`,
     segment: segmentMap[dbRecord.segmento] || 'AB',
     equipment: dbRecord.equipamento,

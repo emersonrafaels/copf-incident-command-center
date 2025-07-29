@@ -724,10 +724,10 @@ const Ocorrencias = () => {
                        <TableHead className="w-12">Ações</TableHead>
                      </TableRow>
                    </TableHeader>
-                <TableBody>
-                  {sortedOccurrences.map(occurrence => (
-                    <TableRow key={occurrence.id} className="text-xs">
-                      <TableCell className="font-medium py-2">{occurrence.id}</TableCell>
+                 <TableBody>
+                   {sortedOccurrences.map(occurrence => (
+                     <TableRow key={occurrence.id} className="text-xs">
+                       <TableCell className="font-medium py-2">{occurrence.displayId}</TableCell>
                       <TableCell className="py-2 text-xs">
                         {new Date(occurrence.createdAt).toLocaleDateString('pt-BR', { 
                           day: '2-digit', 
