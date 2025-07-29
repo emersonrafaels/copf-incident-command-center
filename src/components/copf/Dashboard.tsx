@@ -198,8 +198,11 @@ export function Dashboard() {
       if (statusFilterMulti.length > 0 && !statusFilterMulti.includes(occurrence.status)) return false;
       if (vendorFilterMulti.length > 0 && !vendorFilterMulti.includes(occurrence.vendor)) return false;
       if (transportadoraFilterMulti.length > 0) {
-        // Usar o campo transportadora do objeto de dados
+        // Verificar se a transportadora existe e está na lista de filtros
         if (!occurrence.transportadora || !transportadoraFilterMulti.includes(occurrence.transportadora)) return false;
+        
+        // Garantir que apenas ocorrências válidas sejam mostradas (com transportadora não nula)
+        if (!occurrence.transportadora || occurrence.transportadora.trim() === '') return false;
       }
 
       // Filtro de série

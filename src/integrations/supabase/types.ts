@@ -36,7 +36,7 @@ export type Database = {
           status: string
           supt: string
           tipo_agencia: string
-          transportadora: string | null
+          transportadora: string
           uf: string
           updated_at: string
           usuario_responsavel: string | null
@@ -63,7 +63,7 @@ export type Database = {
           status: string
           supt: string
           tipo_agencia: string
-          transportadora?: string | null
+          transportadora: string
           uf: string
           updated_at?: string
           usuario_responsavel?: string | null
@@ -90,7 +90,7 @@ export type Database = {
           status?: string
           supt?: string
           tipo_agencia?: string
-          transportadora?: string | null
+          transportadora?: string
           uf?: string
           updated_at?: string
           usuario_responsavel?: string | null
