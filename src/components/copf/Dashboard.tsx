@@ -81,6 +81,7 @@ export function Dashboard() {
     vendorPriorityFilter,
     reincidentFilter,
     longTailFilter,
+    motivoFilter,
     hasActiveFilters,
     filterPeriod,
     customDateRange,
@@ -300,10 +301,17 @@ export function Dashboard() {
         const isPriorityP1 = occurrence.severity === 'critical' || occurrence.severity === 'high';
         if (!isPriorityP1) return false;
       }
+
+      // Filtro de motivo de ocorrência
+      if (motivoFilter.length > 0) {
+        const motivoOcorrencia = occurrence.motivoOcorrencia || 'Não informado';
+        if (!motivoFilter.includes(motivoOcorrencia)) return false;
+      }
+
       return true;
     });
     return filtered;
-  }, [occurrences, segmentFilterMulti, equipmentFilterMulti, statusFilterMulti, statusEquipamentoFilterMulti, vendorFilterMulti, transportadoraFilterMulti, serialNumberFilter, agenciaFilter, ufFilter, tipoAgenciaFilter, pontoVipFilter, overrideFilter, vendorPriorityFilter, reincidentFilter, longTailFilter]);
+  }, [occurrences, segmentFilterMulti, equipmentFilterMulti, statusFilterMulti, statusEquipamentoFilterMulti, vendorFilterMulti, transportadoraFilterMulti, serialNumberFilter, agenciaFilter, ufFilter, tipoAgenciaFilter, pontoVipFilter, overrideFilter, vendorPriorityFilter, reincidentFilter, longTailFilter, motivoFilter]);
 
   // Cálculos memoizados para garantir consistência com a página de ocorrências
   const cardMetrics = useMemo(() => {

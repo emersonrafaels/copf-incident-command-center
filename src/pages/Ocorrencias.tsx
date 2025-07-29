@@ -41,6 +41,7 @@ const Ocorrencias = () => {
     vendorPriorityFilter,
     reincidentFilter,
     statusSlaFilter,
+    motivoFilter,
     updateFilter
   } = useFilters();
   const [searchParams] = useSearchParams();
@@ -270,7 +271,10 @@ const Ocorrencias = () => {
       transportadoraFilterMulti.includes(occurrence.transportadora)
     );
 
-    return matchesSearch && matchesStatus && matchesSegment && matchesEquipment && matchesSerial && matchesVendor && matchesSeverity && matchesAgencia && matchesUF && matchesTipoAgencia && matchesPontoVip && matchesSupt && matchesStatusEquipamento && matchesTransportadora;
+    // Filtro de motivo de ocorrência
+    const matchesMotivo = motivoFilter.length === 0 || motivoFilter.includes(occurrence.motivoOcorrencia || 'Não informado');
+
+    return matchesSearch && matchesStatus && matchesSegment && matchesEquipment && matchesSerial && matchesVendor && matchesSeverity && matchesAgencia && matchesUF && matchesTipoAgencia && matchesPontoVip && matchesSupt && matchesStatusEquipamento && matchesTransportadora && matchesMotivo;
   });
 
   const handleExportExcel = () => {
