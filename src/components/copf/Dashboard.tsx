@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { OptimizedMetricCard } from "./OptimizedMetricCard";
 import { OptimizedInteractiveCharts } from "./OptimizedInteractiveCharts";
 import { StatusBadge } from "./StatusBadge";
-import { LongTailChart } from "./LongTailChart";
+import { AgingChart } from "./AgingChart";
 import { OccurrenceModal } from "./OccurrenceModal";
 import { EquipmentStatusChart } from "./EquipmentStatusChart";
 import { TopAgenciesChart } from "./TopAgenciesChart";
@@ -681,29 +681,77 @@ export function Dashboard() {
       </div>
 
 
-      {/* Equipment Status Chart */}
+      {/* Highlights Operacionais - Movido para cima para storytelling */}
       <div className="animate-fade-in" style={{
       animationDelay: '0.3s'
-    }}>
-        <EquipmentStatusChart occurrences={filteredOccurrences} />
-      </div>
-
-      {/* Top Agencies Chart */}
-      <div className="animate-fade-in" style={{
-      animationDelay: '0.35s'
-    }}>
-        <TopAgenciesChart occurrences={occurrences} filteredOccurrences={filteredOccurrences} />
-      </div>
-
-      {/* Highlights Operacionais */}
-      <div className="animate-fade-in" style={{
-      animationDelay: '0.4s'
     }}>
         <OccurrenceHighlights 
           occurrences={filteredOccurrences} 
           onOccurrenceClick={handleOccurrenceClick}
           onNavigateToOccurrences={handleNavigateToOccurrences}
         />
+      </div>
+
+      {/* Seção de Análise Visual - Grid de Gráficos */}
+      <div className="space-y-8">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg">
+              <TrendingUp className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-foreground">Análise Visual Operacional</h2>
+              <p className="text-muted-foreground">Dashboards interativos para análise detalhada dos dados</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Grid de gráficos organizados para storytelling */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+          {/* Equipment Status Chart */}
+          <div className="animate-fade-in" style={{
+          animationDelay: '0.35s'
+        }}>
+            <EquipmentStatusChart occurrences={filteredOccurrences} />
+          </div>
+
+          {/* Top Agencies Chart */}
+          <div className="animate-fade-in" style={{
+          animationDelay: '0.4s'
+        }}>
+            <TopAgenciesChart occurrences={occurrences} filteredOccurrences={filteredOccurrences} />
+          </div>
+        </div>
+
+        {/* Gráfico de Aging - Largura completa para destaque */}
+        <div className="animate-fade-in" style={{
+        animationDelay: '0.45s'
+      }}>
+          <Card className="border-l-4 border-l-orange-500">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <div className="w-2 h-6 bg-gradient-to-b from-orange-500 to-red-500 rounded-sm"></div>
+                Gráfico de Aging
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <HelpCircle className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Análise do tempo de permanência das ocorrências em aberto (aging), distribuídas por faixas temporais</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Distribuição temporal de ocorrências em aberto - identifique gargalos e otimize a performance operacional
+              </p>
+            </CardHeader>
+            <CardContent>
+              <AgingChart occurrences={occurrences} filteredOccurrences={filteredOccurrences} />
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {/* Dashboard Content Wrapper for PDF Export */}
