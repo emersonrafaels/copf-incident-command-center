@@ -204,16 +204,18 @@ export function Dashboard() {
           occurrence: {
             id: occurrence.id,
             agency: occurrence.agency,
-            transportadora: occurrence.transportadora
+            transportadora: occurrence.transportadora,
+            tipoAgencia: occurrence.tipoAgencia
           },
-          filterValues: transportadoraFilterMulti
+          filterValues: transportadoraFilterMulti,
+          tipoAgenciaFilter
         });
         
-        // Verificar se a transportadora existe e está na lista de filtros
-        if (!occurrence.transportadora || !transportadoraFilterMulti.includes(occurrence.transportadora)) return false;
-        
-        // Garantir que apenas ocorrências válidas sejam mostradas (com transportadora não nula)
+        // Verificar se a transportadora existe e não está vazia
         if (!occurrence.transportadora || occurrence.transportadora.trim() === '') return false;
+        
+        // Verificar se a transportadora está na lista de filtros
+        if (!transportadoraFilterMulti.includes(occurrence.transportadora)) return false;
       }
 
       // Filtro de série
@@ -260,8 +262,12 @@ export function Dashboard() {
         if (!hasReincidence) return false;
       }
       
-      // Filtro de Long Tail (tempo desde abertura)
+      // Filtro de Long Tail (tempo desde abertura) - apenas ocorrências ativas para consistência com LongTailChart
       if (longTailFilter.length > 0) {
+        // Primeiro verificar se a ocorrência está ativa (não cancelada/encerrada)
+        const isActiveOccurrence = occurrence.status === 'a_iniciar' || occurrence.status === 'em_andamento';
+        if (!isActiveOccurrence) return false;
+        
         const createdDate = new Date(occurrence.createdAt);
         const hoursDiff = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60);
         const daysDiff = hoursDiff / 24;
@@ -275,10 +281,10 @@ export function Dashboard() {
             case '4-8h': return hoursDiff > 4 && hoursDiff <= 8;
             case '8-12h': return hoursDiff > 8 && hoursDiff <= 12;
             case '12-24h': return hoursDiff > 12 && hoursDiff <= 24;
-            case '1-2d': return daysDiff > 1 && daysDiff <= 2;
-            case '2-3d': return daysDiff > 2 && daysDiff <= 3;
-            case '3-5d': return daysDiff > 3 && daysDiff <= 5;
-            case '>5d': return daysDiff > 5;
+            case '1-2 dias': return daysDiff > 1 && daysDiff <= 2;
+            case '2-3 dias': return daysDiff > 2 && daysDiff <= 3;
+            case '3-5 dias': return daysDiff > 3 && daysDiff <= 5;
+            case '>5 dias': return daysDiff > 5;
             default: return false;
           }
         });
