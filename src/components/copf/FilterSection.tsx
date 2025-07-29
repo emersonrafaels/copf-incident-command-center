@@ -1085,21 +1085,18 @@ export function FilterSection({ className, showSerialNumber = false }: FilterSec
                          <Popover>
                            <PopoverTrigger asChild>
                              <Button variant="outline" className="w-full h-10 justify-between hover:bg-orange-500/5 hover:border-orange-500/30 transition-all duration-200 group-hover:shadow-sm">
-                               {longTailFilter.length > 0 ? (
-                                 <div className="flex items-center gap-2">
-                                   <Badge variant="secondary" className="h-5 text-xs bg-orange-500/10 text-orange-500">
-                                     {longTailFilter.length}
-                                   </Badge>
-                                   <span className="text-sm">
-                                     {longTailFilter.length === 1 ? 
-                                       (['1d', '2d', '3d', '4d', '5d'].includes(longTailFilter[0]) ? 
-                                         { '1d': '>1 dia', '2d': '>2 dias', '3d': '>3 dias', '4d': '>4 dias', '5d': '>5 dias' }[longTailFilter[0] as '1d' | '2d' | '3d' | '4d' | '5d'] : 
-                                         longTailFilter[0]
-                                       ) : 
-                                       `${longTailFilter.length} faixas`
-                                     }
-                                   </span>
-                                 </div>
+                                {longTailFilter.length > 0 ? (
+                                  <div className="flex items-center gap-2">
+                                    <Badge variant="secondary" className="h-5 text-xs bg-orange-500/10 text-orange-500">
+                                      {longTailFilter.length}
+                                    </Badge>
+                                    <span className="text-sm">
+                                      {longTailFilter.length === 1 ? 
+                                        longTailFilter[0] : 
+                                        `${longTailFilter.length} faixas`
+                                      }
+                                    </span>
+                                  </div>
                                ) : "Todas as faixas"}
                                <div className="w-4 h-4 opacity-50">⌄</div>
                              </Button>
@@ -1110,12 +1107,18 @@ export function FilterSection({ className, showSerialNumber = false }: FilterSec
                                <CommandEmpty>Nenhuma faixa encontrada.</CommandEmpty>
                                <CommandList>
                                  <CommandGroup>
-                                   {[
-                                     { value: '1d', label: '>1 dia' },
-                                     { value: '2d', label: '>2 dias' },
-                                     { value: '3d', label: '>3 dias' },
-                                     { value: '4d', label: '>4 dias' },
-                                     { value: '5d', label: '>5 dias', highlight: true }
+                                    {[
+                                      { value: '0-0.5h', label: '0-0.5h' },
+                                      { value: '0.5-1h', label: '0.5-1h' },
+                                      { value: '1-2h', label: '1-2h' },
+                                      { value: '2-4h', label: '2-4h' },
+                                      { value: '4-8h', label: '4-8h' },
+                                      { value: '8-12h', label: '8-12h' },
+                                      { value: '12-24h', label: '12-24h' },
+                                      { value: '1-2d', label: '1-2 dias' },
+                                      { value: '2-3d', label: '2-3 dias' },
+                                      { value: '3-5d', label: '3-5 dias' },
+                                      { value: '>5d', label: '>5 dias', highlight: true }
                                    ].map(range => (
                                      <CommandItem key={range.value} onSelect={() => {
                                        const isSelected = longTailFilter.includes(range.value);

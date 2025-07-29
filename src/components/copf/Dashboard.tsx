@@ -68,6 +68,7 @@ export function Dashboard() {
     overrideFilter,
     vendorPriorityFilter,
     reincidentFilter,
+    longTailFilter,
     hasActiveFilters,
     filterPeriod,
     customDateRange,
@@ -198,6 +199,16 @@ export function Dashboard() {
       if (statusFilterMulti.length > 0 && !statusFilterMulti.includes(occurrence.status)) return false;
       if (vendorFilterMulti.length > 0 && !vendorFilterMulti.includes(occurrence.vendor)) return false;
       if (transportadoraFilterMulti.length > 0) {
+        // Debug: adicionar log para verificar filtro de transportadora
+        console.log('Transportadora Filter Debug:', {
+          occurrence: {
+            id: occurrence.id,
+            agency: occurrence.agency,
+            transportadora: occurrence.transportadora
+          },
+          filterValues: transportadoraFilterMulti
+        });
+        
         // Verificar se a transportadora existe e está na lista de filtros
         if (!occurrence.transportadora || !transportadoraFilterMulti.includes(occurrence.transportadora)) return false;
         
@@ -248,6 +259,31 @@ export function Dashboard() {
         );
         if (!hasReincidence) return false;
       }
+      
+      // Filtro de Long Tail (tempo desde abertura)
+      if (longTailFilter.length > 0) {
+        const createdDate = new Date(occurrence.createdAt);
+        const hoursDiff = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60);
+        const daysDiff = hoursDiff / 24;
+        
+        const matchesFilter = longTailFilter.some(filter => {
+          switch (filter) {
+            case '0-0.5h': return hoursDiff >= 0 && hoursDiff <= 0.5;
+            case '0.5-1h': return hoursDiff > 0.5 && hoursDiff <= 1;
+            case '1-2h': return hoursDiff > 1 && hoursDiff <= 2;
+            case '2-4h': return hoursDiff > 2 && hoursDiff <= 4;
+            case '4-8h': return hoursDiff > 4 && hoursDiff <= 8;
+            case '8-12h': return hoursDiff > 8 && hoursDiff <= 12;
+            case '12-24h': return hoursDiff > 12 && hoursDiff <= 24;
+            case '1-2d': return daysDiff > 1 && daysDiff <= 2;
+            case '2-3d': return daysDiff > 2 && daysDiff <= 3;
+            case '3-5d': return daysDiff > 3 && daysDiff <= 5;
+            case '>5d': return daysDiff > 5;
+            default: return false;
+          }
+        });
+        if (!matchesFilter) return false;
+      }
 
       // Filtro de priorizadas com fornecedor (simular campo prioridade_fornecedor)
       if (vendorPriorityFilter) {
@@ -258,7 +294,7 @@ export function Dashboard() {
       return true;
     });
     return filtered;
-  }, [occurrences, segmentFilterMulti, equipmentFilterMulti, statusFilterMulti, vendorFilterMulti, transportadoraFilterMulti, serialNumberFilter, agenciaFilter, ufFilter, tipoAgenciaFilter, pontoVipFilter, overrideFilter, vendorPriorityFilter, reincidentFilter]);
+  }, [occurrences, segmentFilterMulti, equipmentFilterMulti, statusFilterMulti, vendorFilterMulti, transportadoraFilterMulti, serialNumberFilter, agenciaFilter, ufFilter, tipoAgenciaFilter, pontoVipFilter, overrideFilter, vendorPriorityFilter, reincidentFilter, longTailFilter]);
 
   // Cálculos memoizados para garantir consistência com a página de ocorrências
   const cardMetrics = useMemo(() => {
