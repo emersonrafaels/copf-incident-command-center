@@ -127,7 +127,7 @@ export function Dashboard() {
   };
 
   // Handlers para navegar com filtros específicos
-  const handleNavigateToOccurrences = (filter: 'total' | 'pending' | 'reincidence' | 'overdue' | 'agencies' | 'mttr' | 'inoperant' | 'entered-today' | 'due-today' | 'overdue-today') => {
+  const handleNavigateToOccurrences = (filter: 'total' | 'pending' | 'reincidence' | 'overdue' | 'agencies' | 'mttr' | 'inoperant' | 'entered-today' | 'due-today' | 'overdue-today' | 'critical') => {
     console.log('Card clicked:', filter, 'Current filtered occurrences:', filteredOccurrences.length);
     
     // Aplicar filtros específicos do card clicado SEM limpar os filtros existentes
@@ -171,6 +171,12 @@ export function Dashboard() {
       case 'inoperant':
         filters.updateFilter('statusEquipamentoFilterMulti', ['inoperante']);
         break;
+      case 'critical':
+        // Navegar com filtro específico via state
+        navigate('/ocorrencias', { 
+          state: { filterType: 'critical' } 
+        });
+        return; // Early return para evitar navegação dupla
     }
     
     // Navegar para a página de ocorrências
@@ -323,12 +329,27 @@ export function Dashboard() {
     // 5. Equipamentos inoperantes
     const inoperantEquipments = filteredOccurrences.filter(o => o.statusEquipamento === 'inoperante').length;
 
+    // 6. Ocorrências críticas
+    const criticalOccurrences = filteredOccurrences.filter(o => o.severity === 'critical').length;
+
+    // 7. Ocorrências que vencem hoje
+    const dueTodayOccurrences = filteredOccurrences.filter(o => {
+      if (o.status === 'encerrado') return false;
+      const createdDate = new Date(o.createdAt);
+      const hoursElapsed = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60);
+      const slaLimit = o.severity === 'critical' || o.severity === 'high' ? 24 : 72;
+      const hoursUntilDue = slaLimit - hoursElapsed;
+      return hoursUntilDue > 0 && hoursUntilDue <= 24; // Vence nas próximas 24 horas
+    }).length;
+
     return {
       totalOccurrences,
       pendingOccurrences,
       reincidentOccurrences,
       overdueOccurrences,
-      inoperantEquipments
+      inoperantEquipments,
+      criticalOccurrences,
+      dueTodayOccurrences
     };
   }, [filteredOccurrences]);
 
@@ -556,7 +577,7 @@ export function Dashboard() {
             </TooltipProvider>
           </div>
 
-          {/* 2.5. Equipamentos Inoperantes */}
+          {/* 3. Equipamentos Inoperantes */}
           <div onClick={() => handleNavigateToOccurrences('inoperant')} className="cursor-pointer">
             <TooltipProvider>
               <Tooltip>
@@ -578,8 +599,77 @@ export function Dashboard() {
               </Tooltip>
             </TooltipProvider>
           </div>
+
+          {/* 4. Ocorrências Críticas */}
+          <div onClick={() => handleNavigateToOccurrences('critical')} className="cursor-pointer">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="relative">
+                    <OptimizedMetricCard 
+                      title="Ocorrências Críticas" 
+                      value={cardMetrics.criticalOccurrences}
+                      icon={<AlertTriangle className="h-4 w-4" />} 
+                      description="Prioridade máxima"
+                      isLoading={isLoading}
+                    />
+                    <HelpCircle className="absolute top-2 right-2 h-4 w-4 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p><strong>Ocorrências Críticas:</strong> Incidentes de severidade crítica que impactam severamente a operação e requerem atenção imediata, com SLA de resolução de 24 horas.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
           
-          {/* 3. Reincidências */}
+          {/* 5. SLA em Atraso */}
+          <div onClick={() => handleNavigateToOccurrences('overdue')} className="cursor-pointer">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="relative">
+                    <OptimizedMetricCard 
+                      title="SLA em Atraso" 
+                      value={cardMetrics.overdueOccurrences}
+                      icon={<AlertTriangle className="h-4 w-4" />} 
+                      description="Acima do prazo limite"
+                      isLoading={isLoading}
+                    />
+                    <HelpCircle className="absolute top-2 right-2 h-4 w-4 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p><strong>SLA em Atraso:</strong> Ocorrências que ultrapassaram o tempo limite de resolução estabelecido no acordo de nível de serviço (24h para críticas/altas, 72h para médias/baixas).</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+
+          {/* 6. Vencem Hoje */}
+          <div onClick={() => handleNavigateToOccurrences('due-today')} className="cursor-pointer">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="relative">
+                    <OptimizedMetricCard 
+                      title="Vencem Hoje" 
+                      value={cardMetrics.dueTodayOccurrences}
+                      icon={<Clock className="h-4 w-4" />} 
+                      description="SLA nas próximas 24h"
+                      isLoading={isLoading}
+                    />
+                    <HelpCircle className="absolute top-2 right-2 h-4 w-4 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p><strong>Vencem Hoje:</strong> Ocorrências que atingirão o prazo limite do SLA nas próximas 24 horas, requerendo atenção prioritária para evitar descumprimento do acordo de nível de serviço.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          
+          {/* 7. Reincidências */}
           <div onClick={() => handleNavigateToOccurrences('reincidence')} className="cursor-pointer">
             <TooltipProvider>
               <Tooltip>
@@ -602,30 +692,7 @@ export function Dashboard() {
             </TooltipProvider>
           </div>
           
-          {/* 4. Ocorrências com SLA em atraso */}
-          <div onClick={() => handleNavigateToOccurrences('overdue')} className="cursor-pointer">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="relative">
-                    <OptimizedMetricCard 
-                      title="SLA em Atraso" 
-                      value={cardMetrics.overdueOccurrences}
-                      icon={<AlertTriangle className="h-4 w-4" />} 
-                      description="Acima do prazo limite"
-                      isLoading={isLoading}
-                    />
-                    <HelpCircle className="absolute top-2 right-2 h-4 w-4 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-xs">
-                  <p><strong>SLA em Atraso:</strong> Ocorrências que ultrapassaram o tempo limite de resolução estabelecido no acordo de nível de serviço (24h para críticas/altas, 72h para médias/baixas).</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-          
-          {/* 5. Agências Afetadas + VIP */}
+          {/* 8. Agências Afetadas */}
           <div onClick={() => handleNavigateToOccurrences('agencies')} className="cursor-pointer">
             <TooltipProvider>
               <Tooltip>
@@ -655,7 +722,7 @@ export function Dashboard() {
             </TooltipProvider>
           </div>
           
-          {/* 6. MTTR */}
+          {/* 9. MTTR */}
           <div onClick={() => handleNavigateToOccurrences('mttr')} className="cursor-pointer">
             <TooltipProvider>
               <Tooltip>
