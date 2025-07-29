@@ -1,10 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Bell, MessageSquare, Clock, AlertTriangle, CheckCircle, User, Building } from "lucide-react";
+import { Bell, MessageSquare, Clock, AlertTriangle, CheckCircle, User, Building, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
 
 interface Message {
@@ -118,8 +119,16 @@ const priorityLabels = {
 };
 
 export function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
+  const navigate = useNavigate();
   const [messages] = useState<Message[]>(defaultMessages);
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
+
+  const handleViewOccurrence = (occurrenceId: string) => {
+    // Fechar o painel de notificações
+    onClose();
+    // Navegar para a página de detalhes da ocorrência
+    navigate(`/ocorrencia/${occurrenceId}`);
+  };
 
   const unreadCount = messages.filter(m => !m.isRead).length;
 
@@ -195,6 +204,19 @@ export function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
                     <span>
                       {format(selectedMessage.timestamp, 'dd/MM/yyyy HH:mm')}
                     </span>
+                  </div>
+
+                  {/* Botão para abrir detalhe da ocorrência */}
+                  <div className="pt-2 border-t border-border">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => handleViewOccurrence(selectedMessage.occurrenceId)}
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Ver Detalhe da Ocorrência
+                    </Button>
                   </div>
                 </div>
               </div>
