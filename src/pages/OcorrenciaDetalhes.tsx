@@ -5,16 +5,17 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Send, AlertTriangle, Clock, User, FileText, Upload, X } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { ArrowLeft, Send, AlertTriangle, Clock, User, FileText, Upload, X, Star, MessageSquare } from 'lucide-react';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { MessageTemplates } from '@/components/copf/MessageTemplates';
 
 export default function OcorrenciaDetalhes() {
   const { id } = useParams<{ id: string }>();
@@ -25,8 +26,10 @@ export default function OcorrenciaDetalhes() {
   const [occurrence, setOccurrence] = useState<any>(null);
   const [vendorMessage, setVendorMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
-  const [selectedPriority, setSelectedPriority] = useState('');
+  const [isPrioritized, setIsPrioritized] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [historyEntries, setHistoryEntries] = useState<any[]>([]);
 
   useEffect(() => {
     console.log('Procurando ocorrência com ID:', id);
@@ -36,13 +39,49 @@ export default function OcorrenciaDetalhes() {
       console.log('Ocorrência encontrada:', found);
       setOccurrence(found);
       if (found) {
-        setSelectedPriority('medium'); // Default priority
+        setIsPrioritized(found.severity === 'critical' || found.severity === 'high');
+        // Histórico inicial mockado
+        setHistoryEntries([
+          {
+            id: '1',
+            type: 'created',
+            timestamp: found.createdAt,
+            author: 'Sistema COPF',
+            description: 'Ocorrência criada',
+            details: found.description
+          }
+        ]);
       }
     }
   }, [occurrences, id]);
 
   const formatDate = (dateString: string) => {
     return format(new Date(dateString), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR });
+  };
+
+  const handlePriorityToggle = (checked: boolean) => {
+    setIsPrioritized(checked);
+    
+    const newEntry = {
+      id: Date.now().toString(),
+      type: checked ? 'prioritized' : 'deprioritized',
+      timestamp: new Date().toISOString(),
+      author: 'Operação COPF',
+      description: checked ? 'Ocorrência priorizada' : 'Ocorrência despriorizada',
+      details: checked ? 'Ocorrência marcada como prioritária para atendimento urgente' : 'Prioridade removida da ocorrência'
+    };
+    
+    setHistoryEntries(prev => [newEntry, ...prev]);
+    
+    toast({
+      title: checked ? "Ocorrência Priorizada" : "Prioridade Removida",
+      description: checked ? "A ocorrência foi marcada como prioritária" : "A prioridade foi removida da ocorrência"
+    });
+  };
+
+  const handleTemplateSelect = (template: any) => {
+    setVendorMessage(template.content);
+    setShowTemplates(false);
   };
 
   const handleSendToVendor = async () => {
@@ -76,37 +115,6 @@ export default function OcorrenciaDetalhes() {
 
   const removeAttachment = (index: number) => {
     setAttachments(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const handlePriorityChange = (newPriority: string) => {
-    setSelectedPriority(newPriority);
-    if (occurrence) {
-      setOccurrence({...occurrence, priority: newPriority});
-      toast({
-        title: "Prioridade alterada",
-        description: `Prioridade alterada para ${getPriorityLabel(newPriority)}`
-      });
-    }
-  };
-
-  const getPriorityLabel = (priority: string) => {
-    const labels = {
-      low: 'Baixa',
-      medium: 'Média',
-      high: 'Alta',
-      urgent: 'Urgente'
-    };
-    return labels[priority as keyof typeof labels] || priority;
-  };
-
-  const getPriorityVariant = (priority: string): "default" | "destructive" | "outline" | "secondary" => {
-    const variants: Record<string, "default" | "destructive" | "outline" | "secondary"> = {
-      low: 'secondary',
-      medium: 'default',
-      high: 'destructive',
-      urgent: 'destructive'
-    };
-    return variants[priority] || 'default';
   };
 
   const getSeverityVariant = (severity: string): "default" | "destructive" | "outline" | "secondary" => {
@@ -176,7 +184,7 @@ export default function OcorrenciaDetalhes() {
               Voltar
             </Button>
             <div>
-              <h1 className="text-2xl font-bold">Ocorrência #{occurrence.id}</h1>
+              <h1 className="text-2xl font-bold">Ocorrência #{occurrence.displayId}</h1>
               <p className="text-muted-foreground">
                 Aberta há {getTimeElapsed(occurrence.createdAt)}
               </p>
@@ -255,73 +263,62 @@ export default function OcorrenciaDetalhes() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ScrollArea className="h-64">
-                  <div className="space-y-3">
-                    <div className="flex items-start space-x-3 p-3 bg-muted rounded-md">
-                      <div className="w-2 h-2 bg-primary rounded-full mt-2" />
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium">Ocorrência criada</p>
-                          <Badge variant="outline" className="text-xs">
-                            Abertura da Ocorrência
-                          </Badge>
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          {formatDate(occurrence.createdAt)} • Sistema
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-start space-x-3 p-3 bg-muted rounded-md">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2" />
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium">Atribuída ao fornecedor</p>
-                          <Badge variant="secondary" className="text-xs">
-                            Mensagem (Sistema)
-                          </Badge>
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          {formatDate(occurrence.createdAt)} • {occurrence.assignedTo}
-                        </p>
-                      </div>
-                    </div>
+                <ScrollArea className="h-[300px]">
+                  <div className="space-y-4">
+                    {historyEntries.map((entry) => {
+                      const getIcon = () => {
+                        switch (entry.type) {
+                          case 'created': return <Clock className="h-4 w-4" />;
+                          case 'prioritized': return <Star className="h-4 w-4 text-yellow-500" />;
+                          case 'deprioritized': return <Star className="h-4 w-4 text-gray-400" />;
+                          case 'message': return <MessageSquare className="h-4 w-4" />;
+                          default: return <Clock className="h-4 w-4" />;
+                        }
+                      };
 
-                    <div className="flex items-start space-x-3 p-3 bg-muted rounded-md">
-                      <div className="w-2 h-2 bg-green-500 rounded-full mt-2" />
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium">Mensagem enviada ao fornecedor</p>
-                          <Badge variant="default" className="text-xs">
-                            Mensagem - Operação
-                          </Badge>
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          {formatDate(occurrence.createdAt)} • Operação COPF
-                        </p>
-                        <p className="text-xs text-gray-600 mt-1 italic">
-                          "Equipamento apresentando falha intermitente. Solicitamos verificação urgente."
-                        </p>
-                      </div>
-                    </div>
+                      const getBadgeVariant = () => {
+                        switch (entry.type) {
+                          case 'prioritized': return 'default';
+                          case 'deprioritized': return 'secondary';
+                          case 'message': return 'outline';
+                          default: return 'secondary';
+                        }
+                      };
 
-                    <div className="flex items-start space-x-3 p-3 bg-muted rounded-md">
-                      <div className="w-2 h-2 bg-purple-500 rounded-full mt-2" />
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium">Resposta do fornecedor</p>
-                          <Badge variant="destructive" className="text-xs">
-                            Mensagem - Fornecedor
-                          </Badge>
+                      const getBadgeText = () => {
+                        switch (entry.type) {
+                          case 'created': return 'Criação';
+                          case 'prioritized': return 'Priorizada';
+                          case 'deprioritized': return 'Despriorizada';
+                          case 'message': return 'Mensagem';
+                          default: return 'Atualização';
+                        }
+                      };
+
+                      return (
+                        <div key={entry.id} className="flex items-start space-x-3 p-3 bg-muted rounded-md">
+                          <div className="flex-shrink-0 mt-1">
+                            {getIcon()}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <p className="text-sm font-medium">{entry.description}</p>
+                              <Badge variant={getBadgeVariant()} className="text-xs">
+                                {getBadgeText()}
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {formatDate(entry.timestamp)} • {entry.author}
+                            </p>
+                            {entry.details && (
+                              <p className="text-xs text-gray-600 mt-1 italic">
+                                "{entry.details}"
+                              </p>
+                            )}
+                          </div>
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                          {formatDate(occurrence.createdAt)} • {occurrence.vendor}
-                        </p>
-                        <p className="text-xs text-gray-600 mt-1 italic">
-                          "Técnico será enviado para verificação no período da tarde."
-                        </p>
-                      </div>
-                    </div>
+                      );
+                    })}
                   </div>
                 </ScrollArea>
               </CardContent>
@@ -336,51 +333,64 @@ export default function OcorrenciaDetalhes() {
                 <CardTitle className="flex items-center justify-between">
                   <div className="flex items-center">
                     <AlertTriangle className="h-5 w-5 mr-2" />
-                    Prioridade
+                    Priorização
                   </div>
-                  {!occurrence.prioritized && (
-                    <Badge variant="outline" className="text-orange-600 border-orange-600">
-                      Não Priorizada
-                    </Badge>
-                  )}
+                  <Badge variant={isPrioritized ? 'default' : 'outline'} className={isPrioritized ? 'text-yellow-600 border-yellow-600' : 'text-gray-600 border-gray-600'}>
+                    {isPrioritized ? 'Priorizada' : 'Normal'}
+                  </Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <Select value={selectedPriority} onValueChange={handlePriorityChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecionar prioridade..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">Baixa</SelectItem>
-                    <SelectItem value="medium">Média</SelectItem>
-                    <SelectItem value="high">Alta</SelectItem>
-                    <SelectItem value="urgent">Urgente</SelectItem>
-                  </SelectContent>
-                </Select>
-                <div className="mt-2 flex items-center justify-between">
-                  <Badge variant={getPriorityVariant(selectedPriority)}>
-                    {getPriorityLabel(selectedPriority)}
-                  </Badge>
-                  {occurrence.prioritized && (
-                    <Badge variant="secondary" className="text-green-600">
-                      Priorizada
-                    </Badge>
-                  )}
+                <div className="flex items-center space-x-3">
+                  <Switch
+                    id="priority-switch"
+                    checked={isPrioritized}
+                    onCheckedChange={handlePriorityToggle}
+                  />
+                  <Label htmlFor="priority-switch" className="text-sm font-medium">
+                    {isPrioritized ? 'Remover prioridade' : 'Priorizar ocorrência'}
+                  </Label>
                 </div>
+                {isPrioritized && (
+                  <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                    <div className="flex items-center">
+                      <Star className="h-4 w-4 text-yellow-600 mr-2" />
+                      <span className="text-sm font-medium text-yellow-800">Ocorrência Prioritária</span>
+                    </div>
+                    <p className="text-xs text-yellow-700 mt-1">
+                      SLA reduzido para atendimento urgente
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
             {/* Comunicação com Fornecedor */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Send className="h-5 w-5 mr-2" />
-                  Mensagem para Fornecedor
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <Send className="h-5 w-5 mr-2" />
+                    Mensagem para Fornecedor
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowTemplates(!showTemplates)}
+                  >
+                    Templates
+                  </Button>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                {showTemplates && (
+                  <MessageTemplates
+                    type="operation"
+                    onSelectTemplate={handleTemplateSelect}
+                  />
+                )}
                 <Textarea
-                  placeholder="Digite sua mensagem para o fornecedor..."
+                  placeholder="Digite sua mensagem para o fornecedor ou selecione um template..."
                   value={vendorMessage}
                   onChange={(e) => setVendorMessage(e.target.value)}
                   className="min-h-32"
@@ -427,18 +437,6 @@ export default function OcorrenciaDetalhes() {
                     className="w-full"
                   >
                     {isSending ? 'Enviando...' : 'Enviar Mensagem'}
-                  </Button>
-                  <Button 
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => {
-                      toast({
-                        title: "Priorização enviada",
-                        description: "A solicitação de priorização foi enviada com sucesso"
-                      });
-                    }}
-                  >
-                    Enviar Priorização
                   </Button>
                 </div>
               </CardContent>
