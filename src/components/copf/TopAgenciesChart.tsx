@@ -59,7 +59,7 @@ export function TopAgenciesChart({ occurrences, filteredOccurrences }: TopAgenci
           return number.endsWith('0') || number.endsWith('5');
         })();
         
-        const agencyDisplayName = isVip ? `🏆 ${agency.agency}` : agency.agency;
+        const agencyDisplayName = isVip ? `👑 ${agency.agency}` : agency.agency;
         
         const result: any = {
           agency: agencyDisplayName,
