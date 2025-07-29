@@ -359,7 +359,7 @@ export default function OcorrenciaDetalhes() {
                       <span className="text-sm font-medium text-yellow-800">Ocorrência Prioritária</span>
                     </div>
                     <p className="text-xs text-yellow-700 mt-1">
-                      SLA reduzido para atendimento urgente
+                      Ao salvar como priorizada, essa ocorrência aparecerá priorizada para o fornecedor.
                     </p>
                   </div>
                 )}
