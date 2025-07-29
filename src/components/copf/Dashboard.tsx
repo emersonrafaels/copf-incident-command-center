@@ -91,33 +91,128 @@ export function Dashboard() {
     toast('Exportação iniciada - Gerando PDF da dashboard...');
     try {
       const dashboardElement = document.getElementById('dashboard-content');
-      if (!dashboardElement) return;
+      if (!dashboardElement) {
+        toast('Erro - Elemento da dashboard não encontrado para exportação');
+        return;
+      }
+
+      // Capturar imagem da dashboard com alta qualidade
       const canvas = await html2canvas(dashboardElement, {
         scale: 2,
         useCORS: true,
-        allowTaint: true
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        removeContainer: false
       });
+
       const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('l', 'mm', 'a4');
-      const imgWidth = 297;
+      const pdf = new jsPDF('l', 'mm', 'a4'); // Paisagem para melhor visualização
+      
+      // Configurações do PDF
+      const pageWidth = 297;
       const pageHeight = 210;
-      const imgHeight = canvas.height * imgWidth / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
-      pdf.setFontSize(16);
-      pdf.text('Dashboard COPF - ' + new Date().toLocaleDateString('pt-BR'), 20, 20);
-      position = 30;
-      pdf.addImage(imgData, 'PNG', 10, position, imgWidth - 20, imgHeight);
-      heightLeft -= pageHeight;
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight + 30;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 10, position, imgWidth - 20, imgHeight);
-        heightLeft -= pageHeight;
+      const margin = 15;
+      const contentWidth = pageWidth - (margin * 2);
+      
+      // Header com informações
+      const now = new Date();
+      const dateTime = now.toLocaleString('pt-BR', {
+        dateStyle: 'full',
+        timeStyle: 'short'
+      });
+      
+      // Título principal
+      pdf.setFontSize(18);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Dashboard COPF - Sistema de Monitoramento', margin, 25);
+      
+      // Data e hora de geração
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(`Gerado em: ${dateTime}`, margin, 35);
+      
+      // Informações adicionais sobre filtros
+      if (hasActiveFilters) {
+        pdf.setFontSize(10);
+        pdf.setTextColor(100, 100, 100);
+        pdf.text('* Relatório gerado com filtros aplicados', margin, 42);
       }
-      pdf.save(`dashboard-copf-${new Date().toISOString().split('T')[0]}.pdf`);
+      
+      // Período dos dados
+      const periodText = filterPeriod === '7-days' ? 'Últimos 7 dias' :
+                        filterPeriod === '30-days' ? 'Últimos 30 dias' :
+                        filterPeriod === '60-days' ? 'Últimos 60 dias' :
+                        filterPeriod === '90-days' ? 'Últimos 90 dias' : 'Período personalizado';
+      
+      pdf.setFontSize(10);
+      pdf.setTextColor(80, 80, 80);
+      pdf.text(`Período: ${periodText}`, margin, 48);
+      
+      // Resetar cor para preto
+      pdf.setTextColor(0, 0, 0);
+      
+      // Calcular dimensões da imagem
+      const imgAspectRatio = canvas.width / canvas.height;
+      const imgWidth = contentWidth;
+      const imgHeight = imgWidth / imgAspectRatio;
+      
+      // Posição inicial da imagem (após o header)
+      let yPosition = 55;
+      
+      // Adicionar imagem da dashboard
+      if (imgHeight <= (pageHeight - yPosition - margin)) {
+        // A imagem cabe em uma página
+        pdf.addImage(imgData, 'PNG', margin, yPosition, imgWidth, imgHeight);
+      } else {
+        // A imagem precisa ser dividida em múltiplas páginas
+        let remainingHeight = imgHeight;
+        let currentY = yPosition;
+        let sourceY = 0;
+        
+        while (remainingHeight > 0) {
+          const availableHeight = pageHeight - currentY - margin;
+          const sliceHeight = Math.min(remainingHeight, availableHeight);
+          const sourceHeight = (sliceHeight / imgHeight) * canvas.height;
+          
+          // Criar um canvas temporário para o slice
+          const tempCanvas = document.createElement('canvas');
+          const tempCtx = tempCanvas.getContext('2d');
+          tempCanvas.width = canvas.width;
+          tempCanvas.height = sourceHeight;
+          
+          if (tempCtx) {
+            tempCtx.drawImage(canvas, 0, sourceY, canvas.width, sourceHeight, 0, 0, canvas.width, sourceHeight);
+            const sliceData = tempCanvas.toDataURL('image/png');
+            pdf.addImage(sliceData, 'PNG', margin, currentY, imgWidth, sliceHeight);
+          }
+          
+          remainingHeight -= sliceHeight;
+          sourceY += sourceHeight;
+          
+          if (remainingHeight > 0) {
+            pdf.addPage();
+            currentY = margin;
+          }
+        }
+      }
+      
+      // Footer na última página
+      const pageCount = pdf.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        pdf.setPage(i);
+        pdf.setFontSize(8);
+        pdf.setTextColor(120, 120, 120);
+        pdf.text(`Página ${i} de ${pageCount} - Dashboard COPF`, margin, pageHeight - 5);
+      }
+      
+      // Salvar o PDF
+      const fileName = `dashboard-copf-${now.toISOString().split('T')[0]}-${now.getHours()}h${now.getMinutes()}.pdf`;
+      pdf.save(fileName);
+      
       toast('Download concluído - Dashboard exportada em PDF com sucesso!');
     } catch (error) {
+      console.error('Erro na exportação:', error);
       toast('Erro na exportação - Não foi possível gerar o PDF. Tente novamente.');
     }
   };
@@ -437,7 +532,7 @@ export function Dashboard() {
 
   // Verificar tipo de agência atual (para mostrar filtros condicionais)
   const tipoAgenciaAtual = tipoAgenciaFilter.includes('terceirizada') ? 'terceirizada' : tipoAgenciaFilter.includes('convencional') ? 'convencional' : 'all';
-  return <div className="space-y-8 animate-fade-in">
+  return <div id="dashboard-content" className="space-y-8 animate-fade-in">
       {/* Hero Header */}
       <div className="relative">
         {/* Background Gradient */}
