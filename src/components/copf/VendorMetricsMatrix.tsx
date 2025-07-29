@@ -332,7 +332,7 @@ export function VendorMetricsMatrix({ occurrences, onNavigateToOccurrences }: Ve
       <Card className="border-l-4 border-l-secondary">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-secondary" />
+            <BarChart3 className="h-5 w-5 text-primary" />
             Heatmap: Fornecedor × Equipamento
           </CardTitle>
           <p className="text-sm text-muted-foreground">
