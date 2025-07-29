@@ -2,8 +2,9 @@ import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Badge } from "@/components/ui/badge";
+import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { OccurrenceData } from '@/hooks/useDashboardData';
-import { Building2, AlertTriangle } from 'lucide-react';
+import { Building2, AlertTriangle, Info } from 'lucide-react';
 
 interface TopAgenciesChartProps {
   occurrences: OccurrenceData[];
@@ -147,6 +148,16 @@ export function TopAgenciesChart({ occurrences, filteredOccurrences }: TopAgenci
         <CardTitle className="flex items-center gap-2">
           <div className="w-2 h-6 bg-gradient-to-b from-primary to-primary/60 rounded-sm"></div>
           Top 10 Agências por Volume de Ocorrências
+          <TooltipProvider>
+            <UITooltip>
+              <TooltipTrigger>
+                <Info className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Este gráfico representa as top 10 agências com mais ocorrências respeitando o período e filtro atual.</p>
+              </TooltipContent>
+            </UITooltip>
+          </TooltipProvider>
         </CardTitle>
         <p className="text-sm text-muted-foreground">
           Agências com maior número de ocorrências e seus principais equipamentos problemáticos
@@ -214,7 +225,7 @@ export function TopAgenciesChart({ occurrences, filteredOccurrences }: TopAgenci
               <span className="text-sm font-medium text-yellow-800">Agências VIP Identificadas</span>
             </div>
             <p className="text-xs text-yellow-700">
-              As agências marcadas como VIP requerem atenção prioritária devido ao seu status estratégico.
+              Agências VIP são marcadas com um símbolo de 👑
             </p>
           </div>
         )}
