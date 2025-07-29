@@ -215,7 +215,7 @@ export function OccurrenceHighlights({
                       </Tooltip>
                     </TooltipProvider>
                   </div>
-                  <p className="text-sm text-muted-foreground">Ocorrências criadas no dia atual</p>
+                  <p className="text-sm text-muted-foreground">Ocorrências abertas hoje</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
