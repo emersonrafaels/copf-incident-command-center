@@ -1,6 +1,6 @@
 import React, { memo, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, Cell, LabelList } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -348,6 +348,16 @@ export const AgingChart = memo(function AgingChart({
               {timeRangeAnalysis.data.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.color} />
               ))}
+              <LabelList 
+                dataKey="count" 
+                position="top" 
+                style={{ 
+                  fill: 'hsl(var(--foreground))', 
+                  fontSize: '12px', 
+                  fontWeight: 'bold',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                }} 
+              />
             </Bar>
           </BarChart>
         </ResponsiveContainer>
