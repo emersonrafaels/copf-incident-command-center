@@ -385,22 +385,18 @@ export const LongTailChart = memo(function LongTailChart({
 
   // Handler para navegar para ocorrências com aging crítico
   const handleFilterAgingCritico = () => {
-    clearAllFilters();
-    setTimeout(() => {
-      updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento']);
-      navigate('/ocorrencias?aging_min=72');
-      toast.success('Mostrando ocorrências na zona crítica (>3 dias)');
-    }, 100);
+    // Aplicar filtros específicos do gráfico (sem limpar filtros existentes)
+    updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento']);
+    navigate('/ocorrencias?aging_min=72');
+    toast.success('Mostrando ocorrências na zona crítica (>3 dias)');
   };
 
   // Handler para clique nas barras do gráfico
   const handleBarClick = (data: TimeRangeData) => {
-    clearAllFilters();
-    setTimeout(() => {
-      updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento']);
-      navigate(`/ocorrencias?aging_min=${data.minHours}&aging_max=${data.maxHours === Infinity ? 999999 : data.maxHours}`);
-      toast.success(`Filtrando ocorrências entre ${data.rangeLabel}`);
-    }, 100);
+    // Aplicar filtros específicos do gráfico (sem limpar filtros existentes)
+    updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento']);
+    navigate(`/ocorrencias?aging_min=${data.minHours}&aging_max=${data.maxHours === Infinity ? 999999 : data.maxHours}`);
+    toast.success(`Filtrando ocorrências entre ${data.rangeLabel}`);
   };
 
   // Renderização condicional

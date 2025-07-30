@@ -77,30 +77,25 @@ export function EquipmentStatusChart({ occurrences }: EquipmentStatusChartProps)
   const handleBarClick = (data: any, stackId: string) => {
     const [segment, equipment] = data.name.split(' - ');
     
-    // Limpar filtros existentes
-    clearAllFilters();
+    // Aplicar filtros específicos do gráfico (sem limpar filtros existentes)
+    updateFilter('segmentFilterMulti', [segment]);
+    updateFilter('equipmentFilterMulti', [equipment]);
     
-    // Aplicar novos filtros
-    setTimeout(() => {
-      updateFilter('segmentFilterMulti', [segment]);
-      updateFilter('equipmentFilterMulti', [equipment]);
-      
-      // Se clicar na parte operante ou inoperante, filtrar por status também
-      if (stackId === 'operante') {
-        updateFilter('statusEquipamentoFilterMulti', ['operante']);
-      } else if (stackId === 'inoperante') {
-        updateFilter('statusEquipamentoFilterMulti', ['inoperante']);
-      }
-      
-      // Navegar para ocorrências
-      navigate('/ocorrencias');
-      
-      // Mostrar toast de confirmação
-      toast({
-        title: "Filtros aplicados",
-        description: `Visualizando ocorrências de ${equipment} do segmento ${segment}${stackId ? ` - ${stackId}` : ''}`,
-      });
-    }, 100);
+    // Se clicar na parte operante ou inoperante, filtrar por status também
+    if (stackId === 'operante') {
+      updateFilter('statusEquipamentoFilterMulti', ['operante']);
+    } else if (stackId === 'inoperante') {
+      updateFilter('statusEquipamentoFilterMulti', ['inoperante']);
+    }
+    
+    // Navegar para ocorrências
+    navigate('/ocorrencias');
+    
+    // Mostrar toast de confirmação
+    toast({
+      title: "Filtros aplicados",
+      description: `Visualizando ocorrências de ${equipment} do segmento ${segment}${stackId ? ` - ${stackId}` : ''}`,
+    });
   };
 
   return (

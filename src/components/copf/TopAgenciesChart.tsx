@@ -149,30 +149,24 @@ export function TopAgenciesChart({ occurrences, filteredOccurrences }: TopAgenci
   };
 
   const handleBarClick = (data: any, equipmentType?: string) => {
-    // Limpar filtros existentes
-    clearAllFilters();
+    // Aplicar filtros específicos do gráfico (sem limpar filtros existentes)
+    updateFilter('agenciaFilter', [data.originalAgency]);
     
-    // Aplicar novos filtros
-    setTimeout(() => {
-      // Usar array para agência para consistência
-      updateFilter('agenciaFilter', [data.originalAgency]);
-      
-      // Se clicar em um equipamento específico, filtrar por ele também
-      if (equipmentType) {
-        const [segment, equipment] = equipmentType.split(' - ');
-        updateFilter('segmentFilterMulti', [segment]);
-        updateFilter('equipmentFilterMulti', [equipment]);
-      }
-      
-      // Navegar para ocorrências
-      navigate('/ocorrencias');
-      
-      // Mostrar toast de confirmação
-      toast({
-        title: "Filtros aplicados",
-        description: `Visualizando ocorrências da agência ${data.originalAgency}${equipmentType ? ` - ${equipmentType}` : ''}`,
-      });
-    }, 100);
+    // Se clicar em um equipamento específico, filtrar por ele também
+    if (equipmentType) {
+      const [segment, equipment] = equipmentType.split(' - ');
+      updateFilter('segmentFilterMulti', [segment]);
+      updateFilter('equipmentFilterMulti', [equipment]);
+    }
+    
+    // Navegar para ocorrências
+    navigate('/ocorrencias');
+    
+    // Mostrar toast de confirmação
+    toast({
+      title: "Filtros aplicados",
+      description: `Visualizando ocorrências da agência ${data.originalAgency}${equipmentType ? ` - ${equipmentType}` : ''}`,
+    });
   };
 
   return (

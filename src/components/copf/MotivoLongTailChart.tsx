@@ -93,14 +93,16 @@ export const MotivoLongTailChart = memo(function MotivoLongTailChart({
 
   // Handler para clique nas barras
   const handleBarClick = (data: MotivoData) => {
-    clearAllFilters();
-    setTimeout(() => {
-      // Aplicar filtro por motivo
-      updateFilter('motivoFilter', [data.motivoCompleto]);
-      
-      // Navegar para a página de ocorrências
-      navigate('/ocorrencias');
-    }, 100);
+    // Aplicar filtros específicos do gráfico (sem limpar filtros existentes)
+    updateFilter('motivoFilter', [data.motivoCompleto]);
+    
+    // Navegar para a página de ocorrências
+    navigate('/ocorrencias');
+    
+    // Mostrar toast de confirmação
+    toast.success(`Filtro aplicado: ${data.motivoCompleto}`, {
+      description: `${data.count} ocorrências encontradas (${data.percentage}% do total)`
+    });
   };
 
   // Custom Tooltip melhorado
