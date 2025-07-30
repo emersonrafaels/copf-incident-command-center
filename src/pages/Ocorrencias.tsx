@@ -783,9 +783,9 @@ const Ocorrencias = () => {
                           className="cursor-pointer hover:bg-accent/50 transition-colors select-none w-24"
                           onClick={() => handleSort('dataPrevisaoEncerramento')}
                         >
-                          <div className="flex items-center gap-1 text-xs font-medium">
-                            Previsão Encerramento
-                            <div className="flex flex-col opacity-40 hover:opacity-100 transition-opacity">
+                           <div className="flex items-center gap-1 text-xs font-medium">
+                             Previsão de Atendimento
+                             <div className="flex flex-col opacity-40 hover:opacity-100 transition-opacity">
                               <ChevronUp className={`h-3 w-3 -mb-1 ${sortColumn === 'dataPrevisaoEncerramento' && sortDirection === 'asc' ? 'opacity-100 text-primary' : ''}`} />
                               <ChevronDown className={`h-3 w-3 ${sortColumn === 'dataPrevisaoEncerramento' && sortDirection === 'desc' ? 'opacity-100 text-primary' : ''}`} />
                             </div>
