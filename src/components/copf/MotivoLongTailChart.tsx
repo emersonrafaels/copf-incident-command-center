@@ -1,11 +1,12 @@
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, Cell, LabelList, ComposedChart, Line, ReferenceLine } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { AlertTriangle, TrendingDown, Info } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertTriangle, TrendingDown, Info, Maximize2 } from 'lucide-react';
 import { useFilters } from '@/contexts/FiltersContext';
 import { toast } from 'sonner';
 import { OccurrenceData } from '@/hooks/useDashboardData';
@@ -162,226 +163,325 @@ const MotivoLongTailChart = memo(function MotivoLongTailChart({
   return (
     <Card className="border-l-4 border-l-orange-500">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <TrendingDown className="h-5 w-5 text-orange-500" />
-          Long Tail - Motivos de Ocorrência
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="max-w-xs">
-                  Análise Long Tail dos motivos de ocorrência seguindo o princípio 80/20. As barras vermelhas representam os poucos motivos que causam a maioria dos problemas. A linha azul mostra o percentual acumulado, ajudando a identificar onde concentrar esforços de melhoria. Clique nas barras para filtrar por motivo específico.
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Métricas resumo aprimoradas */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950/30 dark:to-red-900/20 p-4 rounded-lg border border-red-200 dark:border-red-800">
-            <div className="flex items-center gap-3">
-              <div className="w-3 h-3 rounded-full bg-red-500 shadow-sm"></div>
-              <div>
-                <p className="text-xs text-red-700 dark:text-red-300 font-medium">Top 3 Motivos</p>
-                <p className="text-lg font-bold text-red-800 dark:text-red-200">
-                  {motivoData.slice(0, 3).reduce((sum, item) => sum + item.percentage, 0)}%
-                </p>
-              </div>
-            </div>
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <TrendingDown className="h-5 w-5 text-orange-500" />
+            Long Tail - Motivos de Ocorrência
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="max-w-xs">
+                    Análise Long Tail dos motivos de ocorrência seguindo o princípio 80/20. As barras vermelhas representam os poucos motivos que causam a maioria dos problemas. A linha azul mostra o percentual acumulado, ajudando a identificar onde concentrar esforços de melhoria. Clique nas barras para filtrar por motivo específico.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
           
-          <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950/30 dark:to-orange-900/20 p-4 rounded-lg border border-orange-200 dark:border-orange-800">
-            <div className="flex items-center gap-3">
-              <div className="w-3 h-3 rounded-full bg-orange-500 shadow-sm"></div>
-              <div>
-                <p className="text-xs text-orange-700 dark:text-orange-300 font-medium">Total de Motivos</p>
-                <p className="text-lg font-bold text-orange-800 dark:text-orange-200">{motivoData.length}</p>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm" className="hover-scale">
+                <Maximize2 className="h-4 w-4" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-7xl h-[90vh] p-6 animate-scale-in">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <TrendingDown className="h-5 w-5 text-orange-500" />
+                  Long Tail - Motivos de Ocorrência (Tela Cheia)
+                </DialogTitle>
+              </DialogHeader>
+              
+              {/* Gráfico em tela cheia */}
+              <div className="h-full overflow-auto">
+                <div className="h-[calc(90vh-120px)]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ComposedChart
+                      data={motivoData}
+                      margin={{ top: 40, right: 80, left: 60, bottom: 140 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} />
+                      
+                      <XAxis 
+                        dataKey="motivo"
+                        tick={{ 
+                          fontSize: 12, 
+                          fill: 'hsl(var(--muted-foreground))',
+                          fontWeight: 600
+                        }}
+                        angle={-35}
+                        textAnchor="end"
+                        height={140}
+                        interval={0}
+                        tickLine={{ stroke: 'hsl(var(--border))', strokeWidth: 1 }}
+                        axisLine={{ stroke: 'hsl(var(--border))', strokeWidth: 1 }}
+                      />
+                      
+                      <YAxis 
+                        yAxisId="count"
+                        orientation="left"
+                        tick={{ 
+                          fontSize: 13, 
+                          fill: 'hsl(var(--muted-foreground))',
+                          fontWeight: 600
+                        }}
+                        label={{ 
+                          value: 'Nº de Ocorrências', 
+                          angle: -90, 
+                          position: 'insideLeft',
+                          style: { textAnchor: 'middle', fill: 'hsl(var(--foreground))', fontSize: '14px', fontWeight: 600 }
+                        }}
+                        tickLine={{ stroke: 'hsl(var(--border))', strokeWidth: 1 }}
+                        axisLine={{ stroke: 'hsl(var(--border))', strokeWidth: 1 }}
+                      />
+                      
+                      <YAxis 
+                        yAxisId="percentage"
+                        orientation="right"
+                        domain={[0, 100]}
+                        tick={{ 
+                          fontSize: 13, 
+                          fill: 'hsl(var(--primary))',
+                          fontWeight: 600
+                        }}
+                        label={{ 
+                          value: '% Acumulado', 
+                          angle: 90, 
+                          position: 'insideRight',
+                          style: { textAnchor: 'middle', fill: 'hsl(var(--primary))', fontSize: '14px', fontWeight: 600 }
+                        }}
+                        tickLine={{ stroke: 'hsl(var(--primary))', strokeWidth: 1 }}
+                        axisLine={{ stroke: 'hsl(var(--primary))', strokeWidth: 1 }}
+                      />
+                      
+                      <RechartsTooltip content={<CustomTooltip />} />
+                      
+                      <Bar 
+                        yAxisId="count"
+                        dataKey="count"
+                        radius={[8, 8, 0, 0]}
+                        className="cursor-pointer hover:opacity-75 transition-all duration-200"
+                        onClick={(data, index) => handleBarClick(motivoData[index])}
+                      >
+                        {motivoData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                        <LabelList 
+                          dataKey="count" 
+                          position="top" 
+                          style={{ 
+                            fill: 'hsl(var(--foreground))', 
+                            fontSize: '12px', 
+                            fontWeight: 'bold'
+                          }} 
+                        />
+                      </Bar>
+                      
+                      <Line
+                        yAxisId="percentage"
+                        type="monotone"
+                        dataKey="cumulativePercentage"
+                        stroke="hsl(var(--primary))"
+                        strokeWidth={4}
+                        dot={{ 
+                          fill: 'hsl(var(--primary))', 
+                          strokeWidth: 3, 
+                          r: 6,
+                          stroke: 'hsl(var(--background))'
+                        }}
+                        activeDot={{ 
+                          r: 10, 
+                          fill: 'hsl(var(--primary))',
+                          stroke: 'hsl(var(--background))',
+                          strokeWidth: 3
+                        }}
+                      />
+                      
+                      <ReferenceLine 
+                        yAxisId="percentage" 
+                        y={80} 
+                        stroke="hsl(var(--destructive))" 
+                        strokeDasharray="8 4" 
+                        strokeWidth={2}
+                        label={{ 
+                          value: "Linha 80%", 
+                          position: "top",
+                          style: { 
+                            fill: 'hsl(var(--destructive))', 
+                            fontSize: '13px',
+                            fontWeight: 'bold'
+                          }
+                        }}
+                      />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
-            </div>
+            </DialogContent>
+          </Dialog>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {/* Métricas resumo */}
+        <div className="flex flex-wrap items-center gap-4 p-4 bg-muted/30 rounded-lg mb-6">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-red-500"></div>
+            <span className="text-sm text-muted-foreground">Top 3 Motivos:</span>
+            <span className="font-semibold text-foreground">
+              {motivoData.slice(0, 3).reduce((sum, item) => sum + item.percentage, 0)}%
+            </span>
           </div>
-
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
-            <div className="flex items-center gap-3">
-              <div className="w-3 h-3 rounded-full bg-blue-500 shadow-sm"></div>
-              <div>
-                <p className="text-xs text-blue-700 dark:text-blue-300 font-medium">Total Ocorrências</p>
-                <p className="text-lg font-bold text-blue-800 dark:text-blue-200">
-                  {motivoData.reduce((sum, item) => sum + item.count, 0)}
-                </p>
-              </div>
-            </div>
+          <div className="w-px h-4 bg-border"></div>
+          
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-orange-500"></div>
+            <span className="text-sm text-muted-foreground">Motivos Diversos:</span>
+            <span className="font-semibold text-orange-600">{motivoData.length}</span>
           </div>
         </div>
 
-        {/* Gráfico Composto com melhor layout */}
-        <div className="bg-gradient-to-br from-background to-muted/20 p-4 rounded-lg border">
-          <div className="h-[600px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart
-                data={motivoData}
-                margin={{ top: 40, right: 80, left: 60, bottom: 140 }}
+        {/* Gráfico Composto com Eixo Duplo */}
+        <div className="h-[500px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <ComposedChart
+              data={motivoData}
+              margin={{ top: 30, right: 50, left: 30, bottom: 120 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+              
+              {/* Eixo X com textos melhorados */}
+              <XAxis 
+                dataKey="motivo"
+                tick={{ 
+                  fontSize: 11, 
+                  fill: 'hsl(var(--muted-foreground))',
+                  fontWeight: 500
+                }}
+                angle={-45}
+                textAnchor="end"
+                height={120}
+                interval={0}
+                tickLine={{ stroke: 'hsl(var(--border))' }}
+              />
+              
+              {/* Eixo Y Esquerdo - Contagem */}
+              <YAxis 
+                yAxisId="count"
+                orientation="left"
+                tick={{ 
+                  fontSize: 12, 
+                  fill: 'hsl(var(--muted-foreground))',
+                  fontWeight: 500
+                }}
+                label={{ 
+                  value: 'Nº de Ocorrências', 
+                  angle: -90, 
+                  position: 'insideLeft',
+                  style: { textAnchor: 'middle', fill: 'hsl(var(--foreground))' }
+                }}
+                tickLine={{ stroke: 'hsl(var(--border))' }}
+              />
+              
+              {/* Eixo Y Direito - Percentual Acumulado */}
+              <YAxis 
+                yAxisId="percentage"
+                orientation="right"
+                domain={[0, 100]}
+                tick={{ 
+                  fontSize: 12, 
+                  fill: 'hsl(var(--primary))',
+                  fontWeight: 500
+                }}
+                label={{ 
+                  value: '% Acumulado', 
+                  angle: 90, 
+                  position: 'insideRight',
+                  style: { textAnchor: 'middle', fill: 'hsl(var(--primary))' }
+                }}
+                tickLine={{ stroke: 'hsl(var(--primary))' }}
+              />
+              
+              <RechartsTooltip content={<CustomTooltip />} />
+              
+              {/* Barras de Ocorrências */}
+              <Bar 
+                yAxisId="count"
+                dataKey="count"
+                radius={[6, 6, 0, 0]}
+                className="cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={(data, index) => handleBarClick(motivoData[index])}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} />
-                
-                {/* Eixo X com melhor formatação */}
-                <XAxis 
-                  dataKey="motivo"
-                  tick={{ 
-                    fontSize: 10, 
-                    fill: 'hsl(var(--muted-foreground))',
-                    fontWeight: 600
-                  }}
-                  angle={-35}
-                  textAnchor="end"
-                  height={140}
-                  interval={0}
-                  tickLine={{ stroke: 'hsl(var(--border))', strokeWidth: 1 }}
-                  axisLine={{ stroke: 'hsl(var(--border))', strokeWidth: 1 }}
+                {motivoData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+                <LabelList 
+                  dataKey="count" 
+                  position="top" 
+                  style={{ 
+                    fill: 'hsl(var(--foreground))', 
+                    fontSize: '11px', 
+                    fontWeight: 'bold'
+                  }} 
                 />
-                
-                {/* Eixo Y Esquerdo - Contagem */}
-                <YAxis 
-                  yAxisId="count"
-                  orientation="left"
-                  tick={{ 
-                    fontSize: 11, 
-                    fill: 'hsl(var(--muted-foreground))',
-                    fontWeight: 600
-                  }}
-                  label={{ 
-                    value: 'Nº de Ocorrências', 
-                    angle: -90, 
-                    position: 'insideLeft',
-                    style: { textAnchor: 'middle', fill: 'hsl(var(--foreground))', fontSize: '12px', fontWeight: 600 }
-                  }}
-                  tickLine={{ stroke: 'hsl(var(--border))', strokeWidth: 1 }}
-                  axisLine={{ stroke: 'hsl(var(--border))', strokeWidth: 1 }}
-                />
-                
-                {/* Eixo Y Direito - Percentual Acumulado */}
-                <YAxis 
-                  yAxisId="percentage"
-                  orientation="right"
-                  domain={[0, 100]}
-                  tick={{ 
-                    fontSize: 11, 
-                    fill: 'hsl(var(--primary))',
-                    fontWeight: 600
-                  }}
-                  label={{ 
-                    value: '% Acumulado', 
-                    angle: 90, 
-                    position: 'insideRight',
-                    style: { textAnchor: 'middle', fill: 'hsl(var(--primary))', fontSize: '12px', fontWeight: 600 }
-                  }}
-                  tickLine={{ stroke: 'hsl(var(--primary))', strokeWidth: 1 }}
-                  axisLine={{ stroke: 'hsl(var(--primary))', strokeWidth: 1 }}
-                />
-                
-                <RechartsTooltip content={<CustomTooltip />} />
-                
-                {/* Barras de Ocorrências com melhor estilo */}
-                <Bar 
-                  yAxisId="count"
-                  dataKey="count"
-                  radius={[8, 8, 0, 0]}
-                  className="cursor-pointer hover:opacity-75 transition-all duration-200"
-                  onClick={(data, index) => handleBarClick(motivoData[index])}
-                >
-                  {motivoData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                  <LabelList 
-                    dataKey="count" 
-                    position="top" 
-                    style={{ 
-                      fill: 'hsl(var(--foreground))', 
-                      fontSize: '10px', 
-                      fontWeight: 'bold'
-                    }} 
-                  />
-                </Bar>
-                
-                {/* Linha de Percentual Acumulado aprimorada */}
-                <Line
-                  yAxisId="percentage"
-                  type="monotone"
-                  dataKey="cumulativePercentage"
-                  stroke="hsl(var(--primary))"
-                  strokeWidth={4}
-                  dot={{ 
-                    fill: 'hsl(var(--primary))', 
-                    strokeWidth: 3, 
-                    r: 5,
-                    stroke: 'hsl(var(--background))'
-                  }}
-                  activeDot={{ 
-                    r: 8, 
-                    fill: 'hsl(var(--primary))',
-                    stroke: 'hsl(var(--background))',
-                    strokeWidth: 3,
-                    className: "drop-shadow-lg"
-                  }}
-                />
-                
-                {/* Linha de referência 80% melhorada */}
-                <ReferenceLine 
-                  yAxisId="percentage" 
-                  y={80} 
-                  stroke="hsl(var(--destructive))" 
-                  strokeDasharray="8 4" 
-                  strokeWidth={2}
-                  label={{ 
-                    value: "Linha 80%", 
-                    position: "top",
-                    style: { 
-                      fill: 'hsl(var(--destructive))', 
-                      fontSize: '11px',
-                      fontWeight: 'bold'
-                    }
-                  }}
-                />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </div>
+              </Bar>
+              
+              {/* Linha de Percentual Acumulado */}
+              <Line
+                yAxisId="percentage"
+                type="monotone"
+                dataKey="cumulativePercentage"
+                stroke="hsl(var(--primary))"
+                strokeWidth={3}
+                dot={{ 
+                  fill: 'hsl(var(--primary))', 
+                  strokeWidth: 2, 
+                  r: 4,
+                  stroke: 'hsl(var(--background))'
+                }}
+                activeDot={{ 
+                  r: 6, 
+                  fill: 'hsl(var(--primary))',
+                  stroke: 'hsl(var(--background))',
+                  strokeWidth: 2
+                }}
+              />
+              
+              {/* Linha de referência 80% */}
+              <ReferenceLine 
+                yAxisId="percentage" 
+                y={80} 
+                stroke="hsl(var(--destructive))" 
+                strokeDasharray="5 5" 
+                label={{ 
+                  value: "80% Faixa", 
+                  position: "top",
+                  style: { fill: 'hsl(var(--destructive))', fontSize: '12px' }
+                }}
+              />
+            </ComposedChart>
+          </ResponsiveContainer>
         </div>
 
-        {/* Legenda aprimorada */}
-        <div className="bg-muted/30 p-4 rounded-lg">
-          <h4 className="text-sm font-semibold mb-3 text-foreground">Categorias de Motivos</h4>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <div className="flex items-center gap-2 p-2 bg-background rounded border">
-              <div className="w-4 h-4 bg-red-500 rounded border shadow-sm"></div>
-              <div>
-                <span className="text-xs font-medium">Top 3 Críticos</span>
-                <p className="text-xs text-muted-foreground">Maior impacto</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 p-2 bg-background rounded border">
-              <div className="w-4 h-4 bg-orange-500 rounded border shadow-sm"></div>
-              <div>
-                <span className="text-xs font-medium">Frequentes</span>
-                <p className="text-xs text-muted-foreground">Alta ocorrência</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 p-2 bg-background rounded border">
-              <div className="w-4 h-4 bg-blue-500 rounded border shadow-sm"></div>
-              <div>
-                <span className="text-xs font-medium">Moderados</span>
-                <p className="text-xs text-muted-foreground">Média ocorrência</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 p-2 bg-background rounded border">
-              <div className="w-4 h-4 bg-green-500 rounded border shadow-sm"></div>
-              <div>
-                <span className="text-xs font-medium">Esporádicos</span>
-                <p className="text-xs text-muted-foreground">Baixa ocorrência</p>
-              </div>
-            </div>
+        {/* Legenda */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs mt-4">
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 bg-red-500 rounded-sm"></div>
+            <span>Top 3 (Críticos)</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 bg-orange-500 rounded-sm"></div>
+            <span>Frequentes</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 bg-blue-500 rounded-sm"></div>
+            <span>Moderados</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 bg-green-500 rounded-sm"></div>
+            <span>Esporádicos</span>
           </div>
         </div>
       </CardContent>
