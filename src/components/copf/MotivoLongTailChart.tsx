@@ -25,7 +25,7 @@ interface MotivoData {
   color: string;
 }
 
-export const MotivoLongTailChart = memo(function MotivoLongTailChart({
+const MotivoLongTailChart = memo(function MotivoLongTailChart({
   occurrences,
   filteredOccurrences
 }: MotivoLongTailChartProps) {
@@ -343,3 +343,5 @@ export const MotivoLongTailChart = memo(function MotivoLongTailChart({
     </Card>
   );
 });
+
+export default MotivoLongTailChart;

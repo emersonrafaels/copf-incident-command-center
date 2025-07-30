@@ -14,7 +14,7 @@ import { FilterSection } from "./FilterSection";
 const EnhancedInteractiveCharts = lazy(() => import('./EnhancedInteractiveCharts').then(module => ({ default: module.EnhancedInteractiveCharts })))
 const VendorEquipmentMatrix = lazy(() => import('./VendorEquipmentMatrix').then(module => ({ default: module.VendorEquipmentMatrix })))
 const VendorMetricsMatrix = lazy(() => import('./VendorMetricsMatrix').then(module => ({ default: module.VendorMetricsMatrix })))
-const MotivoLongTailChart = lazy(() => import('./MotivoLongTailChart').then(module => ({ default: module.MotivoLongTailChart })))
+const MotivoLongTailChart = lazy(() => import('./MotivoLongTailChart'))
 const SlaPrevisaoChart = lazy(() => import('./SlaPrevisaoChart').then(module => ({ default: module.SlaPrevisaoChart })))
 import { OccurrenceHighlights } from "./OccurrenceHighlights";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
