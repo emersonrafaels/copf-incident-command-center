@@ -12,7 +12,7 @@ export function ComingSoonBadge({ className, size = "default" }: ComingSoonBadge
     <Badge 
       variant="secondary" 
       className={cn(
-        "bg-warning/10 text-warning border-warning/20 animate-pulse",
+        "bg-warning/10 text-warning border-warning/20",
         size === "sm" && "text-xs px-1.5 py-0.5",
         size === "lg" && "text-sm px-3 py-1",
         className
