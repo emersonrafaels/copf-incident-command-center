@@ -1034,8 +1034,8 @@ export function FilterSection({ className, showSerialNumber = false }: FilterSec
                                    </Badge>
                                    <span className="text-sm">
                                      {statusSlaFilter.length === 1 ? 
-                                       (['no_prazo', 'vencido', 'critico'].includes(statusSlaFilter[0]) ? 
-                                         { no_prazo: 'No Prazo', vencido: 'Vencido', critico: 'Crítico' }[statusSlaFilter[0] as 'no_prazo' | 'vencido' | 'critico'] : 
+                                        (['no_prazo', 'vencido'].includes(statusSlaFilter[0]) ? 
+                                          { no_prazo: 'No Prazo', vencido: 'Vencido' }[statusSlaFilter[0] as 'no_prazo' | 'vencido'] :
                                          statusSlaFilter[0]
                                        ) : 
                                        `${statusSlaFilter.length} status`
@@ -1052,11 +1052,10 @@ export function FilterSection({ className, showSerialNumber = false }: FilterSec
                                <CommandEmpty>Nenhum status SLA encontrado.</CommandEmpty>
                                <CommandList>
                                  <CommandGroup>
-                                   {[
-                                     { value: 'no_prazo', label: 'No Prazo' },
-                                     { value: 'vencido', label: 'Vencido' },
-                                     { value: 'critico', label: 'Crítico' }
-                                   ].map(status => (
+                                    {[
+                                      { value: 'no_prazo', label: 'No Prazo' },
+                                      { value: 'vencido', label: 'Vencido' }
+                                    ].map(status => (
                                      <CommandItem key={status.value} onSelect={() => {
                                        const isSelected = statusSlaFilter.includes(status.value);
                                        if (isSelected) {
