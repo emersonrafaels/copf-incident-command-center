@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MapPin, Thermometer, Activity, Clock, Building2, Layers } from "lucide-react";
 import { HeatMap } from "@/components/copf/HeatMap";
+import { ComingSoonOverlay } from "@/components/copf/ComingSoonOverlay";
 
 const mockMapaData = [
   { agencia: "AG0001 - Centro (São Paulo/SP)", ocorrencias: 23, regiao: "São Paulo Centro", equipamentos: 45, criticidade: "Alta", horarioPico: "14h-16h" },
@@ -27,154 +28,168 @@ const mockMapaData = [
 const Mapa = () => {
   return (
     <COPFLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Mapa de Calor</h1>
-          <p className="text-muted-foreground">Visualização geográfica da concentração de ocorrências</p>
-        </div>
-
-        {/* Filtros */}
-        <FilterSection />
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <Card className="h-[500px]">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Layers className="h-5 w-5" />
-                  Mapa de Calor Interativo
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="h-full p-0">
-                <HeatMap />
-              </CardContent>
-            </Card>
+      <ComingSoonOverlay
+        title="Mapa de Calor"
+        description="Visualização geográfica avançada da concentração de ocorrências em tempo real"
+        version="MVP 2.0"
+        releaseDate="Q2 2024"
+        features={[
+          "Mapa interativo com clusters dinâmicos",
+          "Filtros avançados por região e criticidade",
+          "Visualização em tempo real das ocorrências",
+          "Análise de tendências geográficas",
+          "Exportação de relatórios por localização"
+        ]}
+      >
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Mapa de Calor</h1>
+            <p className="text-muted-foreground">Visualização geográfica da concentração de ocorrências</p>
           </div>
 
-          <div className="space-y-4">
-            <Tabs defaultValue="agencias" className="space-y-4">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="agencias">Por Agência</TabsTrigger>
-                <TabsTrigger value="metricas">Métricas</TabsTrigger>
-              </TabsList>
+          {/* Filtros */}
+          <FilterSection />
 
-              <TabsContent value="agencias">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Building2 className="h-5 w-5" />
-                      Concentração por Agência
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {mockMapaData.map((item, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors">
-                        <div className="flex-1">
-                          <p className="font-medium text-sm">{item.agencia}</p>
-                          <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
-                            <span>📍 {item.regiao}</span>
-                            <span>🔧 {item.equipamentos} equip.</span>
-                            <span>⏰ {item.horarioPico}</span>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <Card className="h-[500px]">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Layers className="h-5 w-5" />
+                    Mapa de Calor Interativo
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="h-full p-0">
+                  <HeatMap />
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="space-y-4">
+              <Tabs defaultValue="agencias" className="space-y-4">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="agencias">Por Agência</TabsTrigger>
+                  <TabsTrigger value="metricas">Métricas</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="agencias">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Building2 className="h-5 w-5" />
+                        Concentração por Agência
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {mockMapaData.map((item, index) => (
+                        <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors">
+                          <div className="flex-1">
+                            <p className="font-medium text-sm">{item.agencia}</p>
+                            <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
+                              <span>📍 {item.regiao}</span>
+                              <span>🔧 {item.equipamentos} equip.</span>
+                              <span>⏰ {item.horarioPico}</span>
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant={
-                            item.criticidade === "Crítica" ? "destructive" :
-                            item.criticidade === "Alta" ? "secondary" :
-                            item.criticidade === "Média" ? "default" : "outline"
-                          } className="text-xs">
-                            {item.criticidade}
-                          </Badge>
-                          <Badge variant={
-                            item.ocorrencias > 10 ? "destructive" :
-                            item.ocorrencias > 5 ? "secondary" : "outline"
-                          }>
-                            {item.ocorrencias}
-                          </Badge>
-                        </div>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="metricas">
-                <div className="space-y-4">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Activity className="h-5 w-5" />
-                        Estatísticas Gerais
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="text-center p-3 bg-muted/50 rounded-lg">
-                          <div className="text-2xl font-bold text-primary">{mockMapaData.reduce((acc, item) => acc + item.ocorrencias, 0)}</div>
-                          <div className="text-xs text-muted-foreground">Total Ocorrências</div>
-                        </div>
-                        <div className="text-center p-3 bg-muted/50 rounded-lg">
-                          <div className="text-2xl font-bold text-foreground">2.360</div>
-                          <div className="text-xs text-muted-foreground">Agências Ativas</div>
-                        </div>
-                        <div className="text-center p-3 bg-muted/50 rounded-lg">
-                          <div className="text-2xl font-bold text-orange-500">{mockMapaData.filter(item => item.criticidade === "Crítica" || item.criticidade === "Alta").length}</div>
-                          <div className="text-xs text-muted-foreground">Alta Criticidade</div>
-                        </div>
-                        <div className="text-center p-3 bg-muted/50 rounded-lg">
-                          <div className="text-2xl font-bold text-green-500">{Math.round(mockMapaData.reduce((acc, item) => acc + item.ocorrencias, 0) / mockMapaData.length)}</div>
-                          <div className="text-xs text-muted-foreground">Média por Agência</div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Clock className="h-5 w-5" />
-                        Horários de Pico
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2 text-sm">
-                        {[...new Set(mockMapaData.map(item => item.horarioPico))].map((horario, index) => (
-                          <div key={index} className="flex items-center justify-between p-2 bg-muted/30 rounded">
-                            <span>{horario}</span>
-                            <Badge variant="outline">
-                              {mockMapaData.filter(item => item.horarioPico === horario).length} agências
+                          <div className="flex items-center gap-2">
+                            <Badge variant={
+                              item.criticidade === "Crítica" ? "destructive" :
+                              item.criticidade === "Alta" ? "secondary" :
+                              item.criticidade === "Média" ? "default" : "outline"
+                            } className="text-xs">
+                              {item.criticidade}
+                            </Badge>
+                            <Badge variant={
+                              item.ocorrencias > 10 ? "destructive" :
+                              item.ocorrencias > 5 ? "secondary" : "outline"
+                            }>
+                              {item.ocorrencias}
                             </Badge>
                           </div>
-                        ))}
-                      </div>
+                        </div>
+                      ))}
                     </CardContent>
                   </Card>
-                </div>
-              </TabsContent>
-            </Tabs>
+                </TabsContent>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Legenda</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-destructive rounded-full"></div>
-                  <span className="text-sm">Crítica/Alta concentração (10+)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-yellow-500 rounded-full"></div>
-                  <span className="text-sm">Média concentração (5-10)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-green-500 rounded-full"></div>
-                  <span className="text-sm">Baixa concentração (1-5)</span>
-                </div>
-              </CardContent>
-            </Card>
+                <TabsContent value="metricas">
+                  <div className="space-y-4">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Activity className="h-5 w-5" />
+                          Estatísticas Gerais
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="text-center p-3 bg-muted/50 rounded-lg">
+                            <div className="text-2xl font-bold text-primary">{mockMapaData.reduce((acc, item) => acc + item.ocorrencias, 0)}</div>
+                            <div className="text-xs text-muted-foreground">Total Ocorrências</div>
+                          </div>
+                          <div className="text-center p-3 bg-muted/50 rounded-lg">
+                            <div className="text-2xl font-bold text-foreground">2.360</div>
+                            <div className="text-xs text-muted-foreground">Agências Ativas</div>
+                          </div>
+                          <div className="text-center p-3 bg-muted/50 rounded-lg">
+                            <div className="text-2xl font-bold text-orange-500">{mockMapaData.filter(item => item.criticidade === "Crítica" || item.criticidade === "Alta").length}</div>
+                            <div className="text-xs text-muted-foreground">Alta Criticidade</div>
+                          </div>
+                          <div className="text-center p-3 bg-muted/50 rounded-lg">
+                            <div className="text-2xl font-bold text-green-500">{Math.round(mockMapaData.reduce((acc, item) => acc + item.ocorrencias, 0) / mockMapaData.length)}</div>
+                            <div className="text-xs text-muted-foreground">Média por Agência</div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Clock className="h-5 w-5" />
+                          Horários de Pico
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2 text-sm">
+                          {[...new Set(mockMapaData.map(item => item.horarioPico))].map((horario, index) => (
+                            <div key={index} className="flex items-center justify-between p-2 bg-muted/30 rounded">
+                              <span>{horario}</span>
+                              <Badge variant="outline">
+                                {mockMapaData.filter(item => item.horarioPico === horario).length} agências
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </TabsContent>
+              </Tabs>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Legenda</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-destructive rounded-full"></div>
+                    <span className="text-sm">Crítica/Alta concentração (10+)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-yellow-500 rounded-full"></div>
+                    <span className="text-sm">Média concentração (5-10)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+                    <span className="text-sm">Baixa concentração (1-5)</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
-      </div>
+      </ComingSoonOverlay>
     </COPFLayout>
   );
 };
