@@ -16,6 +16,11 @@ const navigation = [{
   icon: FileText,
   description: "Lista detalhada de ocorrências"
 }, {
+  title: "Visão do Fornecedor",
+  url: "/visao-fornecedor",
+  icon: Building2,
+  description: "Dashboard para fornecedores"
+}, {
   title: "Mapa de Calor",
   url: "/mapa",
   icon: MapPin,
@@ -30,11 +35,6 @@ const navigation = [{
   url: "/comunicacao",
   icon: MessageSquare,
   description: "Gestão de fornecedores"
-}, {
-  title: "Visão do Fornecedor",
-  url: "/visao-fornecedor",
-  icon: Building2,
-  description: "Dashboard para fornecedores"
 }];
 const adminNavigation = [{
   title: "Equipes",
@@ -139,8 +139,8 @@ export function COPFSidebar() {
           <SidebarGroupContent>
             <SidebarMenu className="space-responsive-xs">
               {adminNavigation.filter(item => !item.hidden || (item.title === "Equipes" && showTeams)).map(item => {
-                const isComingSoon = false;
-                const comingSoonTooltip = "";
+                const isComingSoon = item.title === "Configurações";
+                const comingSoonTooltip = item.title === "Configurações" ? "Disponível em Versão Futura (após MVP)" : "";
                 
                 const content = (
                   <SidebarMenuButton asChild className="h-10 sm:h-11 px-3 rounded-lg transition-all duration-200 hover:bg-sidebar-accent data-[active=true]:bg-sidebar-accent data-[active=true]:font-semibold">

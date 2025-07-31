@@ -24,7 +24,7 @@ export function ComingSoonBadge({ className, size = "default" }: ComingSoonBadge
         size === "default" && "h-3 w-3",
         size === "lg" && "h-4 w-4"
       )} />
-      Em breve
+      Futuro
     </Badge>
   )
 }
