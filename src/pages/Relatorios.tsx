@@ -69,7 +69,7 @@ const Relatorios = () => {
       <ComingSoonOverlay
         title="Relatórios Avançados"
         description="Análises detalhadas e relatórios executivos com insights avançados"
-        version="MVP 1.5"
+        version="Versão Futura (após MVP)"
         releaseDate="Q1 2024"
         features={[
           "Relatórios executivos personalizáveis",

@@ -54,7 +54,7 @@ export function ComingSoonOverlay({
       </div>
       
       {/* Overlay */}
-      <div className="absolute inset-0 flex items-center justify-center p-6 bg-background/60 backdrop-blur-sm">
+      <div className="absolute inset-0 flex items-start justify-center pt-20 p-6 bg-background/60 backdrop-blur-sm">
         <Card className="max-w-md w-full border-2 border-primary/20 shadow-2xl bg-background/95 backdrop-blur">
           <CardHeader className="text-center pb-4">
             <div className="mx-auto mb-4 w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center">
@@ -89,21 +89,14 @@ export function ComingSoonOverlay({
               </div>
             )}
 
-            <div className="flex flex-col gap-3">
-              <Button
-                variant="outline"
-                onClick={() => setShowPreview(true)}
-                className="w-full"
-              >
-                <Eye className="mr-2 h-4 w-4" />
-                Visualizar Preview
-              </Button>
-              
-              <Button variant="premium" className="w-full">
-                <Bell className="mr-2 h-4 w-4" />
-                Notificar quando disponível
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              onClick={() => setShowPreview(true)}
+              className="w-full"
+            >
+              <Eye className="mr-2 h-4 w-4" />
+              Visualizar Preview
+            </Button>
           </CardContent>
         </Card>
       </div>

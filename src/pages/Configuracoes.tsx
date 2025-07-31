@@ -13,7 +13,7 @@ const Configuracoes = () => {
       <ComingSoonOverlay
         title="Configurações Avançadas"
         description="Painel completo de configurações e personalização do sistema"
-        version="MVP 2.0"
+        version="Versão Futura (após MVP)"
         releaseDate="Q2 2024"
         features={[
           "Configurações de perfis e permissões",

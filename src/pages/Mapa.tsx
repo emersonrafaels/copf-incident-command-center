@@ -31,7 +31,7 @@ const Mapa = () => {
       <ComingSoonOverlay
         title="Mapa de Calor"
         description="Visualização geográfica avançada da concentração de ocorrências em tempo real"
-        version="MVP 2.0"
+        version="Versão Futura (após MVP)"
         releaseDate="Q2 2024"
         features={[
           "Mapa interativo com clusters dinâmicos",
