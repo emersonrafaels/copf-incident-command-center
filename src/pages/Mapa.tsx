@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MapPin, Thermometer, Activity, Clock, Building2, Layers } from "lucide-react";
 import { HeatMap } from "@/components/copf/HeatMap";
 import { ComingSoonOverlay } from "@/components/copf/ComingSoonOverlay";
+import { ComingSoonBadge } from "@/components/copf/ComingSoonBadge";
 
 const mockMapaData = [
   { agencia: "AG0001 - Centro (São Paulo/SP)", ocorrencias: 23, regiao: "São Paulo Centro", equipamentos: 45, criticidade: "Alta", horarioPico: "14h-16h" },
@@ -42,9 +43,12 @@ const Mapa = () => {
         ]}
       >
         <div className="space-y-6">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Mapa de Calor</h1>
-            <p className="text-muted-foreground">Visualização geográfica da concentração de ocorrências</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Mapa de Calor</h1>
+              <p className="text-muted-foreground">Visualização geográfica da concentração de ocorrências</p>
+            </div>
+            <ComingSoonBadge size="lg" />
           </div>
 
           {/* Filtros */}

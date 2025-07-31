@@ -15,6 +15,7 @@ import { useState, useMemo } from "react";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useFilters } from "@/contexts/FiltersContext";
 import { ComingSoonOverlay } from "@/components/copf/ComingSoonOverlay";
+import { ComingSoonBadge } from "@/components/copf/ComingSoonBadge";
 
 const Relatorios = () => {
   // Importar dados das ocorrências do hook
@@ -84,11 +85,16 @@ const Relatorios = () => {
           {/* Header melhorado */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 bg-gradient-to-r from-primary/5 via-secondary/5 to-accent/5 rounded-xl border">
             <div className="space-y-2">
-              <h1 className="text-3xl font-bold text-foreground tracking-tight">Relatórios</h1>
-              <p className="text-muted-foreground flex items-center gap-2">
-                <Activity className="h-4 w-4" />
-                Análises e métricas detalhadas do sistema • 2.360 agências monitoradas
-              </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-3xl font-bold text-foreground tracking-tight">Relatórios</h1>
+                  <p className="text-muted-foreground flex items-center gap-2">
+                    <Activity className="h-4 w-4" />
+                    Análises e métricas detalhadas do sistema • 2.360 agências monitoradas
+                  </p>
+                </div>
+                <ComingSoonBadge size="lg" />
+              </div>
             </div>
             <div className="flex gap-3">
               <Button variant="outline" className="hover-scale">

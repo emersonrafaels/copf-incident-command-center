@@ -139,8 +139,8 @@ export function COPFSidebar() {
           <SidebarGroupContent>
             <SidebarMenu className="space-responsive-xs">
               {adminNavigation.filter(item => !item.hidden || (item.title === "Equipes" && showTeams)).map(item => {
-                const isComingSoon = item.title === "Configurações";
-                const comingSoonTooltip = "Disponível no MVP 2.0 - Q2 2024";
+                const isComingSoon = false;
+                const comingSoonTooltip = "";
                 
                 const content = (
                   <SidebarMenuButton asChild className="h-10 sm:h-11 px-3 rounded-lg transition-all duration-200 hover:bg-sidebar-accent data-[active=true]:bg-sidebar-accent data-[active=true]:font-semibold">

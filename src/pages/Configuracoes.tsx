@@ -6,6 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Settings, Bell, Palette } from "lucide-react";
 import { ComingSoonOverlay } from "@/components/copf/ComingSoonOverlay";
+import { ComingSoonBadge } from "@/components/copf/ComingSoonBadge";
 
 const Configuracoes = () => {
   return (
@@ -25,9 +26,12 @@ const Configuracoes = () => {
         ]}
       >
         <div className="space-y-6">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Configurações</h1>
-            <p className="text-muted-foreground">Configurações do sistema e preferências</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Configurações</h1>
+              <p className="text-muted-foreground">Configurações do sistema e preferências</p>
+            </div>
+            <ComingSoonBadge size="lg" />
           </div>
 
           <Tabs defaultValue="geral" className="space-y-6">

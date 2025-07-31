@@ -29,19 +29,7 @@ export function ComingSoonOverlay({
   if (showPreview) {
     return (
       <div className={cn("relative", className)}>
-        <div className="absolute top-4 right-4 z-10">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowPreview(false)}
-            className="bg-background/80 backdrop-blur-sm"
-          >
-            Voltar
-          </Button>
-        </div>
-        <div className="opacity-60 pointer-events-none">
-          {children}
-        </div>
+        {children}
       </div>
     )
   }
@@ -70,9 +58,6 @@ export function ComingSoonOverlay({
                 <Calendar className="mr-1 h-3 w-3" />
                 {version}
               </Badge>
-              <p className="text-sm text-muted-foreground">
-                Previsão de lançamento: <span className="font-medium text-foreground">{releaseDate}</span>
-              </p>
             </div>
 
             {features.length > 0 && (
