@@ -106,7 +106,7 @@ export function COPFSidebar() {
                             </div>
                             <span className="text-responsive-xs text-muted-foreground truncate">{item.description}</span>
                           </div>}
-                        {collapsed && isComingSoon && <ComingSoonBadge size="sm" className="absolute -top-0.5 -right-0.5 z-10" />}
+                        {collapsed && isComingSoon && <ComingSoonBadge size="sm" className="absolute -top-1 -right-2 z-20" />}
                       </div>
                     </NavLink>
                   </SidebarMenuButton>
@@ -154,7 +154,7 @@ export function COPFSidebar() {
                             </div>
                             <span className="text-responsive-xs text-muted-foreground truncate">{item.description}</span>
                           </div>}
-                        {collapsed && isComingSoon && <ComingSoonBadge size="sm" className="absolute -top-0.5 -right-0.5 z-10" />}
+                        {collapsed && isComingSoon && <ComingSoonBadge size="sm" className="absolute -top-1 -right-2 z-20" />}
                       </div>
                     </NavLink>
                   </SidebarMenuButton>
