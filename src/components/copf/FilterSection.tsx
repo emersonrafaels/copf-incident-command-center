@@ -12,7 +12,6 @@ import { Filter, RefreshCw, ChevronDown, ChevronUp, Check, Truck, Clock } from "
 import { useFilters } from "@/contexts/FiltersContext";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { cn } from "@/lib/utils";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 interface FilterSectionProps {
   className?: string;
   showSerialNumber?: boolean;
@@ -42,7 +41,7 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
     severityFilterMulti,
     statusEquipamentoFilterMulti,
     serialNumberFilter,
-    equipmentModelFilter,
+    equipmentModelFilterMulti,
     overrideFilter,
     vendorPriorityFilter,
     reincidentFilter,
@@ -243,7 +242,7 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
                         supt: suptFilter.length > 0,
                         segmento: segmentFilterMulti.length > 0,
                         equipamento: equipmentFilterMulti.length > 0,
-                        modelo: equipmentModelFilter !== 'all',
+                        modelo: equipmentModelFilterMulti.length > 0,
                         status: statusFilterMulti.length > 0,
                         statusEquipamento: statusEquipamentoFilterMulti.length > 0,
                         criticidade: severityFilterMulti.length > 0,
@@ -265,7 +264,7 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
                         supt: suptFilter.length > 0,
                         segmento: segmentFilterMulti.length > 0,
                         equipamento: equipmentFilterMulti.length > 0,
-                        modelo: equipmentModelFilter !== 'all',
+                        modelo: equipmentModelFilterMulti.length > 0,
                         status: statusFilterMulti.length > 0,
                         statusEquipamento: statusEquipamentoFilterMulti.length > 0,
                         criticidade: severityFilterMulti.length > 0,
@@ -287,7 +286,7 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
                         supt: suptFilter.length > 0,
                         segmento: segmentFilterMulti.length > 0,
                         equipamento: equipmentFilterMulti.length > 0,
-                        modelo: equipmentModelFilter !== 'all',
+                        modelo: equipmentModelFilterMulti.length > 0,
                         status: statusFilterMulti.length > 0,
                         statusEquipamento: statusEquipamentoFilterMulti.length > 0,
                         criticidade: severityFilterMulti.length > 0,
@@ -763,17 +762,46 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
                         <div className="w-1 h-4 bg-secondary/60 rounded-full"></div>
                         Modelo do equipamento
                       </Label>
-                      <Select value={equipmentModelFilter} onValueChange={(v) => updateFilter('equipmentModelFilter', v)}>
-                        <SelectTrigger className="w-full h-10">
-                          <SelectValue placeholder="Todos os modelos" />
-                        </SelectTrigger>
-                        <SelectContent className="z-50">
-                          <SelectItem value="all">Todos os modelos</SelectItem>
-                          {availableEquipmentModels.map((m) => (
-                            <SelectItem key={m} value={m}>{m}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" className="w-full h-10 justify-between hover:bg-secondary/5 hover:border-secondary/30 transition-all duration-200 group-hover:shadow-sm">
+                            {equipmentModelFilterMulti.length > 0 ? (
+                              <div className="flex items-center gap-2">
+                                <Badge variant="secondary" className="h-5 text-xs bg-secondary/10 text-secondary">
+                                  {equipmentModelFilterMulti.length}
+                                </Badge>
+                                <span className="text-sm">
+                                  {equipmentModelFilterMulti.length === 1 ? equipmentModelFilterMulti[0] : `${equipmentModelFilterMulti.length} modelos`}
+                                </span>
+                              </div>
+                            ) : "Todos os modelos"}
+                            <div className="w-4 h-4 opacity-50">⌄</div>
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                          <Command>
+                            <CommandInput placeholder="Buscar modelo..." className="h-9" />
+                            <CommandEmpty>Nenhum modelo encontrado.</CommandEmpty>
+                            <CommandList>
+                              <CommandGroup className="max-h-64 overflow-y-auto">
+                                {availableEquipmentModels.map(modelo => (
+                                  <CommandItem key={modelo} onSelect={() => {
+                                    const isSelected = equipmentModelFilterMulti.includes(modelo);
+                                    if (isSelected) {
+                                      updateFilter('equipmentModelFilterMulti', equipmentModelFilterMulti.filter(m => m !== modelo));
+                                    } else {
+                                      updateFilter('equipmentModelFilterMulti', [...equipmentModelFilterMulti, modelo]);
+                                    }
+                                  }}>
+                                    <Check className={cn("mr-2 h-4 w-4", equipmentModelFilterMulti.includes(modelo) ? "opacity-100" : "opacity-0")} />
+                                    {modelo}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
                     </div>
 
                     {/* Status da ocorrência */}

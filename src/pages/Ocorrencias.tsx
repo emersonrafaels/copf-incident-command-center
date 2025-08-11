@@ -15,8 +15,6 @@ import { useFilters } from "@/contexts/FiltersContext";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import * as XLSX from 'xlsx';
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
 const Ocorrencias = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -45,7 +43,7 @@ const Ocorrencias = () => {
     statusSlaFilter,
     motivoFilter,
     previsaoSlaFilter,
-    equipmentModelFilter,
+    equipmentModelFilterMulti,
     updateFilter
   } = useFilters();
   const [searchParams] = useSearchParams();
@@ -321,9 +319,9 @@ const Ocorrencias = () => {
     // Filtro de motivo de ocorrência
     const matchesMotivo = motivoFilter.length === 0 || motivoFilter.includes(occurrence.motivoOcorrencia || 'Não informado');
 
-    // Filtro especial local: Modelo de equipamento
+    // Filtro especial: Modelo de equipamento (global)
     const occurrenceModel = getModelForOccurrence(occurrence);
-    const matchesEquipmentModel = equipmentModelFilter === 'all' || equipmentModelFilter === '' || equipmentModelFilter === occurrenceModel;
+    const matchesEquipmentModel = equipmentModelFilterMulti.length === 0 || equipmentModelFilterMulti.includes(occurrenceModel);
 
     // Filtro de previsão vs SLA
     const matchesPrevisaoSla = (() => {
