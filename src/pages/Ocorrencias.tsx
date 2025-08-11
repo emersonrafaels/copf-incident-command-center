@@ -55,8 +55,8 @@ const Ocorrencias = () => {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [showAIAssistant, setShowAIAssistant] = useState(false);
 
-  // Filtro especial local: Modelo do equipamento
-  const [equipmentModelFilter, setEquipmentModelFilter] = useState<string>('');
+  // Filtro de modelo: usa o filtro global do contexto (equipmentModelFilter)
+
 
   // Mapeamento genérico de modelos por equipamento (somente para esta página)
   const equipmentModelsMap: Record<string, string[]> = {
@@ -323,7 +323,7 @@ const Ocorrencias = () => {
 
     // Filtro especial local: Modelo de equipamento
     const occurrenceModel = getModelForOccurrence(occurrence);
-    const matchesEquipmentModel = !equipmentModelFilter || equipmentModelFilter === occurrenceModel;
+    const matchesEquipmentModel = equipmentModelFilter === 'all' || equipmentModelFilter === '' || equipmentModelFilter === occurrenceModel;
 
     // Filtro de previsão vs SLA
     const matchesPrevisaoSla = (() => {
@@ -640,18 +640,19 @@ const Ocorrencias = () => {
                 <div className="space-y-2">
                   <Label className="text-sm text-muted-foreground">Modelo do equipamento (especial)</Label>
                   <div className="flex gap-2">
-                    <Select value={equipmentModelFilter} onValueChange={setEquipmentModelFilter}>
+                    <Select value={equipmentModelFilter} onValueChange={(v) => updateFilter('equipmentModelFilter', v)}>
                       <SelectTrigger className="w-full h-10">
                         <SelectValue placeholder="Todos os modelos" />
                       </SelectTrigger>
                       <SelectContent className="z-50">
+                        <SelectItem value="all">Todos os modelos</SelectItem>
                         {availableEquipmentModels.map((m) => (
                           <SelectItem key={m} value={m}>{m}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                    {equipmentModelFilter && (
-                      <Button variant="outline" onClick={() => setEquipmentModelFilter('')}>
+                    {equipmentModelFilter !== 'all' && (
+                      <Button variant="outline" onClick={() => updateFilter('equipmentModelFilter', 'all')}>
                         Limpar
                       </Button>
                     )}
