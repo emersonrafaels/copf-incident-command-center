@@ -45,6 +45,7 @@ const Ocorrencias = () => {
     statusSlaFilter,
     motivoFilter,
     previsaoSlaFilter,
+    equipmentModelFilter,
     updateFilter
   } = useFilters();
   const [searchParams] = useSearchParams();

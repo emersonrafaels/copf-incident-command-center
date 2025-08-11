@@ -6,6 +6,7 @@ export interface FiltersState {
   segmentFilter: string;
   equipmentFilter: string;
   serialNumberFilter: string;
+  equipmentModelFilter: string;
   statusFilter: string;
   vendorFilter: string;
   transportadoraFilter: string;
@@ -55,6 +56,7 @@ const defaultFilters: FiltersState = {
   segmentFilter: 'all',
   equipmentFilter: 'all',
   serialNumberFilter: '',
+  equipmentModelFilter: 'all',
   statusFilter: 'all',
   vendorFilter: 'all',
   transportadoraFilter: 'all',
@@ -114,6 +116,7 @@ export const FiltersProvider: React.FC<{ children: ReactNode }> = ({ children })
     filters.segmentFilter !== 'all' ||
     filters.equipmentFilter !== 'all' ||
     filters.serialNumberFilter !== '' ||
+    filters.equipmentModelFilter !== 'all' ||
     filters.statusFilter !== 'all' ||
     filters.overrideFilter ||
     filters.vendorPriorityFilter ||

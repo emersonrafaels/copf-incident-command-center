@@ -12,7 +12,7 @@ import { Filter, RefreshCw, ChevronDown, ChevronUp, Check, Truck, Clock } from "
 import { useFilters } from "@/contexts/FiltersContext";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { cn } from "@/lib/utils";
-
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 interface FilterSectionProps {
   className?: string;
   showSerialNumber?: boolean;
@@ -42,6 +42,7 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
     severityFilterMulti,
     statusEquipamentoFilterMulti,
     serialNumberFilter,
+    equipmentModelFilter,
     overrideFilter,
     vendorPriorityFilter,
     reincidentFilter,
@@ -98,6 +99,34 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
 
   const uniqueEquipments = getFilteredEquipments();
   const uniqueVendors = Array.from(new Set(occurrences.map(o => o.vendor))).sort();
+
+  // Mapeamento genérico de modelos por equipamento
+  const equipmentModelsMap: Record<string, string[]> = {
+    'ATM Saque': ['Modelo ATM Saque 1', 'Modelo ATM Saque 2'],
+    'ATM Depósito': ['Modelo ATM Depósito 1', 'Modelo ATM Depósito 2'],
+    'Cassete': ['Modelo Cassete 1', 'Modelo Cassete 2'],
+    'Notebook': ['Modelo Notebook 1', 'Modelo Notebook 2'],
+    'Desktop': ['Modelo Desktop 1', 'Modelo Desktop 2'],
+    'Leitor de Cheques/documentos': ['Modelo Leitor Cheques 1', 'Modelo Leitor Cheques 2'],
+    'Leitor biométrico': ['Modelo Leitor Biométrico 1', 'Modelo Leitor Biométrico 2'],
+    'PIN PAD': ['Modelo PIN PAD 1', 'Modelo PIN PAD 2'],
+    'Scanner de Cheque': ['Modelo Scanner Cheque 1', 'Modelo Scanner Cheque 2'],
+    'Impressora': ['Modelo Impressora 1', 'Modelo Impressora 2'],
+    'Impressora térmica': ['Modelo Impressora Térmica 1', 'Modelo Impressora Térmica 2'],
+    'Impressora multifuncional': ['Modelo Impressora Multifuncional 1', 'Modelo Impressora Multifuncional 2'],
+    'Monitor LCD/LED': ['Modelo Monitor 1', 'Modelo Monitor 2'],
+    'Teclado': ['Modelo Teclado 1', 'Modelo Teclado 2'],
+    'Servidor': ['Modelo Servidor 1', 'Modelo Servidor 2'],
+    'Televisão': ['Modelo Televisão 1', 'Modelo Televisão 2'],
+    'Senheiro': ['Modelo Senheiro 1', 'Modelo Senheiro 2'],
+    'TCR': ['Modelo TCR 1', 'Modelo TCR 2'],
+    'Classificadora': ['Modelo Classificadora 1', 'Modelo Classificadora 2'],
+    'Fragmentadora de Papel': ['Modelo Fragmentadora 1', 'Modelo Fragmentadora 2'],
+  };
+  const allModelOptions = Array.from(new Set(Object.values(equipmentModelsMap).flat()));
+  const availableEquipmentModels = equipmentFilterMulti.length > 0
+    ? Array.from(new Set(equipmentFilterMulti.flatMap(eq => equipmentModelsMap[eq] || [])))
+    : allModelOptions;
 
   // Dados de transportadoras e seus fornecedores
   const transportadoraFornecedores = {
@@ -214,6 +243,7 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
                         supt: suptFilter.length > 0,
                         segmento: segmentFilterMulti.length > 0,
                         equipamento: equipmentFilterMulti.length > 0,
+                        modelo: equipmentModelFilter !== 'all',
                         status: statusFilterMulti.length > 0,
                         statusEquipamento: statusEquipamentoFilterMulti.length > 0,
                         criticidade: severityFilterMulti.length > 0,
@@ -235,6 +265,7 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
                         supt: suptFilter.length > 0,
                         segmento: segmentFilterMulti.length > 0,
                         equipamento: equipmentFilterMulti.length > 0,
+                        modelo: equipmentModelFilter !== 'all',
                         status: statusFilterMulti.length > 0,
                         statusEquipamento: statusEquipamentoFilterMulti.length > 0,
                         criticidade: severityFilterMulti.length > 0,
@@ -256,6 +287,7 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
                         supt: suptFilter.length > 0,
                         segmento: segmentFilterMulti.length > 0,
                         equipamento: equipmentFilterMulti.length > 0,
+                        modelo: equipmentModelFilter !== 'all',
                         status: statusFilterMulti.length > 0,
                         statusEquipamento: statusEquipamentoFilterMulti.length > 0,
                         criticidade: severityFilterMulti.length > 0,
@@ -723,6 +755,25 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
                           </Command>
                         </PopoverContent>
                       </Popover>
+                    </div>
+
+                    {/* Modelo do equipamento */}
+                    <div className="group space-y-3">
+                      <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                        <div className="w-1 h-4 bg-secondary/60 rounded-full"></div>
+                        Modelo do equipamento
+                      </Label>
+                      <Select value={equipmentModelFilter} onValueChange={(v) => updateFilter('equipmentModelFilter', v)}>
+                        <SelectTrigger className="w-full h-10">
+                          <SelectValue placeholder="Todos os modelos" />
+                        </SelectTrigger>
+                        <SelectContent className="z-50">
+                          <SelectItem value="all">Todos os modelos</SelectItem>
+                          {availableEquipmentModels.map((m) => (
+                            <SelectItem key={m} value={m}>{m}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
 
                     {/* Status da ocorrência */}
