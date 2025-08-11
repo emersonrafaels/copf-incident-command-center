@@ -14,6 +14,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useFilters } from "@/contexts/FiltersContext";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import * as XLSX from 'xlsx';
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Ocorrencias = () => {
   const navigate = useNavigate();
@@ -51,6 +53,47 @@ const Ocorrencias = () => {
   const [sortColumn, setSortColumn] = useState('');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [showAIAssistant, setShowAIAssistant] = useState(false);
+
+  // Filtro especial local: Modelo do equipamento
+  const [equipmentModelFilter, setEquipmentModelFilter] = useState<string>('');
+
+  // Mapeamento genérico de modelos por equipamento (somente para esta página)
+  const equipmentModelsMap: Record<string, string[]> = {
+    'ATM Saque': ['Modelo ATM Saque 1', 'Modelo ATM Saque 2'],
+    'ATM Depósito': ['Modelo ATM Depósito 1', 'Modelo ATM Depósito 2'],
+    'Cassete': ['Modelo Cassete 1', 'Modelo Cassete 2'],
+    'Notebook': ['Modelo Notebook 1', 'Modelo Notebook 2'],
+    'Desktop': ['Modelo Desktop 1', 'Modelo Desktop 2'],
+    'Leitor de Cheques/documentos': ['Modelo Leitor Cheques 1', 'Modelo Leitor Cheques 2'],
+    'Leitor biométrico': ['Modelo Leitor Biométrico 1', 'Modelo Leitor Biométrico 2'],
+    'PIN PAD': ['Modelo PIN PAD 1', 'Modelo PIN PAD 2'],
+    'Scanner de Cheque': ['Modelo Scanner Cheque 1', 'Modelo Scanner Cheque 2'],
+    'Impressora': ['Modelo Impressora 1', 'Modelo Impressora 2'],
+    'Impressora térmica': ['Modelo Impressora Térmica 1', 'Modelo Impressora Térmica 2'],
+    'Impressora multifuncional': ['Modelo Impressora Multifuncional 1', 'Modelo Impressora Multifuncional 2'],
+    'Monitor LCD/LED': ['Modelo Monitor 1', 'Modelo Monitor 2'],
+    'Teclado': ['Modelo Teclado 1', 'Modelo Teclado 2'],
+    'Servidor': ['Modelo Servidor 1', 'Modelo Servidor 2'],
+    'Televisão': ['Modelo Televisão 1', 'Modelo Televisão 2'],
+    'Senheiro': ['Modelo Senheiro 1', 'Modelo Senheiro 2'],
+    'TCR': ['Modelo TCR 1', 'Modelo TCR 2'],
+    'Classificadora': ['Modelo Classificadora 1', 'Modelo Classificadora 2'],
+    'Fragmentadora de Papel': ['Modelo Fragmentadora 1', 'Modelo Fragmentadora 2'],
+  };
+
+  const allModelOptions = Array.from(
+    new Set(Object.values(equipmentModelsMap).flat())
+  );
+  const availableEquipmentModels = equipmentFilterMulti.length > 0
+    ? Array.from(new Set(equipmentFilterMulti.flatMap(eq => equipmentModelsMap[eq] || [])))
+    : allModelOptions;
+
+  const getModelForOccurrence = (occurrence: any) => {
+    const models = equipmentModelsMap[occurrence.equipment] || ['Modelo Genérico 1', 'Modelo Genérico 2'];
+    const key = (occurrence.serialNumber || occurrence.id || '').toString();
+    const idx = key.length > 0 ? (key.charCodeAt(0) + key.length) % models.length : 0;
+    return models[idx];
+  };
 
   // Extrair parâmetros de aging da URL
   const agingMin = searchParams.get('aging_min');
@@ -277,6 +320,10 @@ const Ocorrencias = () => {
     // Filtro de motivo de ocorrência
     const matchesMotivo = motivoFilter.length === 0 || motivoFilter.includes(occurrence.motivoOcorrencia || 'Não informado');
 
+    // Filtro especial local: Modelo de equipamento
+    const occurrenceModel = getModelForOccurrence(occurrence);
+    const matchesEquipmentModel = !equipmentModelFilter || equipmentModelFilter === occurrenceModel;
+
     // Filtro de previsão vs SLA
     const matchesPrevisaoSla = (() => {
       if (previsaoSlaFilter.length === 0) return true;
@@ -309,7 +356,7 @@ const Ocorrencias = () => {
       return false;
     })();
 
-    return matchesSearch && matchesStatus && matchesSegment && matchesEquipment && matchesSerial && matchesVendor && matchesSeverity && matchesAgencia && matchesUF && matchesTipoAgencia && matchesPontoVip && matchesSupt && matchesStatusEquipamento && matchesTransportadora && matchesMotivo && matchesPrevisaoSla;
+    return matchesSearch && matchesStatus && matchesSegment && matchesEquipment && matchesSerial && matchesVendor && matchesSeverity && matchesAgencia && matchesUF && matchesTipoAgencia && matchesPontoVip && matchesSupt && matchesStatusEquipamento && matchesTransportadora && matchesMotivo && matchesEquipmentModel && matchesPrevisaoSla;
   });
 
   const handleExportExcel = () => {
@@ -586,6 +633,30 @@ const Ocorrencias = () => {
                   className="pl-10 h-11 border-2 focus:border-primary/50 transition-colors" 
                 />
               </div>
+
+              {/* Filtro especial: Modelo do equipamento (somente nesta página) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm text-muted-foreground">Modelo do equipamento (especial)</Label>
+                  <div className="flex gap-2">
+                    <Select value={equipmentModelFilter} onValueChange={setEquipmentModelFilter}>
+                      <SelectTrigger className="w-full h-10">
+                        <SelectValue placeholder="Todos os modelos" />
+                      </SelectTrigger>
+                      <SelectContent className="z-50">
+                        {availableEquipmentModels.map((m) => (
+                          <SelectItem key={m} value={m}>{m}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {equipmentModelFilter && (
+                      <Button variant="outline" onClick={() => setEquipmentModelFilter('')}>
+                        Limpar
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -803,6 +874,7 @@ const Ocorrencias = () => {
                             </div>
                           </div>
                         </TableHead>
+                        <TableHead className="w-24">Modelo</TableHead>
                         <TableHead 
                           className="cursor-pointer hover:bg-accent/50 transition-colors select-none w-20"
                           onClick={() => handleSort('serialNumber')}
@@ -887,19 +959,20 @@ const Ocorrencias = () => {
                          ) : (
                            <span className="text-muted-foreground">-</span>
                          )}
-                       </TableCell>
-                       <TableCell className="py-2 text-xs truncate max-w-[80px]">{occurrence.serialNumber}</TableCell>
-                        <TableCell className="py-2">
-                           <Button 
-                             variant="ghost" 
-                             size="sm" 
-                             onClick={() => navigate(`/ocorrencia/${occurrence.id}`)} 
-                             title="Visualizar detalhes da ocorrência"
-                             className="h-6 w-6 p-0"
-                           >
-                             <Eye className="h-3 w-3" />
-                           </Button>
                         </TableCell>
+                        <TableCell className="py-2 text-xs truncate max-w-[120px]">{getModelForOccurrence(occurrence)}</TableCell>
+                        <TableCell className="py-2 text-xs truncate max-w-[80px]">{occurrence.serialNumber}</TableCell>
+                         <TableCell className="py-2">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => navigate(`/ocorrencia/${occurrence.id}`)} 
+                              title="Visualizar detalhes da ocorrência"
+                              className="h-6 w-6 p-0"
+                            >
+                              <Eye className="h-3 w-3" />
+                            </Button>
+                         </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
