@@ -53,9 +53,9 @@ const Ocorrencias = () => {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [showAIAssistant, setShowAIAssistant] = useState(false);
 
-  // Filtro de modelo: usa o filtro global do contexto (equipmentModelFilter)
-
-
+  // Filtro de modelo: usa o filtro global do contexto (multiselect)
+  const filtersCtxForModels = useFilters();
+  const selectedEquipmentModels = filtersCtxForModels?.equipmentModelFilterMulti ?? [];
   // Mapeamento genérico de modelos por equipamento (somente para esta página)
   const equipmentModelsMap: Record<string, string[]> = {
     'ATM Saque': ['Modelo ATM Saque 1', 'Modelo ATM Saque 2'],
@@ -321,7 +321,7 @@ const Ocorrencias = () => {
 
     // Filtro especial: Modelo de equipamento (global)
     const occurrenceModel = getModelForOccurrence(occurrence);
-    const matchesEquipmentModel = equipmentModelFilterMulti.length === 0 || equipmentModelFilterMulti.includes(occurrenceModel);
+    const matchesEquipmentModel = selectedEquipmentModels.length === 0 || selectedEquipmentModels.includes(occurrenceModel);
 
     // Filtro de previsão vs SLA
     const matchesPrevisaoSla = (() => {
