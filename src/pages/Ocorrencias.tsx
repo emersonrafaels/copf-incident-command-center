@@ -635,30 +635,6 @@ const Ocorrencias = () => {
                 />
               </div>
 
-              {/* Filtro especial: Modelo do equipamento (somente nesta página) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-sm text-muted-foreground">Modelo do equipamento (especial)</Label>
-                  <div className="flex gap-2">
-                    <Select value={equipmentModelFilter} onValueChange={(v) => updateFilter('equipmentModelFilter', v)}>
-                      <SelectTrigger className="w-full h-10">
-                        <SelectValue placeholder="Todos os modelos" />
-                      </SelectTrigger>
-                      <SelectContent className="z-50">
-                        <SelectItem value="all">Todos os modelos</SelectItem>
-                        {availableEquipmentModels.map((m) => (
-                          <SelectItem key={m} value={m}>{m}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {equipmentModelFilter !== 'all' && (
-                      <Button variant="outline" onClick={() => updateFilter('equipmentModelFilter', 'all')}>
-                        Limpar
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </div>
             </div>
           </CardContent>
         </Card>
