@@ -638,7 +638,7 @@ export function Dashboard() {
       <div className="animate-fade-in" style={{
       animationDelay: '0.1s'
     }}>
-        <FilterSection />
+        <FilterSection defaultOpen />
       </div>
 
       {/* Métricas principais */}

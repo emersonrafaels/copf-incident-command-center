@@ -16,10 +16,11 @@ import { cn } from "@/lib/utils";
 interface FilterSectionProps {
   className?: string;
   showSerialNumber?: boolean;
+  defaultOpen?: boolean;
 }
 
-export function FilterSection({ className, showSerialNumber = false }: FilterSectionProps) {
-  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+export function FilterSection({ className, showSerialNumber = false, defaultOpen = false }: FilterSectionProps) {
+  const [isFiltersOpen, setIsFiltersOpen] = useState(defaultOpen);
   const [isLocationOpen, setIsLocationOpen] = useState(true);
   const [isEquipmentOpen, setIsEquipmentOpen] = useState(true);
   const [isVendorOpen, setIsVendorOpen] = useState(true);
