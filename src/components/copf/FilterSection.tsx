@@ -19,7 +19,7 @@ interface FilterSectionProps {
 }
 
 export function FilterSection({ className, showSerialNumber = false }: FilterSectionProps) {
-  const [isFiltersOpen, setIsFiltersOpen] = useState(true);
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [isLocationOpen, setIsLocationOpen] = useState(true);
   const [isEquipmentOpen, setIsEquipmentOpen] = useState(true);
   const [isVendorOpen, setIsVendorOpen] = useState(true);
