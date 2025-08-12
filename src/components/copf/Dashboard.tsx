@@ -371,9 +371,9 @@ export function Dashboard() {
         if (!agenciaFilter.includes(agencyNumber)) return false;
       }
 
-      // Filtro de UF
+      // Filtro de UF (usar campo 'estado' vindo do banco)
       if (ufFilter.length > 0) {
-        const agencyUF = occurrence.agency.split(' - ')[1] || 'SP';
+        const agencyUF = occurrence.estado;
         if (!ufFilter.includes(agencyUF)) return false;
       }
 

@@ -195,9 +195,8 @@ const Ocorrencias = () => {
       // Filtro de agência por número
       const matchesAgencia = !Array.isArray(agenciaFilter) || agenciaFilter.length === 0 || agenciaFilter.some(agency => occurrence.agency.includes(agency));
 
-      // Filtro de UF
-      const agencyUF = occurrence.agency.split(' - ')[1] || 'SP';
-      const matchesUF = ufFilter.length === 0 || ufFilter.includes(agencyUF);
+      // Filtro de UF (usar campo 'estado' vindo do banco)
+      const matchesUF = ufFilter.length === 0 || ufFilter.includes(occurrence.estado);
 
       // Usar o campo tipoAgencia do objeto de dados (igual ao Dashboard)
       const matchesTipoAgencia = tipoAgenciaFilter.length === 0 || tipoAgenciaFilter.includes(occurrence.tipoAgencia);
