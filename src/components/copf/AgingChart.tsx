@@ -218,10 +218,12 @@ export const AgingChart = memo(function AgingChart({
         previsaoMaiorSla: 'previsao_alem_sla',
         semPrevisao: 'sem_previsao',
       };
-      updateFilter('previsaoSlaFilter', [map[category]]);
+      const value = map[category];
+      updateFilter('previsaoSlaFilter', [value]);
+      navigate(`/ocorrencias?aging_min=${data.minHours}&aging_max=${data.maxHours === Infinity ? 999999 : data.maxHours}&previsao=${value}`);
+    } else {
+      navigate(`/ocorrencias?aging_min=${data.minHours}&aging_max=${data.maxHours === Infinity ? 999999 : data.maxHours}`);
     }
-
-    navigate(`/ocorrencias?aging_min=${data.minHours}&aging_max=${data.maxHours === Infinity ? 999999 : data.maxHours}`);
 
     const categoryLabel = category === 'dentroPrazo' ? 'com previsão' : category === 'previsaoMaiorSla' ? 'previsão > SLA' : category === 'semPrevisao' ? 'sem previsão' : 'todas as categorias';
     toast.success(`Filtrando ocorrências ${category ? categoryLabel : ''} entre ${data.rangeLabel}`);
