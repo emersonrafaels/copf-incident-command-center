@@ -176,6 +176,20 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
     ? Object.values(municipiosPorUF).flat().sort()
     : ufFilter.flatMap(uf => municipiosPorUF[uf as keyof typeof municipiosPorUF] || []).sort();
 
+  // Gerador determinístico de código (4 caracteres) para sintomas
+  const getSymptomCode = (s: string) => {
+    const base = (s || 'NAO INFORMADO')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toUpperCase();
+    let hash = 0 >>> 0;
+    for (let i = 0; i < base.length; i++) {
+      hash = ((hash * 31) + base.charCodeAt(i)) >>> 0;
+    }
+    const hex = (hash >>> 0).toString(16).toUpperCase().padStart(4, '0');
+    return hex.slice(0, 4);
+  };
+
   // Diretorias de Negócio (DINEG)
   const dinegOptions = ['2', '5', '8', '80'];
 
@@ -1230,10 +1244,12 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
                                     </Badge>
                                     <span className="text-sm">
                                       {motivoFilter.length === 1 ? 
-                                        (motivoFilter[0].length > 20 ? 
-                                          `${motivoFilter[0].substring(0, 20)}...` : 
-                                          motivoFilter[0]
-                                        ) : 
+                                        (() => { 
+                                          const m = motivoFilter[0];
+                                          const code = getSymptomCode(m);
+                                          const txt = m.length > 20 ? `${m.substring(0, 20)}...` : m;
+                                          return `${code} - ${txt}`;
+                                        })() : 
                                         `${motivoFilter.length} sintomas`
                                       }
                                     </span>
@@ -1250,21 +1266,25 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
                                   <CommandGroup>
                                     {Array.from(new Set(occurrences.map(o => o.motivoOcorrencia || 'Não informado')))
                                       .sort()
-                                      .map(motivo => (
-                                        <CommandItem key={motivo} onSelect={() => {
-                                          const isSelected = motivoFilter.includes(motivo);
-                                          if (isSelected) {
-                                            updateFilter('motivoFilter', motivoFilter.filter(m => m !== motivo));
-                                          } else {
-                                            updateFilter('motivoFilter', [...motivoFilter, motivo]);
-                                          }
-                                        }}>
-                                          <Check className={cn("mr-2 h-4 w-4", motivoFilter.includes(motivo) ? "opacity-100" : "opacity-0")} />
-                                          <span className="text-sm" title={motivo}>
-                                            {motivo.length > 50 ? `${motivo.substring(0, 50)}...` : motivo}
-                                          </span>
-                                        </CommandItem>
-                                      ))}
+                                      .map(motivo => {
+                                        const code = getSymptomCode(motivo);
+                                        const label = motivo.length > 50 ? `${motivo.substring(0, 50)}...` : motivo;
+                                        return (
+                                          <CommandItem key={motivo} onSelect={() => {
+                                            const isSelected = motivoFilter.includes(motivo);
+                                            if (isSelected) {
+                                              updateFilter('motivoFilter', motivoFilter.filter(m => m !== motivo));
+                                            } else {
+                                              updateFilter('motivoFilter', [...motivoFilter, motivo]);
+                                            }
+                                          }}>
+                                            <Check className={cn("mr-2 h-4 w-4", motivoFilter.includes(motivo) ? "opacity-100" : "opacity-0")} />
+                                            <span className="text-sm" title={motivo}>
+                                              {`${code} - ${label}`}
+                                            </span>
+                                          </CommandItem>
+                                        );
+                                      })}
                                   </CommandGroup>
                                 </CommandList>
                               </Command>
