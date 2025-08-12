@@ -1,14 +1,14 @@
 import React, { memo, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, Cell, LabelList } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, LabelList } from 'recharts';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AlertTriangle, Clock, Info } from 'lucide-react';
 import { useFilters } from '@/contexts/FiltersContext';
 import { toast } from 'sonner';
 import { OccurrenceData } from '@/hooks/useDashboardData';
-import { formatHours } from '@/lib/timeUtils';
+
 
 interface AgingChartProps {
   occurrences: OccurrenceData[];
@@ -19,8 +19,9 @@ interface TimeRangeData {
   range: string;
   rangeLabel: string;
   count: number;
-  color: string;
-  category: 'excellent' | 'acceptable' | 'near_limit' | 'within_sla' | 'above_sla' | 'needs_attention' | 'critical';
+  dentroPrazo: number;
+  previsaoMaiorSla: number;
+  semPrevisao: number;
   minHours: number;
   maxHours: number;
 }
@@ -111,10 +112,7 @@ export const AgingChart = memo(function AgingChart({
   filteredOccurrences
 }: AgingChartProps) {
   const navigate = useNavigate();
-  const {
-    updateFilter,
-    clearAllFilters
-  } = useFilters();
+  const { updateFilter } = useFilters();
 
   // Processar dados por faixas de tempo
   const timeRangeAnalysis = useMemo(() => {
@@ -151,45 +149,40 @@ export const AgingChart = memo(function AgingChart({
 
     // Agrupar por faixas de tempo
     const timeRangeData: TimeRangeData[] = TIME_RANGES.map(range => {
-      const count = durations.filter(d => {
-        if (range.maxHours === Infinity) {
-          return d.durationHours >= range.minHours;
-        }
+      // Ocorrências dentro da faixa
+      const items = durations.filter(d => {
+        if (range.maxHours === Infinity) return d.durationHours >= range.minHours;
         return d.durationHours >= range.minHours && d.durationHours < range.maxHours;
-      }).length;
+      });
 
-      // Definir cor baseada na categoria
-      let color = '#10b981';
-      switch (range.category) {
-        case 'excellent':
-          color = '#10b981';
-          break;
-        case 'acceptable':
-          color = '#22c55e';
-          break;
-        case 'near_limit':
-          color = '#eab308';
-          break;
-        case 'within_sla':
-          color = '#f59e0b';
-          break;
-        case 'above_sla':
-          color = '#f97316';
-          break;
-        case 'needs_attention':
-          color = '#ea580c';
-          break;
-        case 'critical':
-          color = '#ef4444';
-          break;
-      }
+      // Contagens por categoria de previsão vs SLA
+      let dentroPrazo = 0;
+      let previsaoMaiorSla = 0;
+      let semPrevisao = 0;
+
+      items.forEach(d => {
+        const createdDate = new Date(d.createdAt);
+        const slaLimitHours = d.severity === 'critical' || d.severity === 'high' ? 24 : 72;
+        const slaDeadline = new Date(createdDate.getTime() + slaLimitHours * 60 * 60 * 1000);
+
+        if (!d.dataPrevisaoEncerramento) {
+          semPrevisao++;
+        } else {
+          const previsaoDate = new Date(d.dataPrevisaoEncerramento);
+          if (previsaoDate > slaDeadline) previsaoMaiorSla++;
+          else dentroPrazo++;
+        }
+      });
+
+      const count = dentroPrazo + previsaoMaiorSla + semPrevisao;
 
       return {
         range: range.range,
         rangeLabel: range.label,
         count,
-        color,
-        category: range.category,
+        dentroPrazo,
+        previsaoMaiorSla,
+        semPrevisao,
         minHours: range.minHours,
         maxHours: range.maxHours
       };
@@ -216,11 +209,22 @@ export const AgingChart = memo(function AgingChart({
   }, [occurrences, filteredOccurrences]);
 
   // Handler para clique nas barras
-  const handleBarClick = (data: TimeRangeData) => {
-    // Aplicar filtros específicos do gráfico (sem limpar filtros existentes)
+  const handleBarClick = (data: TimeRangeData, category?: 'dentroPrazo' | 'previsaoMaiorSla' | 'semPrevisao') => {
     updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento']);
+
+    if (category) {
+      const map: Record<'dentroPrazo' | 'previsaoMaiorSla' | 'semPrevisao', string> = {
+        dentroPrazo: 'com_previsao_dentro_sla',
+        previsaoMaiorSla: 'previsao_alem_sla',
+        semPrevisao: 'sem_previsao',
+      };
+      updateFilter('previsaoSlaFilter', [map[category]]);
+    }
+
     navigate(`/ocorrencias?aging_min=${data.minHours}&aging_max=${data.maxHours === Infinity ? 999999 : data.maxHours}`);
-    toast.success(`Filtrando ocorrências entre ${data.rangeLabel}`);
+
+    const categoryLabel = category === 'dentroPrazo' ? 'dentro do prazo' : category === 'previsaoMaiorSla' ? 'previsão > SLA' : category === 'semPrevisao' ? 'sem previsão' : 'todas as categorias';
+    toast.success(`Filtrando ocorrências ${category ? categoryLabel : ''} entre ${data.rangeLabel}`);
   };
 
   // Handler para aging crítico
@@ -232,7 +236,7 @@ export const AgingChart = memo(function AgingChart({
   };
 
   // Custom Tooltip
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
@@ -240,19 +244,18 @@ export const AgingChart = memo(function AgingChart({
           <p className="font-medium text-foreground">{data.rangeLabel}</p>
           <div className="space-y-1 mt-2">
             <p className="text-sm">
-              <span className="inline-block w-3 h-3 rounded-sm mr-2" style={{ backgroundColor: data.color }}></span>
-              Ocorrências: {data.count}
+              <span className="inline-block w-3 h-3 rounded-sm mr-2" style={{ backgroundColor: 'hsl(var(--success))' }}></span>
+              Dentro do prazo: {data.dentroPrazo}
             </p>
-            <p className="text-xs text-muted-foreground">
-              Categoria: {data.category === 'excellent' ? 'Excelente' :
-                          data.category === 'acceptable' ? 'Aceitável' :
-                          data.category === 'near_limit' ? 'Próximo ao Limite' :
-                          data.category === 'within_sla' ? 'Dentro do SLA' :
-                          data.category === 'above_sla' ? 'Acima do SLA' :
-                          data.category === 'needs_attention' ? 'Necessita Atenção' :
-                          'Crítico'}
+            <p className="text-sm">
+              <span className="inline-block w-3 h-3 rounded-sm mr-2" style={{ backgroundColor: 'hsl(var(--destructive))' }}></span>
+              Previsão &gt; SLA: {data.previsaoMaiorSla}
             </p>
-            <p className="text-xs text-muted-foreground">Clique para filtrar</p>
+            <p className="text-sm">
+              <span className="inline-block w-3 h-3 rounded-sm mr-2" style={{ backgroundColor: 'hsl(var(--muted-foreground))' }}></span>
+              Sem previsão: {data.semPrevisao}
+            </p>
+            <p className="text-xs text-muted-foreground">Clique em um segmento para filtrar</p>
           </div>
         </div>
       );
@@ -336,14 +339,27 @@ export const AgingChart = memo(function AgingChart({
             />
             <RechartsTooltip content={<CustomTooltip />} />
             <Bar 
-              dataKey="count"
+              dataKey="dentroPrazo"
+              stackId="a"
               radius={[4, 4, 0, 0]}
               className="cursor-pointer hover:opacity-80 transition-opacity"
-              onClick={(data, index) => handleBarClick(timeRangeAnalysis.data[index])}
+              fill="hsl(var(--success))"
+              onClick={(data, index) => handleBarClick(timeRangeAnalysis.data[index], 'dentroPrazo')}
+            />
+            <Bar 
+              dataKey="previsaoMaiorSla"
+              stackId="a"
+              className="cursor-pointer hover:opacity-80 transition-opacity"
+              fill="hsl(var(--destructive))"
+              onClick={(data, index) => handleBarClick(timeRangeAnalysis.data[index], 'previsaoMaiorSla')}
+            />
+            <Bar 
+              dataKey="semPrevisao"
+              stackId="a"
+              className="cursor-pointer hover:opacity-80 transition-opacity"
+              fill="hsl(var(--muted-foreground))"
+              onClick={(data, index) => handleBarClick(timeRangeAnalysis.data[index], 'semPrevisao')}
             >
-              {timeRangeAnalysis.data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
-              ))}
               <LabelList 
                 dataKey="count" 
                 position="top" 
@@ -360,22 +376,18 @@ export const AgingChart = memo(function AgingChart({
       </div>
 
       {/* Legenda */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
         <div className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-green-500 rounded-sm"></div>
-          <span>Excelente (≤1h)</span>
+          <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'hsl(var(--success))' }}></div>
+          <span>Dentro do prazo (previsão ≤ SLA)</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-green-400 rounded-sm"></div>
-          <span>Aceitável (1-8h)</span>
+          <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'hsl(var(--destructive))' }}></div>
+          <span>Previsão &gt; SLA</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-yellow-500 rounded-sm"></div>
-          <span>Próximo ao Limite (8-24h)</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-red-500 rounded-sm"></div>
-          <span>Crítico (&gt;72h)</span>
+          <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'hsl(var(--muted-foreground))' }}></div>
+          <span>Sem previsão</span>
         </div>
       </div>
     </div>
