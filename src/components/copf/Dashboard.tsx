@@ -486,6 +486,62 @@ export function Dashboard() {
         i++;
       }
 
+      // Garantir ~10% de reincidências reais (não contar itens com "-dup-")
+      const targetReinc = Math.floor(MIN_COUNT * 0.10);
+      const isDup = (o: any) => String(o.id).includes('-dup-');
+      const countReinc = (arr: any[]) => arr.reduce((count, occurrence, idx) => {
+        const hasPair = arr.some((other, jdx) =>
+          jdx !== idx &&
+          other.description === occurrence.description &&
+          other.equipment === occurrence.equipment &&
+          other.agency === occurrence.agency &&
+          Math.abs(new Date(other.createdAt).getTime() - new Date(occurrence.createdAt).getTime()) <= 4 * 24 * 60 * 60 * 1000
+        );
+        return count + (hasPair ? 1 : 0);
+      }, 0);
+
+      const realBase = augmented.filter(o => !isDup(o));
+      let currentReinc = countReinc(realBase);
+      let seedIndex = 0;
+
+      while (currentReinc < targetReinc && realBase.length > 0 && seedIndex < realBase.length * 2) {
+        const seed = realBase[seedIndex % realBase.length];
+        const seedCreated = new Date(seed.createdAt);
+        // criar entre 12h e 96h após a original para caracterizar reincidência
+        const offsetHrs = 12 + Math.random() * (96 - 12);
+        const created = new Date(seedCreated.getTime() + offsetHrs * 60 * 60 * 1000);
+        const resolutionOffsetHrs = Math.random() * 48;
+        const resolutionDate = new Date(created.getTime() + resolutionOffsetHrs * 60 * 60 * 1000);
+
+        const synthetic = {
+          ...seed,
+          id: `syn-${seed.id}-${currentReinc + 1}`,
+          displayId: `COPF-${String(Math.floor(Math.random() * 99999)).padStart(5, '0')}`,
+          createdAt: created.toISOString(),
+          resolvedAt: seed.status === 'encerrado' ? resolutionDate.toISOString() : seed.resolvedAt,
+          dataEncerramento: seed.status === 'encerrado' ? resolutionDate.toISOString() : seed.dataEncerramento,
+        };
+
+        augmented.push(synthetic);
+        realBase.push(synthetic);
+        currentReinc = countReinc(realBase);
+        seedIndex++;
+      }
+
+      // Ajustar tamanho final para exatamente MIN_COUNT, removendo duplicados "-dup-" primeiro
+      if (augmented.length > MIN_COUNT) {
+        let toRemove = augmented.length - MIN_COUNT;
+        for (let k = augmented.length - 1; k >= 0 && toRemove > 0; k--) {
+          if (String(augmented[k].id).includes('-dup-')) {
+            augmented.splice(k, 1);
+            toRemove--;
+          }
+        }
+        if (augmented.length > MIN_COUNT) {
+          augmented.length = MIN_COUNT;
+        }
+      }
+
       filtered = augmented;
     }
 
