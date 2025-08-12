@@ -223,7 +223,7 @@ export const AgingChart = memo(function AgingChart({
 
     navigate(`/ocorrencias?aging_min=${data.minHours}&aging_max=${data.maxHours === Infinity ? 999999 : data.maxHours}`);
 
-    const categoryLabel = category === 'dentroPrazo' ? 'dentro do prazo' : category === 'previsaoMaiorSla' ? 'previsão > SLA' : category === 'semPrevisao' ? 'sem previsão' : 'todas as categorias';
+    const categoryLabel = category === 'dentroPrazo' ? 'com previsão' : category === 'previsaoMaiorSla' ? 'previsão > SLA' : category === 'semPrevisao' ? 'sem previsão' : 'todas as categorias';
     toast.success(`Filtrando ocorrências ${category ? categoryLabel : ''} entre ${data.rangeLabel}`);
   };
 
@@ -244,16 +244,16 @@ export const AgingChart = memo(function AgingChart({
           <p className="font-medium text-foreground">{data.rangeLabel}</p>
           <div className="space-y-1 mt-2">
             <p className="text-sm">
-              <span className="inline-block w-3 h-3 rounded-sm mr-2" style={{ backgroundColor: 'hsl(var(--success))' }}></span>
-              Dentro do prazo: {data.dentroPrazo}
-            </p>
-            <p className="text-sm">
-              <span className="inline-block w-3 h-3 rounded-sm mr-2" style={{ backgroundColor: 'hsl(var(--destructive))' }}></span>
+              <span className="inline-block w-3 h-3 rounded-sm mr-2" style={{ backgroundColor: '#ef4444' }}></span>
               Previsão &gt; SLA: {data.previsaoMaiorSla}
             </p>
             <p className="text-sm">
-              <span className="inline-block w-3 h-3 rounded-sm mr-2" style={{ backgroundColor: 'hsl(var(--muted-foreground))' }}></span>
+              <span className="inline-block w-3 h-3 rounded-sm mr-2" style={{ backgroundColor: '#6b7280' }}></span>
               Sem previsão: {data.semPrevisao}
+            </p>
+            <p className="text-sm">
+              <span className="inline-block w-3 h-3 rounded-sm mr-2" style={{ backgroundColor: '#f59e0b' }}></span>
+              Com previsão: {data.dentroPrazo}
             </p>
             <p className="text-xs text-muted-foreground">Clique em um segmento para filtrar</p>
           </div>
@@ -339,26 +339,26 @@ export const AgingChart = memo(function AgingChart({
             />
             <RechartsTooltip content={<CustomTooltip />} />
             <Bar 
-              dataKey="dentroPrazo"
-              stackId="a"
-              radius={[4, 4, 0, 0]}
-              className="cursor-pointer hover:opacity-80 transition-opacity"
-              fill="hsl(var(--success))"
-              onClick={(data, index) => handleBarClick(timeRangeAnalysis.data[index], 'dentroPrazo')}
-            />
-            <Bar 
               dataKey="previsaoMaiorSla"
               stackId="a"
               className="cursor-pointer hover:opacity-80 transition-opacity"
-              fill="hsl(var(--destructive))"
+              fill="#ef4444"
               onClick={(data, index) => handleBarClick(timeRangeAnalysis.data[index], 'previsaoMaiorSla')}
             />
             <Bar 
               dataKey="semPrevisao"
               stackId="a"
               className="cursor-pointer hover:opacity-80 transition-opacity"
-              fill="hsl(var(--muted-foreground))"
+              fill="#6b7280"
               onClick={(data, index) => handleBarClick(timeRangeAnalysis.data[index], 'semPrevisao')}
+            />
+            <Bar 
+              dataKey="dentroPrazo"
+              stackId="a"
+              radius={[4, 4, 0, 0]}
+              className="cursor-pointer hover:opacity-80 transition-opacity"
+              fill="#f59e0b"
+              onClick={(data, index) => handleBarClick(timeRangeAnalysis.data[index], 'dentroPrazo')}
             >
               <LabelList 
                 dataKey="count" 
@@ -378,16 +378,16 @@ export const AgingChart = memo(function AgingChart({
       {/* Legenda */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
         <div className="flex items-center gap-1">
-          <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'hsl(var(--success))' }}></div>
-          <span>Dentro do prazo (previsão ≤ SLA)</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'hsl(var(--destructive))' }}></div>
+          <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#ef4444' }}></div>
           <span>Previsão &gt; SLA</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'hsl(var(--muted-foreground))' }}></div>
+          <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#6b7280' }}></div>
           <span>Sem previsão</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#f59e0b' }}></div>
+          <span>Com previsão</span>
         </div>
       </div>
     </div>
