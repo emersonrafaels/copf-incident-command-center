@@ -145,7 +145,7 @@ const MotivoLongTailChart = memo(function MotivoLongTailChart({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TrendingDown className="h-5 w-5 text-orange-500" />
-            Long Tail - Motivos de Ocorrência
+            Long Tail - Sintomas das Ocorrências
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -166,7 +166,7 @@ const MotivoLongTailChart = memo(function MotivoLongTailChart({
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <TrendingDown className="h-5 w-5 text-orange-500" />
-            Long Tail - Motivos de Ocorrência
+            Long Tail - Sintomas das Ocorrências
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -191,7 +191,7 @@ const MotivoLongTailChart = memo(function MotivoLongTailChart({
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   <TrendingDown className="h-5 w-5 text-orange-500" />
-                  Long Tail - Motivos de Ocorrência (Tela Cheia)
+                  Long Tail - Sintomas das Ocorrências (Tela Cheia)
                 </DialogTitle>
               </DialogHeader>
               
