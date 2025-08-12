@@ -363,18 +363,24 @@ const Ocorrencias = () => {
   });
 
   const handleExportExcel = () => {
-    // Preparar dados para exportação
+    // Preparar dados para exportação (ordem alinhada à tabela)
     const exportData = filteredOccurrences.map(occurrence => ({
       'ID': occurrence.id,
       'Agência': occurrence.agency,
+      'Segmento': occurrence.segment,
       'Equipamento': occurrence.equipment,
-      'Criticidade': getSeverityLabel(occurrence.severity),
-      'Status': getStatusLabel(occurrence.status),
-      'Data/Hora': new Date(occurrence.createdAt).toLocaleString('pt-BR'),
+      'Status Equipamento': occurrence.statusEquipamento === 'operante' ? 'Operante' : 'Inoperante',
       'Fornecedor': occurrence.vendor,
-      'Com Impedimento': occurrence.possuiImpedimento ? 'Sim' : 'Não',
+      'Status': getStatusLabel(occurrence.status),
+      'SLA': getSlaStatus(occurrence),
+      'Criticidade': getSeverityLabel(occurrence.severity),
+      'Data/Hora Abertura': new Date(occurrence.createdAt).toLocaleString('pt-BR'),
+      'Previsão de Atendimento': occurrence.dataPrevisaoEncerramento ? new Date(occurrence.dataPrevisaoEncerramento).toLocaleString('pt-BR') : '',
+      'Data Encerramento': occurrence.dataEncerramento ? new Date(occurrence.dataEncerramento).toLocaleString('pt-BR') : '',
+      'Impedimento': occurrence.possuiImpedimento ? 'Sim' : 'Não',
       'Motivo Impedimento': occurrence.motivoImpedimento || '',
-      'Descrição': occurrence.description
+      'Modelo': getModelForOccurrence(occurrence),
+      'N° Série': occurrence.serialNumber || ''
     }));
 
     // Criar workbook
@@ -383,7 +389,11 @@ const Ocorrencias = () => {
     XLSX.utils.book_append_sheet(wb, ws, "Ocorrências");
 
     // Ajustar largura das colunas
-    const wscols = [{wch: 10}, {wch: 30}, {wch: 20}, {wch: 15}, {wch: 15}, {wch: 20}, {wch: 20}, {wch: 14}, {wch: 40}, {wch: 50}];
+    const wscols = [
+      { wch: 10 }, { wch: 16 }, { wch: 14 }, { wch: 18 }, { wch: 20 },
+      { wch: 18 }, { wch: 14 }, { wch: 12 }, { wch: 14 }, { wch: 22 },
+      { wch: 24 }, { wch: 22 }, { wch: 12 }, { wch: 28 }, { wch: 16 }, { wch: 14 }
+    ];
     ws['!cols'] = wscols;
 
     // Baixar arquivo
@@ -891,39 +901,39 @@ const Ocorrencias = () => {
                    {sortedOccurrences.map(occurrence => (
                      <TableRow key={occurrence.id} className="text-xs">
                        <TableCell className="font-medium py-2">{occurrence.displayId}</TableCell>
-                      <TableCell className="py-2 text-xs">
-                        {new Date(occurrence.createdAt).toLocaleDateString('pt-BR', { 
-                          day: '2-digit', 
-                          month: '2-digit',
-                          year: '2-digit'
-                        })} {new Date(occurrence.createdAt).toLocaleTimeString('pt-BR', {
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
-                      </TableCell>
-                      <TableCell className="py-2 truncate max-w-[120px]">{occurrence.agency}</TableCell>
-                      <TableCell className="py-2">
-                        <Badge variant="outline" className="text-xs px-1 py-0">{occurrence.segment}</Badge>
-                      </TableCell>
-                      <TableCell className="py-2 truncate max-w-[100px]">{occurrence.equipment}</TableCell>
+                       <TableCell className="py-2 truncate max-w-[120px]">{occurrence.agency}</TableCell>
+                       <TableCell className="py-2">
+                         <Badge variant="outline" className="text-xs px-1 py-0">{occurrence.segment}</Badge>
+                       </TableCell>
+                       <TableCell className="py-2 truncate max-w-[100px]">{occurrence.equipment}</TableCell>
                        <TableCell className="py-2">
                          <Badge variant={occurrence.statusEquipamento === 'operante' ? 'default' : 'destructive'} className="text-xs px-1 py-0">
                            {occurrence.statusEquipamento === 'operante' ? 'Op' : 'In'}
                          </Badge>
                        </TableCell>
-                      <TableCell className="py-2">
-                        <Badge variant={getSeverityVariant(occurrence.severity)} className="text-xs px-1 py-0">
-                          {getSeverityLabel(occurrence.severity)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="py-2">
-                        <Badge variant={getSlaStatusVariant(getSlaStatus(occurrence))} className="text-xs px-1 py-0">
-                          {getSlaStatus(occurrence)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="py-2 text-xs">{occurrence.vendor}</TableCell>
+                       <TableCell className="py-2 text-xs">{occurrence.vendor}</TableCell>
                        <TableCell className="py-2">
                          <StatusBadge status={occurrence.status} />
+                       </TableCell>
+                       <TableCell className="py-2">
+                         <Badge variant={getSlaStatusVariant(getSlaStatus(occurrence))} className="text-xs px-1 py-0">
+                           {getSlaStatus(occurrence)}
+                         </Badge>
+                       </TableCell>
+                       <TableCell className="py-2">
+                         <Badge variant={getSeverityVariant(occurrence.severity)} className="text-xs px-1 py-0">
+                           {getSeverityLabel(occurrence.severity)}
+                         </Badge>
+                       </TableCell>
+                       <TableCell className="py-2 text-xs">
+                         {new Date(occurrence.createdAt).toLocaleDateString('pt-BR', { 
+                           day: '2-digit', 
+                           month: '2-digit',
+                           year: '2-digit'
+                         })} {new Date(occurrence.createdAt).toLocaleTimeString('pt-BR', {
+                           hour: '2-digit',
+                           minute: '2-digit'
+                         })}
                        </TableCell>
                        <TableCell className="py-2 text-xs">
                          {occurrence.dataPrevisaoEncerramento ? (
@@ -956,37 +966,37 @@ const Ocorrencias = () => {
                          ) : (
                            <span className="text-muted-foreground">-</span>
                          )}
-                        </TableCell>
-                         <TableCell className="py-2 text-xs truncate max-w-[120px]">{getModelForOccurrence(occurrence)}</TableCell>
-                         <TableCell className="py-2 text-xs truncate max-w-[80px]">{occurrence.serialNumber}</TableCell>
-                         <TableCell className="py-2">
-                           {occurrence.possuiImpedimento ? (
-                             <Badge variant="destructive" className="text-xs px-1 py-0">Sim</Badge>
-                           ) : (
-                             <span className="text-muted-foreground">Não</span>
-                           )}
-                         </TableCell>
-                         <TableCell className="py-2 text-xs truncate max-w-[200px]">
-                           {occurrence.motivoImpedimento ? (
-                             <span title={occurrence.motivoImpedimento}>
-                               {`${getSymptomCode(occurrence.motivoImpedimento)} - ${occurrence.motivoImpedimento.length > 40 ? occurrence.motivoImpedimento.substring(0, 40) + '...' : occurrence.motivoImpedimento}`}
-                             </span>
-                           ) : (
-                             <span className="text-muted-foreground">-</span>
-                           )}
-                         </TableCell>
-                          <TableCell className="py-2">
-                             <Button 
-                               variant="ghost" 
-                               size="sm" 
-                               onClick={() => navigate(`/ocorrencia/${occurrence.id}`)} 
-                               title="Visualizar detalhes da ocorrência"
-                               className="h-6 w-6 p-0"
-                             >
-                               <Eye className="h-3 w-3" />
-                             </Button>
-                          </TableCell>
-                    </TableRow>
+                       </TableCell>
+                       <TableCell className="py-2">
+                         {occurrence.possuiImpedimento ? (
+                           <Badge variant="destructive" className="text-xs px-1 py-0">Sim</Badge>
+                         ) : (
+                           <span className="text-muted-foreground">Não</span>
+                         )}
+                       </TableCell>
+                       <TableCell className="py-2 text-xs truncate max-w-[200px]">
+                         {occurrence.motivoImpedimento ? (
+                           <span title={occurrence.motivoImpedimento}>
+                             {`${getSymptomCode(occurrence.motivoImpedimento)} - ${occurrence.motivoImpedimento.length > 40 ? occurrence.motivoImpedimento.substring(0, 40) + '...' : occurrence.motivoImpedimento}`}
+                           </span>
+                         ) : (
+                           <span className="text-muted-foreground">-</span>
+                         )}
+                       </TableCell>
+                       <TableCell className="py-2 text-xs truncate max-w-[120px]">{getModelForOccurrence(occurrence)}</TableCell>
+                       <TableCell className="py-2 text-xs truncate max-w-[80px]">{occurrence.serialNumber}</TableCell>
+                       <TableCell className="py-2">
+                         <Button 
+                           variant="ghost" 
+                           size="sm" 
+                           onClick={() => navigate(`/ocorrencia/${occurrence.id}`)} 
+                           title="Visualizar detalhes da ocorrência"
+                           className="h-6 w-6 p-0"
+                         >
+                           <Eye className="h-3 w-3" />
+                         </Button>
+                       </TableCell>
+                     </TableRow>
                   ))}
                 </TableBody>
               </Table>

@@ -139,8 +139,7 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
     'Link de dados indisponível',
     'Aguardando peça em trânsito',
     'Janela de manutenção restrita',
-    'Problemas de segurança no local',
-    'Clima desfavorável'
+    'Problemas de segurança no local'
   ];
 
   // Dados de transportadoras e seus fornecedores
