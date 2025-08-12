@@ -82,19 +82,24 @@ export function EquipmentStatusChart({ occurrences }: EquipmentStatusChartProps)
     updateFilter('equipmentFilterMulti', [equipment]);
     
     // Se clicar na parte operante ou inoperante, filtrar por status também
+    let equipStatusParam = '';
     if (stackId === 'operante') {
       updateFilter('statusEquipamentoFilterMulti', ['operante']);
+      equipStatusParam = 'operante';
     } else if (stackId === 'inoperante') {
       updateFilter('statusEquipamentoFilterMulti', ['inoperante']);
+      equipStatusParam = 'inoperante';
     }
     
-    // Navegar para ocorrências
-    navigate('/ocorrencias');
+    // Navegar para ocorrências com parâmetros para garantir aplicação
+    const params = new URLSearchParams({ segment, equipment });
+    if (equipStatusParam) params.set('equip_status', equipStatusParam);
+    navigate(`/ocorrencias?${params.toString()}`);
     
     // Mostrar toast de confirmação
     toast({
       title: "Filtros aplicados",
-      description: `Visualizando ocorrências de ${equipment} do segmento ${segment}${stackId ? ` - ${stackId}` : ''}`,
+      description: `Visualizando ocorrências de ${equipment} do segmento ${segment}${equipStatusParam ? ` - ${equipStatusParam}` : ''}`,
     });
   };
 

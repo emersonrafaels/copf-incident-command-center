@@ -122,29 +122,24 @@ const Ocorrencias = () => {
     const segmentParam = searchParams.get('segment');
     const equipmentParam = searchParams.get('equipment');
     const previsaoParam = searchParams.get('previsao');
+    const equipStatusParam = searchParams.get('equip_status');
 
-    if (agencyParam) {
-      updateFilter('agenciaFilter', [agencyParam]);
-    }
-    if (segmentParam) {
-      updateFilter('segmentFilterMulti', [segmentParam]);
-    }
-    if (equipmentParam) {
-      updateFilter('equipmentFilterMulti', [equipmentParam]);
-    }
+    if (agencyParam) updateFilter('agenciaFilter', [agencyParam]);
+    if (segmentParam) updateFilter('segmentFilterMulti', [segmentParam]);
+    if (equipmentParam) updateFilter('equipmentFilterMulti', [equipmentParam]);
     if (previsaoParam && ['sem_previsao','previsao_alem_sla','com_previsao_dentro_sla'].includes(previsaoParam)) {
       updateFilter('previsaoSlaFilter', [previsaoParam]);
     }
+    if (equipStatusParam && ['operante','inoperante'].includes(equipStatusParam)) {
+      updateFilter('statusEquipamentoFilterMulti', [equipStatusParam]);
+    }
 
     if (filterType === 'critical') {
-      // Aplicar filtro de criticidade para ocorrências críticas
       updateFilter('severityFilterMulti', ['critical']);
     } else if (filterType === 'due-today') {
-      // Aplicar filtro de SLA crítico para ocorrências que vencem hoje
       updateFilter('statusSlaFilter', ['critico']);
     }
     
-    // Compatibilidade com query params do highlights
     if (slaStatus === 'due_today') {
       updateFilter('statusSlaFilter', ['critico']);
     }
@@ -427,57 +422,8 @@ const Ocorrencias = () => {
     return matchesSearch && matchesStatus && matchesSegment && matchesEquipment && matchesSerial && matchesVendor && matchesSeverity && matchesAgencia && matchesUF && matchesTipoAgencia && matchesPontoVip && matchesSupt && matchesStatusEquipamento && matchesTransportadora && matchesMotivo && matchesMotivoImpedimento && matchesEquipmentModel && matchesPrevisaoSla && matchesImpedimentoFlag;
   });
 
-  // Evitar geração quando houver filtros ativos ou filtros de aging/previsão via URL
-  if (hasActiveFilters || agingMin !== null || agingMax !== null || previsaoSlaFilter.length > 0) {
-    return base;
-  }
-
-  // Garantir algumas ocorrências com aging > 5 dias e sem previsão (somente sem filtros)
-  const MIN_OLD_NOFORECAST = 12; // "algumas ocorrências"
-  const oldNoForecastCount = base.filter(o => {
-    const created = new Date(o.createdAt);
-    const agingHours = (Date.now() - created.getTime()) / (1000 * 60 * 60);
-    const isActive = o.status !== 'encerrado' && o.status !== 'cancelado';
-    return isActive && agingHours > 120 && !o.dataPrevisaoEncerramento;
-  }).length;
-
-  if (oldNoForecastCount >= MIN_OLD_NOFORECAST) return base;
-
-  const toAdd = MIN_OLD_NOFORECAST - oldNoForecastCount;
-  const vendors = Array.from(new Set(occurrences.map(o => o.vendor))).filter(Boolean);
-  const equipments = Array.from(new Set(occurrences.map(o => o.equipment))).filter(Boolean);
-  const agencies = Array.from(new Set(occurrences.map(o => o.agency))).filter(Boolean);
-
-  const generated = Array.from({ length: toAdd }).map((_, i) => {
-    const hoursAgo = 132 + (i % 36); // entre ~5,5 e ~6,9 dias atrás
-    const createdAt = new Date(Date.now() - hoursAgo * 60 * 60 * 1000).toISOString();
-    const displayId = `COPF-${String(Math.floor(Math.random() * 99999)).padStart(5, '0')}`;
-    return {
-      id: `SYNTH-${Date.now()}-${i}`,
-      displayId,
-      agency: agencies[i % (agencies.length || 1)] || '0001 - Centro',
-      segment: 'AB' as const,
-      equipment: equipments[i % (equipments.length || 1)] || 'Notebook',
-      serialNumber: `SN-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
-      description: 'Atendimento pendente - Sem previsão do fornecedor',
-      motivoOcorrencia: 'Falha técnica',
-      severity: 'medium' as const,
-      status: 'em_andamento' as const,
-      createdAt,
-      assignedTo: 'Fila de atendimento',
-      vendor: vendors[i % (vendors.length || 1)] || 'NCR',
-      transportadora: 'Prosegur',
-      tipoAgencia: 'convencional',
-      estado: 'SP',
-      municipio: 'São Paulo',
-      dineg: '21',
-      vip: false,
-      statusEquipamento: 'inoperante' as const,
-      // campos opcionais não preenchidos
-    } as any;
-  });
-
-  return base.concat(generated);
+  // Manter contagem estática - sem geração de dados
+  return base;
   })();
   const handleExportExcel = () => {
     // Preparar dados para exportação (ordem alinhada à tabela)
