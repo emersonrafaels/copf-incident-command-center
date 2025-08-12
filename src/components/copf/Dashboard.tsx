@@ -302,7 +302,52 @@ export function Dashboard() {
 
   // Filtrar ocorrências - Memoizado para performance
   const filteredOccurrences = useMemo(() => {
+    // Determina intervalo de datas baseado no filtro selecionado
+    const now = new Date();
+    let startDate: Date | null = null;
+    let endDate: Date | null = now;
+
+    switch (filterPeriod) {
+      case '7-days':
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - 7);
+        break;
+      case '30-days':
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - 30);
+        break;
+      case '60-days':
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - 60);
+        break;
+      case '90-days':
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - 90);
+        break;
+      case 'custom':
+        if (customDateRange?.from) {
+          startDate = new Date(customDateRange.from);
+        }
+        if (customDateRange?.to) {
+          endDate = new Date(customDateRange.to);
+          // incluir o dia final inteiro
+          endDate.setHours(23, 59, 59, 999);
+        }
+        break;
+      default:
+        // fallback: sem filtro de período
+        startDate = null;
+        endDate = null;
+    }
+
     let filtered = occurrences.filter(occurrence => {
+      // Filtro por período (Data/Hora Abertura)
+      if (startDate && endDate) {
+        const created = new Date(occurrence.createdAt);
+        if (isNaN(created.getTime())) return false;
+        if (created < startDate || created > endDate) return false;
+      }
+
       // Filtros multiselect
       if (segmentFilterMulti.length > 0 && !segmentFilterMulti.includes(occurrence.segment)) return false;
       if (equipmentFilterMulti.length > 0 && !equipmentFilterMulti.includes(occurrence.equipment)) return false;
@@ -408,7 +453,7 @@ export function Dashboard() {
       return true;
     });
     return filtered;
-  }, [occurrences, segmentFilterMulti, equipmentFilterMulti, statusFilterMulti, statusEquipamentoFilterMulti, vendorFilterMulti, transportadoraFilterMulti, serialNumberFilter, agenciaFilter, ufFilter, tipoAgenciaFilter, pontoVipFilter, overrideFilter, vendorPriorityFilter, reincidentFilter, longTailFilter, motivoFilter]);
+  }, [occurrences, filterPeriod, customDateRange, segmentFilterMulti, equipmentFilterMulti, statusFilterMulti, statusEquipamentoFilterMulti, vendorFilterMulti, transportadoraFilterMulti, serialNumberFilter, agenciaFilter, ufFilter, tipoAgenciaFilter, pontoVipFilter, overrideFilter, vendorPriorityFilter, reincidentFilter, longTailFilter, motivoFilter]);
 
   // Cálculos memoizados para garantir consistência com a página de ocorrências
   const cardMetrics = useMemo(() => {
