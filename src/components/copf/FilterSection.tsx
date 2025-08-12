@@ -1214,11 +1214,11 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
                          </Popover>
                         </div>
 
-                        {/* Motivo da Ocorrência */}
+                        {/* Sintoma da Ocorrência */}
                         <div className="group space-y-3">
                           <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                             <div className="w-1 h-4 bg-amber-500/60 rounded-full"></div>
-                            Motivo da Ocorrência
+                            Sintoma da Ocorrência
                           </Label>
                           <Popover>
                             <PopoverTrigger asChild>
