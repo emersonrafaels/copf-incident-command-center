@@ -149,8 +149,11 @@ export function TopAgenciesChart({ occurrences, filteredOccurrences }: TopAgenci
   };
 
   const handleBarClick = (data: any, equipmentType?: string) => {
+    // Garantir número da agência consistente com filtros
+    const agencyNumber = data.agencyNumber || (data.originalAgency?.match(/\d+/)?.[0] || '');
+
     // Aplicar filtros específicos do gráfico (sem limpar filtros existentes)
-    updateFilter('agenciaFilter', [data.originalAgency]);
+    updateFilter('agenciaFilter', [agencyNumber]);
     
     // Se clicar em um equipamento específico, filtrar por ele também
     if (equipmentType) {
@@ -159,13 +162,20 @@ export function TopAgenciesChart({ occurrences, filteredOccurrences }: TopAgenci
       updateFilter('equipmentFilterMulti', [equipment]);
     }
     
-    // Navegar para ocorrências
-    navigate('/ocorrencias');
+    // Navegar para ocorrências com query param para garantir aplicação do filtro na chegada
+    const params = new URLSearchParams();
+    if (agencyNumber) params.set('agency', agencyNumber);
+    if (equipmentType) {
+      const [segment, equipment] = equipmentType.split(' - ');
+      params.set('segment', segment);
+      params.set('equipment', equipment);
+    }
+    navigate(`/ocorrencias?${params.toString()}`);
     
     // Mostrar toast de confirmação
     toast({
       title: "Filtros aplicados",
-      description: `Visualizando ocorrências da agência ${data.originalAgency}${equipmentType ? ` - ${equipmentType}` : ''}`,
+      description: `Visualizando ocorrências da agência ${agencyNumber}${equipmentType ? ` - ${equipmentType}` : ''}`,
     });
   };
 

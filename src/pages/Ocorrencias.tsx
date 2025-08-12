@@ -118,6 +118,20 @@ const Ocorrencias = () => {
 
   // Aplicar filtros especiais ao carregar a página
   useEffect(() => {
+    const agencyParam = searchParams.get('agency');
+    const segmentParam = searchParams.get('segment');
+    const equipmentParam = searchParams.get('equipment');
+
+    if (agencyParam) {
+      updateFilter('agenciaFilter', [agencyParam]);
+    }
+    if (segmentParam) {
+      updateFilter('segmentFilterMulti', [segmentParam]);
+    }
+    if (equipmentParam) {
+      updateFilter('equipmentFilterMulti', [equipmentParam]);
+    }
+
     if (filterType === 'critical') {
       // Aplicar filtro de criticidade para ocorrências críticas
       updateFilter('severityFilterMulti', ['critical']);
@@ -130,7 +144,7 @@ const Ocorrencias = () => {
     if (slaStatus === 'due_today') {
       updateFilter('statusSlaFilter', ['critico']);
     }
-  }, [filterType, slaStatus, updateFilter]);
+  }, [filterType, slaStatus, updateFilter, searchParams]);
 
   // Filtrar ocorrências com o mesmo período da dashboard e reforço de casos >5 dias sem previsão
   const filteredOccurrences = (() => {
