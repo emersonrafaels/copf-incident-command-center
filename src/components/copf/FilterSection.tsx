@@ -129,6 +129,20 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
     ? Array.from(new Set(equipmentFilterMulti.flatMap(eq => equipmentModelsMap[eq] || [])))
     : allModelOptions;
 
+  // Opções sugeridas para motivos de impedimento (exibição no filtro)
+  const defaultImpedimentos: string[] = [
+    'Falta de Peças',
+    'Sem acesso ao equipamento',
+    'Aguardando autorização do cliente',
+    'Dependência de terceiro',
+    'Falha de energia elétrica',
+    'Link de dados indisponível',
+    'Aguardando peça em trânsito',
+    'Janela de manutenção restrita',
+    'Problemas de segurança no local',
+    'Clima desfavorável'
+  ];
+
   // Dados de transportadoras e seus fornecedores
   const transportadoraFornecedores = {
     'Protege': ['STM', 'NCR', 'Diebold'],
@@ -1342,7 +1356,7 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
                                 <CommandEmpty>Nenhum impedimento encontrado.</CommandEmpty>
                                 <CommandList className="max-h-60">
                                   <CommandGroup>
-                                    {Array.from(new Set(occurrences.map(o => o.motivoImpedimento || 'Não informado')))
+                                    {Array.from(new Set([...defaultImpedimentos, ...occurrences.map(o => o.motivoImpedimento || 'Não informado')]))
                                       .sort()
                                       .map(motivo => {
                                         const code = getSymptomCode(motivo);
