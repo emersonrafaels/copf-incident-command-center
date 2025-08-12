@@ -970,6 +970,7 @@ const Ocorrencias = () => {
                             </div>
                           </div>
                         </TableHead>
+                        <TableHead className="w-24">Prioridade</TableHead>
                         <TableHead className="w-12">Ações</TableHead>
                       </TableRow>
                    </TableHeader>
@@ -1060,18 +1061,26 @@ const Ocorrencias = () => {
                          )}
                        </TableCell>
                        <TableCell className="py-2 text-xs truncate max-w-[120px]">{getModelForOccurrence(occurrence)}</TableCell>
-                       <TableCell className="py-2 text-xs truncate max-w-[80px]">{occurrence.serialNumber}</TableCell>
-                       <TableCell className="py-2">
-                         <Button 
-                           variant="ghost" 
-                           size="sm" 
-                           onClick={() => navigate(`/ocorrencia/${occurrence.id}`)} 
-                           title="Visualizar detalhes da ocorrência"
-                           className="h-6 w-6 p-0"
-                         >
-                           <Eye className="h-3 w-3" />
-                         </Button>
-                       </TableCell>
+                        <TableCell className="py-2 text-xs truncate max-w-[80px]">{occurrence.serialNumber}</TableCell>
+                        <TableCell className="py-2">
+                          <Badge 
+                            variant={(occurrence.severity === 'critical' || occurrence.severity === 'high') ? 'default' : 'secondary'}
+                            className="text-xs px-1 py-0"
+                          >
+                            {(occurrence.severity === 'critical' || occurrence.severity === 'high') ? 'Priorizado' : 'Não priorizado'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="py-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => navigate(`/ocorrencia/${occurrence.id}`)} 
+                            title="Visualizar detalhes da ocorrência"
+                            className="h-6 w-6 p-0"
+                          >
+                            <Eye className="h-3 w-3" />
+                          </Button>
+                        </TableCell>
                      </TableRow>
                   ))}
                 </TableBody>
