@@ -230,53 +230,52 @@ export function Dashboard() {
     console.log('Card clicked:', filter, 'Current filtered occurrences:', filteredOccurrences.length);
     
     // Aplicar filtros específicos do card clicado SEM limpar os filtros existentes
+    const params = new URLSearchParams();
     switch (filter) {
       case 'total':
-        // Sem filtros específicos adicionais - mantém apenas os filtros já aplicados
+        // Sem filtros específicos
         break;
       case 'pending':
         filters.updateFilter('statusFilterMulti', ['a_iniciar', 'em_andamento', 'com_impedimentos']);
+        params.set('status', 'a_iniciar,em_andamento,com_impedimentos');
         break;
       case 'reincidence':
         filters.updateFilter('reincidentFilter', true);
+        params.set('reincidence', '1');
         break;
       case 'overdue':
-        filters.updateFilter('overrideFilter', true);
+        // Usar parâmetro de URL para aplicar na página
+        params.set('sla_status', 'overdue');
         break;
       case 'entered-today':
-        // Navegar com filtro específico via state
-        navigate('/ocorrencias', { 
-          state: { filterType: 'entered-today' } 
-        });
-        return; // Early return para evitar navegação dupla
+        navigate('/ocorrencias', { state: { filterType: 'entered-today' } });
+        return;
       case 'due-today':
-        // Navegar com filtro específico via state
-        navigate('/ocorrencias', { 
-          state: { filterType: 'due-today' } 
-        });
-        return; // Early return para evitar navegação dupla
+        navigate('/ocorrencias', { state: { filterType: 'due-today' } });
+        return;
       case 'overdue-today':
-        // Navegar com filtro específico via state
-        navigate('/ocorrencias', { 
-          state: { filterType: 'overdue-today' } 
-        });
-        return; // Early return para evitar navegação dupla
+        navigate('/ocorrencias', { state: { filterType: 'overdue-today' } });
+        return;
       case 'agencies':
-        // Sem filtros específicos adicionais - mantém apenas os filtros já aplicados
+        // Sem filtros específicos
         break;
       case 'mttr':
         filters.updateFilter('statusFilterMulti', ['encerrado']);
+        params.set('status', 'encerrado');
         break;
       case 'inoperant':
         filters.updateFilter('statusEquipamentoFilterMulti', ['inoperante']);
+        params.set('equip_status', 'inoperante');
         break;
       case 'critical':
         filters.updateFilter('severityFilterMulti', ['critical']);
+        params.set('severity', 'critical');
         break;
     }
     
-    // Navegar para a página de ocorrências
-    navigate('/ocorrencias');
+    // Navegar para a página de ocorrências com parâmetros quando necessário
+    const query = params.toString();
+    navigate(query ? `/ocorrencias?${query}` : '/ocorrencias');
     toast('Filtros aplicados - navegando para página de ocorrências');
   };
 

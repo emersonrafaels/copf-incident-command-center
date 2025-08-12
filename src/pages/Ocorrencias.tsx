@@ -123,6 +123,9 @@ const Ocorrencias = () => {
     const equipmentParam = searchParams.get('equipment');
     const previsaoParam = searchParams.get('previsao');
     const equipStatusParam = searchParams.get('equip_status');
+    const statusParam = searchParams.get('status');
+    const severityParam = searchParams.get('severity');
+    const reincidenceParam = searchParams.get('reincidence');
 
     if (agencyParam) updateFilter('agenciaFilter', [agencyParam]);
     if (segmentParam) updateFilter('segmentFilterMulti', [segmentParam]);
@@ -132,6 +135,16 @@ const Ocorrencias = () => {
     }
     if (equipStatusParam && ['operante','inoperante'].includes(equipStatusParam)) {
       updateFilter('statusEquipamentoFilterMulti', [equipStatusParam]);
+    }
+    if (statusParam) {
+      const statuses = statusParam.split(',').filter(Boolean);
+      if (statuses.length) updateFilter('statusFilterMulti', statuses);
+    }
+    if (severityParam) {
+      updateFilter('severityFilterMulti', [severityParam]);
+    }
+    if (reincidenceParam === '1' || reincidenceParam === 'true') {
+      updateFilter('reincidentFilter', true);
     }
 
     if (filterType === 'critical') {
