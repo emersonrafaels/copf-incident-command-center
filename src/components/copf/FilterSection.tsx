@@ -133,7 +133,7 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
   const defaultImpedimentos: string[] = [
     'Falta de Peças',
     'Sem acesso ao equipamento',
-    'Aguardando autorização do cliente',
+    'Equipe indisponível',
     'Dependência de terceiro',
     'Falha de energia elétrica',
     'Link de dados indisponível',
