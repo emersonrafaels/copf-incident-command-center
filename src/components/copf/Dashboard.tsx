@@ -490,7 +490,7 @@ export function Dashboard() {
     }
 
     return filtered;
-  }, [occurrences, filterPeriod, customDateRange, segmentFilterMulti, equipmentFilterMulti, statusFilterMulti, statusEquipamentoFilterMulti, vendorFilterMulti, transportadoraFilterMulti, serialNumberFilter, agenciaFilter, ufFilter, tipoAgenciaFilter, pontoVipFilter, overrideFilter, vendorPriorityFilter, reincidentFilter, longTailFilter, motivoFilter]);
+  }, [occurrences, filterPeriod, customDateRange, segmentFilterMulti, equipmentFilterMulti, statusFilterMulti, statusEquipamentoFilterMulti, vendorFilterMulti, transportadoraFilterMulti, serialNumberFilter, agenciaFilter, ufFilter, tipoAgenciaFilter, pontoVipFilter, overrideFilter, vendorPriorityFilter, reincidentFilter, longTailFilter, motivoFilter, hasActiveFilters]);
 
   // Cálculos memoizados para garantir consistência com a página de ocorrências
   const cardMetrics = useMemo(() => {
@@ -502,9 +502,10 @@ export function Dashboard() {
       o.status === 'a_iniciar' || o.status === 'em_andamento' || o.status === 'com_impedimentos'
     ).length;
 
-    // 3. Reincidências - usar mesma lógica que será usada na página de ocorrências
-    const reincidentOccurrences = filteredOccurrences.reduce((count, occurrence, index) => {
-      const sameReasonEquipment = filteredOccurrences.filter((other, otherIndex) => 
+    // 3. Reincidências - ignorar itens sintéticos (id com "-dup-")
+    const baseForReincidence = filteredOccurrences.filter(o => !String(o.id).includes('-dup-'));
+    const reincidentOccurrences = baseForReincidence.reduce((count, occurrence, index) => {
+      const sameReasonEquipment = baseForReincidence.filter((other, otherIndex) => 
         otherIndex !== index &&
         other.description === occurrence.description &&
         other.equipment === occurrence.equipment &&
