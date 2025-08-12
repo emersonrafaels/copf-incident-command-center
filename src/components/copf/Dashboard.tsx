@@ -503,14 +503,13 @@ export function Dashboard() {
     // 6. Ocorrências críticas
     const criticalOccurrences = filteredOccurrences.filter(o => o.severity === 'critical').length;
 
-    // 7. Ocorrências que vencem hoje
     const dueTodayOccurrences = filteredOccurrences.filter(o => {
-      if (o.status === 'encerrado') return false;
-      const createdDate = new Date(o.createdAt);
-      const hoursElapsed = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60);
+      const occCreatedDate = new Date(o.createdAt);
       const slaLimit = o.severity === 'critical' || o.severity === 'high' ? 24 : 72;
-      const hoursUntilDue = slaLimit - hoursElapsed;
-      return hoursUntilDue > 0 && hoursUntilDue <= 24; // Vence nas próximas 24 horas
+      const slaEndDate = new Date(occCreatedDate.getTime() + slaLimit * 60 * 60 * 1000);
+      const isDueToday = slaEndDate.toDateString() === new Date().toDateString();
+      const isNotCompleted = o.status !== 'encerrado' && o.status !== 'cancelado';
+      return isDueToday && isNotCompleted;
     }).length;
 
     return {
@@ -827,7 +826,7 @@ export function Dashboard() {
                       title="Vencem Hoje" 
                       value={cardMetrics.dueTodayOccurrences}
                       icon={<Clock className="h-4 w-4" />} 
-                      description="SLA nas próximas 24h"
+                      description="SLA com vencimento hoje"
                       isLoading={isLoading}
                     />
                     <HelpCircle className="absolute top-2 right-2 h-4 w-4 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
