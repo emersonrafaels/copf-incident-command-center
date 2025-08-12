@@ -1234,18 +1234,18 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
                                           `${motivoFilter[0].substring(0, 20)}...` : 
                                           motivoFilter[0]
                                         ) : 
-                                        `${motivoFilter.length} motivos`
+                                        `${motivoFilter.length} sintomas`
                                       }
                                     </span>
                                   </div>
-                                ) : "Todos os motivos"}
+                                ) : "Todos os sintomas"}
                                 <div className="w-4 h-4 opacity-50">⌄</div>
                               </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-80 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
                               <Command>
-                                <CommandInput placeholder="Buscar motivo..." className="h-9" />
-                                <CommandEmpty>Nenhum motivo encontrado.</CommandEmpty>
+                                <CommandInput placeholder="Buscar sintoma..." className="h-9" />
+                                <CommandEmpty>Nenhum sintoma encontrado.</CommandEmpty>
                                 <CommandList className="max-h-60">
                                   <CommandGroup>
                                     {Array.from(new Set(occurrences.map(o => o.motivoOcorrencia || 'Não informado')))
