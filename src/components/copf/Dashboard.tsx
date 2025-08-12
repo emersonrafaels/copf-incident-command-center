@@ -453,8 +453,8 @@ export function Dashboard() {
       return true;
     });
 
-    // Aumentar volume para demonstrar pelo menos 300 ocorrências nos últimos 7 dias
-    if (filterPeriod === '7-days' && filtered.length < 300) {
+    // Aumentar volume apenas para demonstração quando não há filtros ativos
+    if (filterPeriod === '7-days' && !hasActiveFilters && filtered.length < 300) {
       const MIN_COUNT = 300;
       const start = startDate ?? new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
       const end = endDate ?? new Date();
