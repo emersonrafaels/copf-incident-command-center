@@ -27,6 +27,9 @@ export interface OccurrenceData {
   dineg: string
   vip: boolean
   statusEquipamento: 'operante' | 'inoperante'
+  // Impedimentos
+  possuiImpedimento?: boolean
+  motivoImpedimento?: string
 }
 
 export interface ChartData {
@@ -116,7 +119,10 @@ const mapDatabaseToOccurrence = (dbRecord: any): OccurrenceData => {
     municipio: 'Centro', // Campo não existe ainda no banco
     dineg: dbRecord.supt,
     vip: dbRecord.vip,
-    statusEquipamento: dbRecord.status_equipamento || 'operante'
+    statusEquipamento: dbRecord.status_equipamento || 'operante',
+    // Impedimentos
+    possuiImpedimento: dbRecord.possui_impedimento,
+    motivoImpedimento: dbRecord.motivo_impedimento || undefined
   }
 }
 

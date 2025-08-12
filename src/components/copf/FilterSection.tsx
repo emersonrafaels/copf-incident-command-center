@@ -48,6 +48,8 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
     statusSlaFilter,
     longTailFilter,
     motivoFilter,
+    impedimentoFilter,
+    motivoImpedimentoFilter,
     hasActiveFilters,
     updateFilter,
     clearAllFilters
@@ -1072,7 +1074,7 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
                  <CollapsibleContent>
                    <div className="space-y-4">
                      {/* Primeira linha: Switches */}
-                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div className="flex items-center space-x-2 p-3 border border-border/50 rounded-lg bg-background/50 hover:bg-accent/10 transition-colors">
                            <Switch
                              id="due-today-filter"
@@ -1106,6 +1108,18 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
                          />
                          <Label htmlFor="vendor-priority-filter" className="text-sm cursor-pointer select-none">
                            Priorizadas com o Fornecedor
+                         </Label>
+                       </div>
+
+                       <div className="flex items-center space-x-2 p-3 border border-border/50 rounded-lg bg-background/50 hover:bg-accent/10 transition-colors">
+                         <Switch
+                           id="impedimento-filter"
+                           checked={impedimentoFilter}
+                           onCheckedChange={(checked) => updateFilter('impedimentoFilter', checked)}
+                           className="data-[state=checked]:bg-primary"
+                         />
+                         <Label htmlFor="impedimento-filter" className="text-sm cursor-pointer select-none">
+                           Com Impedimento
                          </Label>
                        </div>
                      </div>
@@ -1279,6 +1293,70 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
                                             }
                                           }}>
                                             <Check className={cn("mr-2 h-4 w-4", motivoFilter.includes(motivo) ? "opacity-100" : "opacity-0")} />
+                                            <span className="text-sm" title={motivo}>
+                                              {`${code} - ${label}`}
+                                            </span>
+                                          </CommandItem>
+                                        );
+                                      })}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+
+                        {/* Motivo de Impedimento */}
+                        <div className="group space-y-3">
+                          <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                            <div className="w-1 h-4 bg-amber-500/60 rounded-full"></div>
+                            Motivo de Impedimento
+                          </Label>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button variant="outline" className="w-full h-10 justify-between hover:bg-amber-500/5 hover:border-amber-500/30 transition-all duration-200 group-hover:shadow-sm">
+                                {motivoImpedimentoFilter.length > 0 ? (
+                                  <div className="flex items-center gap-2">
+                                    <Badge variant="secondary" className="h-5 text-xs bg-amber-500/10 text-amber-500">
+                                      {motivoImpedimentoFilter.length}
+                                    </Badge>
+                                    <span className="text-sm">
+                                      {motivoImpedimentoFilter.length === 1 ? 
+                                        (() => { 
+                                          const m = motivoImpedimentoFilter[0];
+                                          const code = getSymptomCode(m);
+                                          const txt = m.length > 20 ? `${m.substring(0, 20)}...` : m;
+                                          return `${code} - ${txt}`;
+                                        })() : 
+                                        `${motivoImpedimentoFilter.length} sintomas`
+                                      }
+                                    </span>
+                                  </div>
+                                ) : "Todos os impedimentos"}
+                                <div className="w-4 h-4 opacity-50">⌄</div>
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-80 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                              <Command>
+                                <CommandInput placeholder="Buscar impedimento..." className="h-9" />
+                                <CommandEmpty>Nenhum impedimento encontrado.</CommandEmpty>
+                                <CommandList className="max-h-60">
+                                  <CommandGroup>
+                                    {Array.from(new Set(occurrences.map(o => o.motivoImpedimento || 'Não informado')))
+                                      .sort()
+                                      .map(motivo => {
+                                        const code = getSymptomCode(motivo);
+                                        const label = motivo.length > 50 ? `${motivo.substring(0, 50)}...` : motivo;
+                                        return (
+                                          <CommandItem key={motivo} onSelect={() => {
+                                            const isSelected = motivoImpedimentoFilter.includes(motivo);
+                                            if (isSelected) {
+                                              updateFilter('motivoImpedimentoFilter', motivoImpedimentoFilter.filter(m => m !== motivo));
+                                            } else {
+                                              updateFilter('motivoImpedimentoFilter', [...motivoImpedimentoFilter, motivo]);
+                                            }
+                                          }}>
+                                            <Check className={cn("mr-2 h-4 w-4", motivoImpedimentoFilter.includes(motivo) ? "opacity-100" : "opacity-0")} />
                                             <span className="text-sm" title={motivo}>
                                               {`${code} - ${label}`}
                                             </span>

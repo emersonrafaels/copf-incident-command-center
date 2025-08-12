@@ -44,6 +44,8 @@ const Ocorrencias = () => {
     motivoFilter,
     previsaoSlaFilter,
     equipmentModelFilterMulti,
+    impedimentoFilter,
+    motivoImpedimentoFilter,
     updateFilter
   } = useFilters();
   const [searchParams] = useSearchParams();
@@ -316,8 +318,10 @@ const Ocorrencias = () => {
       transportadoraFilterMulti.includes(occurrence.transportadora)
     );
 
-    // Filtro de motivo de ocorrência
+    // Filtro de motivo de ocorrência e impedimento
     const matchesMotivo = motivoFilter.length === 0 || motivoFilter.includes(occurrence.motivoOcorrencia || 'Não informado');
+    const matchesMotivoImpedimento = motivoImpedimentoFilter.length === 0 || motivoImpedimentoFilter.includes(occurrence.motivoImpedimento || 'Não informado');
+    const matchesImpedimentoFlag = !impedimentoFilter || !!occurrence.possuiImpedimento;
 
     // Filtro especial: Modelo de equipamento (global)
     const occurrenceModel = getModelForOccurrence(occurrence);
@@ -355,7 +359,7 @@ const Ocorrencias = () => {
       return false;
     })();
 
-    return matchesSearch && matchesStatus && matchesSegment && matchesEquipment && matchesSerial && matchesVendor && matchesSeverity && matchesAgencia && matchesUF && matchesTipoAgencia && matchesPontoVip && matchesSupt && matchesStatusEquipamento && matchesTransportadora && matchesMotivo && matchesEquipmentModel && matchesPrevisaoSla;
+    return matchesSearch && matchesStatus && matchesSegment && matchesEquipment && matchesSerial && matchesVendor && matchesSeverity && matchesAgencia && matchesUF && matchesTipoAgencia && matchesPontoVip && matchesSupt && matchesStatusEquipamento && matchesTransportadora && matchesMotivo && matchesMotivoImpedimento && matchesEquipmentModel && matchesPrevisaoSla && matchesImpedimentoFlag;
   });
 
   const handleExportExcel = () => {
@@ -368,6 +372,8 @@ const Ocorrencias = () => {
       'Status': getStatusLabel(occurrence.status),
       'Data/Hora': new Date(occurrence.createdAt).toLocaleString('pt-BR'),
       'Fornecedor': occurrence.vendor,
+      'Com Impedimento': occurrence.possuiImpedimento ? 'Sim' : 'Não',
+      'Motivo Impedimento': occurrence.motivoImpedimento || '',
       'Descrição': occurrence.description
     }));
 
@@ -377,7 +383,7 @@ const Ocorrencias = () => {
     XLSX.utils.book_append_sheet(wb, ws, "Ocorrências");
 
     // Ajustar largura das colunas
-    const wscols = [{wch: 10}, {wch: 30}, {wch: 20}, {wch: 15}, {wch: 15}, {wch: 20}, {wch: 20}, {wch: 50}];
+    const wscols = [{wch: 10}, {wch: 30}, {wch: 20}, {wch: 15}, {wch: 15}, {wch: 20}, {wch: 20}, {wch: 14}, {wch: 40}, {wch: 50}];
     ws['!cols'] = wscols;
 
     // Baixar arquivo
@@ -417,6 +423,19 @@ const Ocorrencias = () => {
       default:
         return 'outline';
     }
+  };
+
+  const getSymptomCode = (s: string) => {
+    const base = (s || 'NAO INFORMADO')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toUpperCase();
+    let hash = 0 >>> 0;
+    for (let i = 0; i < base.length; i++) {
+      hash = ((hash * 31) + base.charCodeAt(i)) >>> 0;
+    }
+    const hex = (hash >>> 0).toString(16).toUpperCase().padStart(4, '0');
+    return hex.slice(0, 4);
   };
 
   const getSeverityLabel = (severity: string) => {
@@ -863,6 +882,8 @@ const Ocorrencias = () => {
                             </div>
                           </div>
                         </TableHead>
+                        <TableHead className="w-16">Imped.</TableHead>
+                        <TableHead className="w-40">Motivo Impedimento</TableHead>
                         <TableHead className="w-12">Ações</TableHead>
                      </TableRow>
                    </TableHeader>
@@ -936,19 +957,35 @@ const Ocorrencias = () => {
                            <span className="text-muted-foreground">-</span>
                          )}
                         </TableCell>
-                        <TableCell className="py-2 text-xs truncate max-w-[120px]">{getModelForOccurrence(occurrence)}</TableCell>
-                        <TableCell className="py-2 text-xs truncate max-w-[80px]">{occurrence.serialNumber}</TableCell>
+                         <TableCell className="py-2 text-xs truncate max-w-[120px]">{getModelForOccurrence(occurrence)}</TableCell>
+                         <TableCell className="py-2 text-xs truncate max-w-[80px]">{occurrence.serialNumber}</TableCell>
                          <TableCell className="py-2">
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              onClick={() => navigate(`/ocorrencia/${occurrence.id}`)} 
-                              title="Visualizar detalhes da ocorrência"
-                              className="h-6 w-6 p-0"
-                            >
-                              <Eye className="h-3 w-3" />
-                            </Button>
+                           {occurrence.possuiImpedimento ? (
+                             <Badge variant="destructive" className="text-xs px-1 py-0">Sim</Badge>
+                           ) : (
+                             <span className="text-muted-foreground">Não</span>
+                           )}
                          </TableCell>
+                         <TableCell className="py-2 text-xs truncate max-w-[200px]">
+                           {occurrence.motivoImpedimento ? (
+                             <span title={occurrence.motivoImpedimento}>
+                               {`${getSymptomCode(occurrence.motivoImpedimento)} - ${occurrence.motivoImpedimento.length > 40 ? occurrence.motivoImpedimento.substring(0, 40) + '...' : occurrence.motivoImpedimento}`}
+                             </span>
+                           ) : (
+                             <span className="text-muted-foreground">-</span>
+                           )}
+                         </TableCell>
+                          <TableCell className="py-2">
+                             <Button 
+                               variant="ghost" 
+                               size="sm" 
+                               onClick={() => navigate(`/ocorrencia/${occurrence.id}`)} 
+                               title="Visualizar detalhes da ocorrência"
+                               className="h-6 w-6 p-0"
+                             >
+                               <Eye className="h-3 w-3" />
+                             </Button>
+                          </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

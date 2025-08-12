@@ -36,6 +36,9 @@ export interface FiltersState {
   statusSlaFilter: string[];
   longTailFilter: string[];
   motivoFilter: string[];
+  // Impedimentos
+  impedimentoFilter: boolean;
+  motivoImpedimentoFilter: string[];
   previsaoSlaFilter: string[];
   
   // Filtros de período
@@ -83,6 +86,8 @@ const defaultFilters: FiltersState = {
   statusSlaFilter: [],
   longTailFilter: [],
   motivoFilter: [],
+  impedimentoFilter: false,
+  motivoImpedimentoFilter: [],
   previsaoSlaFilter: [],
   
   filterPeriod: '7-days',
@@ -121,6 +126,7 @@ export const FiltersProvider: React.FC<{ children: ReactNode }> = ({ children })
     filters.overrideFilter ||
     filters.vendorPriorityFilter ||
     filters.reincidentFilter ||
+    filters.impedimentoFilter ||
     filters.vendorFilter !== 'all' ||
     filters.transportadoraFilter !== 'all' ||
     filters.agenciaFilter.length > 0 ||
@@ -133,6 +139,7 @@ export const FiltersProvider: React.FC<{ children: ReactNode }> = ({ children })
     filters.statusSlaFilter.length > 0 ||
     filters.longTailFilter.length > 0 ||
     filters.motivoFilter.length > 0 ||
+    filters.motivoImpedimentoFilter.length > 0 ||
     filters.previsaoSlaFilter.length > 0;
 
   return (
