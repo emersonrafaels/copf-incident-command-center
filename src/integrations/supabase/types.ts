@@ -27,10 +27,12 @@ export type Database = {
           equipamento: string
           fornecedor: string
           id: string
+          motivo_impedimento: string | null
           motivo_ocorrencia: string | null
           numero_serie: string
           observacoes: string | null
           override: boolean
+          possui_impedimento: boolean
           prioridade: string
           prioridade_fornecedor: string | null
           reincidencia: boolean
@@ -58,10 +60,12 @@ export type Database = {
           equipamento: string
           fornecedor: string
           id?: string
+          motivo_impedimento?: string | null
           motivo_ocorrencia?: string | null
           numero_serie: string
           observacoes?: string | null
           override?: boolean
+          possui_impedimento?: boolean
           prioridade: string
           prioridade_fornecedor?: string | null
           reincidencia?: boolean
@@ -89,10 +93,12 @@ export type Database = {
           equipamento?: string
           fornecedor?: string
           id?: string
+          motivo_impedimento?: string | null
           motivo_ocorrencia?: string | null
           numero_serie?: string
           observacoes?: string | null
           override?: boolean
+          possui_impedimento?: boolean
           prioridade?: string
           prioridade_fornecedor?: string | null
           reincidencia?: boolean
