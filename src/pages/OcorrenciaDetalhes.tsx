@@ -282,7 +282,7 @@ export default function OcorrenciaDetalhes() {
                      </div>
                    ) : (
                      <div>
-                       <Label className="font-medium">Previsão de Fechamento</Label>
+                       <Label className="font-medium">Previsão de Atendimento</Label>
                        <p className="text-sm">
                          {(() => {
                            const createdDate = new Date(occurrence.createdAt);
