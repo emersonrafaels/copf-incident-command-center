@@ -16,13 +16,19 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { MessageTemplates } from '@/components/copf/MessageTemplates';
-
 export default function OcorrenciaDetalhes() {
-  const { id } = useParams<{ id: string }>();
+  const {
+    id
+  } = useParams<{
+    id: string;
+  }>();
   const navigate = useNavigate();
-  const { occurrences } = useDashboardData();
-  const { toast } = useToast();
-  
+  const {
+    occurrences
+  } = useDashboardData();
+  const {
+    toast
+  } = useToast();
   const [occurrence, setOccurrence] = useState<any>(null);
   const [vendorMessage, setVendorMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
@@ -31,7 +37,6 @@ export default function OcorrenciaDetalhes() {
   const [attachments, setAttachments] = useState<File[]>([]);
   const [showTemplates, setShowTemplates] = useState(false);
   const [historyEntries, setHistoryEntries] = useState<any[]>([]);
-
   useEffect(() => {
     console.log('Procurando ocorrência com ID:', id);
     console.log('Ocorrências disponíveis:', occurrences?.length);
@@ -47,42 +52,37 @@ export default function OcorrenciaDetalhes() {
         // Histórico inicial com duas entradas obrigatórias (ordem crescente por timestamp)
         const openingDate = new Date(found.createdAt);
         const assignmentDate = new Date(openingDate.getTime() + 2 * 60 * 1000); // 2 minutos depois
-        
-        setHistoryEntries([
-          {
-            id: '1',
-            type: 'created',
-            timestamp: openingDate.toISOString(),
-            author: 'Sistema',
-            description: 'Abertura da Ocorrência',
-            details: found.description
-          },
-          {
-            id: '2',
-            type: 'assigned',
-            timestamp: assignmentDate.toISOString(),
-            author: 'Sistema',
-            description: 'Atribuição da Ocorrência para o Fornecedor',
-            details: `Ocorrência atribuída para ${found.vendor}`
-          }
-        ]);
+
+        setHistoryEntries([{
+          id: '1',
+          type: 'created',
+          timestamp: openingDate.toISOString(),
+          author: 'Sistema',
+          description: 'Abertura da Ocorrência',
+          details: found.description
+        }, {
+          id: '2',
+          type: 'assigned',
+          timestamp: assignmentDate.toISOString(),
+          author: 'Sistema',
+          description: 'Atribuição da Ocorrência para o Fornecedor',
+          details: `Ocorrência atribuída para ${found.vendor}`
+        }]);
       }
     }
   }, [occurrences, id]);
-
   const formatDate = (dateString: string) => {
-    return format(new Date(dateString), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR });
+    return format(new Date(dateString), "dd/MM/yyyy 'às' HH:mm", {
+      locale: ptBR
+    });
   };
-
   const handlePriorityToggle = (checked: boolean) => {
     setTempPriority(checked);
   };
-
   const savePriority = () => {
     if (tempPriority === isPrioritized) return;
-
     setIsPrioritized(tempPriority);
-    
+
     // Create new history entry for priority change
     const newEntry = {
       id: Date.now().toString(),
@@ -92,20 +92,16 @@ export default function OcorrenciaDetalhes() {
       description: tempPriority ? 'Ocorrência priorizada' : 'Ocorrência despriorizada',
       details: tempPriority ? 'Ocorrência marcada como prioritária para atendimento urgente' : 'Prioridade removida da ocorrência'
     };
-    
     setHistoryEntries(prev => [...prev, newEntry].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()));
-    
     toast({
       title: tempPriority ? "Ocorrência Priorizada" : "Prioridade Removida",
       description: tempPriority ? "A ocorrência foi marcada como prioritária" : "A prioridade foi removida da ocorrência"
     });
   };
-
   const handleTemplateSelect = (template: any) => {
     setVendorMessage(template.content);
     setShowTemplates(false);
   };
-
   const handleSendToVendor = async () => {
     if (!vendorMessage.trim()) {
       toast({
@@ -115,9 +111,8 @@ export default function OcorrenciaDetalhes() {
       });
       return;
     }
-
     setIsSending(true);
-    
+
     // Adicionar mensagem ao histórico
     const newEntry = {
       id: Date.now().toString(),
@@ -127,9 +122,8 @@ export default function OcorrenciaDetalhes() {
       description: 'Mensagem enviada para o fornecedor',
       details: vendorMessage
     };
-    
     setHistoryEntries(prev => [...prev, newEntry].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()));
-    
+
     // Simular envio
     setTimeout(() => {
       toast({
@@ -141,16 +135,13 @@ export default function OcorrenciaDetalhes() {
       setIsSending(false);
     }, 1000);
   };
-
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     setAttachments(prev => [...prev, ...files]);
   };
-
   const removeAttachment = (index: number) => {
     setAttachments(prev => prev.filter((_, i) => i !== index));
   };
-
   const getSeverityVariant = (severity: string): "default" | "destructive" | "outline" | "secondary" => {
     const variants: Record<string, "default" | "destructive" | "outline" | "secondary"> = {
       critical: 'destructive',
@@ -160,7 +151,6 @@ export default function OcorrenciaDetalhes() {
     };
     return variants[severity] || 'default';
   };
-
   const getSeverityLabel = (severity: string) => {
     const labels = {
       critical: 'Crítica',
@@ -170,12 +160,10 @@ export default function OcorrenciaDetalhes() {
     };
     return labels[severity as keyof typeof labels] || severity;
   };
-
   const getTimeElapsed = (dateString: string) => {
     const now = new Date();
     const occurrenceDate = new Date(dateString);
     const diffInMinutes = Math.floor((now.getTime() - occurrenceDate.getTime()) / (1000 * 60));
-    
     if (diffInMinutes < 60) {
       return `${diffInMinutes}min`;
     } else if (diffInMinutes < 1440) {
@@ -184,16 +172,10 @@ export default function OcorrenciaDetalhes() {
       return `${Math.floor(diffInMinutes / 1440)}d`;
     }
   };
-
   if (!occurrence) {
-    return (
-      <COPFLayout>
+    return <COPFLayout>
         <div className="p-6">
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/ocorrencias')}
-            className="mb-6"
-          >
+          <Button variant="ghost" onClick={() => navigate('/ocorrencias')} className="mb-6">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Voltar para Ocorrências
           </Button>
@@ -201,19 +183,13 @@ export default function OcorrenciaDetalhes() {
             <p className="text-muted-foreground">Ocorrência não encontrada</p>
           </div>
         </div>
-      </COPFLayout>
-    );
+      </COPFLayout>;
   }
-
-  return (
-    <COPFLayout>
+  return <COPFLayout>
       <div className="p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              onClick={() => navigate('/ocorrencias')}
-            >
+            <Button variant="ghost" onClick={() => navigate('/ocorrencias')}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Voltar
             </Button>
@@ -229,10 +205,7 @@ export default function OcorrenciaDetalhes() {
                {getSeverityLabel(occurrence.severity)}
              </Badge>
              <Badge variant={occurrence.status === 'a_iniciar' || occurrence.status === 'em_andamento' ? 'destructive' : 'default'}>
-               {occurrence.status === 'a_iniciar' ? 'A Iniciar' : 
-                occurrence.status === 'em_andamento' ? 'Em Andamento' : 
-                occurrence.status === 'encerrado' ? 'Encerrada' : 
-                occurrence.status === 'com_impedimentos' ? 'Com Impedimentos' : 'Cancelada'}
+               {occurrence.status === 'a_iniciar' ? 'A Iniciar' : occurrence.status === 'em_andamento' ? 'Em Andamento' : occurrence.status === 'encerrado' ? 'Encerrada' : occurrence.status === 'com_impedimentos' ? 'Com Impedimentos' : 'Cancelada'}
              </Badge>
           </div>
         </div>
@@ -270,70 +243,64 @@ export default function OcorrenciaDetalhes() {
                      <p className="text-sm">{occurrence.serialNumber}</p>
                    </div>
                    <div>
-                     <Label className="font-medium">Abertura</Label>
+                     <Label className="font-medium">Data da Abertura
+                  </Label>
                      <p className="text-sm">{formatDate(occurrence.createdAt)}</p>
                    </div>
                    
                    {/* Data de Previsão/Encerramento baseada no status */}
-                   {occurrence.status === 'encerrado' && occurrence.resolvedAt ? (
-                     <div>
+                   {occurrence.status === 'encerrado' && occurrence.resolvedAt ? <div>
                        <Label className="font-medium">Data de Encerramento</Label>
                        <p className="text-sm">{formatDate(occurrence.resolvedAt)}</p>
-                     </div>
-                   ) : (
-                     <div>
+                     </div> : <div>
                        <Label className="font-medium">Previsão de Atendimento</Label>
                        <p className="text-sm">
                          {(() => {
-                           const createdDate = new Date(occurrence.createdAt);
-                           const slaHours = occurrence.severity === 'critical' || occurrence.severity === 'high' ? 24 : 72;
-                           const predictedDate = new Date(createdDate.getTime() + (slaHours * 60 * 60 * 1000));
-                           return formatDate(predictedDate.toISOString());
-                         })()}
+                      const createdDate = new Date(occurrence.createdAt);
+                      const slaHours = occurrence.severity === 'critical' || occurrence.severity === 'high' ? 24 : 72;
+                      const predictedDate = new Date(createdDate.getTime() + slaHours * 60 * 60 * 1000);
+                      return formatDate(predictedDate.toISOString());
+                    })()}
                        </p>
-                     </div>
-                   )}
+                     </div>}
                  </div>
                  
                  <Separator />
                  
                  {/* Campos específicos para agências (exceto PAB e PAE) */}
                  {(() => {
-                   // Simular tipo de agência baseado no número
-                   const agencyNumber = occurrence.agency.match(/\d+/)?.[0] || '0';
-                   const agencyType = parseInt(agencyNumber) % 10 === 0 ? 'PAB' : 
-                                    parseInt(agencyNumber) % 10 === 5 ? 'PAE' : 'Convencional';
-                   
-                   if (agencyType !== 'PAB' && agencyType !== 'PAE') {
-                     return (
-                       <div>
+                // Simular tipo de agência baseado no número
+                const agencyNumber = occurrence.agency.match(/\d+/)?.[0] || '0';
+                const agencyType = parseInt(agencyNumber) % 10 === 0 ? 'PAB' : parseInt(agencyNumber) % 10 === 5 ? 'PAE' : 'Convencional';
+                if (agencyType !== 'PAB' && agencyType !== 'PAE') {
+                  return <div>
                          <h4 className="font-medium mb-3">Informações da Agência</h4>
                          <div className="grid grid-cols-2 gap-4">
                            <div>
                              <Label className="font-medium">Última Reforma</Label>
                              <p className="text-sm">
                                {(() => {
-                                 const reforms = ['Plano Diretor', 'Espaço Itaú', 'Ainda Não Reformada'];
-                                 return reforms[parseInt(agencyNumber) % 3];
-                               })()}
+                            const reforms = ['Plano Diretor', 'Espaço Itaú', 'Ainda Não Reformada'];
+                            return reforms[parseInt(agencyNumber) % 3];
+                          })()}
                              </p>
                            </div>
                            <div>
                              <Label className="font-medium">Data da Última Reforma</Label>
                              <p className="text-sm">
                                {(() => {
-                                 const years = ['2022', '2023', '2024', '2025', 'Ainda Não Reformada'];
-                                 return years[parseInt(agencyNumber) % 5];
-                               })()}
+                            const years = ['2022', '2023', '2024', '2025', 'Ainda Não Reformada'];
+                            return years[parseInt(agencyNumber) % 5];
+                          })()}
                              </p>
                            </div>
                            <div>
                              <Label className="font-medium">Arquétipo Atual</Label>
                              <p className="text-sm">
                                {(() => {
-                                 const archetypes = ['Standard', 'Ultralight', 'Premium'];
-                                 return archetypes[parseInt(agencyNumber) % 3];
-                               })()}
+                            const archetypes = ['Standard', 'Ultralight', 'Premium'];
+                            return archetypes[parseInt(agencyNumber) % 3];
+                          })()}
                              </p>
                            </div>
                            <div>
@@ -348,11 +315,10 @@ export default function OcorrenciaDetalhes() {
                            </div>
                          </div>
                          <Separator className="mt-4" />
-                       </div>
-                     );
-                   }
-                   return null;
-                 })()}
+                       </div>;
+                }
+                return null;
+              })()}
                  
                 <div>
                   <Label className="font-medium">Descrição do Problema</Label>
@@ -378,42 +344,56 @@ export default function OcorrenciaDetalhes() {
               <CardContent>
                 <ScrollArea className="h-[300px]">
                   <div className="space-y-4">
-                    {historyEntries.map((entry) => {
-                      const getIcon = () => {
-                        switch (entry.type) {
-                          case 'created': return <Clock className="h-4 w-4" />;
-                          case 'assigned': return <User className="h-4 w-4" />;
-                          case 'prioritized': return <Star className="h-4 w-4 text-yellow-500" />;
-                          case 'deprioritized': return <Star className="h-4 w-4 text-gray-400" />;
-                          case 'message': return <MessageSquare className="h-4 w-4" />;
-                          default: return <Clock className="h-4 w-4" />;
-                        }
-                      };
-
-                      const getBadgeVariant = () => {
-                        switch (entry.type) {
-                          case 'created': return 'secondary';
-                          case 'assigned': return 'outline';
-                          case 'prioritized': return 'default';
-                          case 'deprioritized': return 'secondary';
-                          case 'message': return 'outline';
-                          default: return 'secondary';
-                        }
-                      };
-
-                      const getBadgeText = () => {
-                        switch (entry.type) {
-                          case 'created': return 'Abertura';
-                          case 'assigned': return 'Atribuição';
-                          case 'prioritized': return 'Priorizada';
-                          case 'deprioritized': return 'Despriorizada';
-                          case 'message': return 'Mensagem';
-                          default: return 'Atualização';
-                        }
-                      };
-
-                      return (
-                        <div key={entry.id} className="flex items-start space-x-3 p-3 bg-muted rounded-md">
+                    {historyEntries.map(entry => {
+                    const getIcon = () => {
+                      switch (entry.type) {
+                        case 'created':
+                          return <Clock className="h-4 w-4" />;
+                        case 'assigned':
+                          return <User className="h-4 w-4" />;
+                        case 'prioritized':
+                          return <Star className="h-4 w-4 text-yellow-500" />;
+                        case 'deprioritized':
+                          return <Star className="h-4 w-4 text-gray-400" />;
+                        case 'message':
+                          return <MessageSquare className="h-4 w-4" />;
+                        default:
+                          return <Clock className="h-4 w-4" />;
+                      }
+                    };
+                    const getBadgeVariant = () => {
+                      switch (entry.type) {
+                        case 'created':
+                          return 'secondary';
+                        case 'assigned':
+                          return 'outline';
+                        case 'prioritized':
+                          return 'default';
+                        case 'deprioritized':
+                          return 'secondary';
+                        case 'message':
+                          return 'outline';
+                        default:
+                          return 'secondary';
+                      }
+                    };
+                    const getBadgeText = () => {
+                      switch (entry.type) {
+                        case 'created':
+                          return 'Abertura';
+                        case 'assigned':
+                          return 'Atribuição';
+                        case 'prioritized':
+                          return 'Priorizada';
+                        case 'deprioritized':
+                          return 'Despriorizada';
+                        case 'message':
+                          return 'Mensagem';
+                        default:
+                          return 'Atualização';
+                      }
+                    };
+                    return <div key={entry.id} className="flex items-start space-x-3 p-3 bg-muted rounded-md">
                           <div className="flex-shrink-0 mt-1">
                             {getIcon()}
                           </div>
@@ -427,15 +407,12 @@ export default function OcorrenciaDetalhes() {
                             <p className="text-xs text-muted-foreground">
                               {formatDate(entry.timestamp)} • {entry.author}
                             </p>
-                            {entry.details && (
-                              <p className="text-xs text-gray-600 mt-1 italic">
+                            {entry.details && <p className="text-xs text-gray-600 mt-1 italic">
                                 "{entry.details}"
-                              </p>
-                            )}
+                              </p>}
                           </div>
-                        </div>
-                      );
-                    })}
+                        </div>;
+                  })}
                   </div>
                 </ScrollArea>
               </CardContent>
@@ -460,28 +437,17 @@ export default function OcorrenciaDetalhes() {
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3">
-                    <Switch
-                      id="priority-switch"
-                      checked={tempPriority}
-                      onCheckedChange={handlePriorityToggle}
-                    />
+                    <Switch id="priority-switch" checked={tempPriority} onCheckedChange={handlePriorityToggle} />
                     <Label htmlFor="priority-switch" className="text-sm font-medium">
                       {tempPriority ? 'Remover prioridade' : 'Priorizar ocorrência'}
                     </Label>
                   </div>
                   
-                  {tempPriority !== isPrioritized && (
-                    <Button 
-                      onClick={savePriority}
-                      size="sm"
-                      className="w-full"
-                    >
+                  {tempPriority !== isPrioritized && <Button onClick={savePriority} size="sm" className="w-full">
                       Salvar Priorização
-                    </Button>
-                  )}
+                    </Button>}
                   
-                  {isPrioritized && (
-                    <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                  {isPrioritized && <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
                       <div className="flex items-center">
                         <Star className="h-4 w-4 text-yellow-600 mr-2" />
                         <span className="text-sm font-medium text-yellow-800">Ocorrência Prioritária</span>
@@ -489,8 +455,7 @@ export default function OcorrenciaDetalhes() {
                       <p className="text-xs text-yellow-700 mt-1">
                         Ao salvar como priorizada, essa ocorrência aparecerá priorizada para o fornecedor.
                       </p>
-                    </div>
-                  )}
+                    </div>}
                 </div>
               </CardContent>
             </Card>
@@ -503,28 +468,14 @@ export default function OcorrenciaDetalhes() {
                     <Send className="h-5 w-5 mr-2" />
                     Mensagem para Fornecedor
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowTemplates(!showTemplates)}
-                  >
+                  <Button variant="outline" size="sm" onClick={() => setShowTemplates(!showTemplates)}>
                     Templates
                   </Button>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {showTemplates && (
-                  <MessageTemplates
-                    type="operation"
-                    onSelectTemplate={handleTemplateSelect}
-                  />
-                )}
-                <Textarea
-                  placeholder="Digite sua mensagem para o fornecedor ou selecione um template..."
-                  value={vendorMessage}
-                  onChange={(e) => setVendorMessage(e.target.value)}
-                  className="min-h-32"
-                />
+                {showTemplates && <MessageTemplates type="operation" onSelectTemplate={handleTemplateSelect} />}
+                <Textarea placeholder="Digite sua mensagem para o fornecedor ou selecione um template..." value={vendorMessage} onChange={e => setVendorMessage(e.target.value)} className="min-h-32" />
                 
                 {/* Anexos */}
                 <div>
@@ -534,38 +485,20 @@ export default function OcorrenciaDetalhes() {
                       <span>Anexar arquivos</span>
                     </div>
                   </Label>
-                  <Input
-                    id="file-upload"
-                    type="file"
-                    multiple
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
+                  <Input id="file-upload" type="file" multiple onChange={handleFileUpload} className="hidden" />
                   
-                  {attachments.length > 0 && (
-                    <div className="mt-2 space-y-2">
-                      {attachments.map((file, index) => (
-                        <div key={index} className="flex items-center justify-between p-2 bg-muted rounded">
+                  {attachments.length > 0 && <div className="mt-2 space-y-2">
+                      {attachments.map((file, index) => <div key={index} className="flex items-center justify-between p-2 bg-muted rounded">
                           <span className="text-sm truncate">{file.name}</span>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeAttachment(index)}
-                          >
+                          <Button variant="ghost" size="sm" onClick={() => removeAttachment(index)}>
                             <X className="h-4 w-4" />
                           </Button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                        </div>)}
+                    </div>}
                 </div>
 
                 <div className="space-y-2">
-                  <Button 
-                    onClick={handleSendToVendor}
-                    disabled={isSending || !vendorMessage.trim()}
-                    className="w-full"
-                  >
+                  <Button onClick={handleSendToVendor} disabled={isSending || !vendorMessage.trim()} className="w-full">
                     {isSending ? 'Enviando...' : 'Enviar Mensagem'}
                   </Button>
                 </div>
@@ -574,6 +507,5 @@ export default function OcorrenciaDetalhes() {
           </div>
         </div>
       </div>
-    </COPFLayout>
-  );
+    </COPFLayout>;
 }
