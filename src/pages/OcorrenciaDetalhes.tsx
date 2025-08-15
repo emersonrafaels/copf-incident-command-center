@@ -326,8 +326,8 @@ export default function OcorrenciaDetalhes() {
                   </p>
                 </div>
                 <div>
-                  <Label className="font-medium">Responsável</Label>
-                  <p className="text-sm">{occurrence.assignedTo}</p>
+                  
+                  
                 </div>
               </CardContent>
             </Card>
