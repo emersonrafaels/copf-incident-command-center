@@ -320,7 +320,7 @@ export default function OcorrenciaDetalhes() {
               })()}
                  
                 <div>
-                  <Label className="font-medium">Descrição do Problema</Label>
+                  <Label className="font-medium">Sintoma</Label>
                   <p className="text-sm mt-1 p-3 bg-muted rounded-md">
                     {occurrence.description}
                   </p>
