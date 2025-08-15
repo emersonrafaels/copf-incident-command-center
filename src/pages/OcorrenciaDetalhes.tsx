@@ -243,8 +243,7 @@ export default function OcorrenciaDetalhes() {
                      <p className="text-sm">{occurrence.serialNumber}</p>
                    </div>
                    <div>
-                     <Label className="font-medium">Data da Abertura
-                  </Label>
+                     <Label className="font-medium">Data/Hora da Abertura</Label>
                      <p className="text-sm">{formatDate(occurrence.createdAt)}</p>
                    </div>
                    
