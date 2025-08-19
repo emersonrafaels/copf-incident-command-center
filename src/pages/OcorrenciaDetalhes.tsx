@@ -222,10 +222,10 @@ export default function OcorrenciaDetalhes() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-6">
-                  {/* Informações Básicas */}
+                  {/* Informações da Agência */}
                   <div>
-                    <h4 className="font-semibold text-sm text-muted-foreground mb-3">Informações Básicas</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <h4 className="font-semibold text-sm text-muted-foreground mb-3">Informações da Agência</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                       <div>
                         <Label className="font-medium text-xs">Agência</Label>
                         <p className="text-sm font-medium">{occurrence.agency}</p>
@@ -242,6 +242,13 @@ export default function OcorrenciaDetalhes() {
                         <Label className="font-medium text-xs">SUPT</Label>
                         <p className="text-sm">{occurrence.supt || 'Não informado'}</p>
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Informações do Equipamento */}
+                  <div>
+                    <h4 className="font-semibold text-sm text-muted-foreground mb-3">Informações do Equipamento</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       <div>
                         <Label className="font-medium text-xs">Fornecedor</Label>
                         <p className="text-sm">{occurrence.vendor}</p>
@@ -250,17 +257,17 @@ export default function OcorrenciaDetalhes() {
                         <Label className="font-medium text-xs">Equipamento</Label>
                         <p className="text-sm">{occurrence.equipment}</p>
                       </div>
-                    </div>
-                  </div>
-
-                  {/* Informações Técnicas e Temporais */}
-                  <div>
-                    <h4 className="font-semibold text-sm text-muted-foreground mb-3">Informações Técnicas e Temporais</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
                       <div>
                         <Label className="font-medium text-xs">Número de Série</Label>
                         <p className="text-sm font-mono">{occurrence.serialNumber}</p>
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Informações Temporais */}
+                  <div>
+                    <h4 className="font-semibold text-sm text-muted-foreground mb-3">Informações Temporais</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       <div>
                         <Label className="font-medium text-xs">Data/Hora da Abertura</Label>
                         <p className="text-sm">{formatDate(occurrence.createdAt)}</p>
