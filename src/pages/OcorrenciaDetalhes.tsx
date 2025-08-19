@@ -221,23 +221,31 @@ export default function OcorrenciaDetalhes() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                 <div className="grid grid-cols-2 gap-4">
-                   <div>
-                     <Label className="font-medium">Agência</Label>
-                     <p className="text-sm">{occurrence.agency}</p>
-                   </div>
-                   <div>
-                     <Label className="font-medium">UF</Label>
-                     <p className="text-sm">{occurrence.estado}</p>
-                   </div>
-                   <div>
-                     <Label className="font-medium">Equipamento</Label>
-                     <p className="text-sm">{occurrence.equipment}</p>
-                   </div>
-                   <div>
-                     <Label className="font-medium">Fornecedor</Label>
-                     <p className="text-sm">{occurrence.vendor}</p>
-                   </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="font-medium">Agência</Label>
+                    <p className="text-sm">{occurrence.agency}</p>
+                  </div>
+                  <div>
+                    <Label className="font-medium">UF</Label>
+                    <p className="text-sm">{occurrence.estado}</p>
+                  </div>
+                  <div>
+                    <Label className="font-medium">Equipamento</Label>
+                    <p className="text-sm">{occurrence.equipment}</p>
+                  </div>
+                  <div>
+                    <Label className="font-medium">Fornecedor</Label>
+                    <p className="text-sm">{occurrence.vendor}</p>
+                  </div>
+                  <div>
+                    <Label className="font-medium">SUPT</Label>
+                    <p className="text-sm">{occurrence.supt || 'Não informado'}</p>
+                  </div>
+                  <div>
+                    <Label className="font-medium">DINEG</Label>
+                    <p className="text-sm">{occurrence.dineg || 'Não informado'}</p>
+                  </div>
                    <div>
                      <Label className="font-medium">Número de Série</Label>
                      <p className="text-sm">{occurrence.serialNumber}</p>

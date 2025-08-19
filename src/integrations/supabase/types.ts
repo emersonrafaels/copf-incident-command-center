@@ -24,6 +24,7 @@ export type Database = {
           data_previsao_encerramento: string | null
           data_resolucao: string | null
           descricao: string
+          dineg: string | null
           equipamento: string
           fornecedor: string
           id: string
@@ -57,6 +58,7 @@ export type Database = {
           data_previsao_encerramento?: string | null
           data_resolucao?: string | null
           descricao: string
+          dineg?: string | null
           equipamento: string
           fornecedor: string
           id?: string
@@ -90,6 +92,7 @@ export type Database = {
           data_previsao_encerramento?: string | null
           data_resolucao?: string | null
           descricao?: string
+          dineg?: string | null
           equipamento?: string
           fornecedor?: string
           id?: string
