@@ -221,56 +221,73 @@ export default function OcorrenciaDetalhes() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-6">
+                  {/* Informações Básicas */}
                   <div>
-                    <Label className="font-medium">Agência</Label>
-                    <p className="text-sm">{occurrence.agency}</p>
+                    <h4 className="font-semibold text-sm text-muted-foreground mb-3">Informações Básicas</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div>
+                        <Label className="font-medium text-xs">Agência</Label>
+                        <p className="text-sm font-medium">{occurrence.agency}</p>
+                      </div>
+                      <div>
+                        <Label className="font-medium text-xs">UF</Label>
+                        <p className="text-sm">{occurrence.estado}</p>
+                      </div>
+                      <div>
+                        <Label className="font-medium text-xs">DINEG</Label>
+                        <p className="text-sm">{occurrence.dineg || 'Não informado'}</p>
+                      </div>
+                      <div>
+                        <Label className="font-medium text-xs">SUPT</Label>
+                        <p className="text-sm">{occurrence.supt || 'Não informado'}</p>
+                      </div>
+                      <div>
+                        <Label className="font-medium text-xs">Fornecedor</Label>
+                        <p className="text-sm">{occurrence.vendor}</p>
+                      </div>
+                      <div>
+                        <Label className="font-medium text-xs">Equipamento</Label>
+                        <p className="text-sm">{occurrence.equipment}</p>
+                      </div>
+                    </div>
                   </div>
+
+                  {/* Informações Técnicas e Temporais */}
                   <div>
-                    <Label className="font-medium">UF</Label>
-                    <p className="text-sm">{occurrence.estado}</p>
+                    <h4 className="font-semibold text-sm text-muted-foreground mb-3">Informações Técnicas e Temporais</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+                      <div>
+                        <Label className="font-medium text-xs">Número de Série</Label>
+                        <p className="text-sm font-mono">{occurrence.serialNumber}</p>
+                      </div>
+                      <div>
+                        <Label className="font-medium text-xs">Data/Hora da Abertura</Label>
+                        <p className="text-sm">{formatDate(occurrence.createdAt)}</p>
+                      </div>
+                      <div>
+                        <Label className="font-medium text-xs">Previsão de Atendimento</Label>
+                        <p className="text-sm">
+                          {(() => {
+                            const createdDate = new Date(occurrence.createdAt);
+                            const slaHours = occurrence.severity === 'critical' || occurrence.severity === 'high' ? 24 : 72;
+                            const predictedDate = new Date(createdDate.getTime() + slaHours * 60 * 60 * 1000);
+                            return formatDate(predictedDate.toISOString());
+                          })()}
+                        </p>
+                      </div>
+                      <div>
+                        <Label className="font-medium text-xs">Data/Hora de Encerramento</Label>
+                        <p className="text-sm">
+                          {occurrence.status === 'encerrado' && occurrence.resolvedAt 
+                            ? formatDate(occurrence.resolvedAt) 
+                            : <span className="text-muted-foreground">Em aberto</span>
+                          }
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <Label className="font-medium">Equipamento</Label>
-                    <p className="text-sm">{occurrence.equipment}</p>
-                  </div>
-                  <div>
-                    <Label className="font-medium">Fornecedor</Label>
-                    <p className="text-sm">{occurrence.vendor}</p>
-                  </div>
-                  <div>
-                    <Label className="font-medium">SUPT</Label>
-                    <p className="text-sm">{occurrence.supt || 'Não informado'}</p>
-                  </div>
-                  <div>
-                    <Label className="font-medium">DINEG</Label>
-                    <p className="text-sm">{occurrence.dineg || 'Não informado'}</p>
-                  </div>
-                   <div>
-                     <Label className="font-medium">Número de Série</Label>
-                     <p className="text-sm">{occurrence.serialNumber}</p>
-                   </div>
-                   <div>
-                     <Label className="font-medium">Data/Hora da Abertura</Label>
-                     <p className="text-sm">{formatDate(occurrence.createdAt)}</p>
-                   </div>
-                   
-                   {/* Data de Previsão/Encerramento baseada no status */}
-                   {occurrence.status === 'encerrado' && occurrence.resolvedAt ? <div>
-                       <Label className="font-medium">Data de Encerramento</Label>
-                       <p className="text-sm">{formatDate(occurrence.resolvedAt)}</p>
-                     </div> : <div>
-                       <Label className="font-medium">Previsão de Atendimento</Label>
-                       <p className="text-sm">
-                         {(() => {
-                      const createdDate = new Date(occurrence.createdAt);
-                      const slaHours = occurrence.severity === 'critical' || occurrence.severity === 'high' ? 24 : 72;
-                      const predictedDate = new Date(createdDate.getTime() + slaHours * 60 * 60 * 1000);
-                      return formatDate(predictedDate.toISOString());
-                    })()}
-                       </p>
-                     </div>}
-                 </div>
+                </div>
                  
                  <Separator />
                  
