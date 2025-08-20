@@ -970,7 +970,7 @@ const Ocorrencias = () => {
                             </div>
                           </div>
                         </TableHead>
-                        <TableHead className="w-24">Prioridade</TableHead>
+                        <TableHead className="w-24">Priorizado</TableHead>
                         <TableHead className="w-12">Ações</TableHead>
                       </TableRow>
                    </TableHeader>
@@ -1067,7 +1067,7 @@ const Ocorrencias = () => {
                             variant={(occurrence.severity === 'critical' || occurrence.severity === 'high') ? 'default' : 'secondary'}
                             className="text-xs px-1 py-0"
                           >
-                            {(occurrence.severity === 'critical' || occurrence.severity === 'high') ? 'Priorizado' : 'Não priorizado'}
+                            {(occurrence.severity === 'critical' || occurrence.severity === 'high') ? 'Sim' : 'Não'}
                           </Badge>
                         </TableCell>
                         <TableCell className="py-2">
