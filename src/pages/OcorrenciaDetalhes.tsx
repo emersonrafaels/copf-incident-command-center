@@ -262,7 +262,7 @@ export default function OcorrenciaDetalhes() {
                 <div className="space-y-6">
                   {/* Informações da Agência */}
                   <div>
-                    <h4 className="font-bold text-sm text-muted-foreground mb-3">Informações da Agência</h4>
+                    <h4 className="font-extrabold text-base text-foreground mb-3">Informações da Agência</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                       <div>
                         <Label className="font-medium text-xs">Agência</Label>
@@ -287,7 +287,7 @@ export default function OcorrenciaDetalhes() {
 
                    {/* Informações do Equipamento */}
                    <div>
-                     <h4 className="font-bold text-sm text-muted-foreground mb-3">Informações do Equipamento</h4>
+                     <h4 className="font-extrabold text-base text-foreground mb-3">Informações do Equipamento</h4>
                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                        <div>
                          <Label className="font-medium text-xs">Equipamento</Label>
@@ -333,7 +333,7 @@ export default function OcorrenciaDetalhes() {
 
                    {/* Informações de Impedimento */}
                    <div>
-                     <h4 className="font-bold text-sm text-muted-foreground mb-3">Informações de Impedimento</h4>
+                     <h4 className="font-extrabold text-base text-foreground mb-3">Informações de Impedimento</h4>
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                        <div>
                          <Label className="font-medium text-xs">Impedimento</Label>
@@ -348,7 +348,7 @@ export default function OcorrenciaDetalhes() {
 
                   {/* Informações Temporais */}
                   <div>
-                    <h4 className="font-bold text-sm text-muted-foreground mb-3">Informações Temporais</h4>
+                    <h4 className="font-extrabold text-base text-foreground mb-3">Informações Temporais</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       <div>
                         <Label className="font-medium text-xs">Data/Hora da Abertura</Label>
