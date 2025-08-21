@@ -957,7 +957,6 @@ const Ocorrencias = () => {
                         </TableHead>
                         <TableHead className="w-16">Impedimento</TableHead>
                         <TableHead className="w-40">Motivo Impedimento</TableHead>
-                        <TableHead className="w-24">Modelo</TableHead>
                         <TableHead 
                           className="cursor-pointer hover:bg-accent/50 transition-colors select-none w-20"
                           onClick={() => handleSort('serialNumber')}
@@ -1060,8 +1059,7 @@ const Ocorrencias = () => {
                            <span className="text-muted-foreground">-</span>
                          )}
                        </TableCell>
-                       <TableCell className="py-2 text-xs truncate max-w-[120px]">{getModelForOccurrence(occurrence)}</TableCell>
-                        <TableCell className="py-2 text-xs truncate max-w-[80px]">{occurrence.serialNumber}</TableCell>
+                         <TableCell className="py-2 text-xs truncate max-w-[80px]">{occurrence.serialNumber}</TableCell>
                         <TableCell className="py-2">
                           <Badge 
                             variant={(occurrence.severity === 'critical' || occurrence.severity === 'high') ? 'default' : 'secondary'}

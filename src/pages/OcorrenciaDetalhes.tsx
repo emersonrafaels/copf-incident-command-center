@@ -258,6 +258,37 @@ export default function OcorrenciaDetalhes() {
                         <p className="text-sm">{occurrence.equipment}</p>
                       </div>
                       <div>
+                        <Label className="font-medium text-xs">Modelo</Label>
+                        <p className="text-sm">{(() => {
+                          const equipmentModelsMap: Record<string, string[]> = {
+                            'ATM Saque': ['Modelo ATM Saque 1', 'Modelo ATM Saque 2'],
+                            'ATM Depósito': ['Modelo ATM Depósito 1', 'Modelo ATM Depósito 2'],
+                            'Cassete': ['Modelo Cassete 1', 'Modelo Cassete 2'],
+                            'Notebook': ['Modelo Notebook 1', 'Modelo Notebook 2'],
+                            'Desktop': ['Modelo Desktop 1', 'Modelo Desktop 2'],
+                            'Leitor de Cheques/documentos': ['Modelo Leitor Cheques 1', 'Modelo Leitor Cheques 2'],
+                            'Leitor biométrico': ['Modelo Leitor Biométrico 1', 'Modelo Leitor Biométrico 2'],
+                            'PIN PAD': ['Modelo PIN PAD 1', 'Modelo PIN PAD 2'],
+                            'Scanner de Cheque': ['Modelo Scanner Cheque 1', 'Modelo Scanner Cheque 2'],
+                            'Impressora': ['Modelo Impressora 1', 'Modelo Impressora 2'],
+                            'Impressora térmica': ['Modelo Impressora Térmica 1', 'Modelo Impressora Térmica 2'],
+                            'Impressora multifuncional': ['Modelo Impressora Multifuncional 1', 'Modelo Impressora Multifuncional 2'],
+                            'Monitor LCD/LED': ['Modelo Monitor 1', 'Modelo Monitor 2'],
+                            'Teclado': ['Modelo Teclado 1', 'Modelo Teclado 2'],
+                            'Servidor': ['Modelo Servidor 1', 'Modelo Servidor 2'],
+                            'Televisão': ['Modelo Televisão 1', 'Modelo Televisão 2'],
+                            'Senheiro': ['Modelo Senheiro 1', 'Modelo Senheiro 2'],
+                            'TCR': ['Modelo TCR 1', 'Modelo TCR 2'],
+                            'Classificadora': ['Modelo Classificadora 1', 'Modelo Classificadora 2'],
+                            'Fragmentadora de Papel': ['Modelo Fragmentadora 1', 'Modelo Fragmentadora 2'],
+                          };
+                          const models = equipmentModelsMap[occurrence.equipment] || ['Modelo Genérico 1', 'Modelo Genérico 2'];
+                          const key = (occurrence.serialNumber || occurrence.id || '').toString();
+                          const idx = key.length > 0 ? (key.charCodeAt(0) + key.length) % models.length : 0;
+                          return models[idx];
+                        })()}</p>
+                      </div>
+                      <div>
                         <Label className="font-medium text-xs">Número de Série</Label>
                         <p className="text-sm font-mono">{occurrence.serialNumber}</p>
                       </div>
