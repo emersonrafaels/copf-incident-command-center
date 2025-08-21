@@ -331,31 +331,17 @@ export default function OcorrenciaDetalhes() {
                      </div>
                    </div>
 
-                   {/* Bloco de Impedimentos */}
+                   {/* Informações de Impedimento */}
                    <div>
-                     <h4 className="font-bold text-sm text-muted-foreground mb-3">Status de Impedimento</h4>
-                     <div className={`border rounded-lg p-4 ${occurrence.possuiImpedimento ? 'bg-destructive/10 border-destructive/20' : 'bg-muted/50 border-border'}`}>
-                       <div className="flex items-start space-x-3">
-                         <div className={`h-8 w-8 rounded-full flex items-center justify-center ${occurrence.possuiImpedimento ? 'bg-destructive' : 'bg-muted-foreground/20'}`}>
-                           <AlertTriangle className={`h-4 w-4 ${occurrence.possuiImpedimento ? 'text-destructive-foreground' : 'text-muted-foreground'}`} />
-                         </div>
-                         <div className="flex-1">
-                           <div className="flex items-center space-x-2 mb-2">
-                             <Label className="font-medium text-xs text-muted-foreground">IMPEDIMENTO</Label>
-                             <Badge variant={occurrence.possuiImpedimento ? "destructive" : "secondary"} className="text-xs">
-                               {occurrence.possuiImpedimento ? 'SIM' : 'NÃO'}
-                             </Badge>
-                           </div>
-                           {occurrence.possuiImpedimento && occurrence.motivoImpedimento && (
-                             <div>
-                               <Label className="font-medium text-xs text-muted-foreground">MOTIVO DO IMPEDIMENTO</Label>
-                               <p className="text-sm font-medium mt-1">{occurrence.motivoImpedimento}</p>
-                             </div>
-                           )}
-                           {!occurrence.possuiImpedimento && (
-                             <p className="text-sm text-muted-foreground">Nenhum impedimento identificado para esta ocorrência</p>
-                           )}
-                         </div>
+                     <h4 className="font-bold text-sm text-muted-foreground mb-3">Informações de Impedimento</h4>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                       <div>
+                         <Label className="font-medium text-xs">Impedimento</Label>
+                         <p className="text-sm">{occurrence.possuiImpedimento ? 'Sim' : 'Não'}</p>
+                       </div>
+                       <div>
+                         <Label className="font-medium text-xs">Motivo</Label>
+                         <p className="text-sm">{occurrence.motivoImpedimento || ''}</p>
                        </div>
                      </div>
                    </div>
