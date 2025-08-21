@@ -292,6 +292,16 @@ export default function OcorrenciaDetalhes() {
                         <Label className="font-medium text-xs">Número de Série</Label>
                         <p className="text-sm font-mono">{occurrence.serialNumber}</p>
                       </div>
+                      <div>
+                        <Label className="font-medium text-xs">Impedimento</Label>
+                        <p className="text-sm">{occurrence.possuiImpedimento ? 'Sim' : 'Não'}</p>
+                      </div>
+                      {occurrence.motivoImpedimento && (
+                        <div>
+                          <Label className="font-medium text-xs">Motivo</Label>
+                          <p className="text-sm">{occurrence.motivoImpedimento}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
 

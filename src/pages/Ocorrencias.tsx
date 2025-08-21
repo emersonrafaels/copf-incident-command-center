@@ -956,8 +956,7 @@ const Ocorrencias = () => {
                           </div>
                         </TableHead>
                         <TableHead className="w-16">Impedimento</TableHead>
-                        <TableHead className="w-40">Motivo Impedimento</TableHead>
-                        <TableHead 
+                        <TableHead
                           className="cursor-pointer hover:bg-accent/50 transition-colors select-none w-20"
                           onClick={() => handleSort('serialNumber')}
                         >
@@ -1043,22 +1042,13 @@ const Ocorrencias = () => {
                            <span className="text-muted-foreground">-</span>
                          )}
                        </TableCell>
-                       <TableCell className="py-2">
-                         {occurrence.possuiImpedimento ? (
-                           <Badge variant="destructive" className="text-xs px-1 py-0">Sim</Badge>
-                         ) : (
-                           <span className="text-muted-foreground">Não</span>
-                         )}
-                       </TableCell>
-                       <TableCell className="py-2 text-xs truncate max-w-[200px]">
-                         {occurrence.motivoImpedimento ? (
-                           <span title={occurrence.motivoImpedimento}>
-                             {`${getSymptomCode(occurrence.motivoImpedimento)} - ${occurrence.motivoImpedimento.length > 40 ? occurrence.motivoImpedimento.substring(0, 40) + '...' : occurrence.motivoImpedimento}`}
-                           </span>
-                         ) : (
-                           <span className="text-muted-foreground">-</span>
-                         )}
-                       </TableCell>
+                        <TableCell className="py-2">
+                          {occurrence.possuiImpedimento ? (
+                            <Badge variant="destructive" className="text-xs px-1 py-0">Sim</Badge>
+                          ) : (
+                            <span className="text-muted-foreground">Não</span>
+                          )}
+                        </TableCell>
                          <TableCell className="py-2 text-xs truncate max-w-[80px]">{occurrence.serialNumber}</TableCell>
                         <TableCell className="py-2">
                           <Badge 
