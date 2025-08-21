@@ -238,7 +238,7 @@ export default function OcorrenciaDetalhes() {
                       </div>
                       <div>
                         <Label className="font-medium text-xs text-muted-foreground">STATUS ATUAL</Label>
-                        <p className="text-xl font-bold text-secondary">
+                        <p className="text-xl font-bold text-foreground">
                           {occurrence.status === 'a_iniciar' ? 'A Iniciar' : 
                            occurrence.status === 'em_andamento' ? 'Em Andamento' : 
                            occurrence.status === 'encerrado' ? 'Encerrada' : 
