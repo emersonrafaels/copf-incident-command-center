@@ -245,65 +245,96 @@ export default function OcorrenciaDetalhes() {
                     </div>
                   </div>
 
-                  {/* Informações do Equipamento */}
-                  <div>
-                    <h4 className="font-bold text-sm text-muted-foreground mb-3">Informações do Equipamento</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      <div>
-                        <Label className="font-medium text-xs">Fornecedor</Label>
-                        <p className="text-sm">{occurrence.vendor}</p>
-                      </div>
-                      <div>
-                        <Label className="font-medium text-xs">Equipamento</Label>
-                        <p className="text-sm">{occurrence.equipment}</p>
-                      </div>
-                      <div>
-                        <Label className="font-medium text-xs">Modelo</Label>
-                        <p className="text-sm">{(() => {
-                          const equipmentModelsMap: Record<string, string[]> = {
-                            'ATM Saque': ['Modelo ATM Saque 1', 'Modelo ATM Saque 2'],
-                            'ATM Depósito': ['Modelo ATM Depósito 1', 'Modelo ATM Depósito 2'],
-                            'Cassete': ['Modelo Cassete 1', 'Modelo Cassete 2'],
-                            'Notebook': ['Modelo Notebook 1', 'Modelo Notebook 2'],
-                            'Desktop': ['Modelo Desktop 1', 'Modelo Desktop 2'],
-                            'Leitor de Cheques/documentos': ['Modelo Leitor Cheques 1', 'Modelo Leitor Cheques 2'],
-                            'Leitor biométrico': ['Modelo Leitor Biométrico 1', 'Modelo Leitor Biométrico 2'],
-                            'PIN PAD': ['Modelo PIN PAD 1', 'Modelo PIN PAD 2'],
-                            'Scanner de Cheque': ['Modelo Scanner Cheque 1', 'Modelo Scanner Cheque 2'],
-                            'Impressora': ['Modelo Impressora 1', 'Modelo Impressora 2'],
-                            'Impressora térmica': ['Modelo Impressora Térmica 1', 'Modelo Impressora Térmica 2'],
-                            'Impressora multifuncional': ['Modelo Impressora Multifuncional 1', 'Modelo Impressora Multifuncional 2'],
-                            'Monitor LCD/LED': ['Modelo Monitor 1', 'Modelo Monitor 2'],
-                            'Teclado': ['Modelo Teclado 1', 'Modelo Teclado 2'],
-                            'Servidor': ['Modelo Servidor 1', 'Modelo Servidor 2'],
-                            'Televisão': ['Modelo Televisão 1', 'Modelo Televisão 2'],
-                            'Senheiro': ['Modelo Senheiro 1', 'Modelo Senheiro 2'],
-                            'TCR': ['Modelo TCR 1', 'Modelo TCR 2'],
-                            'Classificadora': ['Modelo Classificadora 1', 'Modelo Classificadora 2'],
-                            'Fragmentadora de Papel': ['Modelo Fragmentadora 1', 'Modelo Fragmentadora 2'],
-                          };
-                          const models = equipmentModelsMap[occurrence.equipment] || ['Modelo Genérico 1', 'Modelo Genérico 2'];
-                          const key = (occurrence.serialNumber || occurrence.id || '').toString();
-                          const idx = key.length > 0 ? (key.charCodeAt(0) + key.length) % models.length : 0;
-                          return models[idx];
-                        })()}</p>
-                      </div>
-                      <div>
-                        <Label className="font-medium text-xs">Número de Série</Label>
-                        <p className="text-sm font-mono">{occurrence.serialNumber}</p>
-                      </div>
-                      <div>
-                        <Label className="font-medium text-xs">Impedimento</Label>
-                        <p className="text-sm">{occurrence.possuiImpedimento ? 'Sim' : 'Não'}</p>
-                      </div>
-                      {occurrence.motivoImpedimento && (
-                        <div>
-                          <Label className="font-medium text-xs">Motivo</Label>
-                          <p className="text-sm">{occurrence.motivoImpedimento}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                   {/* Fornecedor - Informação Destacada */}
+                   <div>
+                     <h4 className="font-bold text-sm text-muted-foreground mb-3">Fornecedor Responsável</h4>
+                     <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
+                       <div className="flex items-center space-x-3">
+                         <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
+                           <User className="h-4 w-4 text-primary-foreground" />
+                         </div>
+                         <div>
+                           <Label className="font-medium text-xs text-muted-foreground">FORNECEDOR</Label>
+                           <p className="text-lg font-bold text-primary">{occurrence.vendor}</p>
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+
+                   {/* Informações do Equipamento */}
+                   <div>
+                     <h4 className="font-bold text-sm text-muted-foreground mb-3">Informações do Equipamento</h4>
+                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                       <div>
+                         <Label className="font-medium text-xs">Equipamento</Label>
+                         <p className="text-sm">{occurrence.equipment}</p>
+                       </div>
+                       <div>
+                         <Label className="font-medium text-xs">Modelo</Label>
+                         <p className="text-sm">{(() => {
+                           const equipmentModelsMap: Record<string, string[]> = {
+                             'ATM Saque': ['Modelo ATM Saque 1', 'Modelo ATM Saque 2'],
+                             'ATM Depósito': ['Modelo ATM Depósito 1', 'Modelo ATM Depósito 2'],
+                             'Cassete': ['Modelo Cassete 1', 'Modelo Cassete 2'],
+                             'Notebook': ['Modelo Notebook 1', 'Modelo Notebook 2'],
+                             'Desktop': ['Modelo Desktop 1', 'Modelo Desktop 2'],
+                             'Leitor de Cheques/documentos': ['Modelo Leitor Cheques 1', 'Modelo Leitor Cheques 2'],
+                             'Leitor biométrico': ['Modelo Leitor Biométrico 1', 'Modelo Leitor Biométrico 2'],
+                             'PIN PAD': ['Modelo PIN PAD 1', 'Modelo PIN PAD 2'],
+                             'Scanner de Cheque': ['Modelo Scanner Cheque 1', 'Modelo Scanner Cheque 2'],
+                             'Impressora': ['Modelo Impressora 1', 'Modelo Impressora 2'],
+                             'Impressora térmica': ['Modelo Impressora Térmica 1', 'Modelo Impressora Térmica 2'],
+                             'Impressora multifuncional': ['Modelo Impressora Multifuncional 1', 'Modelo Impressora Multifuncional 2'],
+                             'Monitor LCD/LED': ['Modelo Monitor 1', 'Modelo Monitor 2'],
+                             'Teclado': ['Modelo Teclado 1', 'Modelo Teclado 2'],
+                             'Servidor': ['Modelo Servidor 1', 'Modelo Servidor 2'],
+                             'Televisão': ['Modelo Televisão 1', 'Modelo Televisão 2'],
+                             'Senheiro': ['Modelo Senheiro 1', 'Modelo Senheiro 2'],
+                             'TCR': ['Modelo TCR 1', 'Modelo TCR 2'],
+                             'Classificadora': ['Modelo Classificadora 1', 'Modelo Classificadora 2'],
+                             'Fragmentadora de Papel': ['Modelo Fragmentadora 1', 'Modelo Fragmentadora 2'],
+                           };
+                           const models = equipmentModelsMap[occurrence.equipment] || ['Modelo Genérico 1', 'Modelo Genérico 2'];
+                           const key = (occurrence.serialNumber || occurrence.id || '').toString();
+                           const idx = key.length > 0 ? (key.charCodeAt(0) + key.length) % models.length : 0;
+                           return models[idx];
+                         })()}</p>
+                       </div>
+                       <div>
+                         <Label className="font-medium text-xs">Número de Série</Label>
+                         <p className="text-sm font-mono">{occurrence.serialNumber}</p>
+                       </div>
+                     </div>
+                   </div>
+
+                   {/* Bloco de Impedimentos */}
+                   <div>
+                     <h4 className="font-bold text-sm text-muted-foreground mb-3">Status de Impedimento</h4>
+                     <div className={`border rounded-lg p-4 ${occurrence.possuiImpedimento ? 'bg-destructive/10 border-destructive/20' : 'bg-muted/50 border-border'}`}>
+                       <div className="flex items-start space-x-3">
+                         <div className={`h-8 w-8 rounded-full flex items-center justify-center ${occurrence.possuiImpedimento ? 'bg-destructive' : 'bg-muted-foreground/20'}`}>
+                           <AlertTriangle className={`h-4 w-4 ${occurrence.possuiImpedimento ? 'text-destructive-foreground' : 'text-muted-foreground'}`} />
+                         </div>
+                         <div className="flex-1">
+                           <div className="flex items-center space-x-2 mb-2">
+                             <Label className="font-medium text-xs text-muted-foreground">IMPEDIMENTO</Label>
+                             <Badge variant={occurrence.possuiImpedimento ? "destructive" : "secondary"} className="text-xs">
+                               {occurrence.possuiImpedimento ? 'SIM' : 'NÃO'}
+                             </Badge>
+                           </div>
+                           {occurrence.possuiImpedimento && occurrence.motivoImpedimento && (
+                             <div>
+                               <Label className="font-medium text-xs text-muted-foreground">MOTIVO DO IMPEDIMENTO</Label>
+                               <p className="text-sm font-medium mt-1">{occurrence.motivoImpedimento}</p>
+                             </div>
+                           )}
+                           {!occurrence.possuiImpedimento && (
+                             <p className="text-sm text-muted-foreground">Nenhum impedimento identificado para esta ocorrência</p>
+                           )}
+                         </div>
+                       </div>
+                     </div>
+                   </div>
 
                   {/* Informações Temporais */}
                   <div>
