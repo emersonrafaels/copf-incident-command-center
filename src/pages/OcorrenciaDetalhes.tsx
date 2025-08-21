@@ -213,6 +213,44 @@ export default function OcorrenciaDetalhes() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Informações da Ocorrência */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Status e Fornecedor */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Fornecedor */}
+                  <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center">
+                        <User className="h-5 w-5 text-primary-foreground" />
+                      </div>
+                      <div>
+                        <Label className="font-medium text-xs text-muted-foreground">FORNECEDOR RESPONSÁVEL</Label>
+                        <p className="text-xl font-bold text-primary">{occurrence.vendor}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Status Atual */}
+                  <div className="bg-secondary/10 border border-secondary/20 rounded-lg p-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
+                        <AlertTriangle className="h-5 w-5 text-secondary-foreground" />
+                      </div>
+                      <div>
+                        <Label className="font-medium text-xs text-muted-foreground">STATUS ATUAL</Label>
+                        <p className="text-xl font-bold text-secondary">
+                          {occurrence.status === 'a_iniciar' ? 'A Iniciar' : 
+                           occurrence.status === 'em_andamento' ? 'Em Andamento' : 
+                           occurrence.status === 'encerrado' ? 'Encerrada' : 
+                           occurrence.status === 'com_impedimentos' ? 'Com Impedimentos' : 'Cancelada'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
