@@ -283,21 +283,7 @@ export default function OcorrenciaDetalhes() {
                     </div>
                   </div>
 
-                   {/* Fornecedor - Informação Destacada */}
-                   <div>
-                     <h4 className="font-bold text-sm text-muted-foreground mb-3">Fornecedor Responsável</h4>
-                     <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
-                       <div className="flex items-center space-x-3">
-                         <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
-                           <User className="h-4 w-4 text-primary-foreground" />
-                         </div>
-                         <div>
-                           <Label className="font-medium text-xs text-muted-foreground">FORNECEDOR</Label>
-                           <p className="text-lg font-bold text-primary">{occurrence.vendor}</p>
-                         </div>
-                       </div>
-                     </div>
-                   </div>
+                   {/* Removed duplicate supplier section - now shown in header */}
 
                    {/* Informações do Equipamento */}
                    <div>
