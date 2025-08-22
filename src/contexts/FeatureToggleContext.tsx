@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 export interface FeatureToggle {
   id: string;
@@ -187,44 +189,95 @@ const defaultOrder: DashboardOrder = {
   ]
 };
 
-const STORAGE_KEY = 'copf-feature-toggles';
-const ORDER_STORAGE_KEY = 'copf-dashboard-order';
-
 export const FeatureToggleProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [featureToggles, setFeatureToggles] = useState<Record<string, FeatureToggle>>(defaultToggles);
   const [dashboardOrder, setDashboardOrder] = useState<DashboardOrder>(defaultOrder);
+  const { toast } = useToast();
 
-  // Carregar configurações do localStorage na inicialização
+  // Carregar configurações do Supabase na inicialização
   useEffect(() => {
-    const savedToggles = localStorage.getItem(STORAGE_KEY);
-    const savedOrder = localStorage.getItem(ORDER_STORAGE_KEY);
-
-    if (savedToggles) {
-      try {
-        const parsed = JSON.parse(savedToggles);
-        setFeatureToggles({ ...defaultToggles, ...parsed });
-      } catch (error) {
-        console.error('Erro ao carregar configurações de toggles:', error);
-      }
-    }
-
-    if (savedOrder) {
-      try {
-        const parsed = JSON.parse(savedOrder);
-        setDashboardOrder({ ...defaultOrder, ...parsed });
-      } catch (error) {
-        console.error('Erro ao carregar ordem do dashboard:', error);
-      }
-    }
+    loadSettings();
   }, []);
 
-  // Salvar no localStorage sempre que houver mudanças
+  const loadSettings = async () => {
+    try {
+      // Verificar se há usuário autenticado
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        // Se não há usuário, usar configurações padrão
+        return;
+      }
+
+      // Carregar configurações do banco
+      const { data: settings, error } = await supabase
+        .from('dashboard_settings')
+        .select('setting_key, setting_value')
+        .in('setting_key', ['feature-toggles', 'dashboard-order']);
+
+      if (error) {
+        console.error('Erro ao carregar configurações:', error);
+        return;
+      }
+
+      if (settings) {
+        settings.forEach(({ setting_key, setting_value }) => {
+          if (setting_key === 'feature-toggles' && setting_value && typeof setting_value === 'object' && !Array.isArray(setting_value)) {
+            setFeatureToggles({ ...defaultToggles, ...(setting_value as unknown as Record<string, FeatureToggle>) });
+          } else if (setting_key === 'dashboard-order' && setting_value && typeof setting_value === 'object' && !Array.isArray(setting_value)) {
+            setDashboardOrder({ ...defaultOrder, ...(setting_value as unknown as DashboardOrder) });
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao carregar configurações:', error);
+    }
+  };
+
+  const saveSettings = async (key: string, value: any) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Autenticação necessária",
+          description: "Você precisa estar logado para salvar configurações.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { error } = await supabase
+        .from('dashboard_settings')
+        .upsert({
+          setting_key: key,
+          setting_value: value
+        });
+
+      if (error) {
+        console.error(`Erro ao salvar ${key}:`, error);
+        toast({
+          title: "Erro ao salvar",
+          description: "Não foi possível salvar as configurações.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error(`Erro ao salvar ${key}:`, error);
+    }
+  };
+
+  // Salvar no Supabase sempre que houver mudanças
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(featureToggles));
+    if (JSON.stringify(featureToggles) !== JSON.stringify(defaultToggles)) {
+      saveSettings('feature-toggles', featureToggles);
+    }
   }, [featureToggles]);
 
   useEffect(() => {
-    localStorage.setItem(ORDER_STORAGE_KEY, JSON.stringify(dashboardOrder));
+    if (JSON.stringify(dashboardOrder) !== JSON.stringify(defaultOrder)) {
+      saveSettings('dashboard-order', dashboardOrder);
+    }
   }, [dashboardOrder]);
 
   const updateToggle = (id: string, enabled: boolean) => {
@@ -244,11 +297,23 @@ export const FeatureToggleProvider: React.FC<{ children: ReactNode }> = ({ child
     }));
   };
 
-  const resetToDefaults = () => {
+  const resetToDefaults = async () => {
     setFeatureToggles(defaultToggles);
     setDashboardOrder(defaultOrder);
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(ORDER_STORAGE_KEY);
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        // Deletar configurações do banco
+        await supabase
+          .from('dashboard_settings')
+          .delete()
+          .in('setting_key', ['feature-toggles', 'dashboard-order']);
+      }
+    } catch (error) {
+      console.error('Erro ao resetar configurações:', error);
+    }
   };
 
   const getOrderedItems = (category: keyof DashboardOrder): FeatureToggle[] => {
