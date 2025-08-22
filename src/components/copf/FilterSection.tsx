@@ -883,6 +883,56 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
                       </Popover>
                     </div>
 
+                    {/* Status do equipamento */}
+                    <div className="group space-y-3">
+                      <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                        <div className="w-1 h-4 bg-secondary/60 rounded-full"></div>
+                        Status do equipamento
+                      </Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" className="w-full h-10 justify-between hover:bg-secondary/5 hover:border-secondary/30 transition-all duration-200 group-hover:shadow-sm">
+                            {statusEquipamentoFilterMulti.length > 0 ? (
+                              <div className="flex items-center gap-2">
+                                <Badge variant="secondary" className="h-5 text-xs bg-secondary/10 text-secondary">
+                                  {statusEquipamentoFilterMulti.length}
+                                </Badge>
+                                <span className="text-sm">
+                                  {statusEquipamentoFilterMulti.length === 1 ? 
+                                    (statusEquipamentoFilterMulti[0] === 'operante' ? 'Operante' : 'Inoperante') : 
+                                    `${statusEquipamentoFilterMulti.length} status`}
+                                </span>
+                              </div>
+                            ) : "Todos os status"}
+                            <div className="w-4 h-4 opacity-50">⌄</div>
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                          <Command>
+                            <CommandList>
+                              <CommandGroup>
+                                {[
+                                  { value: 'operante', label: 'Equipamento Operante' },
+                                  { value: 'inoperante', label: 'Equipamento Inoperante' }
+                                ].map(status => (
+                                  <CommandItem key={status.value} onSelect={() => {
+                                    const isSelected = statusEquipamentoFilterMulti.includes(status.value);
+                                    if (isSelected) {
+                                      updateFilter('statusEquipamentoFilterMulti', statusEquipamentoFilterMulti.filter(s => s !== status.value));
+                                    } else {
+                                      updateFilter('statusEquipamentoFilterMulti', [...statusEquipamentoFilterMulti, status.value]);
+                                    }
+                                  }}>
+                                    <Check className={cn("mr-2 h-4 w-4", statusEquipamentoFilterMulti.includes(status.value) ? "opacity-100" : "opacity-0")} />
+                                    {status.label}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                    </div>
                   </div>
                 </CollapsibleContent>
               </div>
