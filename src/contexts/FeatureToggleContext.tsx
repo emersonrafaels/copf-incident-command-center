@@ -90,7 +90,7 @@ const defaultToggles: Record<string, FeatureToggle> = {
     id: 'todayOccurrences',
     label: 'Entraram Hoje',
     description: 'Ocorrências que entraram no sistema hoje',
-    enabled: true,
+    enabled: false,
     category: 'cards',
     order: 7
   },
