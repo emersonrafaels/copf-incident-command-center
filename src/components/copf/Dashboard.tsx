@@ -1094,12 +1094,6 @@ export function Dashboard() {
         </div>
       </div>
 
-      {/* Filtros */}
-      <div className="animate-fade-in" style={{
-      animationDelay: '0.1s'
-    }}>
-        <FilterSection defaultOpen />
-      </div>
 
       {/* Métricas principais */}
       <div className="animate-fade-in" style={{
