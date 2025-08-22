@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
+// Force refresh after removing Supabase/useToast dependencies
+
 export interface FeatureToggle {
   id: string;
   label: string;
