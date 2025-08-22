@@ -236,7 +236,7 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
   });
 
   // Verificar tipo de ponto atual (para mostrar filtros condicionais)
-  const tipoAgenciaAtual = tipoAgenciaFilter.includes('terceirizada') ? 'terceirizada' : tipoAgenciaFilter.includes('convencional') ? 'convencional' : 'all';
+  const tipoAgenciaAtual = tipoAgenciaFilter.some(tipo => tipo.includes('Terceirizada')) ? 'terceirizada' : tipoAgenciaFilter.some(tipo => tipo.includes('Convencional')) ? 'convencional' : 'all';
 
   return (
     <Card className={cn("animate-fade-in border-border/50 bg-gradient-to-r from-card to-muted/20", className)}>
@@ -395,7 +395,7 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
                             <Command>
                               <CommandList>
                                 <CommandGroup>
-                                   {['Convencional (Ag)', 'Convencional (PAB)', 'Terceirizada (Espaço Itaú)', 'Terceirizada (PAB)', 'Terceirizada (PAE)', 'Terceirizada (Phygital)'].map(tipo => (
+                                   {['Convencional (AG)', 'Convencional (PAB)', 'Terceirizada (Espaço Itaú)', 'Terceirizada (PAB)', 'Terceirizada (PAE)', 'Terceirizada (Phygital)'].map(tipo => (
                                       <CommandItem key={tipo} onSelect={() => {
                                         const isSelected = tipoAgenciaFilter.includes(tipo);
                                         if (isSelected) {

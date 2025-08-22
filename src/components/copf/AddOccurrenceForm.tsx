@@ -60,7 +60,7 @@ export const AddOccurrenceForm = ({ onSuccess }: AddOccurrenceFormProps) => {
   const segmentOptions = ["Varejo", "Atacado", "Corporativo", "Private"];
   const vendorOptions = ["Fornecedor A", "Fornecedor B", "Fornecedor C", "Fornecedor D"];
   const ufOptions = ["SP", "RJ", "MG", "RS", "PR", "SC", "BA", "GO", "PE", "CE"];
-  const tipoAgenciaOptions = ["Convencional (Ag)", "Convencional (PAB)", "Terceirizada (Espaço Itaú)", "Terceirizada (PAB)", "Terceirizada (PAE)", "Terceirizada (Phygital)"];
+  const tipoAgenciaOptions = ["Convencional (AG)", "Convencional (PAB)", "Terceirizada (Espaço Itaú)", "Terceirizada (PAB)", "Terceirizada (PAE)", "Terceirizada (Phygital)"];
   const transportadoraOptions = ["Transportadora A", "Transportadora B", "Transportadora C"];
 
   const handleSubmit = async (e: React.FormEvent) => {

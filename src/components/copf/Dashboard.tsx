@@ -991,7 +991,7 @@ export function Dashboard() {
   })));
 
   // Verificar tipo de ponto atual (para mostrar filtros condicionais)
-  const tipoAgenciaAtual = tipoAgenciaFilter.includes('terceirizada') ? 'terceirizada' : tipoAgenciaFilter.includes('convencional') ? 'convencional' : 'all';
+  const tipoAgenciaAtual = tipoAgenciaFilter.some(tipo => tipo.includes('Terceirizada')) ? 'terceirizada' : tipoAgenciaFilter.some(tipo => tipo.includes('Convencional')) ? 'convencional' : 'all';
   return <div id="dashboard-content" className="space-y-8 animate-fade-in">
       {/* Hero Header */}
       <div className="relative">
