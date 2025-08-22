@@ -326,6 +326,7 @@ export function Dashboard() {
   };
 
   const renderChart = (chartId: string) => {
+    console.log(`Chart ${chartId}:`, featureToggles[chartId]?.enabled);
     if (!featureToggles[chartId]?.enabled) return null;
     
     switch (chartId) {
