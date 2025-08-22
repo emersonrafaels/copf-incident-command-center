@@ -159,16 +159,16 @@ export const AddOccurrenceForm = ({ onSuccess }: AddOccurrenceFormProps) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle className="text-base font-extrabold">Informações da Agência</CardTitle>
+                <CardTitle className="text-base font-extrabold">Informações do Ponto</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="agencia" className="font-semibold">Agência *</Label>
+                  <Label htmlFor="agencia" className="font-semibold">Ponto *</Label>
                   <Input
                     id="agencia"
                     value={formData.agencia}
                     onChange={(e) => handleInputChange("agencia", e.target.value)}
-                    placeholder="Ex: Agência Centro - 001"
+                    placeholder="Ex: Ponto Centro - 001"
                     required
                   />
                 </div>

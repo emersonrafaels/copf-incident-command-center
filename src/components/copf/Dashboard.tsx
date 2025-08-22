@@ -211,7 +211,7 @@ export function Dashboard() {
                   </div>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs">
-                  <p><strong>Reincidências:</strong> Ocorrências que se repetem no mesmo equipamento e agência, indicando possíveis problemas estruturais ou necessidade de manutenção preventiva mais eficaz.</p>
+                  <p><strong>Reincidências:</strong> Ocorrências que se repetem no mesmo equipamento e ponto, indicando possíveis problemas estruturais ou necessidade de manutenção preventiva mais eficaz.</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -225,7 +225,7 @@ export function Dashboard() {
                 <TooltipTrigger asChild>
                   <div className="relative">
                     <OptimizedMetricCard 
-                      title="Agências Afetadas" 
+                      title="Pontos Afetados" 
                       value={(() => {
                         const affectedAgencies = new Set(filteredOccurrences.map(o => o.agency));
                         const vipAgencies = Array.from(affectedAgencies).filter(agency => {
@@ -242,7 +242,7 @@ export function Dashboard() {
                   </div>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs">
-                  <p><strong>Agências Afetadas:</strong> Número de agências bancárias que possuem pelo menos uma ocorrência ativa. As agências VIP são pontos estratégicos que recebem prioridade especial no atendimento.</p>
+                  <p><strong>Pontos Afetados:</strong> Número de pontos que possuem pelo menos uma ocorrência ativa. Os pontos VIP são unidades estratégicas que recebem prioridade especial no atendimento.</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -785,7 +785,7 @@ export function Dashboard() {
       // Usar o campo tipoAgencia do objeto de dados
       if (tipoAgenciaFilter.length > 0 && !tipoAgenciaFilter.includes(occurrence.tipoAgencia)) return false;
 
-      // Simular ponto VIP (agências com número terminado em 0, 5 são VIP)
+      // Simular ponto VIP (pontos com número terminado em 0, 5 são VIP)
       const agencyNumber = occurrence.agency.match(/\d+/)?.[0] || '0';
       const isVip = agencyNumber.endsWith('0') || agencyNumber.endsWith('5');
       const pontoVipStatus = isVip ? 'sim' : 'nao';
@@ -804,7 +804,7 @@ export function Dashboard() {
 
       // Filtro de reincidências (simular campo reincidencia)
       if (reincidentFilter) {
-        // Lógica simplificada: equipamentos com mais de uma ocorrência na mesma agência
+        // Lógica simplificada: equipamentos com mais de uma ocorrência no mesmo ponto
         const hasReincidence = occurrences.some(other => 
           other.id !== occurrence.id &&
           other.equipment === occurrence.equipment && 
@@ -979,9 +979,9 @@ export function Dashboard() {
   // Estados brasileiros
   const estadosBrasil = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'];
 
-  // Filtrar UFs baseadas nas agências selecionadas
+  // Filtrar UFs baseadas nos pontos selecionados
   const availableUFs = !Array.isArray(agenciaFilter) || agenciaFilter.length === 0 ? estadosBrasil : Array.from(new Set(agenciaFilter.map(agencyNumber => {
-    // Lógica simplificada: agências 0-999 = SP, 1000-1999 = RJ, etc.
+    // Lógica simplificada: pontos 0-999 = SP, 1000-1999 = RJ, etc.
     const num = parseInt(agencyNumber);
     if (num <= 999) return 'SP';
     if (num <= 1999) return 'RJ';
@@ -990,7 +990,7 @@ export function Dashboard() {
     return 'PR';
   })));
 
-  // Verificar tipo de agência atual (para mostrar filtros condicionais)
+  // Verificar tipo de ponto atual (para mostrar filtros condicionais)
   const tipoAgenciaAtual = tipoAgenciaFilter.includes('terceirizada') ? 'terceirizada' : tipoAgenciaFilter.includes('convencional') ? 'convencional' : 'all';
   return <div id="dashboard-content" className="space-y-8 animate-fade-in">
       {/* Hero Header */}

@@ -122,8 +122,8 @@ const defaultToggles: Record<string, FeatureToggle> = {
   },
   topAgenciesChart: {
     id: 'topAgenciesChart',
-    label: 'Top Agências Afetadas',
-    description: 'Ranking das agências com mais ocorrências',
+    label: 'Top Pontos Afetados',
+    description: 'Ranking dos pontos com mais ocorrências',
     enabled: true,
     category: 'charts',
     order: 1
@@ -219,7 +219,7 @@ const defaultOrder: DashboardOrder = {
   ],
   charts: [
     'equipmentStatusChart',
-    'topAgenciesChart',
+          'topAgenciesChart',
     'agingChart',
     'vendorMetricsMatrix',
     'motivoLongTailChart',

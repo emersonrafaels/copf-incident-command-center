@@ -60,7 +60,7 @@ export function TopAgenciesChart({ occurrences, filteredOccurrences }: TopAgenci
       .sort((a: any, b: any) => b.total - a.total)
       .slice(0, 10)
       .map((agency: any) => {
-        // Adicionar marcador VIP ao nome da agência
+        // Adicionar marcador VIP ao nome do ponto
         const isVip = (() => {
           const number = agency.agency.match(/\d+/)?.[0] || '0';
           return number.endsWith('0') || number.endsWith('5');
@@ -175,7 +175,7 @@ export function TopAgenciesChart({ occurrences, filteredOccurrences }: TopAgenci
     // Mostrar toast de confirmação
     toast({
       title: "Filtros aplicados",
-      description: `Visualizando ocorrências da agência ${agencyNumber}${equipmentType ? ` - ${equipmentType}` : ''}`,
+      description: `Visualizando ocorrências do ponto ${agencyNumber}${equipmentType ? ` - ${equipmentType}` : ''}`,
     });
   };
 
@@ -184,20 +184,20 @@ export function TopAgenciesChart({ occurrences, filteredOccurrences }: TopAgenci
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <div className="w-2 h-6 bg-gradient-to-b from-primary to-primary/60 rounded-sm"></div>
-          Top 10 Agências por Volume de Ocorrências
+          Top 10 Pontos por Volume de Ocorrências
           <TooltipProvider>
             <UITooltip>
               <TooltipTrigger>
                 <Info className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors" />
               </TooltipTrigger>
               <TooltipContent>
-                <p>Este gráfico representa as top 10 agências com mais ocorrências. Clique nas barras para filtrar por agência.</p>
+                <p>Este gráfico representa os top 10 pontos com mais ocorrências. Clique nas barras para filtrar por ponto.</p>
               </TooltipContent>
             </UITooltip>
           </TooltipProvider>
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Agências com maior número de ocorrências e seus principais equipamentos problemáticos
+          Pontos com maior número de ocorrências e seus principais equipamentos problemáticos
         </p>
       </CardHeader>
       <CardContent>
@@ -256,15 +256,15 @@ export function TopAgenciesChart({ occurrences, filteredOccurrences }: TopAgenci
           </div>
         </div>
 
-        {/* Resumo das agências VIP */}
+        {/* Resumo dos pontos VIP */}
         {chartData.chartData.some((agency: any) => agency.isVip) && (
           <div className="mt-6 p-4 bg-yellow-500/5 border border-yellow-500/20 rounded-lg">
             <div className="flex items-center gap-2 mb-2">
               <AlertTriangle className="h-4 w-4 text-yellow-600" />
-              <span className="text-sm font-medium text-yellow-800">Agências VIP Identificadas</span>
+              <span className="text-sm font-medium text-yellow-800">Pontos VIP Identificados</span>
             </div>
             <p className="text-xs text-yellow-700">
-              Agências VIP são marcadas com um símbolo de 👑
+              Pontos VIP são marcados com um símbolo de 👑
             </p>
           </div>
         )}

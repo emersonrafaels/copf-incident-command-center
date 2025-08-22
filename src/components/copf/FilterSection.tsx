@@ -160,15 +160,15 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
   };
   const availableVendors = getFilteredVendors();
 
-  // Gerar agências únicas baseadas nas ocorrências
+  // Gerar pontos únicos baseados nas ocorrências
   const uniqueAgencies = Array.from(new Set(occurrences.map(o => o.agency.match(/\d+/)?.[0] || ''))).filter(Boolean).sort();
 
   // Estados brasileiros
   const estadosBrasil = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'];
 
-  // Filtrar UFs baseadas nas agências selecionadas
+  // Filtrar UFs baseadas nos pontos selecionados
   const availableUFs = !Array.isArray(agenciaFilter) || agenciaFilter.length === 0 ? estadosBrasil : Array.from(new Set(agenciaFilter.map(agencyNumber => {
-    // Lógica simplificada: agências 0-999 = SP, 1000-1999 = RJ, etc.
+    // Lógica simplificada: pontos 0-999 = SP, 1000-1999 = RJ, etc.
     const num = parseInt(agencyNumber);
     if (num <= 999) return 'SP';
     if (num <= 1999) return 'RJ';
@@ -222,7 +222,7 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
     return dinegFilter.flatMap(dineg => suptOptions[dineg as keyof typeof suptOptions] || []).sort();
   };
 
-  // Filtrar DINEG baseado nas agências selecionadas (lógica simplificada)
+  // Filtrar DINEG baseado nos pontos selecionados (lógica simplificada)
   const availableDinegs = !Array.isArray(agenciaFilter) || agenciaFilter.length === 0 ? dinegOptions : dinegOptions.filter((dineg, index) => {
     // Lógica simplificada para demonstração
     const agencyNumbers = agenciaFilter.map(a => parseInt(a));
@@ -235,7 +235,7 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
     return hasMatchingAgency;
   });
 
-  // Verificar tipo de agência atual (para mostrar filtros condicionais)
+  // Verificar tipo de ponto atual (para mostrar filtros condicionais)
   const tipoAgenciaAtual = tipoAgenciaFilter.includes('terceirizada') ? 'terceirizada' : tipoAgenciaFilter.includes('convencional') ? 'convencional' : 'all';
 
   return (
@@ -262,7 +262,7 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
                   <>
                     <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20">
                       {Object.values({
-                        agencia: agenciaFilter.length > 0,
+                         agencia: agenciaFilter.length > 0,
                         uf: ufFilter.length > 0,
                         municipio: municipioFilter.length > 0,
                         dineg: dinegFilter.length > 0,
@@ -366,7 +366,7 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <div className="space-y-6">
-                    {/* Tipo da Agência - Primeiro filtro */}
+                    {/* Tipo do Ponto - Primeiro filtro */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                       <div className="group space-y-3">
                         <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
@@ -416,55 +416,55 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
                       </div>
                     </div>
 
-                    {/* Linha com Agência, UF, Município */}
+                    {/* Linha com Ponto, UF, Município */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {/* Agência */}
-                      <div className="group space-y-3">
-                        <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                          <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
-                          Agência
-                        </Label>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
-                              {agenciaFilter.length > 0 ? (
-                                <div className="flex items-center gap-2">
-                                  <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
-                                    {agenciaFilter.length}
-                                  </Badge>
-                                  <span className="text-sm">
-                                    {agenciaFilter.length === 1 ? `Agência ${agenciaFilter[0]}` : `${agenciaFilter.length} agências`}
-                                  </span>
-                                </div>
-                              ) : "Todas as agências"}
-                              <div className="w-4 h-4 opacity-50">⌄</div>
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
-                            <Command>
-                              <CommandInput placeholder="Buscar agência..." className="h-9" />
-                              <CommandEmpty>Nenhuma agência encontrada.</CommandEmpty>
-                              <CommandList>
-                                <CommandGroup className="max-h-64 overflow-y-auto">
-                                  {uniqueAgencies.map(agency => (
-                                    <CommandItem key={agency} onSelect={() => {
-                                      const isSelected = agenciaFilter.includes(agency);
-                                      if (isSelected) {
-                                        updateFilter('agenciaFilter', agenciaFilter.filter(a => a !== agency));
-                                      } else {
-                                        updateFilter('agenciaFilter', [...agenciaFilter, agency]);
-                                      }
-                                    }}>
-                                      <Check className={cn("mr-2 h-4 w-4", agenciaFilter.includes(agency) ? "opacity-100" : "opacity-0")} />
-                                      Agência {agency}
-                                    </CommandItem>
-                                  ))}
-                                </CommandGroup>
-                              </CommandList>
-                            </Command>
-                          </PopoverContent>
-                        </Popover>
-                      </div>
+                       {/* Ponto */}
+                       <div className="group space-y-3">
+                         <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                           <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+                           Ponto
+                         </Label>
+                         <Popover>
+                           <PopoverTrigger asChild>
+                             <Button variant="outline" className="w-full h-10 justify-between hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 group-hover:shadow-sm">
+                               {agenciaFilter.length > 0 ? (
+                                 <div className="flex items-center gap-2">
+                                   <Badge variant="secondary" className="h-5 text-xs bg-primary/10 text-primary">
+                                     {agenciaFilter.length}
+                                   </Badge>
+                                   <span className="text-sm">
+                                     {agenciaFilter.length === 1 ? `Ponto ${agenciaFilter[0]}` : `${agenciaFilter.length} pontos`}
+                                   </span>
+                                 </div>
+                               ) : "Todos os pontos"}
+                               <div className="w-4 h-4 opacity-50">⌄</div>
+                             </Button>
+                           </PopoverTrigger>
+                           <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
+                             <Command>
+                               <CommandInput placeholder="Buscar ponto..." className="h-9" />
+                               <CommandEmpty>Nenhum ponto encontrado.</CommandEmpty>
+                               <CommandList>
+                                 <CommandGroup className="max-h-64 overflow-y-auto">
+                                   {uniqueAgencies.map(agency => (
+                                     <CommandItem key={agency} onSelect={() => {
+                                       const isSelected = agenciaFilter.includes(agency);
+                                       if (isSelected) {
+                                         updateFilter('agenciaFilter', agenciaFilter.filter(a => a !== agency));
+                                       } else {
+                                         updateFilter('agenciaFilter', [...agenciaFilter, agency]);
+                                       }
+                                     }}>
+                                       <Check className={cn("mr-2 h-4 w-4", agenciaFilter.includes(agency) ? "opacity-100" : "opacity-0")} />
+                                       Ponto {agency}
+                                     </CommandItem>
+                                   ))}
+                                 </CommandGroup>
+                               </CommandList>
+                             </Command>
+                           </PopoverContent>
+                         </Popover>
+                       </div>
 
                       {/* UF */}
                       <div className="group space-y-3">
