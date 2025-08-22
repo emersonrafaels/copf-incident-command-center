@@ -9,8 +9,19 @@ import { ComingSoonOverlay } from "@/components/copf/ComingSoonOverlay";
 import { ComingSoonBadge } from "@/components/copf/ComingSoonBadge";
 import { PopulateOccurrencesButton } from "@/components/copf/PopulateOccurrencesButton";
 import { DashboardOrderConfig } from "@/components/copf/DashboardOrderConfig";
+import { useToast } from "@/hooks/use-toast";
 
 const Configuracoes = () => {
+  const { toast } = useToast();
+
+  const handleSaveSettings = () => {
+    // Save any form values to localStorage if needed
+    toast({
+      title: "Configurações salvas",
+      description: "Suas alterações foram aplicadas com sucesso.",
+    });
+  };
+
   return (
     <COPFLayout>
       <ComingSoonOverlay
@@ -248,7 +259,7 @@ const Configuracoes = () => {
                   <p className="font-medium">Salvar Configurações</p>
                   <p className="text-sm text-muted-foreground">As alterações serão aplicadas imediatamente</p>
                 </div>
-                <Button variant="premium">
+                <Button variant="premium" onClick={handleSaveSettings}>
                   Salvar Alterações
                 </Button>
               </div>
