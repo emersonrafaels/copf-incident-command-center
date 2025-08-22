@@ -33,6 +33,7 @@ import { Check } from "lucide-react";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useToast } from "@/hooks/use-toast";
 import { useFilters } from "@/contexts/FiltersContext";
+import { useFeatureToggle } from "@/contexts/FeatureToggleContext";
 import { AlertTriangle, CheckCircle2, Clock, TrendingUp, MapPin, Users, Calendar, Download, RefreshCw, CalendarDays, Truck, HelpCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import jsPDF from 'jspdf';
@@ -54,6 +55,7 @@ export function Dashboard() {
     refreshData
   } = useDashboardData();
   const { toast: toastHook } = useToast();
+  const { featureToggles, getOrderedItems } = useFeatureToggle();
   const [selectedOccurrence, setSelectedOccurrence] = useState<any>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -65,6 +67,362 @@ export function Dashboard() {
   useEffect(() => {
     filters.clearAllFilters();
   }, []);
+  
+  // Helper functions para renderizar componentes baseado nos feature toggles
+  const renderCard = (cardId: string) => {
+    if (!featureToggles[cardId]?.enabled) return null;
+    
+    switch (cardId) {
+      case 'totalOccurrences':
+        return (
+          <div key={cardId} onClick={() => handleNavigateToOccurrences('total')} className="cursor-pointer">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="relative">
+                    <OptimizedMetricCard 
+                      title="Total de Ocorrências" 
+                      value={cardMetrics.totalOccurrences}
+                      icon={<AlertTriangle className="h-4 w-4" />} 
+                      description={`${Math.round(cardMetrics.totalOccurrences / occurrences.length * 100)}% do total`}
+                      isLoading={isLoading}
+                    />
+                    <HelpCircle className="absolute top-2 right-2 h-4 w-4 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p><strong>Total de Ocorrências:</strong> Número total de incidentes registrados no sistema, incluindo todas as situações que requerem intervenção técnica nos equipamentos bancários.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        );
+      case 'pendingOccurrences':
+        return (
+          <div key={cardId} onClick={() => handleNavigateToOccurrences('pending')} className="cursor-pointer">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="relative">
+                    <OptimizedMetricCard 
+                      title="Ocorrências Pendentes" 
+                      value={cardMetrics.pendingOccurrences}
+                      icon={<Clock className="h-4 w-4" />} 
+                      description="Em andamento ou aguardando"
+                      isLoading={isLoading}
+                    />
+                    <HelpCircle className="absolute top-2 right-2 h-4 w-4 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p><strong>Ocorrências Pendentes:</strong> Incidentes que ainda não foram resolvidos, incluindo os que estão aguardando início, em andamento ou com impedimentos. Requer atenção da equipe técnica.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        );
+      case 'inoperantEquipments':
+        return (
+          <div key={cardId} onClick={() => handleNavigateToOccurrences('inoperant')} className="cursor-pointer">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="relative">
+                    <OptimizedMetricCard 
+                      title="Equipamentos Inoperantes" 
+                      value={cardMetrics.inoperantEquipments}
+                      icon={<AlertTriangle className="h-4 w-4" />} 
+                      description="Equipamentos fora de operação"
+                      isLoading={isLoading}
+                    />
+                    <HelpCircle className="absolute top-2 right-2 h-4 w-4 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p><strong>Equipamentos Inoperantes:</strong> Número de equipamentos que estão fora de operação devido a falhas técnicas, indisponibilidade ou manutenção, impactando diretamente o atendimento aos clientes.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        );
+      case 'criticalOccurrences':
+        return (
+          <div key={cardId} onClick={() => handleNavigateToOccurrences('critical')} className="cursor-pointer">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="relative">
+                    <OptimizedMetricCard 
+                      title="Ocorrências Críticas" 
+                      value={cardMetrics.criticalOccurrences}
+                      icon={<AlertTriangle className="h-4 w-4" />} 
+                      description="Prioridade máxima"
+                      isLoading={isLoading}
+                    />
+                    <HelpCircle className="absolute top-2 right-2 h-4 w-4 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p><strong>Ocorrências Críticas:</strong> Incidentes de severidade crítica que impactam severamente a operação e requerem atenção imediata, com SLA de resolução de 24 horas.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        );
+      case 'overdueOccurrences':
+        return (
+          <div key={cardId} onClick={() => handleNavigateToOccurrences('overdue')} className="cursor-pointer">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="relative">
+                    <OptimizedMetricCard 
+                      title="SLA em Atraso" 
+                      value={cardMetrics.overdueOccurrences}
+                      icon={<AlertTriangle className="h-4 w-4" />} 
+                      description="Acima do prazo limite"
+                      isLoading={isLoading}
+                    />
+                    <HelpCircle className="absolute top-2 right-2 h-4 w-4 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p><strong>SLA em Atraso:</strong> Ocorrências que ultrapassaram o tempo limite de resolução estabelecido no acordo de nível de serviço (24h para críticas/altas, 72h para médias/baixas).</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        );
+      case 'reincidences':
+        return (
+          <div key={cardId} onClick={() => handleNavigateToOccurrences('reincidence')} className="cursor-pointer">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="relative">
+                    <OptimizedMetricCard 
+                      title="Reincidências" 
+                      value={cardMetrics.reincidentOccurrences}
+                      icon={<AlertTriangle className="h-4 w-4" />} 
+                      description="Ocorrências repetidas"
+                      isLoading={isLoading}
+                    />
+                    <HelpCircle className="absolute top-2 right-2 h-4 w-4 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p><strong>Reincidências:</strong> Ocorrências que se repetem no mesmo equipamento e agência, indicando possíveis problemas estruturais ou necessidade de manutenção preventiva mais eficaz.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        );
+      case 'affectedAgencies':
+        return (
+          <div key={cardId} onClick={() => handleNavigateToOccurrences('agencies')} className="cursor-pointer">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="relative">
+                    <OptimizedMetricCard 
+                      title="Agências Afetadas" 
+                      value={(() => {
+                        const affectedAgencies = new Set(filteredOccurrences.map(o => o.agency));
+                        const vipAgencies = Array.from(affectedAgencies).filter(agency => {
+                          const agencyNumber = agency.match(/\d+/)?.[0] || '0';
+                          return agencyNumber.endsWith('0') || agencyNumber.endsWith('5');
+                        });
+                        return `${affectedAgencies.size} (${vipAgencies.length} VIP)`;
+                      })()}
+                      icon={<MapPin className="h-4 w-4" />} 
+                      description="Pontos com ocorrências"
+                      isLoading={isLoading}
+                    />
+                    <HelpCircle className="absolute top-2 right-2 h-4 w-4 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p><strong>Agências Afetadas:</strong> Número de agências bancárias que possuem pelo menos uma ocorrência ativa. As agências VIP são pontos estratégicos que recebem prioridade especial no atendimento.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        );
+      case 'averageMTTR':
+        return (
+          <div key={cardId} onClick={() => handleNavigateToOccurrences('mttr')} className="cursor-pointer">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="relative">
+                    <OptimizedMetricCard 
+                      title="MTTR" 
+                      value={metrics?.avgMTTR || "4.2h"}
+                      icon={<Clock className="h-4 w-4" />} 
+                      description="Tempo médio de resolução"
+                      isLoading={isLoading}
+                    />
+                    <HelpCircle className="absolute top-2 right-2 h-4 w-4 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p><strong>MTTR (Mean Time To Resolution):</strong> Tempo médio necessário para resolver uma ocorrência, desde a abertura até o encerramento. Indicador chave de eficiência operacional da equipe de suporte.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const renderChart = (chartId: string) => {
+    if (!featureToggles[chartId]?.enabled) return null;
+    
+    switch (chartId) {
+      case 'equipmentStatusChart':
+        return (
+          <div key={chartId} className="animate-fade-in" style={{ animationDelay: '0.35s' }}>
+            <EquipmentStatusChart occurrences={filteredOccurrences} />
+          </div>
+        );
+      case 'topAgenciesChart':
+        return (
+          <div key={chartId} className="animate-fade-in" style={{ animationDelay: '0.4s' }}>
+            <TopAgenciesChart occurrences={occurrences} filteredOccurrences={filteredOccurrences} />
+          </div>
+        );
+      case 'agingChart':
+        return (
+          <div key={chartId} className="animate-fade-in" style={{ animationDelay: '0.45s' }}>
+            <Card className="border-l-4 border-l-orange-500">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <div className="w-2 h-6 bg-gradient-to-b from-orange-500 to-red-500 rounded-sm"></div>
+                  Gráfico de Aging
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <HelpCircle className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Análise do tempo de permanência das ocorrências em aberto (aging), distribuídas por faixas temporais</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Distribuição temporal de ocorrências em aberto - identifique gargalos e otimize a performance operacional
+                </p>
+              </CardHeader>
+              <CardContent>
+                <AgingChart occurrences={occurrences} filteredOccurrences={filteredOccurrences} />
+              </CardContent>
+            </Card>
+          </div>
+        );
+      case 'vendorMetricsMatrix':
+        return (
+          <div key={chartId} className="animate-fade-in" style={{ animationDelay: '0.5s' }}>
+            <Suspense fallback={
+              <Card className="border-l-4 border-l-primary">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-5 w-5 rounded" />
+                    <Skeleton className="h-6 w-48" />
+                  </div>
+                  <Skeleton className="h-4 w-96" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-[400px] w-full rounded-lg" />
+                </CardContent>
+              </Card>
+            }>
+              <VendorMetricsMatrix 
+                occurrences={filteredOccurrences} 
+                onNavigateToOccurrences={handleVendorMetricsNavigation}
+              />
+            </Suspense>
+          </div>
+        );
+      case 'motivoLongTailChart':
+        return (
+          <div key={chartId} className="animate-fade-in" style={{ animationDelay: '0.55s' }}>
+            <Suspense fallback={
+              <Card className="border-l-4 border-l-orange-500">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-5 w-5 rounded" />
+                    <Skeleton className="h-6 w-48" />
+                  </div>
+                  <Skeleton className="h-4 w-96" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-[400px] w-full rounded-lg" />
+                </CardContent>
+              </Card>
+            }>
+              <MotivoLongTailChart 
+                occurrences={occurrences} 
+                filteredOccurrences={filteredOccurrences}
+              />
+            </Suspense>
+          </div>
+        );
+      case 'slaPrevisaoChart':
+        return (
+          <div key={chartId} className="animate-fade-in" style={{ animationDelay: '0.6s' }}>
+            <Suspense fallback={
+              <Card className="border-l-4 border-l-blue-500">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-5 w-5 rounded" />
+                    <Skeleton className="h-6 w-48" />
+                  </div>
+                  <Skeleton className="h-4 w-96" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-[400px] w-full rounded-lg" />
+                </CardContent>
+              </Card>
+            }>
+              <SlaPrevisaoChart 
+                occurrences={occurrences} 
+                filteredOccurrences={filteredOccurrences}
+              />
+            </Suspense>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const renderSection = (sectionId: string) => {
+    if (!featureToggles[sectionId]?.enabled) return null;
+    
+    switch (sectionId) {
+      case 'filterSection':
+        return (
+          <div key={sectionId} className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
+            <FilterSection defaultOpen />
+          </div>
+        );
+      case 'occurrenceHighlights':
+        return (
+          <div key={sectionId} className="animate-fade-in" style={{ animationDelay: '0.5s' }}>
+            <OccurrenceHighlights 
+              occurrences={filteredOccurrences} 
+              onOccurrenceClick={handleOccurrenceClick}
+              onNavigateToOccurrences={handleNavigateToOccurrences}
+            />
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
   const {
     agenciaFilter,
     ufFilter,
