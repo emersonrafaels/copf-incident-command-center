@@ -17,7 +17,7 @@ const equipments = [
 ];
 
 const vendors = ['Fornecedor A', 'Fornecedor B', 'Fornecedor C', 'Fornecedor D', 'Fornecedor E'];
-const segments = ['Varejo', 'Atacado', 'Corporativo', 'Private'];
+const segments = ['atm', 'pos', 'rede', 'datacenter'];
 const states = ['SP', 'RJ', 'MG', 'RS', 'PR', 'SC', 'BA', 'GO', 'PE', 'CE'];
 const agencyTypes = ['Tradicional', 'PAB', 'PAE', 'Posto'];
 const transporters = ['Transportadora A', 'Transportadora B', 'Transportadora C', 'Transportadora D'];
