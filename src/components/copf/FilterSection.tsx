@@ -382,12 +382,10 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
                                     {tipoAgenciaFilter.length}
                                   </Badge>
                                    <span className="text-sm">
-                                     {tipoAgenciaFilter.length === 1 ? 
-                                       (tipoAgenciaFilter[0] === 'convencional' ? 'Convencional' : 
-                                        tipoAgenciaFilter[0] === 'terceirizada' ? 'Terceirizada' :
-                                        tipoAgenciaFilter[0] === 'pab' ? 'PAB' : 'PAE') : 
-                                       `${tipoAgenciaFilter.length} tipos`}
-                                   </span>
+                                      {tipoAgenciaFilter.length === 1 ? 
+                                        tipoAgenciaFilter[0] : 
+                                        `${tipoAgenciaFilter.length} tipos`}
+                                    </span>
                                 </div>
                               ) : "Todos os tipos"}
                               <div className="w-4 h-4 opacity-50">⌄</div>
@@ -397,21 +395,19 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
                             <Command>
                               <CommandList>
                                 <CommandGroup>
-                                   {['convencional', 'terceirizada', 'pab', 'pae'].map(tipo => (
-                                     <CommandItem key={tipo} onSelect={() => {
-                                       const isSelected = tipoAgenciaFilter.includes(tipo);
-                                       if (isSelected) {
-                                         updateFilter('tipoAgenciaFilter', tipoAgenciaFilter.filter(t => t !== tipo));
-                                       } else {
-                                         updateFilter('tipoAgenciaFilter', [...tipoAgenciaFilter, tipo]);
-                                       }
-                                     }}>
-                                       <Check className={cn("mr-2 h-4 w-4", tipoAgenciaFilter.includes(tipo) ? "opacity-100" : "opacity-0")} />
-                                       {tipo === 'convencional' ? 'Convencional' : 
-                                        tipo === 'terceirizada' ? 'Terceirizada' :
-                                        tipo === 'pab' ? 'PAB' : 'PAE'}
-                                     </CommandItem>
-                                   ))}
+                                   {['Convencional (Ag)', 'Convencional (PAB)', 'Terceirizada (Espaço Itaú)', 'Terceirizada (PAB)', 'Terceirizada (PAE)', 'Terceirizada (Phygital)'].map(tipo => (
+                                      <CommandItem key={tipo} onSelect={() => {
+                                        const isSelected = tipoAgenciaFilter.includes(tipo);
+                                        if (isSelected) {
+                                          updateFilter('tipoAgenciaFilter', tipoAgenciaFilter.filter(t => t !== tipo));
+                                        } else {
+                                          updateFilter('tipoAgenciaFilter', [...tipoAgenciaFilter, tipo]);
+                                        }
+                                      }}>
+                                        <Check className={cn("mr-2 h-4 w-4", tipoAgenciaFilter.includes(tipo) ? "opacity-100" : "opacity-0")} />
+                                        {tipo}
+                                      </CommandItem>
+                                    ))}
                                 </CommandGroup>
                               </CommandList>
                             </Command>
