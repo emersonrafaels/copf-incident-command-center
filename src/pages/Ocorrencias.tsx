@@ -8,7 +8,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search, Download, Eye, MessageSquare, Bot, ChevronUp, ChevronDown } from "lucide-react";
 import { StatusBadge } from "@/components/copf/StatusBadge";
-import { PopulateOccurrencesButton } from "@/components/copf/PopulateOccurrencesButton";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -704,7 +703,6 @@ const Ocorrencias = () => {
             <p className="text-muted-foreground">Lista detalhada de todas as ocorrências registradas</p>
           </div>
           <div className="flex gap-2">
-            <PopulateOccurrencesButton onSuccess={refreshData} />
             <Button variant="outline" onClick={() => setShowAIAssistant(!showAIAssistant)}>
               <Bot className="mr-2 h-4 w-4" />
               Assistente IA

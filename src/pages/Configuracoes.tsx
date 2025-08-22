@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Bell, Palette } from "lucide-react";
+import { Settings, Bell, Palette, Database } from "lucide-react";
 import { ComingSoonOverlay } from "@/components/copf/ComingSoonOverlay";
 import { ComingSoonBadge } from "@/components/copf/ComingSoonBadge";
+import { PopulateOccurrencesButton } from "@/components/copf/PopulateOccurrencesButton";
 
 const Configuracoes = () => {
   return (
@@ -35,11 +36,12 @@ const Configuracoes = () => {
           </div>
 
           <Tabs defaultValue="geral" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="geral">Geral</TabsTrigger>
               <TabsTrigger value="notificacoes">Notificações</TabsTrigger>
               <TabsTrigger value="funcionalidades">Funcionalidades</TabsTrigger>
               <TabsTrigger value="aparencia">Aparência</TabsTrigger>
+              <TabsTrigger value="edge-functions">Edge Functions</TabsTrigger>
             </TabsList>
 
             <TabsContent value="geral" className="space-y-6">
@@ -185,6 +187,37 @@ const Configuracoes = () => {
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Tamanho de Fonte</label>
                       <Input defaultValue="14" type="number" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="edge-functions" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Database className="h-5 w-5" />
+                    Funções Backend
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <p className="font-semibold">Popular Ocorrências de Teste</p>
+                        <p className="text-sm text-muted-foreground">
+                          Adiciona 50 ocorrências de exemplo com dados variados para teste do sistema
+                        </p>
+                      </div>
+                      <PopulateOccurrencesButton />
+                    </div>
+                    
+                    <div className="bg-muted/50 p-4 rounded-lg">
+                      <p className="text-sm text-muted-foreground">
+                        <strong>Aviso:</strong> Esta função é destinada apenas para ambiente de desenvolvimento e testes. 
+                        Use com cuidado em produção.
+                      </p>
                     </div>
                   </div>
                 </CardContent>
