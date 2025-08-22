@@ -1094,6 +1094,12 @@ export function Dashboard() {
         </div>
       </div>
 
+      {/* Filtros */}
+      {featureToggles.filterSection?.enabled && (
+        <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
+          <FilterSection defaultOpen />
+        </div>
+      )}
 
       {/* Métricas principais */}
       <div className="animate-fade-in" style={{
@@ -1137,8 +1143,8 @@ export function Dashboard() {
         </div>
       </div>
 
-      {/* Sections - Dynamic rendering based on feature toggles */}
-      {getOrderedItems('sections').map(item => renderSection(item.id)).filter(Boolean)}
+      {/* Sections - Dynamic rendering based on feature toggles (excluding filterSection) */}
+      {getOrderedItems('sections').filter(item => item.id !== 'filterSection').map(item => renderSection(item.id)).filter(Boolean)}
 
       {/* Dashboard Content Wrapper for PDF Export */}
       <div id="dashboard-content" className="hidden">
