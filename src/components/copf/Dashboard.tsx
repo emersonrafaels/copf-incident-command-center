@@ -296,6 +296,30 @@ export function Dashboard() {
             </TooltipProvider>
           </div>
         );
+      case 'todayOccurrences':
+        return (
+          <div key={cardId} onClick={() => handleNavigateToOccurrences('entered-today')} className="cursor-pointer">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="relative">
+                    <OptimizedMetricCard 
+                      title="Entraram Hoje" 
+                      value={cardMetrics.todayOccurrences || 0}
+                      icon={<Clock className="h-4 w-4" />} 
+                      description="Ocorrências criadas hoje"
+                      isLoading={isLoading}
+                    />
+                    <HelpCircle className="absolute top-2 right-2 h-4 w-4 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p><strong>Entraram Hoje:</strong> Número de ocorrências que foram criadas no sistema no dia atual, permitindo acompanhar o volume diário de novos casos.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        );
       default:
         return null;
     }
@@ -885,6 +909,7 @@ export function Dashboard() {
     // 6. Ocorrências críticas
     const criticalOccurrences = filteredOccurrences.filter(o => o.severity === 'critical').length;
 
+    // 7. Vencem hoje
     const dueTodayOccurrences = filteredOccurrences.filter(o => {
       const occCreatedDate = new Date(o.createdAt);
       const slaLimit = o.severity === 'critical' || o.severity === 'high' ? 24 : 72;
@@ -894,6 +919,13 @@ export function Dashboard() {
       return isDueToday && isNotCompleted;
     }).length;
 
+    // 8. Entraram hoje
+    const todayOccurrences = filteredOccurrences.filter(o => {
+      const occCreatedDate = new Date(o.createdAt);
+      const today = new Date();
+      return occCreatedDate.toDateString() === today.toDateString();
+    }).length;
+
     return {
       totalOccurrences,
       pendingOccurrences,
@@ -901,7 +933,8 @@ export function Dashboard() {
       overdueOccurrences,
       inoperantEquipments,
       criticalOccurrences,
-      dueTodayOccurrences
+      dueTodayOccurrences,
+      todayOccurrences
     };
   }, [filteredOccurrences]);
 

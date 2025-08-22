@@ -86,13 +86,21 @@ const defaultToggles: Record<string, FeatureToggle> = {
     category: 'cards',
     order: 6
   },
+  todayOccurrences: {
+    id: 'todayOccurrences',
+    label: 'Entraram Hoje',
+    description: 'Ocorrências que entraram no sistema hoje',
+    enabled: true,
+    category: 'cards',
+    order: 7
+  },
   averageMTTR: {
     id: 'averageMTTR',
     label: 'MTTR Médio',
     description: 'Tempo médio de resolução de ocorrências',
     enabled: true,
     category: 'cards',
-    order: 7
+    order: 8
   },
 
   // Gráficos e Análises
@@ -173,6 +181,7 @@ const defaultOrder: DashboardOrder = {
     'overdueOccurrences',
     'reincidences',
     'affectedAgencies',
+    'todayOccurrences',
     'averageMTTR'
   ],
   charts: [
