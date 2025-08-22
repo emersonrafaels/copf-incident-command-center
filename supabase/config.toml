@@ -1,1 +1,4 @@
 project_id = "xrxvfwurdjzzuibuahju"
+
+[functions.populate-occurrences]
+verify_jwt = false
