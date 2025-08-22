@@ -160,6 +160,30 @@ const defaultToggles: Record<string, FeatureToggle> = {
     category: 'charts',
     order: 5
   },
+  vendorEquipmentMatrix: {
+    id: 'vendorEquipmentMatrix',
+    label: 'Matriz Fornecedor x Equipamento',
+    description: 'Matriz de ocorrências por fornecedor e equipamento',
+    enabled: true,
+    category: 'charts',
+    order: 6
+  },
+  criticalityHeatmap: {
+    id: 'criticalityHeatmap',
+    label: 'Mapa de Criticidade',
+    description: 'Heatmap de criticidade das ocorrências',
+    enabled: true,
+    category: 'charts',
+    order: 7
+  },
+  interactiveCharts: {
+    id: 'interactiveCharts',
+    label: 'Gráficos Interativos',
+    description: 'Conjunto de gráficos interativos avançados',
+    enabled: true,
+    category: 'charts',
+    order: 8
+  },
 
   // Seções Especiais
   filterSection: {
@@ -199,7 +223,10 @@ const defaultOrder: DashboardOrder = {
     'agingChart',
     'vendorMetricsMatrix',
     'motivoLongTailChart',
-    'slaPrevisaoChart'
+    'slaPrevisaoChart',
+    'vendorEquipmentMatrix',
+    'criticalityHeatmap',
+    'interactiveCharts'
   ],
   sections: [
     'filterSection',
