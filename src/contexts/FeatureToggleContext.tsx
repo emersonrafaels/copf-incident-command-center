@@ -1,6 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 export interface FeatureToggle {
   id: string;
@@ -192,82 +190,40 @@ const defaultOrder: DashboardOrder = {
 export const FeatureToggleProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [featureToggles, setFeatureToggles] = useState<Record<string, FeatureToggle>>(defaultToggles);
   const [dashboardOrder, setDashboardOrder] = useState<DashboardOrder>(defaultOrder);
-  const { toast } = useToast();
 
-  // Carregar configurações do Supabase na inicialização
+  // Carregar configurações do sessionStorage na inicialização
   useEffect(() => {
     loadSettings();
   }, []);
 
-  const loadSettings = async () => {
+  const loadSettings = () => {
     try {
-      // Verificar se há usuário autenticado
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        // Se não há usuário, usar configurações padrão
-        return;
+      const savedToggles = sessionStorage.getItem('feature-toggles');
+      const savedOrder = sessionStorage.getItem('dashboard-order');
+
+      if (savedToggles) {
+        const parsedToggles = JSON.parse(savedToggles);
+        setFeatureToggles({ ...defaultToggles, ...parsedToggles });
       }
 
-      // Carregar configurações do banco
-      const { data: settings, error } = await supabase
-        .from('dashboard_settings')
-        .select('setting_key, setting_value')
-        .in('setting_key', ['feature-toggles', 'dashboard-order']);
-
-      if (error) {
-        console.error('Erro ao carregar configurações:', error);
-        return;
-      }
-
-      if (settings) {
-        settings.forEach(({ setting_key, setting_value }) => {
-          if (setting_key === 'feature-toggles' && setting_value && typeof setting_value === 'object' && !Array.isArray(setting_value)) {
-            setFeatureToggles({ ...defaultToggles, ...(setting_value as unknown as Record<string, FeatureToggle>) });
-          } else if (setting_key === 'dashboard-order' && setting_value && typeof setting_value === 'object' && !Array.isArray(setting_value)) {
-            setDashboardOrder({ ...defaultOrder, ...(setting_value as unknown as DashboardOrder) });
-          }
-        });
+      if (savedOrder) {
+        const parsedOrder = JSON.parse(savedOrder);
+        setDashboardOrder({ ...defaultOrder, ...parsedOrder });
       }
     } catch (error) {
       console.error('Erro ao carregar configurações:', error);
     }
   };
 
-  const saveSettings = async (key: string, value: any) => {
+  const saveSettings = (key: string, value: any) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        toast({
-          title: "Autenticação necessária",
-          description: "Você precisa estar logado para salvar configurações.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const { error } = await supabase
-        .from('dashboard_settings')
-        .upsert({
-          setting_key: key,
-          setting_value: value
-        });
-
-      if (error) {
-        console.error(`Erro ao salvar ${key}:`, error);
-        toast({
-          title: "Erro ao salvar",
-          description: "Não foi possível salvar as configurações.",
-          variant: "destructive",
-        });
-      }
+      sessionStorage.setItem(key, JSON.stringify(value));
     } catch (error) {
       console.error(`Erro ao salvar ${key}:`, error);
     }
   };
 
-  // Salvar no Supabase sempre que houver mudanças
+  // Salvar no sessionStorage sempre que houver mudanças
   useEffect(() => {
     if (JSON.stringify(featureToggles) !== JSON.stringify(defaultToggles)) {
       saveSettings('feature-toggles', featureToggles);
@@ -297,20 +253,13 @@ export const FeatureToggleProvider: React.FC<{ children: ReactNode }> = ({ child
     }));
   };
 
-  const resetToDefaults = async () => {
+  const resetToDefaults = () => {
     setFeatureToggles(defaultToggles);
     setDashboardOrder(defaultOrder);
     
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (user) {
-        // Deletar configurações do banco
-        await supabase
-          .from('dashboard_settings')
-          .delete()
-          .in('setting_key', ['feature-toggles', 'dashboard-order']);
-      }
+      sessionStorage.removeItem('feature-toggles');
+      sessionStorage.removeItem('dashboard-order');
     } catch (error) {
       console.error('Erro ao resetar configurações:', error);
     }
