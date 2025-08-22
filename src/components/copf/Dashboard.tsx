@@ -1041,44 +1041,6 @@ export function Dashboard() {
             </div>
             {/* Action Controls */}
             <div className="flex flex-wrap gap-3">
-              {/* Filtro de Período */}
-              <Select value={filterPeriod} onValueChange={(value) => updateFilter('filterPeriod', value)}>
-                <SelectTrigger className="w-auto min-w-[180px] bg-card border-border/50 hover:border-primary/30 transition-colors shadow-card-default text-foreground font-medium">
-                  <Calendar className="h-4 w-4 mr-2 text-primary" />
-                  <SelectValue className="text-foreground" />
-                </SelectTrigger>
-                <SelectContent className="bg-card border-border/50">
-                  <SelectItem value="7-days">Últimos 7 dias</SelectItem>
-                  <SelectItem value="30-days">Últimos 30 dias</SelectItem>
-                  <SelectItem value="60-days">Últimos 60 dias</SelectItem>
-                  <SelectItem value="90-days">Últimos 90 dias</SelectItem>
-                  <SelectItem value="custom">Período personalizado</SelectItem>
-                </SelectContent>
-              </Select>
-
-              {/* Seletor de data personalizado */}
-              {filterPeriod === 'custom' && <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className={cn("w-auto justify-start text-left font-normal shadow-card-default hover:shadow-card-hover transition-all text-foreground", !customDateRange.from && "text-muted-foreground")}>
-                      <CalendarDays className="h-4 w-4 mr-2 text-primary" />
-                      {customDateRange.from ? customDateRange.to ? <>
-                          <span className="text-foreground">{format(customDateRange.from, "dd/MM/yyyy")} -{" "}
-                          {format(customDateRange.to, "dd/MM/yyyy")}</span>
-                        </> : <span className="text-foreground">{format(customDateRange.from, "dd/MM/yyyy")}</span> : <span className="text-muted-foreground">Selecionar período</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 bg-card border-border/50 shadow-elegant" align="start">
-                    <CalendarComponent initialFocus mode="range" defaultMonth={customDateRange.from} selected={{
-                  from: customDateRange.from,
-                  to: customDateRange.to
-                }} onSelect={range => {
-                  updateFilter('customDateRange', range || {});
-                  if (range?.from && range?.to) {
-                    setShowDatePicker(false);
-                  }
-                }} numberOfMonths={2} className="pointer-events-auto" />
-                  </PopoverContent>
-                </Popover>}
 
               <Button variant="outline" size="sm" onClick={handleRefresh} className="shadow-card-default hover:shadow-card-hover transition-all hover:border-primary/30">
                 <RefreshCw className="h-4 w-4 mr-2 text-primary" />
