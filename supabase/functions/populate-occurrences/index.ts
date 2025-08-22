@@ -8,60 +8,31 @@ const supabase = createClient(
 
 // Sample data arrays
 const equipments = [
-  'ATM Saque', 'ATM Depósito', 'Cassete', 'Notebook', 'Desktop',
-  'Leitor de Cheques/documentos', 'Leitor biométrico', 'PIN PAD',
-  'Scanner de Cheque', 'Impressora', 'Impressora térmica',
-  'Impressora multifuncional', 'Monitor LCD/LED', 'Teclado',
-  'Servidor', 'Televisão', 'Senheiro', 'TCR', 'Classificadora',
-  'Fragmentadora de Papel'
+  'CPU', 'Monitor', 'Impressora', 'UPS', 'Leitor de Cartão',
+  'Câmera', 'Teclado', 'Scanner', 'Notebook', 'Desktop',
+  'Servidor', 'ATM', 'PIN PAD', 'TCR', 'Classificadora'
 ];
 
 const vendors = ['Fornecedor A', 'Fornecedor B', 'Fornecedor C', 'Fornecedor D', 'Fornecedor E'];
 const segments = ['atm', 'pos', 'rede', 'datacenter'];
 const states = ['SP', 'RJ', 'MG', 'RS', 'PR', 'SC', 'BA', 'GO', 'PE', 'CE'];
-const agencyTypes = ['Tradicional', 'PAB', 'PAE', 'Posto'];
-const transporters = ['Transportadora A', 'Transportadora B', 'Transportadora C', 'Transportadora D'];
-const statuses = ['aberto', 'em_andamento', 'aguardando_peca', 'aguardando_terceiro', 'encerrado', 'cancelado'];
+const agencyTypes = ['tradicional', 'digital', 'prime', 'convencional', 'terceirizada'];
+const transporters = ['Transportadora Norte', 'Transportadora Sul', 'Transportadora Leste', 'Transportadora Oeste', 'Transportadora Centro'];
+const statuses = ['pendente', 'em_andamento', 'resolvida', 'com_impedimentos'];
 const priorities = ['baixa', 'media', 'alta', 'critica'];
-const severities = ['low', 'medium', 'high', 'critical'];
-const equipmentStatuses = ['operante', 'inoperante'];
+const severities = ['baixa', 'media', 'alta', 'critica'];
+const equipmentStatuses = ['operante', 'inoperante', 'degradado'];
 
 const descriptions = [
-  'Equipamento não liga após atualização',
-  'Erro na leitura de cartão magnético',
-  'Impressora não responde aos comandos',
-  'Tela preta sem sinal de vídeo',
-  'Barulho anormal durante operação',
-  'Aquecimento excessivo do equipamento',
-  'Falha na comunicação com servidor central',
-  'Travamento intermitente do sistema',
-  'Papel atolado no mecanismo interno',
-  'Sensor biométrico com baixa sensibilidade',
-  'Conexão de rede instável',
-  'Falha no mecanismo de dispensa de cédulas',
-  'Teclado com teclas não funcionais',
-  'Monitor com pixels mortos',
-  'Sistema operacional corrompido',
-  'Falha no sistema de refrigeração',
-  'Erro de comunicação USB',
-  'Bateria do nobreak descarregando rapidamente',
-  'Fragmentadora travando com papel',
-  'Scanner não detectando documentos'
+  'Sistema travado', 'Falha na impressão', 'Equipamento não responde',
+  'Problema de conectividade', 'Mau funcionamento do hardware', 'Falha na comunicação',
+  'Falha de energia', 'Falha no sistema', 'Erro de hardware',
+  'Problema de rede', 'Falha de software', 'Equipamento inoperante'
 ];
 
 const reasons = [
-  'Desgaste natural dos componentes',
-  'Falta de manutenção preventiva',
-  'Sobrecarga no sistema elétrico',
-  'Umidade excessiva no ambiente',
-  'Poeira acumulada nos componentes',
-  'Atualização de software mal sucedida',
-  'Falha na rede elétrica local',
-  'Uso inadequado pelo usuário',
-  'Fim da vida útil do componente',
-  'Defeito de fabricação',
-  'Interferência eletromagnética',
-  'Configuração inadequada do sistema'
+  'Falha de hardware', 'Problema de software', 'Falha de conectividade',
+  'Manutenção preventiva', 'Atualização de sistema', 'Substituição de peças'
 ];
 
 function getRandomElement<T>(array: T[]): T {
@@ -76,23 +47,18 @@ function generateSerialNumber(): string {
 
 function generateAgency(): string {
   const agencyNumber = Math.floor(1000 + Math.random() * 9000);
-  const agencyNames = [
-    'Centro', 'Matriz', 'Shopping', 'Aeroporto', 'Rodoviária',
-    'Universitária', 'Industrial', 'Comercial', 'Residencial', 'Terminal'
-  ];
-  return `Agência ${getRandomElement(agencyNames)} - ${agencyNumber}`;
+  return agencyNumber.toString();
 }
 
 function generateSupt(agency: string): string {
-  const agencyNumber = agency.match(/\d+/)?.[0] || '1000';
-  const num = parseInt(agencyNumber);
+  const num = parseInt(agency);
   
-  if (num >= 2000 && num <= 2999) return '20';
-  if (num >= 3000 && num <= 3999) return '30';
-  if (num >= 4000 && num <= 4999) return '40';
-  if (num >= 5000 && num <= 5999) return '50';
+  if (num >= 2000 && num <= 2999) return 'SUPT-02';
+  if (num >= 3000 && num <= 3999) return 'SUPT-03';
+  if (num >= 4000 && num <= 4999) return 'SUPT-04';
+  if (num >= 5000 && num <= 5999) return 'SUPT-05';
   
-  return ['10', '15', '21', '31', '41', '51'][Math.floor(Math.random() * 6)];
+  return ['SUPT-01', 'SUPT-02', 'SUPT-03', 'SUPT-04', 'SUPT-05'][Math.floor(Math.random() * 5)];
 }
 
 function generateRandomDate(daysAgo: number): string {
@@ -132,12 +98,12 @@ Deno.serve(async (req) => {
       let slaDeadline = null;
       
       // Calculate SLA deadline based on severity
-      const slaHours = (severity === 'critical' || severity === 'high') ? 24 : 72;
+      const slaHours = (severity === 'critica' || severity === 'alta') ? 24 : 72;
       const createdDate = new Date(createdAt);
       slaDeadline = new Date(createdDate.getTime() + (slaHours * 60 * 60 * 1000)).toISOString();
       
-      // If status is resolved or closed, generate resolution date
-      if (status === 'encerrado' || status === 'cancelado') {
+      // If status is resolved, generate resolution date
+      if (status === 'resolvida') {
         const resolvedDaysAgo = Math.floor(Math.random() * createdDaysAgo);
         resolvedAt = generateRandomDate(resolvedDaysAgo);
         closedAt = resolvedAt;
@@ -169,9 +135,9 @@ Deno.serve(async (req) => {
         observacoes: hasImpediment ? 'Equipamento aguardando peça de reposição' : null,
         motivo_impedimento: hasImpediment ? 'Peça em falta no estoque' : null,
         usuario_responsavel: `Usuario${Math.floor(1000 + Math.random() * 9000)}`,
-        dineg: `DINEG${Math.floor(10 + Math.random() * 90)}`,
+        dineg: `DINEG-0${Math.floor(1 + Math.random() * 5)}`,
         prioridade_fornecedor: getRandomElement(['P1', 'P2', 'P3', 'P4']),
-        data_previsao_encerramento: status === 'em_andamento' || status === 'aguardando_peca' ? 
+        data_previsao_encerramento: status === 'em_andamento' || status === 'com_impedimentos' ? 
           new Date(Date.now() + (Math.random() * 7 * 24 * 60 * 60 * 1000)).toISOString() : null
       };
 
