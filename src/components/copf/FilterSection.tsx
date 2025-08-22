@@ -371,7 +371,7 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
                       <div className="group space-y-3">
                         <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                           <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
-                          Tipo da Agência
+                          Tipo do Ponto
                         </Label>
                         <Popover>
                           <PopoverTrigger asChild>
