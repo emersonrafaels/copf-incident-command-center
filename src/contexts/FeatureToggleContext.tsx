@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
-// Force refresh after removing Supabase/useToast dependencies
+import { useToast } from '@/hooks/use-toast';
 
 export interface FeatureToggle {
   id: string;
@@ -23,6 +22,7 @@ interface FeatureToggleContextType {
   updateToggle: (id: string, enabled: boolean) => void;
   reorderItems: (category: keyof DashboardOrder, newOrder: string[]) => void;
   resetToDefaults: () => void;
+  clearSession: () => void;
   getOrderedItems: (category: keyof DashboardOrder) => FeatureToggle[];
 }
 
@@ -228,6 +228,7 @@ const defaultOrder: DashboardOrder = {
 export const FeatureToggleProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [featureToggles, setFeatureToggles] = useState<Record<string, FeatureToggle>>(defaultToggles);
   const [dashboardOrder, setDashboardOrder] = useState<DashboardOrder>(defaultOrder);
+  const { toast } = useToast();
 
   // Carregar configurações do sessionStorage na inicialização
   useEffect(() => {
@@ -313,8 +314,36 @@ export const FeatureToggleProvider: React.FC<{ children: ReactNode }> = ({ child
     try {
       sessionStorage.removeItem('feature-toggles');
       sessionStorage.removeItem('dashboard-order');
+      toast({
+        title: "Configurações restauradas",
+        description: "Todas as configurações foram restauradas para o padrão."
+      });
     } catch (error) {
       console.error('Erro ao resetar configurações:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao restaurar configurações.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const clearSession = () => {
+    try {
+      sessionStorage.removeItem('feature-toggles');
+      sessionStorage.removeItem('dashboard-order');
+      loadSettings(); // Recarrega as configurações
+      toast({
+        title: "Sessão limpa",
+        description: "Dados da sessão foram removidos com sucesso."
+      });
+    } catch (error) {
+      console.error('Erro ao limpar sessão:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao limpar dados da sessão.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -331,6 +360,7 @@ export const FeatureToggleProvider: React.FC<{ children: ReactNode }> = ({ child
     updateToggle,
     reorderItems,
     resetToDefaults,
+    clearSession,
     getOrderedItems
   };
 

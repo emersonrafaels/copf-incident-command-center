@@ -5,7 +5,8 @@ import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { GripVertical, RotateCcw, Eye, EyeOff, ArrowUp, ArrowDown } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { GripVertical, RotateCcw, Eye, EyeOff, ArrowUp, ArrowDown, Trash2 } from 'lucide-react';
 import { useFeatureToggle, FeatureToggle, DashboardOrder } from '@/contexts/FeatureToggleContext';
 import { cn } from '@/lib/utils';
 
@@ -38,8 +39,9 @@ const categories: CategoryConfig[] = [
 ];
 
 export const DashboardOrderConfig: React.FC = () => {
-  const { featureToggles, dashboardOrder, updateToggle, reorderItems, resetToDefaults, getOrderedItems } = useFeatureToggle();
+  const { featureToggles, dashboardOrder, updateToggle, reorderItems, resetToDefaults, clearSession, getOrderedItems } = useFeatureToggle();
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
+  const [isClearing, setIsClearing] = useState(false);
 
   const handleDragEnd = (result: DropResult) => {
     setDraggedItem(null);
@@ -83,6 +85,15 @@ export const DashboardOrderConfig: React.FC = () => {
     return dashboardOrder[category].length;
   };
 
+  const handleClearSession = async () => {
+    setIsClearing(true);
+    try {
+      clearSession();
+    } finally {
+      setIsClearing(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -92,14 +103,44 @@ export const DashboardOrderConfig: React.FC = () => {
             Personalize quais componentes aparecem e em que ordem
           </p>
         </div>
-        <Button
-          variant="outline"
-          onClick={resetToDefaults}
-          className="flex items-center gap-2"
-        >
-          <RotateCcw className="h-4 w-4" />
-          Restaurar Padrões
-        </Button>
+        <div className="flex gap-2">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="outline"
+                className="flex items-center gap-2"
+                disabled={isClearing}
+              >
+                <Trash2 className="h-4 w-4" />
+                {isClearing ? "Limpando..." : "Limpar Sessão"}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Limpar dados da sessão?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Esta ação removerá todas as configurações salvas nesta sessão, mas manterá as configurações atuais visíveis na tela. 
+                  As configurações só voltarão ao padrão se você recarregar a página.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={handleClearSession}>
+                  Limpar Sessão
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          
+          <Button
+            variant="outline"
+            onClick={resetToDefaults}
+            className="flex items-center gap-2"
+          >
+            <RotateCcw className="h-4 w-4" />
+            Restaurar Padrões
+          </Button>
+        </div>
       </div>
 
       <Accordion type="multiple" defaultValue={['cards', 'charts', 'sections']} className="space-y-4">
