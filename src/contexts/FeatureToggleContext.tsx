@@ -321,7 +321,8 @@ export const FeatureToggleProvider: React.FC<{ children: ReactNode }> = ({ child
   const getOrderedItems = (category: keyof DashboardOrder): FeatureToggle[] => {
     return dashboardOrder[category]
       .map(id => featureToggles[id])
-      .filter(Boolean);
+      .filter(Boolean) // Remove undefined items
+      .filter(item => item.enabled); // Remove disabled items
   };
 
   const value: FeatureToggleContextType = {
