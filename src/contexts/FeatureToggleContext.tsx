@@ -241,12 +241,27 @@ export const FeatureToggleProvider: React.FC<{ children: ReactNode }> = ({ child
 
       if (savedToggles) {
         const parsedToggles = JSON.parse(savedToggles);
-        setFeatureToggles({ ...defaultToggles, ...parsedToggles });
+        // Filtrar toggles que não existem mais no padrão
+        const validToggles = Object.keys(parsedToggles)
+          .filter(key => key in defaultToggles)
+          .reduce((obj, key) => {
+            obj[key] = parsedToggles[key];
+            return obj;
+          }, {} as Record<string, FeatureToggle>);
+        
+        setFeatureToggles({ ...defaultToggles, ...validToggles });
       }
 
       if (savedOrder) {
         const parsedOrder = JSON.parse(savedOrder);
-        setDashboardOrder({ ...defaultOrder, ...parsedOrder });
+        // Filtrar itens que não existem mais no padrão
+        const validOrder: DashboardOrder = {
+          cards: parsedOrder.cards?.filter((id: string) => id in defaultToggles) || defaultOrder.cards,
+          charts: parsedOrder.charts?.filter((id: string) => id in defaultToggles) || defaultOrder.charts,
+          sections: parsedOrder.sections?.filter((id: string) => id in defaultToggles) || defaultOrder.sections
+        };
+        
+        setDashboardOrder(validOrder);
       }
     } catch (error) {
       console.error('Erro ao carregar configurações:', error);
