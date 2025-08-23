@@ -12,8 +12,8 @@ import { FilterSection } from "./FilterSection";
 
 // Lazy loading de componentes pesados
 const EnhancedInteractiveCharts = lazy(() => import('./EnhancedInteractiveCharts').then(module => ({ default: module.EnhancedInteractiveCharts })))
-const VendorEquipmentMatrix = lazy(() => import('./VendorEquipmentMatrix').then(module => ({ default: module.VendorEquipmentMatrix })))
 const VendorMetricsMatrix = lazy(() => import('./VendorMetricsMatrix').then(module => ({ default: module.VendorMetricsMatrix })))
+const CriticalityHeatmap = lazy(() => import('./CriticalityHeatmap').then(module => ({ default: module.CriticalityHeatmap })))
 const MotivoLongTailChart = lazy(() => import('./MotivoLongTailChart'))
 const SlaPrevisaoChart = lazy(() => import('./SlaPrevisaoChart').then(module => ({ default: module.SlaPrevisaoChart })))
 import { OccurrenceHighlights } from "./OccurrenceHighlights";
@@ -442,11 +442,11 @@ export function Dashboard() {
             </Suspense>
           </div>
         );
-      case 'vendorEquipmentMatrix':
+      case 'criticalityHeatmap':
         return (
-          <div key={chartId} className="animate-fade-in" style={{ animationDelay: '0.65s' }}>
+          <div key={chartId} className="animate-fade-in" style={{ animationDelay: '0.7s' }}>
             <Suspense fallback={
-              <Card className="border-l-4 border-l-green-500">
+              <Card className="border-l-4 border-l-red-500">
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <Skeleton className="h-5 w-5 rounded" />
@@ -459,34 +459,10 @@ export function Dashboard() {
                 </CardContent>
               </Card>
             }>
-              <VendorEquipmentMatrix 
+              <CriticalityHeatmap 
                 occurrences={filteredOccurrences}
               />
             </Suspense>
-          </div>
-        );
-      case 'criticalityHeatmap':
-        return (
-          <div key={chartId} className="animate-fade-in" style={{ animationDelay: '0.7s' }}>
-            <Card className="border-l-4 border-l-red-500">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <div className="w-2 h-6 bg-gradient-to-b from-red-500 to-orange-500 rounded-sm"></div>
-                  Mapa de Criticidade
-                </CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Em desenvolvimento - Visualização de criticidade por região e equipamento
-                </p>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[400px] flex items-center justify-center border-2 border-dashed border-muted-foreground/20 rounded-lg">
-                  <div className="text-center text-muted-foreground">
-                    <p className="text-lg font-medium mb-2">Funcionalidade em Desenvolvimento</p>
-                    <p className="text-sm">Mapa de calor será implementado em breve</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         );
       case 'interactiveCharts':

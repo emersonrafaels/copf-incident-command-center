@@ -160,14 +160,6 @@ const defaultToggles: Record<string, FeatureToggle> = {
     category: 'charts',
     order: 5
   },
-  vendorEquipmentMatrix: {
-    id: 'vendorEquipmentMatrix',
-    label: 'Matriz Fornecedor x Equipamento',
-    description: 'Matriz de ocorrências por fornecedor e equipamento',
-    enabled: true,
-    category: 'charts',
-    order: 6
-  },
   criticalityHeatmap: {
     id: 'criticalityHeatmap',
     label: 'Mapa de Criticidade',
@@ -219,12 +211,11 @@ const defaultOrder: DashboardOrder = {
   ],
   charts: [
     'equipmentStatusChart',
-          'topAgenciesChart',
+    'topAgenciesChart',
     'agingChart',
     'vendorMetricsMatrix',
     'motivoLongTailChart',
     'slaPrevisaoChart',
-    'vendorEquipmentMatrix',
     'criticalityHeatmap',
     'interactiveCharts'
   ],
