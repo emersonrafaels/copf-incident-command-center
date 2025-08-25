@@ -1,24 +1,25 @@
-import React, { memo, lazy, Suspense } from 'react'
+import React, { memo } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
-import type { ChartData, TimelineData, MTTRData, OccurrenceData } from '@/hooks/useOptimizedDashboardData'
-
-// Lazy loading dos componentes de gráfico
-const BarChart = lazy(() => import('recharts').then(module => ({ default: module.BarChart })))
-const Bar = lazy(() => import('recharts').then(module => ({ default: module.Bar })))
-const LineChart = lazy(() => import('recharts').then(module => ({ default: module.LineChart })))
-const Line = lazy(() => import('recharts').then(module => ({ default: module.Line })))
-const PieChart = lazy(() => import('recharts').then(module => ({ default: module.PieChart })))
-const Pie = lazy(() => import('recharts').then(module => ({ default: module.Pie })))
-const AreaChart = lazy(() => import('recharts').then(module => ({ default: module.AreaChart })))
-const Area = lazy(() => import('recharts').then(module => ({ default: module.Area })))
-const ResponsiveContainer = lazy(() => import('recharts').then(module => ({ default: module.ResponsiveContainer })))
-const XAxis = lazy(() => import('recharts').then(module => ({ default: module.XAxis })))
-const YAxis = lazy(() => import('recharts').then(module => ({ default: module.YAxis })))
-const CartesianGrid = lazy(() => import('recharts').then(module => ({ default: module.CartesianGrid })))
-const Legend = lazy(() => import('recharts').then(module => ({ default: module.Legend })))
+import type { ChartData, TimelineData, MTTRData, OccurrenceData } from '@/hooks/useDashboardData'
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  AreaChart,
+  Area,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Legend,
+  Cell
+} from 'recharts'
 
 interface OptimizedInteractiveChartsProps {
   severityData: ChartData[]
@@ -51,14 +52,28 @@ const chartConfig = {
 }
 
 // Componente individual de gráfico memoizado
-const SeverityChart = memo(({ data }: { data: ChartData[] }) => (
-  <Card className="col-span-1">
-    <CardHeader>
-      <CardTitle>Distribuição por Severidade</CardTitle>
-      <CardDescription>Classificação das ocorrências por nível de severidade</CardDescription>
-    </CardHeader>
-    <CardContent>
-      <Suspense fallback={<ChartSkeleton />}>
+const SeverityChart = memo(({ data }: { data: ChartData[] }) => {
+  if (!data || data.length === 0) {
+    return (
+      <Card className="col-span-1">
+        <CardHeader>
+          <CardTitle>Distribuição por Severidade</CardTitle>
+          <CardDescription>Classificação das ocorrências por nível de severidade</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ChartSkeleton />
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <Card className="col-span-1">
+      <CardHeader>
+        <CardTitle>Distribuição por Severidade</CardTitle>
+        <CardDescription>Classificação das ocorrências por nível de severidade</CardDescription>
+      </CardHeader>
+      <CardContent>
         <ChartContainer config={chartConfig}>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={data}>
@@ -66,26 +81,44 @@ const SeverityChart = memo(({ data }: { data: ChartData[] }) => (
               <XAxis dataKey="name" />
               <YAxis />
               <ChartTooltip content={<ChartTooltipContent />} />
-              <Bar dataKey="value" fill="var(--color-critico)" />
+              <Bar dataKey="value">
+                {data.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.fill} />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </ChartContainer>
-      </Suspense>
-    </CardContent>
-  </Card>
-))
+      </CardContent>
+    </Card>
+  )
+})
 
 SeverityChart.displayName = 'SeverityChart'
 
 // Timeline chart memoizado
-const TimelineChart = memo(({ data }: { data: TimelineData[] }) => (
-  <Card className="col-span-1">
-    <CardHeader>
-      <CardTitle>Histórico de Ocorrências</CardTitle>
-      <CardDescription>Evolução das ocorrências e resoluções</CardDescription>
-    </CardHeader>
-    <CardContent>
-      <Suspense fallback={<ChartSkeleton />}>
+const TimelineChart = memo(({ data }: { data: TimelineData[] }) => {
+  if (!data || data.length === 0) {
+    return (
+      <Card className="col-span-1">
+        <CardHeader>
+          <CardTitle>Histórico de Ocorrências</CardTitle>
+          <CardDescription>Evolução das ocorrências e resoluções</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ChartSkeleton />
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <Card className="col-span-1">
+      <CardHeader>
+        <CardTitle>Histórico de Ocorrências</CardTitle>
+        <CardDescription>Evolução das ocorrências e resoluções</CardDescription>
+      </CardHeader>
+      <CardContent>
         <ChartContainer config={chartConfig}>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={data}>
@@ -96,14 +129,14 @@ const TimelineChart = memo(({ data }: { data: TimelineData[] }) => (
               <Line 
                 type="monotone" 
                 dataKey="ocorrencias" 
-                stroke="var(--color-ocorrencias)" 
+                stroke="hsl(var(--primary))" 
                 strokeWidth={2}
                 dot={{ r: 4 }}
               />
               <Line 
                 type="monotone" 
                 dataKey="resolvidas" 
-                stroke="var(--color-resolvidas)" 
+                stroke="hsl(var(--success))" 
                 strokeWidth={2}
                 dot={{ r: 4 }}
               />
@@ -111,10 +144,10 @@ const TimelineChart = memo(({ data }: { data: TimelineData[] }) => (
             </LineChart>
           </ResponsiveContainer>
         </ChartContainer>
-      </Suspense>
-    </CardContent>
-  </Card>
-))
+      </CardContent>
+    </Card>
+  )
+})
 
 TimelineChart.displayName = 'TimelineChart'
 
@@ -127,32 +160,64 @@ const EquipmentChart = memo(({
   data: ChartData[]
   viewMode: 'segment' | 'equipment'
   onViewModeChange: (mode: 'segment' | 'equipment') => void
-}) => (
-  <Card className="col-span-1">
-    <CardHeader>
-      <CardTitle>Distribuição de Ocorrências</CardTitle>
-      <CardDescription>
-        Análise por {viewMode === 'segment' ? 'segmento' : 'equipamento'}
-      </CardDescription>
-      <div className="flex gap-2">
-        <Button
-          variant={viewMode === 'segment' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => onViewModeChange('segment')}
-        >
-          Por Segmento
-        </Button>
-        <Button
-          variant={viewMode === 'equipment' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => onViewModeChange('equipment')}
-        >
-          Por Equipamento
-        </Button>
-      </div>
-    </CardHeader>
-    <CardContent>
-      <Suspense fallback={<ChartSkeleton />}>
+}) => {
+  if (!data || data.length === 0) {
+    return (
+      <Card className="col-span-1">
+        <CardHeader>
+          <CardTitle>Distribuição de Ocorrências</CardTitle>
+          <CardDescription>
+            Análise por {viewMode === 'segment' ? 'segmento' : 'equipamento'}
+          </CardDescription>
+          <div className="flex gap-2">
+            <Button
+              variant={viewMode === 'segment' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => onViewModeChange('segment')}
+            >
+              Por Segmento
+            </Button>
+            <Button
+              variant={viewMode === 'equipment' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => onViewModeChange('equipment')}
+            >
+              Por Equipamento
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <ChartSkeleton />
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <Card className="col-span-1">
+      <CardHeader>
+        <CardTitle>Distribuição de Ocorrências</CardTitle>
+        <CardDescription>
+          Análise por {viewMode === 'segment' ? 'segmento' : 'equipamento'}
+        </CardDescription>
+        <div className="flex gap-2">
+          <Button
+            variant={viewMode === 'segment' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => onViewModeChange('segment')}
+          >
+            Por Segmento
+          </Button>
+          <Button
+            variant={viewMode === 'equipment' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => onViewModeChange('equipment')}
+          >
+            Por Equipamento
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
         <ChartContainer config={chartConfig}>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
@@ -164,29 +229,46 @@ const EquipmentChart = memo(({
                 outerRadius={100}
                 paddingAngle={5}
                 dataKey="value"
-                fill="var(--color-segmentoAA)"
-              />
+              >
+                {data.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.fill} />
+                ))}
+              </Pie>
               <ChartTooltip content={<ChartTooltipContent />} />
               <Legend />
             </PieChart>
           </ResponsiveContainer>
         </ChartContainer>
-      </Suspense>
-    </CardContent>
-  </Card>
-))
+      </CardContent>
+    </Card>
+  )
+})
 
 EquipmentChart.displayName = 'EquipmentChart'
 
 // MTTR chart memoizado
-const MTTRChart = memo(({ data }: { data: MTTRData[] }) => (
-  <Card className="col-span-1">
-    <CardHeader>
-      <CardTitle>Histórico MTTR</CardTitle>
-      <CardDescription>Tempo médio de resolução ao longo dos meses</CardDescription>
-    </CardHeader>
-    <CardContent>
-      <Suspense fallback={<ChartSkeleton />}>
+const MTTRChart = memo(({ data }: { data: MTTRData[] }) => {
+  if (!data || data.length === 0) {
+    return (
+      <Card className="col-span-1">
+        <CardHeader>
+          <CardTitle>Histórico MTTR</CardTitle>
+          <CardDescription>Tempo médio de resolução ao longo dos meses</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ChartSkeleton />
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <Card className="col-span-1">
+      <CardHeader>
+        <CardTitle>Histórico MTTR</CardTitle>
+        <CardDescription>Tempo médio de resolução ao longo dos meses</CardDescription>
+      </CardHeader>
+      <CardContent>
         <ChartContainer config={chartConfig}>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={data}>
@@ -197,17 +279,17 @@ const MTTRChart = memo(({ data }: { data: MTTRData[] }) => (
               <Area 
                 type="monotone" 
                 dataKey="mttr" 
-                stroke="var(--color-mttr)" 
-                fill="var(--color-mttr)"
+                stroke="hsl(var(--primary))" 
+                fill="hsl(var(--primary))"
                 fillOpacity={0.3}
               />
             </AreaChart>
           </ResponsiveContainer>
         </ChartContainer>
-      </Suspense>
-    </CardContent>
-  </Card>
-))
+      </CardContent>
+    </Card>
+  )
+})
 
 MTTRChart.displayName = 'MTTRChart'
 
