@@ -164,7 +164,7 @@ const defaultToggles: Record<string, FeatureToggle> = {
     id: 'criticalityHeatmap',
     label: 'Mapa de Criticidade',
     description: 'Heatmap de criticidade das ocorrências',
-    enabled: true,
+    enabled: false,
     category: 'charts',
     order: 7
   },
