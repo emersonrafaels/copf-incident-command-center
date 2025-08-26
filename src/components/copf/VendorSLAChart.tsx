@@ -31,33 +31,11 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
       if (!vendorMap[vendor]) {
         vendorMap[vendor] = {
           name: vendor,
-          semPrevisao: 0,
-          previsaoMaiorSLA: 0,
-          slaVencido: 0,
           total: 0
         };
       }
 
       vendorMap[vendor].total++;
-
-      // Apenas para ocorrências não encerradas
-      if (occ.status !== 'encerrado' && !occ.resolvedAt) {
-        const now = new Date();
-        const created = new Date(occ.createdAt);
-        const slaHours = (occ.severity === 'critical' || occ.severity === 'high') ? 24 : 72;
-        const slaDeadline = new Date(created.getTime() + (slaHours * 60 * 60 * 1000));
-        
-        if (now > slaDeadline) {
-          vendorMap[vendor].slaVencido++;
-        } else if (!occ.dataPrevisaoEncerramento) {
-          vendorMap[vendor].semPrevisao++;
-        } else {
-          const previsao = new Date(occ.dataPrevisaoEncerramento);
-          if (previsao > slaDeadline) {
-            vendorMap[vendor].previsaoMaiorSLA++;
-          }
-        }
-      }
     });
 
     const result = Object.values(vendorMap)
@@ -75,8 +53,8 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
     return (
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>Análise de SLA por Fornecedor</CardTitle>
-          <CardDescription>Barras horizontais empilhadas por status de SLA</CardDescription>
+          <CardTitle>Total de Ocorrências por Fornecedor</CardTitle>
+          <CardDescription>Barras horizontais por fornecedor</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center h-64 text-muted-foreground">
@@ -90,8 +68,8 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Análise de SLA por Fornecedor</CardTitle>
-        <CardDescription>Barras horizontais empilhadas por status de SLA</CardDescription>
+        <CardTitle>Total de Ocorrências por Fornecedor</CardTitle>
+        <CardDescription>Barras horizontais por fornecedor</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="w-full h-96">
@@ -110,12 +88,10 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
                 tick={{ fontSize: 12 }}
               />
               <Tooltip 
-                formatter={(value: any, name: string) => [value, name]}
+                formatter={(value: any) => [value, "Total de Ocorrências"]}
                 labelFormatter={(label: string) => `Fornecedor: ${label}`}
               />
-              <Bar dataKey="slaVencido" stackId="a" fill="#ef4444" name="SLA Vencido" />
-              <Bar dataKey="previsaoMaiorSLA" stackId="a" fill="#f59e0b" name="Previsão > SLA" />  
-              <Bar dataKey="semPrevisao" stackId="a" fill="#eab308" name="Sem Previsão" />
+              <Bar dataKey="total" fill="hsl(var(--primary))" name="Total de Ocorrências" />
             </BarChart>
           </ResponsiveContainer>
         </div>
