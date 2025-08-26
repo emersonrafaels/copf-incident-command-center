@@ -18,7 +18,7 @@ interface VendorSLAChartProps {
 
 interface VendorSLAData {
   vendor: string;
-  comPrevisao: number;
+  semPrevisao: number;
   previsaoMaiorSLA: number;
   slaVencido: number;
   total: number;
@@ -34,7 +34,7 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
       if (!vendorStats[vendor]) {
         vendorStats[vendor] = {
           vendor: vendor,
-          comPrevisao: 0,
+          semPrevisao: 0,
           previsaoMaiorSLA: 0,
           slaVencido: 0,
           total: 0
@@ -55,10 +55,10 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
         return;
       }
 
-      // Tem previsão
-      if (dataPrevisao) {
-        vendorStats[vendor].comPrevisao++;
-        
+      // Sem previsão
+      if (!dataPrevisao) {
+        vendorStats[vendor].semPrevisao++;
+      } else {
         // Previsão > SLA (previsão ultrapassa o limite do SLA)
         if (dataPrevisao > slaDeadline) {
           vendorStats[vendor].previsaoMaiorSLA++;
@@ -87,7 +87,7 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
           <div className="space-y-1 mt-2">
             <p className="flex items-center gap-2">
               <span className="w-3 h-3 rounded bg-blue-500"></span>
-              <span className="text-sm">Com previsão: {data.comPrevisao}</span>
+              <span className="text-sm">Sem previsão: {data.semPrevisao}</span>
             </p>
             <p className="flex items-center gap-2">
               <span className="w-3 h-3 rounded bg-yellow-500"></span>
@@ -127,36 +127,35 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
       <CardHeader>
         <CardTitle>Análise de SLA por Fornecedor</CardTitle>
         <CardDescription>
-          Distribuição de ocorrências por fornecedor: com previsão, previsão &gt; SLA e SLA vencido
+          Distribuição de ocorrências por fornecedor: sem previsão, previsão &gt; SLA e SLA vencido
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="h-80 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
+              layout="horizontal"
               data={chartData}
               margin={{
                 top: 20,
                 right: 30,
-                left: 20,
-                bottom: 60,
+                left: 60,
+                bottom: 20,
               }}
             >
               <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-              <XAxis 
+              <XAxis type="number" className="text-xs" />
+              <YAxis 
                 dataKey="vendor"
-                angle={-45}
-                textAnchor="end"
-                height={80}
-                interval={0}
+                type="category"
+                width={150}
                 className="text-xs"
               />
-              <YAxis className="text-xs" />
               <Tooltip content={<CustomTooltip />} />
               <Legend />
               <Bar 
-                dataKey="comPrevisao" 
-                name="Com previsão" 
+                dataKey="semPrevisao" 
+                name="Sem previsão" 
                 fill="hsl(210 100% 50%)"
                 stackId="sla"
               />
