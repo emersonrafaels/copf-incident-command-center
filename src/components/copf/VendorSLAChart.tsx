@@ -1,0 +1,183 @@
+import React, { useMemo } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
+interface OccurrenceData {
+  id: string;
+  vendor: string;
+  dataPrevisaoEncerramento?: string | null;
+  status: string;
+  resolvedAt?: string | null;
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  createdAt: string;
+}
+
+interface VendorSLAChartProps {
+  occurrences: OccurrenceData[];
+}
+
+interface VendorSLAData {
+  vendor: string;
+  comPrevisao: number;
+  previsaoMaiorSLA: number;
+  slaVencido: number;
+  total: number;
+}
+
+const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
+  const chartData = useMemo(() => {
+    const vendorStats: Record<string, VendorSLAData> = {};
+
+    occurrences.forEach(occurrence => {
+      const vendor = occurrence.vendor || 'Não informado';
+      
+      if (!vendorStats[vendor]) {
+        vendorStats[vendor] = {
+          vendor: vendor,
+          comPrevisao: 0,
+          previsaoMaiorSLA: 0,
+          slaVencido: 0,
+          total: 0
+        };
+      }
+
+      vendorStats[vendor].total++;
+
+      const now = new Date();
+      const dataPrevisao = occurrence.dataPrevisaoEncerramento ? new Date(occurrence.dataPrevisaoEncerramento) : null;
+      const createdDate = new Date(occurrence.createdAt);
+      const slaLimit = occurrence.severity === 'critical' || occurrence.severity === 'high' ? 24 : 72;
+      const slaDeadline = new Date(createdDate.getTime() + (slaLimit * 60 * 60 * 1000)); // SLA deadline
+      const isResolved = occurrence.status === 'encerrado' || occurrence.resolvedAt;
+
+      // Se já foi resolvida, não conta nas análises de SLA
+      if (isResolved) {
+        return;
+      }
+
+      // Tem previsão
+      if (dataPrevisao) {
+        vendorStats[vendor].comPrevisao++;
+        
+        // Previsão > SLA (previsão ultrapassa o limite do SLA)
+        if (dataPrevisao > slaDeadline) {
+          vendorStats[vendor].previsaoMaiorSLA++;
+        }
+      }
+
+      // SLA vencido (passou do prazo do SLA)
+      if (now > slaDeadline) {
+        vendorStats[vendor].slaVencido++;
+      }
+    });
+
+    // Converter para array e ordenar por total de ocorrências
+    return Object.values(vendorStats)
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 10); // Mostrar apenas os 10 principais fornecedores
+  }, [occurrences]);
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-background border rounded-lg p-3 shadow-lg">
+          <p className="font-semibold text-foreground">{label}</p>
+          <p className="text-sm text-muted-foreground">Total de ocorrências: {data.total}</p>
+          <div className="space-y-1 mt-2">
+            <p className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded bg-blue-500"></span>
+              <span className="text-sm">Com previsão: {data.comPrevisao}</span>
+            </p>
+            <p className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded bg-yellow-500"></span>
+              <span className="text-sm">Previsão &gt; SLA: {data.previsaoMaiorSLA}</span>
+            </p>
+            <p className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded bg-red-500"></span>
+              <span className="text-sm">SLA vencido: {data.slaVencido}</span>
+            </p>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  if (!chartData.length) {
+    return (
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>Análise de SLA por Fornecedor</CardTitle>
+          <CardDescription>
+            Distribuição de ocorrências por fornecedor e status de SLA
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center h-64 text-muted-foreground">
+            Nenhum dado disponível para exibir
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>Análise de SLA por Fornecedor</CardTitle>
+        <CardDescription>
+          Distribuição de ocorrências por fornecedor: com previsão, previsão &gt; SLA e SLA vencido
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="h-80 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={chartData}
+              margin={{
+                top: 20,
+                right: 30,
+                left: 20,
+                bottom: 60,
+              }}
+            >
+              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+              <XAxis 
+                dataKey="vendor"
+                angle={-45}
+                textAnchor="end"
+                height={80}
+                interval={0}
+                className="text-xs"
+              />
+              <YAxis className="text-xs" />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend />
+              <Bar 
+                dataKey="comPrevisao" 
+                name="Com previsão" 
+                fill="hsl(210 100% 50%)"
+                stackId="sla"
+              />
+              <Bar 
+                dataKey="previsaoMaiorSLA" 
+                name="Previsão &gt; SLA" 
+                fill="hsl(45 100% 50%)"
+                stackId="sla"
+              />
+              <Bar 
+                dataKey="slaVencido" 
+                name="SLA vencido" 
+                fill="hsl(0 100% 50%)"
+                stackId="sla"
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default VendorSLAChart;

@@ -16,6 +16,7 @@ const VendorMetricsMatrix = lazy(() => import('./VendorMetricsMatrix').then(modu
 const CriticalityHeatmap = lazy(() => import('./CriticalityHeatmap').then(module => ({ default: module.CriticalityHeatmap })))
 const MotivoLongTailChart = lazy(() => import('./MotivoLongTailChart'))
 const SlaPrevisaoChart = lazy(() => import('./SlaPrevisaoChart').then(module => ({ default: module.SlaPrevisaoChart })))
+const VendorSLAChart = lazy(() => import('./VendorSLAChart'))
 import { OccurrenceHighlights } from "./OccurrenceHighlights";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -475,6 +476,25 @@ export function Dashboard() {
               equipmentData={equipmentData}
               occurrences={occurrences}
             />
+          </div>
+        );
+      case 'vendorSLAChart':
+        return (
+          <div key={chartId} className="animate-fade-in" style={{ animationDelay: '0.8s' }}>
+            <Suspense fallback={
+              <Card>
+                <CardHeader>
+                  <CardTitle>Análise de SLA por Fornecedor</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-80 w-full">
+                    <Skeleton className="h-full w-full" />
+                  </div>
+                </CardContent>
+              </Card>
+            }>
+              <VendorSLAChart occurrences={filteredOccurrences} />
+            </Suspense>
           </div>
         );
       default:

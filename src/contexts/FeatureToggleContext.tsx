@@ -176,6 +176,14 @@ const defaultToggles: Record<string, FeatureToggle> = {
     category: 'charts',
     order: 8
   },
+  vendorSLAChart: {
+    id: 'vendorSLAChart',
+    label: 'Análise de SLA por Fornecedor',
+    description: 'Distribuição de ocorrências por fornecedor com análise de SLA',
+    enabled: true,
+    category: 'charts',
+    order: 9
+  },
 
   // Seções Especiais
   filterSection: {
@@ -217,7 +225,8 @@ const defaultOrder: DashboardOrder = {
     'motivoLongTailChart',
     'slaPrevisaoChart',
     'criticalityHeatmap',
-    'interactiveCharts'
+    'interactiveCharts',
+    'vendorSLAChart'
   ],
   sections: [
     'filterSection',
