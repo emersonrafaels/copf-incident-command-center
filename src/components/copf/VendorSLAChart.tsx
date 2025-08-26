@@ -48,40 +48,42 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
         };
       }
 
+      // Contar TODAS as ocorrências para o total
       vendorStats[vendor].total++;
 
-      // Só analisar SLA para ocorrências não encerradas
+      // Analisar SLA apenas para ocorrências NÃO ENCERRADAS
       if (occurrence.status !== 'encerrado' && !occurrence.resolvedAt) {
         const now = new Date();
         const dataPrevisao = occurrence.dataPrevisaoEncerramento ? new Date(occurrence.dataPrevisaoEncerramento) : null;
         const createdDate = new Date(occurrence.createdAt);
         
-        // Definir SLA baseado na severidade
+        // Definir SLA baseado na severidade (24h para críticas/altas, 72h para médias/baixas)
         const slaLimit = occurrence.severity === 'critical' || occurrence.severity === 'high' ? 24 : 72;
         const slaDeadline = new Date(createdDate.getTime() + (slaLimit * 60 * 60 * 1000));
 
-        // Verificações de SLA
-        if (!dataPrevisao) {
+        // Categorizar SLA - cada ocorrência só pode estar em UMA categoria
+        if (now > slaDeadline) {
+          // Prioridade 1: SLA já vencido (independente de ter previsão ou não)
+          vendorStats[vendor].slaVencido++;
+        } else if (!dataPrevisao) {
+          // Prioridade 2: Sem previsão (mas SLA ainda não venceu)
           vendorStats[vendor].semPrevisao++;
         } else if (dataPrevisao > slaDeadline) {
+          // Prioridade 3: Com previsão, mas a previsão está além do SLA
           vendorStats[vendor].previsaoMaiorSLA++;
         }
-
-        if (now > slaDeadline) {
-          vendorStats[vendor].slaVencido++;
-        }
+        // Caso contrário: ocorrência está dentro do SLA com previsão válida (não contamos aqui)
       }
     });
 
-    // Converter para array e ordenar por total
+    // Converter para array, filtrar e ordenar por total
     const result = Object.values(vendorStats)
       .filter(vendor => vendor.total > 0)
       .sort((a, b) => b.total - a.total)
-      .slice(0, 10);
+      .slice(0, 8); // Limitar a 8 fornecedores principais
       
-    console.log('VendorSLAChart - VendorStats:', vendorStats);
-    console.log('VendorSLAChart - ChartData result:', result);
-    console.log('VendorSLAChart - Sample occurrence:', occurrences[0]);
+    console.log('VendorSLAChart - Final result:', result);
+    console.log('VendorSLAChart - Total occurrences processed:', occurrences.length);
     
     return result;
   }, [occurrences]);
@@ -89,23 +91,40 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
+      const totalSLAIssues = data.semPrevisao + data.previsaoMaiorSLA + data.slaVencido;
+      const okCount = data.total - totalSLAIssues;
+      
       return (
         <div className="bg-background border rounded-lg p-3 shadow-lg">
           <p className="font-semibold text-foreground">{label}</p>
-          <p className="text-sm text-muted-foreground">Total de ocorrências: {data.total}</p>
-          <div className="space-y-1 mt-2">
-            <p className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded" style={{ backgroundColor: '#FFA500' }}></span>
-              <span className="text-sm">Sem previsão: {data.semPrevisao}</span>
-            </p>
-            <p className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded" style={{ backgroundColor: '#FF6B35' }}></span>
-              <span className="text-sm">Previsão &gt; SLA: {data.previsaoMaiorSLA}</span>
-            </p>
-            <p className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded" style={{ backgroundColor: '#E63946' }}></span>
-              <span className="text-sm">SLA vencido: {data.slaVencido}</span>
-            </p>
+          <p className="text-sm text-muted-foreground mb-2">
+            Total: {data.total} ocorrências
+          </p>
+          <div className="space-y-1">
+            {okCount > 0 && (
+              <p className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded" style={{ backgroundColor: "hsl(var(--success))" }}></span>
+                <span className="text-sm">Dentro do SLA: {okCount}</span>
+              </p>
+            )}
+            {data.semPrevisao > 0 && (
+              <p className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded" style={{ backgroundColor: "hsl(var(--warning))" }}></span>
+                <span className="text-sm">Sem previsão: {data.semPrevisao}</span>
+              </p>
+            )}
+            {data.previsaoMaiorSLA > 0 && (
+              <p className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded" style={{ backgroundColor: "hsl(43 96% 45%)" }}></span>
+                <span className="text-sm">Previsão &gt; SLA: {data.previsaoMaiorSLA}</span>
+              </p>
+            )}
+            {data.slaVencido > 0 && (
+              <p className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded" style={{ backgroundColor: "hsl(var(--destructive))" }}></span>
+                <span className="text-sm">SLA vencido: {data.slaVencido}</span>
+              </p>
+            )}
           </div>
         </div>
       );
@@ -191,19 +210,19 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
               <Bar 
                 dataKey="semPrevisao" 
                 name="Sem previsão" 
-                fill="#FFA500"
+                fill="hsl(var(--warning))"
                 stackId="stack"
               />
               <Bar 
                 dataKey="previsaoMaiorSLA" 
                 name="Previsão > SLA" 
-                fill="#FF6B35"
+                fill="hsl(43 96% 45%)"
                 stackId="stack"
               />
               <Bar 
                 dataKey="slaVencido" 
                 name="SLA vencido" 
-                fill="#E63946"
+                fill="hsl(var(--destructive))"
                 stackId="stack"
               />
             </BarChart>
