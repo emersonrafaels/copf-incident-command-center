@@ -25,12 +25,11 @@ interface VendorSLAData {
 }
 
 const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
-  // Debug logging
-  console.log('VendorSLAChart - Received occurrences:', occurrences?.length || 0);
-  console.log('VendorSLAChart - Sample occurrence:', occurrences?.[0]);
-  
   const chartData = useMemo(() => {
-    console.log('VendorSLAChart - Processing data...');
+    if (!occurrences || occurrences.length === 0) {
+      return [];
+    }
+
     const vendorStats: Record<string, VendorSLAData> = {};
 
     occurrences.forEach(occurrence => {
@@ -48,41 +47,34 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
 
       vendorStats[vendor].total++;
 
-      const now = new Date();
-      const dataPrevisao = occurrence.dataPrevisaoEncerramento ? new Date(occurrence.dataPrevisaoEncerramento) : null;
-      const createdDate = new Date(occurrence.createdAt);
-      const slaLimit = occurrence.severity === 'critical' || occurrence.severity === 'high' ? 24 : 72;
-      const slaDeadline = new Date(createdDate.getTime() + (slaLimit * 60 * 60 * 1000)); // SLA deadline
-      const isResolved = occurrence.status === 'encerrado' || occurrence.resolvedAt;
+      // Só analisar SLA para ocorrências não encerradas
+      if (occurrence.status !== 'encerrado' && !occurrence.resolvedAt) {
+        const now = new Date();
+        const dataPrevisao = occurrence.dataPrevisaoEncerramento ? new Date(occurrence.dataPrevisaoEncerramento) : null;
+        const createdDate = new Date(occurrence.createdAt);
+        
+        // Definir SLA baseado na severidade
+        const slaLimit = occurrence.severity === 'critical' || occurrence.severity === 'high' ? 24 : 72;
+        const slaDeadline = new Date(createdDate.getTime() + (slaLimit * 60 * 60 * 1000));
 
-      // Se já foi resolvida, não conta nas análises de SLA
-      if (isResolved) {
-        return;
-      }
-
-      // Sem previsão
-      if (!dataPrevisao) {
-        vendorStats[vendor].semPrevisao++;
-      } else {
-        // Previsão > SLA (previsão ultrapassa o limite do SLA)
-        if (dataPrevisao > slaDeadline) {
+        // Verificações de SLA
+        if (!dataPrevisao) {
+          vendorStats[vendor].semPrevisao++;
+        } else if (dataPrevisao > slaDeadline) {
           vendorStats[vendor].previsaoMaiorSLA++;
         }
-      }
 
-      // SLA vencido (passou do prazo do SLA)
-      if (now > slaDeadline) {
-        vendorStats[vendor].slaVencido++;
+        if (now > slaDeadline) {
+          vendorStats[vendor].slaVencido++;
+        }
       }
     });
 
-    // Converter para array e ordenar por total de ocorrências
-    const result = Object.values(vendorStats)
+    // Converter para array e ordenar por total
+    return Object.values(vendorStats)
+      .filter(vendor => vendor.total > 0)
       .sort((a, b) => b.total - a.total)
-      .slice(0, 10); // Mostrar apenas os 10 principais fornecedores
-    
-    console.log('VendorSLAChart - Chart data result:', result);
-    return result;
+      .slice(0, 10);
   }, [occurrences]);
 
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -94,7 +86,7 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
           <p className="text-sm text-muted-foreground">Total de ocorrências: {data.total}</p>
           <div className="space-y-1 mt-2">
             <p className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded bg-blue-500"></span>
+              <span className="w-3 h-3 rounded bg-primary"></span>
               <span className="text-sm">Sem previsão: {data.semPrevisao}</span>
             </p>
             <p className="flex items-center gap-2">
@@ -102,7 +94,7 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
               <span className="text-sm">Previsão &gt; SLA: {data.previsaoMaiorSLA}</span>
             </p>
             <p className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded bg-red-500"></span>
+              <span className="w-3 h-3 rounded bg-destructive"></span>
               <span className="text-sm">SLA vencido: {data.slaVencido}</span>
             </p>
           </div>
@@ -113,7 +105,6 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
   };
 
   if (!chartData.length) {
-    console.log('VendorSLAChart - No data available. Occurrences count:', occurrences?.length || 0);
     return (
       <Card className="w-full">
         <CardHeader>
@@ -125,7 +116,12 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
         <CardContent>
           <div className="flex flex-col items-center justify-center h-64 text-muted-foreground space-y-2">
             <div>Nenhum dado disponível para exibir</div>
-            <div className="text-xs">Ocorrências recebidas: {occurrences?.length || 0}</div>
+            <div className="text-xs">
+              {occurrences?.length > 0 
+                ? `${occurrences.length} ocorrências recebidas, mas nenhum fornecedor válido encontrado`
+                : 'Nenhuma ocorrência recebida'
+              }
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -166,19 +162,19 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
               <Bar 
                 dataKey="semPrevisao" 
                 name="Sem previsão" 
-                fill="hsl(210 100% 50%)"
+                fill="hsl(var(--primary))"
                 stackId="sla"
               />
               <Bar 
                 dataKey="previsaoMaiorSLA" 
                 name="Previsão &gt; SLA" 
-                fill="hsl(45 100% 50%)"
+                fill="hsl(var(--warning))"
                 stackId="sla"
               />
               <Bar 
                 dataKey="slaVencido" 
                 name="SLA vencido" 
-                fill="hsl(0 100% 50%)"
+                fill="hsl(var(--destructive))"
                 stackId="sla"
               />
             </BarChart>

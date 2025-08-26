@@ -762,6 +762,7 @@ export function Dashboard() {
 
   // Filtrar ocorrências - Memoizado para performance
   const filteredOccurrences = useMemo(() => {
+    console.log('Dashboard - All occurrences:', occurrences?.length || 0);
     // Determina intervalo de datas baseado no filtro selecionado
     const now = new Date();
     let startDate: Date | null = null;
