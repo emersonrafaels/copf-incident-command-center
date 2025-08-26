@@ -79,69 +79,112 @@ Deno.serve(async (req) => {
 
     const occurrences = [];
 
-    // Generate 50 random occurrences
-    for (let i = 0; i < 50; i++) {
-      const agency = generateAgency();
-      const equipment = getRandomElement(equipments);
-      const status = getRandomElement(statuses);
-      const severity = getRandomElement(severities);
-      const isVip = Math.random() < 0.2; // 20% chance of being VIP
-      const hasImpediment = Math.random() < 0.15; // 15% chance of impediment
-      const isReincident = Math.random() < 0.1; // 10% chance of reincidence
-      
-      // Generate dates - older occurrences have higher chance of being resolved
-      const createdDaysAgo = Math.floor(Math.random() * 30); // Up to 30 days ago
-      const createdAt = generateRandomDate(createdDaysAgo);
-      
-      let resolvedAt = null;
-      let closedAt = null;
-      let slaDeadline = null;
-      
-      // Calculate SLA deadline based on severity
-      const slaHours = (severity === 'critica' || severity === 'alta') ? 24 : 72;
-      const createdDate = new Date(createdAt);
-      slaDeadline = new Date(createdDate.getTime() + (slaHours * 60 * 60 * 1000)).toISOString();
-      
-      // If status is resolved, generate resolution date
-      if (status === 'resolvida') {
-        const resolvedDaysAgo = Math.floor(Math.random() * createdDaysAgo);
-        resolvedAt = generateRandomDate(resolvedDaysAgo);
-        closedAt = resolvedAt;
-      }
-      
-      const occurrence = {
-        agencia: agency,
-        equipamento: equipment,
-        numero_serie: generateSerialNumber(),
-        descricao: getRandomElement(descriptions),
-        status: status,
-        prioridade: getRandomElement(priorities),
-        severidade: severity,
-        fornecedor: getRandomElement(vendors),
-        segmento: getRandomElement(segments),
-        uf: getRandomElement(states),
-        tipo_agencia: getRandomElement(agencyTypes),
-        supt: generateSupt(agency),
-        transportadora: getRandomElement(transporters),
-        status_equipamento: getRandomElement(equipmentStatuses),
-        vip: isVip,
-        possui_impedimento: hasImpediment,
-        reincidencia: isReincident,
-        data_ocorrencia: createdAt,
-        data_resolucao: resolvedAt,
-        data_encerramento: closedAt,
-        data_limite_sla: slaDeadline,
-        motivo_ocorrencia: getRandomElement(reasons),
-        observacoes: hasImpediment ? 'Equipamento aguardando peça de reposição' : null,
-        motivo_impedimento: hasImpediment ? 'Peça em falta no estoque' : null,
-        usuario_responsavel: `Usuario${Math.floor(1000 + Math.random() * 9000)}`,
-        dineg: `DINEG-0${Math.floor(1 + Math.random() * 5)}`,
-        prioridade_fornecedor: getRandomElement(['P1', 'P2', 'P3', 'P4']),
-        data_previsao_encerramento: status === 'em_andamento' || status === 'com_impedimentos' ? 
-          new Date(Date.now() + (Math.random() * 7 * 24 * 60 * 60 * 1000)).toISOString() : null
-      };
+    // Define aging scenarios distribution for heterogeneous data
+    const totalOccurrences = 50;
+    const scenarios = [
+      { type: 'sem_previsao', count: Math.floor(totalOccurrences * 0.35) }, // 35% - Sem previsão
+      { type: 'previsao_maior_sla', count: Math.floor(totalOccurrences * 0.25) }, // 25% - Previsão > SLA
+      { type: 'sla_vencido', count: Math.floor(totalOccurrences * 0.20) }, // 20% - SLA vencido
+      { type: 'resolvidas', count: Math.floor(totalOccurrences * 0.20) } // 20% - Resolvidas
+    ];
 
-      occurrences.push(occurrence);
+    let occurrenceIndex = 0;
+
+    // Generate occurrences for each scenario
+    for (const scenario of scenarios) {
+      for (let i = 0; i < scenario.count; i++) {
+        const agency = generateAgency();
+        const equipment = getRandomElement(equipments);
+        const severity = getRandomElement(severities);
+        const isVip = Math.random() < 0.2; // 20% chance of being VIP
+        const hasImpediment = Math.random() < 0.15; // 15% chance of impediment
+        const isReincident = Math.random() < 0.1; // 10% chance of reincidence
+        
+        // Generate creation date based on scenario
+        let createdDaysAgo;
+        let status;
+        let resolvedAt = null;
+        let closedAt = null;
+        let slaDeadline = null;
+        let forecastDate = null;
+        
+        // Calculate SLA deadline based on severity (24h for alta/critica, 72h for others)
+        const slaHours = (severity === 'critica' || severity === 'alta') ? 24 : 72;
+        
+        switch (scenario.type) {
+          case 'sem_previsao':
+            // Ongoing occurrences without forecast
+            createdDaysAgo = Math.floor(Math.random() * 10) + 1; // 1-10 days ago
+            status = Math.random() < 0.7 ? 'em_andamento' : 'pendente';
+            forecastDate = null; // No forecast date
+            break;
+            
+          case 'previsao_maior_sla':
+            // Occurrences with forecast beyond SLA deadline
+            createdDaysAgo = Math.floor(Math.random() * 15) + 1; // 1-15 days ago
+            status = Math.random() < 0.6 ? 'em_andamento' : 'com_impedimentos';
+            // Forecast date is beyond SLA (SLA + 1-5 days)
+            const slaDate = new Date(Date.now() - (createdDaysAgo * 24 * 60 * 60 * 1000) + (slaHours * 60 * 60 * 1000));
+            forecastDate = new Date(slaDate.getTime() + ((Math.random() * 5 + 1) * 24 * 60 * 60 * 1000)).toISOString();
+            break;
+            
+          case 'sla_vencido':
+            // Occurrences with expired SLA
+            createdDaysAgo = Math.floor(Math.random() * 20) + (slaHours === 24 ? 2 : 4); // Beyond SLA
+            status = Math.random() < 0.5 ? 'em_andamento' : 'com_impedimentos';
+            // May or may not have forecast, but SLA is already expired
+            forecastDate = Math.random() < 0.6 ? 
+              new Date(Date.now() + (Math.random() * 3 * 24 * 60 * 60 * 1000)).toISOString() : null;
+            break;
+            
+          case 'resolvidas':
+            // Resolved occurrences with varied resolution times
+            createdDaysAgo = Math.floor(Math.random() * 30) + 1; // 1-30 days ago
+            status = 'resolvida';
+            const resolvedDaysAgo = Math.floor(Math.random() * createdDaysAgo);
+            resolvedAt = generateRandomDate(resolvedDaysAgo);
+            closedAt = resolvedAt;
+            break;
+        }
+        
+        const createdAt = generateRandomDate(createdDaysAgo);
+        const createdDate = new Date(createdAt);
+        slaDeadline = new Date(createdDate.getTime() + (slaHours * 60 * 60 * 1000)).toISOString();
+
+        const occurrence = {
+          agencia: agency,
+          equipamento: equipment,
+          numero_serie: generateSerialNumber(),
+          descricao: getRandomElement(descriptions),
+          status: status,
+          prioridade: getRandomElement(priorities),
+          severidade: severity,
+          fornecedor: getRandomElement(vendors),
+          segmento: getRandomElement(segments),
+          uf: getRandomElement(states),
+          tipo_agencia: getRandomElement(agencyTypes),
+          supt: generateSupt(agency),
+          transportadora: getRandomElement(transporters),
+          status_equipamento: getRandomElement(equipmentStatuses),
+          vip: isVip,
+          possui_impedimento: hasImpediment,
+          reincidencia: isReincident,
+          data_ocorrencia: createdAt,
+          data_resolucao: resolvedAt,
+          data_encerramento: closedAt,
+          data_limite_sla: slaDeadline,
+          data_previsao_encerramento: forecastDate,
+          motivo_ocorrencia: getRandomElement(reasons),
+          observacoes: hasImpediment ? 'Equipamento aguardando peça de reposição' : null,
+          motivo_impedimento: hasImpediment ? 'Peça em falta no estoque' : null,
+          usuario_responsavel: `Usuario${Math.floor(1000 + Math.random() * 9000)}`,
+          dineg: `DINEG-0${Math.floor(1 + Math.random() * 5)}`,
+          prioridade_fornecedor: getRandomElement(['P1', 'P2', 'P3', 'P4'])
+        };
+
+        occurrences.push(occurrence);
+        occurrenceIndex++;
+      }
     }
 
     console.log(`Generated ${occurrences.length} occurrences. Inserting into database...`);
