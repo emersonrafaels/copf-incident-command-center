@@ -152,62 +152,59 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
               layout="horizontal"
               data={chartData}
               margin={{
-                top: 10,
-                right: 20,
-                left: 20,
-                bottom: 10,
+                top: 20,
+                right: 30,
+                left: 10,
+                bottom: 20,
               }}
-              barCategoryGap="15%"
             >
               <CartesianGrid 
-                strokeDasharray="2 2" 
-                className="opacity-20 stroke-muted-foreground/30" 
-                horizontal={true}
-                vertical={false}
+                strokeDasharray="3 3" 
+                stroke="hsl(var(--muted-foreground))" 
+                opacity={0.2}
               />
               <XAxis 
                 type="number" 
-                className="text-xs text-muted-foreground"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 11 }}
+                tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+                domain={[0, 'dataMax + 2']}
               />
               <YAxis 
                 dataKey="vendor"
                 type="category"
-                width={180}
-                className="text-xs text-foreground"
+                width={120}
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 11 }}
+                tick={{ fontSize: 11, fill: "hsl(var(--foreground))" }}
               />
               <Tooltip content={<CustomTooltip />} />
               <Legend 
+                verticalAlign="bottom"
+                height={36}
+                iconType="rect"
                 wrapperStyle={{ 
-                  paddingTop: '20px',
-                  fontSize: '12px'
+                  paddingTop: '10px',
+                  fontSize: '11px'
                 }}
               />
               <Bar 
                 dataKey="semPrevisao" 
                 name="Sem previsão" 
                 fill="#FFA500"
-                stackId="sla"
-                radius={[0, 2, 2, 0]}
+                stackId="stack"
               />
               <Bar 
                 dataKey="previsaoMaiorSLA" 
                 name="Previsão > SLA" 
                 fill="#FF6B35"
-                stackId="sla"
-                radius={[0, 0, 0, 0]}
+                stackId="stack"
               />
               <Bar 
                 dataKey="slaVencido" 
                 name="SLA vencido" 
                 fill="#E63946"
-                stackId="sla"
-                radius={[0, 2, 2, 0]}
+                stackId="stack"
               />
             </BarChart>
           </ResponsiveContainer>
