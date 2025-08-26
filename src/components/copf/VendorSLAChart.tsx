@@ -5,9 +5,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 interface OccurrenceData {
   id: string;
   vendor: string;
-  dataPrevisaoEncerramento?: string | null;
   status: string;
-  resolvedAt?: string | null;
   severity: 'critical' | 'high' | 'medium' | 'low';
   createdAt: string;
 }
@@ -16,49 +14,50 @@ interface VendorSLAChartProps {
   occurrences: OccurrenceData[];
 }
 
+interface ChartDataItem {
+  vendor: string;
+  total: number;
+}
+
 const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
-  console.log('VendorSLAChart - Received:', occurrences?.length || 0, 'occurrences');
-  
-  // Processar dados de forma simples
-  const processData = () => {
-    if (!occurrences || occurrences.length === 0) return [];
+  // Processar dados dos fornecedores
+  const chartData = React.useMemo(() => {
+    if (!occurrences || occurrences.length === 0) {
+      console.log('VendorSLAChart: No occurrences data');
+      return [];
+    }
 
-    const vendorMap: Record<string, any> = {};
+    console.log(`VendorSLAChart: Processing ${occurrences.length} occurrences`);
 
+    // Contar ocorrências por fornecedor
+    const vendorCounts = new Map<string, number>();
+    
     occurrences.forEach(occ => {
-      const vendor = occ.vendor || 'Não informado';
-      
-      if (!vendorMap[vendor]) {
-        vendorMap[vendor] = {
-          name: vendor,
-          total: 0
-        };
-      }
-
-      vendorMap[vendor].total++;
+      const vendor = occ.vendor || 'Sem Fornecedor';
+      const currentCount = vendorCounts.get(vendor) || 0;
+      vendorCounts.set(vendor, currentCount + 1);
     });
 
-    const result = Object.values(vendorMap)
-      .filter((v: any) => v.total > 0)
-      .sort((a: any, b: any) => b.total - a.total)
-      .slice(0, 8);
-    
-    console.log('Processed data:', result);
-    return result;
-  };
+    // Converter para array e ordenar
+    const result: ChartDataItem[] = Array.from(vendorCounts.entries())
+      .map(([vendor, total]) => ({ vendor, total }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 8); // Top 8 fornecedores
 
-  const chartData = processData();
+    console.log('VendorSLAChart: Chart data processed:', result);
+    return result;
+  }, [occurrences]);
 
   if (chartData.length === 0) {
     return (
       <Card className="w-full">
         <CardHeader>
           <CardTitle>Total de Ocorrências por Fornecedor</CardTitle>
-          <CardDescription>Barras horizontais por fornecedor</CardDescription>
+          <CardDescription>Distribuição de ocorrências entre fornecedores</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center h-64 text-muted-foreground">
-            <p>Nenhum dado disponível</p>
+            <p>Nenhum dado de fornecedor disponível</p>
           </div>
         </CardContent>
       </Card>
@@ -69,29 +68,48 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
     <Card className="w-full">
       <CardHeader>
         <CardTitle>Total de Ocorrências por Fornecedor</CardTitle>
-        <CardDescription>Barras horizontais por fornecedor</CardDescription>
+        <CardDescription>Distribuição de ocorrências entre fornecedores</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="w-full h-96">
+        <div className="w-full" style={{ height: '400px' }}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               layout="horizontal"
               data={chartData}
-              margin={{ top: 20, right: 30, left: 100, bottom: 5 }}
+              margin={{
+                top: 20,
+                right: 30,
+                left: 80,
+                bottom: 20,
+              }}
             >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis type="number" />
-              <YAxis 
-                dataKey="name" 
-                type="category" 
-                width={90} 
+              <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+              <XAxis 
+                type="number"
                 tick={{ fontSize: 12 }}
+                axisLine={{ stroke: 'hsl(var(--border))' }}
+              />
+              <YAxis 
+                type="category"
+                dataKey="vendor"
+                width={70}
+                tick={{ fontSize: 11 }}
+                axisLine={{ stroke: 'hsl(var(--border))' }}
               />
               <Tooltip 
-                formatter={(value: any) => [value, "Total de Ocorrências"]}
+                formatter={(value: number) => [`${value}`, "Ocorrências"]}
                 labelFormatter={(label: string) => `Fornecedor: ${label}`}
+                contentStyle={{
+                  backgroundColor: 'hsl(var(--background))',
+                  border: '1px solid hsl(var(--border))',
+                  borderRadius: '6px'
+                }}
               />
-              <Bar dataKey="total" fill="hsl(var(--primary))" name="Total de Ocorrências" />
+              <Bar 
+                dataKey="total" 
+                fill="hsl(var(--primary))"
+                radius={[0, 4, 4, 0]}
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>
