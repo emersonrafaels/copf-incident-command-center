@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 interface OccurrenceData {
   id: string;
@@ -71,48 +71,22 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
         <CardDescription>Distribuição de ocorrências entre fornecedores</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="w-full" style={{ height: '400px' }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              layout="horizontal"
-              data={chartData}
-              margin={{
-                top: 20,
-                right: 30,
-                left: 80,
-                bottom: 20,
-              }}
-            >
-              <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-              <XAxis 
-                type="number"
-                tick={{ fontSize: 12 }}
-                axisLine={{ stroke: 'hsl(var(--border))' }}
-              />
-              <YAxis 
-                type="category"
-                dataKey="vendor"
-                width={70}
-                tick={{ fontSize: 11 }}
-                axisLine={{ stroke: 'hsl(var(--border))' }}
-              />
-              <Tooltip 
-                formatter={(value: number) => [`${value}`, "Ocorrências"]}
-                labelFormatter={(label: string) => `Fornecedor: ${label}`}
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--background))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '6px'
-                }}
-              />
-              <Bar 
-                dataKey="total" 
-                fill="hsl(var(--primary))"
-                radius={[0, 4, 4, 0]}
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Fornecedor</TableHead>
+              <TableHead className="text-right">Total de Ocorrências</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {chartData.map((item, index) => (
+              <TableRow key={index}>
+                <TableCell className="font-medium">{item.vendor}</TableCell>
+                <TableCell className="text-right">{item.total}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </CardContent>
     </Card>
   );
