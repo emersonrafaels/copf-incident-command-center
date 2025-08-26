@@ -86,15 +86,15 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
           <p className="text-sm text-muted-foreground">Total de ocorrências: {data.total}</p>
           <div className="space-y-1 mt-2">
             <p className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded bg-primary"></span>
+              <span className="w-3 h-3 rounded" style={{ backgroundColor: '#FFA500' }}></span>
               <span className="text-sm">Sem previsão: {data.semPrevisao}</span>
             </p>
             <p className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded bg-yellow-500"></span>
+              <span className="w-3 h-3 rounded" style={{ backgroundColor: '#FF6B35' }}></span>
               <span className="text-sm">Previsão &gt; SLA: {data.previsaoMaiorSLA}</span>
             </p>
             <p className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded bg-destructive"></span>
+              <span className="w-3 h-3 rounded" style={{ backgroundColor: '#E63946' }}></span>
               <span className="text-sm">SLA vencido: {data.slaVencido}</span>
             </p>
           </div>
@@ -137,45 +137,68 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="h-80 w-full">
+        <div className="h-96 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               layout="horizontal"
               data={chartData}
               margin={{
-                top: 20,
-                right: 30,
-                left: 60,
-                bottom: 20,
+                top: 10,
+                right: 20,
+                left: 20,
+                bottom: 10,
               }}
+              barCategoryGap="15%"
             >
-              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-              <XAxis type="number" className="text-xs" />
+              <CartesianGrid 
+                strokeDasharray="2 2" 
+                className="opacity-20 stroke-muted-foreground/30" 
+                horizontal={true}
+                vertical={false}
+              />
+              <XAxis 
+                type="number" 
+                className="text-xs text-muted-foreground"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 11 }}
+              />
               <YAxis 
                 dataKey="vendor"
                 type="category"
-                width={150}
-                className="text-xs"
+                width={180}
+                className="text-xs text-foreground"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 11 }}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Legend />
+              <Legend 
+                wrapperStyle={{ 
+                  paddingTop: '20px',
+                  fontSize: '12px'
+                }}
+              />
               <Bar 
                 dataKey="semPrevisao" 
                 name="Sem previsão" 
-                fill="hsl(var(--primary))"
+                fill="#FFA500"
                 stackId="sla"
+                radius={[0, 2, 2, 0]}
               />
               <Bar 
                 dataKey="previsaoMaiorSLA" 
-                name="Previsão &gt; SLA" 
-                fill="hsl(var(--warning))"
+                name="Previsão > SLA" 
+                fill="#FF6B35"
                 stackId="sla"
+                radius={[0, 0, 0, 0]}
               />
               <Bar 
                 dataKey="slaVencido" 
                 name="SLA vencido" 
-                fill="hsl(var(--destructive))"
+                fill="#E63946"
                 stackId="sla"
+                radius={[0, 2, 2, 0]}
               />
             </BarChart>
           </ResponsiveContainer>
