@@ -25,8 +25,11 @@ interface VendorSLAData {
 }
 
 const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
+  console.log('VendorSLAChart - Received occurrences:', occurrences?.length || 0);
+  
   const chartData = useMemo(() => {
     if (!occurrences || occurrences.length === 0) {
+      console.log('VendorSLAChart - No occurrences data available');
       return [];
     }
 
@@ -71,10 +74,16 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
     });
 
     // Converter para array e ordenar por total
-    return Object.values(vendorStats)
+    const result = Object.values(vendorStats)
       .filter(vendor => vendor.total > 0)
       .sort((a, b) => b.total - a.total)
       .slice(0, 10);
+      
+    console.log('VendorSLAChart - VendorStats:', vendorStats);
+    console.log('VendorSLAChart - ChartData result:', result);
+    console.log('VendorSLAChart - Sample occurrence:', occurrences[0]);
+    
+    return result;
   }, [occurrences]);
 
   const CustomTooltip = ({ active, payload, label }: any) => {
