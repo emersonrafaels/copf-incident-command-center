@@ -256,7 +256,7 @@ export const SlaPrevisaoChart = memo(function SlaPrevisaoChart({
           <div className="flex items-center gap-2 p-2 rounded bg-gray-50 dark:bg-gray-950/20">
             <CheckCircle2 className="h-4 w-4 text-gray-500" />
             <div>
-              <div className="font-medium text-gray-700 dark:text-gray-300">Aguardar</div>
+              <div className="font-medium text-gray-700 dark:text-gray-300">Cobrar</div>
               <div className="text-gray-600 dark:text-gray-400">Sem previsão informada</div>
             </div>
           </div>
