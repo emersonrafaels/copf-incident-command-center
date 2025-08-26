@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface OccurrenceData {
   id: string;
@@ -16,31 +16,21 @@ interface VendorSLAChartProps {
   occurrences: OccurrenceData[];
 }
 
-interface VendorSLAData {
-  vendor: string;
-  semPrevisao: number;
-  previsaoMaiorSLA: number;
-  slaVencido: number;
-  total: number;
-}
-
 const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
-  console.log('VendorSLAChart - Received occurrences:', occurrences?.length || 0);
+  console.log('VendorSLAChart - Received:', occurrences?.length || 0, 'occurrences');
   
-  const chartData = useMemo(() => {
-    if (!occurrences || occurrences.length === 0) {
-      console.log('VendorSLAChart - No occurrences data available');
-      return [];
-    }
+  // Processar dados de forma simples
+  const processData = () => {
+    if (!occurrences || occurrences.length === 0) return [];
 
-    const vendorStats: Record<string, VendorSLAData> = {};
+    const vendorMap: Record<string, any> = {};
 
-    occurrences.forEach(occurrence => {
-      const vendor = occurrence.vendor || 'Não informado';
+    occurrences.forEach(occ => {
+      const vendor = occ.vendor || 'Não informado';
       
-      if (!vendorStats[vendor]) {
-        vendorStats[vendor] = {
-          vendor: vendor,
+      if (!vendorMap[vendor]) {
+        vendorMap[vendor] = {
+          name: vendor,
           semPrevisao: 0,
           previsaoMaiorSLA: 0,
           slaVencido: 0,
@@ -48,108 +38,49 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
         };
       }
 
-      // Contar TODAS as ocorrências para o total
-      vendorStats[vendor].total++;
+      vendorMap[vendor].total++;
 
-      // Analisar SLA apenas para ocorrências NÃO ENCERRADAS
-      if (occurrence.status !== 'encerrado' && !occurrence.resolvedAt) {
+      // Apenas para ocorrências não encerradas
+      if (occ.status !== 'encerrado' && !occ.resolvedAt) {
         const now = new Date();
-        const dataPrevisao = occurrence.dataPrevisaoEncerramento ? new Date(occurrence.dataPrevisaoEncerramento) : null;
-        const createdDate = new Date(occurrence.createdAt);
+        const created = new Date(occ.createdAt);
+        const slaHours = (occ.severity === 'critical' || occ.severity === 'high') ? 24 : 72;
+        const slaDeadline = new Date(created.getTime() + (slaHours * 60 * 60 * 1000));
         
-        // Definir SLA baseado na severidade (24h para críticas/altas, 72h para médias/baixas)
-        const slaLimit = occurrence.severity === 'critical' || occurrence.severity === 'high' ? 24 : 72;
-        const slaDeadline = new Date(createdDate.getTime() + (slaLimit * 60 * 60 * 1000));
-
-        // Categorizar SLA - cada ocorrência só pode estar em UMA categoria
         if (now > slaDeadline) {
-          // Prioridade 1: SLA já vencido (independente de ter previsão ou não)
-          vendorStats[vendor].slaVencido++;
-        } else if (!dataPrevisao) {
-          // Prioridade 2: Sem previsão (mas SLA ainda não venceu)
-          vendorStats[vendor].semPrevisao++;
-        } else if (dataPrevisao > slaDeadline) {
-          // Prioridade 3: Com previsão, mas a previsão está além do SLA
-          vendorStats[vendor].previsaoMaiorSLA++;
+          vendorMap[vendor].slaVencido++;
+        } else if (!occ.dataPrevisaoEncerramento) {
+          vendorMap[vendor].semPrevisao++;
+        } else {
+          const previsao = new Date(occ.dataPrevisaoEncerramento);
+          if (previsao > slaDeadline) {
+            vendorMap[vendor].previsaoMaiorSLA++;
+          }
         }
-        // Caso contrário: ocorrência está dentro do SLA com previsão válida (não contamos aqui)
       }
     });
 
-    // Converter para array, filtrar e ordenar por total
-    const result = Object.values(vendorStats)
-      .filter(vendor => vendor.total > 0)
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 8); // Limitar a 8 fornecedores principais
-      
-    console.log('VendorSLAChart - Final result:', result);
-    console.log('VendorSLAChart - Total occurrences processed:', occurrences.length);
+    const result = Object.values(vendorMap)
+      .filter((v: any) => v.total > 0)
+      .sort((a: any, b: any) => b.total - a.total)
+      .slice(0, 8);
     
+    console.log('Processed data:', result);
     return result;
-  }, [occurrences]);
-
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      const totalSLAIssues = data.semPrevisao + data.previsaoMaiorSLA + data.slaVencido;
-      const okCount = data.total - totalSLAIssues;
-      
-      return (
-        <div className="bg-background border rounded-lg p-3 shadow-lg">
-          <p className="font-semibold text-foreground">{label}</p>
-          <p className="text-sm text-muted-foreground mb-2">
-            Total: {data.total} ocorrências
-          </p>
-          <div className="space-y-1">
-            {okCount > 0 && (
-              <p className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded" style={{ backgroundColor: "hsl(var(--success))" }}></span>
-                <span className="text-sm">Dentro do SLA: {okCount}</span>
-              </p>
-            )}
-            {data.semPrevisao > 0 && (
-              <p className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded" style={{ backgroundColor: "hsl(var(--warning))" }}></span>
-                <span className="text-sm">Sem previsão: {data.semPrevisao}</span>
-              </p>
-            )}
-            {data.previsaoMaiorSLA > 0 && (
-              <p className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded" style={{ backgroundColor: "hsl(43 96% 45%)" }}></span>
-                <span className="text-sm">Previsão &gt; SLA: {data.previsaoMaiorSLA}</span>
-              </p>
-            )}
-            {data.slaVencido > 0 && (
-              <p className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded" style={{ backgroundColor: "hsl(var(--destructive))" }}></span>
-                <span className="text-sm">SLA vencido: {data.slaVencido}</span>
-              </p>
-            )}
-          </div>
-        </div>
-      );
-    }
-    return null;
   };
 
-  if (!chartData.length) {
+  const chartData = processData();
+
+  if (chartData.length === 0) {
     return (
       <Card className="w-full">
         <CardHeader>
           <CardTitle>Análise de SLA por Fornecedor</CardTitle>
-          <CardDescription>
-            Distribuição de ocorrências por fornecedor e status de SLA
-          </CardDescription>
+          <CardDescription>Barras horizontais empilhadas por status de SLA</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col items-center justify-center h-64 text-muted-foreground space-y-2">
-            <div>Nenhum dado disponível para exibir</div>
-            <div className="text-xs">
-              {occurrences?.length > 0 
-                ? `${occurrences.length} ocorrências recebidas, mas nenhum fornecedor válido encontrado`
-                : 'Nenhuma ocorrência recebida'
-              }
-            </div>
+          <div className="flex items-center justify-center h-64 text-muted-foreground">
+            <p>Nenhum dado disponível</p>
           </div>
         </CardContent>
       </Card>
@@ -160,71 +91,31 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
     <Card className="w-full">
       <CardHeader>
         <CardTitle>Análise de SLA por Fornecedor</CardTitle>
-        <CardDescription>
-          Distribuição de ocorrências por fornecedor: sem previsão, previsão &gt; SLA e SLA vencido
-        </CardDescription>
+        <CardDescription>Barras horizontais empilhadas por status de SLA</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="h-96 w-full">
+        <div className="w-full h-96">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               layout="horizontal"
               data={chartData}
-              margin={{
-                top: 20,
-                right: 30,
-                left: 10,
-                bottom: 20,
-              }}
+              margin={{ top: 20, right: 30, left: 100, bottom: 5 }}
             >
-              <CartesianGrid 
-                strokeDasharray="3 3" 
-                stroke="hsl(var(--muted-foreground))" 
-                opacity={0.2}
-              />
-              <XAxis 
-                type="number" 
-                axisLine={false}
-                tickLine={false}
-                tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
-                domain={[0, 'dataMax + 2']}
-              />
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis type="number" />
               <YAxis 
-                dataKey="vendor"
-                type="category"
-                width={120}
-                axisLine={false}
-                tickLine={false}
-                tick={{ fontSize: 11, fill: "hsl(var(--foreground))" }}
+                dataKey="name" 
+                type="category" 
+                width={90} 
+                tick={{ fontSize: 12 }}
               />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend 
-                verticalAlign="bottom"
-                height={36}
-                iconType="rect"
-                wrapperStyle={{ 
-                  paddingTop: '10px',
-                  fontSize: '11px'
-                }}
+              <Tooltip 
+                formatter={(value: any, name: string) => [value, name]}
+                labelFormatter={(label: string) => `Fornecedor: ${label}`}
               />
-              <Bar 
-                dataKey="semPrevisao" 
-                name="Sem previsão" 
-                fill="hsl(var(--warning))"
-                stackId="stack"
-              />
-              <Bar 
-                dataKey="previsaoMaiorSLA" 
-                name="Previsão > SLA" 
-                fill="hsl(43 96% 45%)"
-                stackId="stack"
-              />
-              <Bar 
-                dataKey="slaVencido" 
-                name="SLA vencido" 
-                fill="hsl(var(--destructive))"
-                stackId="stack"
-              />
+              <Bar dataKey="slaVencido" stackId="a" fill="#ef4444" name="SLA Vencido" />
+              <Bar dataKey="previsaoMaiorSLA" stackId="a" fill="#f59e0b" name="Previsão > SLA" />  
+              <Bar dataKey="semPrevisao" stackId="a" fill="#eab308" name="Sem Previsão" />
             </BarChart>
           </ResponsiveContainer>
         </div>
