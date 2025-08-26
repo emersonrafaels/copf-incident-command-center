@@ -25,7 +25,12 @@ interface VendorSLAData {
 }
 
 const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
+  // Debug logging
+  console.log('VendorSLAChart - Received occurrences:', occurrences?.length || 0);
+  console.log('VendorSLAChart - Sample occurrence:', occurrences?.[0]);
+  
   const chartData = useMemo(() => {
+    console.log('VendorSLAChart - Processing data...');
     const vendorStats: Record<string, VendorSLAData> = {};
 
     occurrences.forEach(occurrence => {
@@ -72,9 +77,12 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
     });
 
     // Converter para array e ordenar por total de ocorrências
-    return Object.values(vendorStats)
+    const result = Object.values(vendorStats)
       .sort((a, b) => b.total - a.total)
       .slice(0, 10); // Mostrar apenas os 10 principais fornecedores
+    
+    console.log('VendorSLAChart - Chart data result:', result);
+    return result;
   }, [occurrences]);
 
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -105,6 +113,7 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
   };
 
   if (!chartData.length) {
+    console.log('VendorSLAChart - No data available. Occurrences count:', occurrences?.length || 0);
     return (
       <Card className="w-full">
         <CardHeader>
@@ -114,8 +123,9 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center h-64 text-muted-foreground">
-            Nenhum dado disponível para exibir
+          <div className="flex flex-col items-center justify-center h-64 text-muted-foreground space-y-2">
+            <div>Nenhum dado disponível para exibir</div>
+            <div className="text-xs">Ocorrências recebidas: {occurrences?.length || 0}</div>
           </div>
         </CardContent>
       </Card>
