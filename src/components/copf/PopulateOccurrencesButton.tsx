@@ -63,7 +63,7 @@ export const PopulateOccurrencesButton = ({ onSuccess }: PopulateOccurrencesButt
       ) : (
         <Database className="h-4 w-4 mr-2" />
       )}
-      {loading ? "Populando..." : "Popular Dados Heterogêneos"}
+      {loading ? "Inserindo..." : "Inserir novos dados"}
     </Button>
   );
 };
