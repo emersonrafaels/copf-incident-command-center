@@ -63,26 +63,30 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
       const data = vendorData.get(vendor)!;
       data.total++;
       
-      // Sem previsão
-      if (!occ.data_previsao_encerramento) {
-        data.semPrevisao++;
+      // Logic should be mutually exclusive - check in priority order
+      
+      // First check if SLA is expired (highest priority)
+      if (occ.data_limite_sla && (occ.status === 'pendente' || occ.status === 'em_andamento' || occ.status === 'com_impedimentos')) {
+        const slaLimit = new Date(occ.data_limite_sla);
+        if (now > slaLimit) {
+          data.slaVencido++;
+          return; // Exit early - this occurrence is categorized
+        }
       }
       
-      // Previsão > SLA
+      // Then check if forecast is beyond SLA
       if (occ.data_previsao_encerramento && occ.data_limite_sla) {
         const previsao = new Date(occ.data_previsao_encerramento);
         const slaLimit = new Date(occ.data_limite_sla);
         if (previsao > slaLimit) {
           data.previsaoMaiorSla++;
+          return; // Exit early - this occurrence is categorized
         }
       }
       
-      // SLA Vencido
-      if (occ.data_limite_sla && occ.status !== 'resolvido' && occ.status !== 'fechado') {
-        const slaLimit = new Date(occ.data_limite_sla);
-        if (now > slaLimit) {
-          data.slaVencido++;
-        }
+      // Finally, if no forecast date, count as sem previsao
+      if (!occ.data_previsao_encerramento) {
+        data.semPrevisao++;
       }
     });
 
