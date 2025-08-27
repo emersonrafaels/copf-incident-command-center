@@ -37,6 +37,7 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
     }
 
     console.log(`VendorSLAChart: Processing ${occurrences.length} occurrences`);
+    console.log('VendorSLAChart: Sample occurrences:', occurrences.slice(0, 3));
 
     // Agrupar ocorrências por fornecedor com métricas SLA
     const vendorData = new Map<string, {
@@ -47,9 +48,22 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
     }>();
     
     const now = new Date();
+    console.log('VendorSLAChart: Current time:', now.toISOString());
     
-    occurrences.forEach(occ => {
+    occurrences.forEach((occ, index) => {
       const vendor = occ.fornecedor || occ.vendor || 'Sem Fornecedor';
+      
+      // Debug logging for first few occurrences
+      if (index < 5) {
+        console.log(`VendorSLAChart: Occurrence ${index}:`, {
+          vendor,
+          status: occ.status,
+          data_limite_sla: occ.data_limite_sla,
+          data_previsao_encerramento: occ.data_previsao_encerramento,
+          hasPrevisao: !!occ.data_previsao_encerramento,
+          hasSLA: !!occ.data_limite_sla
+        });
+      }
       
       if (!vendorData.has(vendor)) {
         vendorData.set(vendor, {
@@ -70,6 +84,7 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
         const slaLimit = new Date(occ.data_limite_sla);
         if (now > slaLimit) {
           data.slaVencido++;
+          if (index < 5) console.log(`VendorSLAChart: Occurrence ${index} categorized as SLA_VENCIDO`);
           return; // Exit early - this occurrence is categorized
         }
       }
@@ -80,6 +95,7 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
         const slaLimit = new Date(occ.data_limite_sla);
         if (previsao > slaLimit) {
           data.previsaoMaiorSla++;
+          if (index < 5) console.log(`VendorSLAChart: Occurrence ${index} categorized as PREVISAO_MAIOR_SLA`);
           return; // Exit early - this occurrence is categorized
         }
       }
@@ -87,6 +103,9 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
       // Finally, if no forecast date, count as sem previsao
       if (!occ.data_previsao_encerramento) {
         data.semPrevisao++;
+        if (index < 5) console.log(`VendorSLAChart: Occurrence ${index} categorized as SEM_PREVISAO`);
+      } else {
+        if (index < 5) console.log(`VendorSLAChart: Occurrence ${index} has forecast but doesn't fit other categories`);
       }
     });
 
