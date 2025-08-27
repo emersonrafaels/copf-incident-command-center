@@ -170,7 +170,7 @@ const defaultToggles: Record<string, FeatureToggle> = {
   },
   interactiveCharts: {
     id: 'interactiveCharts',
-    label: 'Gráficos Interativos',
+    label: 'Outros gráficos',
     description: 'Conjunto de gráficos interativos avançados',
     enabled: false,
     category: 'charts',
