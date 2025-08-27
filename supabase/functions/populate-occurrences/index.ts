@@ -113,24 +113,21 @@ Deno.serve(async (req) => {
         
         switch (scenario.type) {
           case 'sem_previsao':
-            // Ongoing occurrences without forecast
-            createdDaysAgo = Math.floor(Math.random() * 10) + 1; // 1-10 days ago
+            // Ongoing occurrences without forecast - within SLA time
+            createdDaysAgo = Math.floor(Math.random() * (slaHours === 24 ? 1 : 2)) + 0.5; // Recent creation, within SLA
             status = Math.random() < 0.7 ? 'em_andamento' : 'pendente';
             forecastDate = null; // No forecast date
             break;
             
           case 'previsao_maior_sla':
             // Occurrences with forecast beyond SLA deadline
-            createdDaysAgo = Math.floor(Math.random() * 15) + 1; // 1-15 days ago
+            createdDaysAgo = Math.floor(Math.random() * (slaHours === 24 ? 2 : 4)) + 1; // 1-2 days for 24h SLA, 1-4 days for 72h SLA
             status = Math.random() < 0.6 ? 'em_andamento' : 'com_impedimentos';
-            // Forecast date is beyond SLA (SLA + 1-5 days)
-            const slaDate = new Date(Date.now() - (createdDaysAgo * 24 * 60 * 60 * 1000) + (slaHours * 60 * 60 * 1000));
-            forecastDate = new Date(slaDate.getTime() + ((Math.random() * 5 + 1) * 24 * 60 * 60 * 1000)).toISOString();
             break;
             
           case 'sla_vencido':
-            // Occurrences with expired SLA
-            createdDaysAgo = Math.floor(Math.random() * 20) + (slaHours === 24 ? 2 : 4); // Beyond SLA
+            // Occurrences with expired SLA - created longer ago than SLA allows
+            createdDaysAgo = (slaHours / 24) + Math.floor(Math.random() * 10) + 1; // Beyond SLA + 1-10 days
             status = Math.random() < 0.5 ? 'em_andamento' : 'com_impedimentos';
             // May or may not have forecast, but SLA is already expired
             forecastDate = Math.random() < 0.6 ? 
@@ -150,6 +147,12 @@ Deno.serve(async (req) => {
         const createdAt = generateRandomDate(createdDaysAgo);
         const createdDate = new Date(createdAt);
         slaDeadline = new Date(createdDate.getTime() + (slaHours * 60 * 60 * 1000)).toISOString();
+        
+        // For previsao_maior_sla scenario, set forecast beyond SLA deadline
+        if (scenario.type === 'previsao_maior_sla') {
+          const slaDate = new Date(createdDate.getTime() + (slaHours * 60 * 60 * 1000));
+          forecastDate = new Date(slaDate.getTime() + ((Math.random() * 5 + 1) * 24 * 60 * 60 * 1000)).toISOString();
+        }
 
         const occurrence = {
           agencia: agency,
