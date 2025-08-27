@@ -8,8 +8,8 @@ interface OccurrenceData {
   status: string;
   severity: 'critical' | 'high' | 'medium' | 'low';
   createdAt: string;
-  data_previsao_encerramento?: string | null;
-  data_limite_sla?: string | null;
+  dataPrevisaoEncerramento?: string;
+  dataLimiteSla?: string;
   fornecedor?: string;
 }
 
@@ -32,12 +32,8 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
   // Processar dados dos fornecedores
   const chartData = React.useMemo(() => {
     if (!occurrences || occurrences.length === 0) {
-      console.log('VendorSLAChart: No occurrences data');
       return [];
     }
-
-    console.log(`VendorSLAChart: Processing ${occurrences.length} occurrences`);
-    console.log('VendorSLAChart: Sample occurrences:', occurrences.slice(0, 3));
 
     // Agrupar ocorrências por fornecedor com métricas SLA
     const vendorData = new Map<string, {
@@ -48,22 +44,9 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
     }>();
     
     const now = new Date();
-    console.log('VendorSLAChart: Current time:', now.toISOString());
     
-    occurrences.forEach((occ, index) => {
+    occurrences.forEach((occ) => {
       const vendor = occ.fornecedor || occ.vendor || 'Sem Fornecedor';
-      
-      // Debug logging for first few occurrences
-      if (index < 5) {
-        console.log(`VendorSLAChart: Occurrence ${index}:`, {
-          vendor,
-          status: occ.status,
-          data_limite_sla: occ.data_limite_sla,
-          data_previsao_encerramento: occ.data_previsao_encerramento,
-          hasPrevisao: !!occ.data_previsao_encerramento,
-          hasSLA: !!occ.data_limite_sla
-        });
-      }
       
       if (!vendorData.has(vendor)) {
         vendorData.set(vendor, {
@@ -80,32 +63,27 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
       // Logic should be mutually exclusive - check in priority order
       
       // First check if SLA is expired (highest priority)
-      if (occ.data_limite_sla && (occ.status === 'pendente' || occ.status === 'em_andamento' || occ.status === 'com_impedimentos')) {
-        const slaLimit = new Date(occ.data_limite_sla);
+      if (occ.dataLimiteSla && (occ.status === 'pendente' || occ.status === 'em_andamento' || occ.status === 'com_impedimentos')) {
+        const slaLimit = new Date(occ.dataLimiteSla);
         if (now > slaLimit) {
           data.slaVencido++;
-          if (index < 5) console.log(`VendorSLAChart: Occurrence ${index} categorized as SLA_VENCIDO`);
           return; // Exit early - this occurrence is categorized
         }
       }
       
       // Then check if forecast is beyond SLA
-      if (occ.data_previsao_encerramento && occ.data_limite_sla) {
-        const previsao = new Date(occ.data_previsao_encerramento);
-        const slaLimit = new Date(occ.data_limite_sla);
+      if (occ.dataPrevisaoEncerramento && occ.dataLimiteSla) {
+        const previsao = new Date(occ.dataPrevisaoEncerramento);
+        const slaLimit = new Date(occ.dataLimiteSla);
         if (previsao > slaLimit) {
           data.previsaoMaiorSla++;
-          if (index < 5) console.log(`VendorSLAChart: Occurrence ${index} categorized as PREVISAO_MAIOR_SLA`);
           return; // Exit early - this occurrence is categorized
         }
       }
       
       // Finally, if no forecast date, count as sem previsao
-      if (!occ.data_previsao_encerramento) {
+      if (!occ.dataPrevisaoEncerramento) {
         data.semPrevisao++;
-        if (index < 5) console.log(`VendorSLAChart: Occurrence ${index} categorized as SEM_PREVISAO`);
-      } else {
-        if (index < 5) console.log(`VendorSLAChart: Occurrence ${index} has forecast but doesn't fit other categories`);
       }
     });
 
@@ -124,7 +102,6 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
       .sort((a, b) => b.total - a.total)
       .slice(0, 8); // Top 8 fornecedores
 
-    console.log('VendorSLAChart: Chart data processed:', result);
     return result;
   }, [occurrences]);
 

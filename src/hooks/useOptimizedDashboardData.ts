@@ -18,6 +18,7 @@ export interface OccurrenceData {
   resolvedAt?: string
   dataPrevisaoEncerramento?: string // Data/hora prevista pelo fornecedor para encerramento
   dataEncerramento?: string // Data/hora real do encerramento
+  dataLimiteSla?: string // Data limite do SLA
   assignedTo: string
   vendor: string
   transportadora?: string
@@ -111,6 +112,7 @@ const mapDatabaseToOccurrence = (dbRecord: any): OccurrenceData => {
     resolvedAt: dbRecord.data_resolucao,
     dataPrevisaoEncerramento: dbRecord.data_previsao_encerramento,
     dataEncerramento: dbRecord.data_encerramento,
+    dataLimiteSla: dbRecord.data_limite_sla,
     assignedTo: dbRecord.usuario_responsavel || 'Não atribuído',
     vendor: dbRecord.fornecedor,
     transportadora: dbRecord.transportadora,
