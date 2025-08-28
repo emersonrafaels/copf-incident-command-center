@@ -411,12 +411,30 @@ export const FeatureToggleProvider: React.FC<{ children: ReactNode }> = ({ child
     });
   };
 
+  const applyFutureVersionConfiguration = () => {
+    const futureToggles = { ...featureToggles };
+    
+    // Habilitar TODOS os cards, gráficos e seções
+    Object.keys(futureToggles).forEach(toggleId => {
+      futureToggles[toggleId] = { ...futureToggles[toggleId], enabled: true };
+    });
+    
+    setFeatureToggles(futureToggles);
+    
+    toast({
+      title: "Configuração Versão Futura aplicada",
+      description: "Todos os cards, gráficos e seções foram habilitados."
+    });
+  };
+
   const setVersion = (version: Version) => {
     setCurrentVersion(version);
     
     // Aplicar configuração padrão do MVP quando selecionado
     if (version === 'MVP') {
       applyMVPConfiguration();
+    } else if (version === 'VERSAO_FUTURA') {
+      applyFutureVersionConfiguration();
     }
     
     try {
