@@ -68,6 +68,16 @@ function generateRandomDate(daysAgo: number): string {
   return date.toISOString();
 }
 
+function generateTodayDate(): string {
+  const now = new Date();
+  // Gerar uma hora aleatória para hoje (entre 00:00 e agora)
+  const randomHour = Math.floor(Math.random() * now.getHours());
+  const randomMinute = Math.floor(Math.random() * 60);
+  const todayDate = new Date(now);
+  todayDate.setHours(randomHour, randomMinute, 0, 0);
+  return todayDate.toISOString();
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -82,10 +92,11 @@ Deno.serve(async (req) => {
     // Define aging scenarios distribution for heterogeneous data
     const totalOccurrences = 50;
     const scenarios = [
-      { type: 'sem_previsao', count: Math.floor(totalOccurrences * 0.35) }, // 35% - Sem previsão
-      { type: 'previsao_maior_sla', count: Math.floor(totalOccurrences * 0.25) }, // 25% - Previsão > SLA
-      { type: 'sla_vencido', count: Math.floor(totalOccurrences * 0.20) }, // 20% - SLA vencido
-      { type: 'resolvidas', count: Math.floor(totalOccurrences * 0.20) } // 20% - Resolvidas
+      { type: 'entraram_hoje', count: Math.floor(totalOccurrences * 0.20) }, // 20% - Entraram hoje
+      { type: 'sem_previsao', count: Math.floor(totalOccurrences * 0.30) }, // 30% - Sem previsão
+      { type: 'previsao_maior_sla', count: Math.floor(totalOccurrences * 0.20) }, // 20% - Previsão > SLA
+      { type: 'sla_vencido', count: Math.floor(totalOccurrences * 0.15) }, // 15% - SLA vencido
+      { type: 'resolvidas', count: Math.floor(totalOccurrences * 0.15) } // 15% - Resolvidas
     ];
 
     let occurrenceIndex = 0;
@@ -112,6 +123,12 @@ Deno.serve(async (req) => {
         const slaHours = (severity === 'critica' || severity === 'alta') ? 24 : 72;
         
         switch (scenario.type) {
+          case 'entraram_hoje':
+            // Occurrences that started today - very recent
+            status = Math.random() < 0.8 ? 'pendente' : 'em_andamento';
+            forecastDate = null; // Usually no forecast yet since they just started
+            break;
+            
           case 'sem_previsao':
             // Ongoing occurrences without forecast - within SLA time
             createdDaysAgo = Math.floor(Math.random() * (slaHours === 24 ? 1 : 2)) + 0.5; // Recent creation, within SLA
@@ -144,7 +161,14 @@ Deno.serve(async (req) => {
             break;
         }
         
-        const createdAt = generateRandomDate(createdDaysAgo);
+        // Generate the creation date based on scenario
+        let createdAt;
+        if (scenario.type === 'entraram_hoje') {
+          createdAt = generateTodayDate();
+        } else {
+          createdAt = generateRandomDate(createdDaysAgo);
+        }
+        
         const createdDate = new Date(createdAt);
         slaDeadline = new Date(createdDate.getTime() + (slaHours * 60 * 60 * 1000)).toISOString();
         
