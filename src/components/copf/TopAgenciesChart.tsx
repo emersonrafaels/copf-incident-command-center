@@ -20,7 +20,12 @@ export function TopAgenciesChart({ occurrences, filteredOccurrences }: TopAgenci
   const { toast } = useToast();
 
   const chartData = useMemo(() => {
-    const dataToUse = filteredOccurrences || occurrences;
+    const dataToUse = filteredOccurrences || occurrences || [];
+    
+    // Early return if no data
+    if (!dataToUse || dataToUse.length === 0) {
+      return [];
+    }
     
     // Agrupar por agência
     const agencyGroups = dataToUse.reduce((acc, occurrence) => {
@@ -163,7 +168,7 @@ export function TopAgenciesChart({ occurrences, filteredOccurrences }: TopAgenci
         </div>
 
         {/* Resumo dos pontos VIP */}
-        {chartData.some((agency: any) => agency.isVip) && (
+        {chartData && chartData.length > 0 && chartData.some((agency: any) => agency.isVip) && (
           <div className="mt-6 p-4 bg-yellow-500/5 border border-yellow-500/20 rounded-lg">
             <div className="flex items-center gap-2 mb-2">
               <AlertTriangle className="h-4 w-4 text-yellow-600" />
