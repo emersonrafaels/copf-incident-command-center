@@ -416,12 +416,12 @@ export const FeatureToggleProvider: React.FC<{ children: ReactNode }> = ({ child
   const applyFutureVersionConfiguration = () => {
     const futureToggles = { ...featureToggles };
     
-    // Gráficos que devem ficar apenas nas configurações (não habilitados automaticamente)
-    const configOnlyCharts = ['criticalityHeatmap', 'interactiveCharts'];
+    // Items que devem ficar desabilitados por padrão (não habilitados automaticamente)
+    const disabledByDefault = ['criticalityHeatmap', 'interactiveCharts', 'todayOccurrences'];
     
-    // Habilitar TODOS os cards, gráficos e seções, EXCETO os que devem ficar apenas nas configurações
+    // Habilitar TODOS os cards, gráficos e seções, EXCETO os que devem ficar desabilitados por padrão
     Object.keys(futureToggles).forEach(toggleId => {
-      if (!configOnlyCharts.includes(toggleId)) {
+      if (!disabledByDefault.includes(toggleId)) {
         futureToggles[toggleId] = { ...futureToggles[toggleId], enabled: true };
       }
     });
