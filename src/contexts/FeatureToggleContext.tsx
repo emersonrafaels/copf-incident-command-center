@@ -376,8 +376,49 @@ export const FeatureToggleProvider: React.FC<{ children: ReactNode }> = ({ child
       .filter(item => item.enabled); // Remove disabled items
   };
 
+  const applyMVPConfiguration = () => {
+    const mvpToggles = { ...featureToggles };
+    
+    // Habilitar todos os cards especificados para MVP
+    const mvpCards = ['pendingOccurrences', 'inoperantEquipments', 'criticalOccurrences', 'affectedAgencies'];
+    mvpCards.forEach(cardId => {
+      if (mvpToggles[cardId]) {
+        mvpToggles[cardId] = { ...mvpToggles[cardId], enabled: true };
+      }
+    });
+    
+    // Habilitar todos os gráficos especificados para MVP
+    const mvpCharts = ['equipmentStatusChart', 'topAgenciesChart', 'agingChart', 'motivoLongTailChart', 'vendorSLAChart'];
+    mvpCharts.forEach(chartId => {
+      if (mvpToggles[chartId]) {
+        mvpToggles[chartId] = { ...mvpToggles[chartId], enabled: true };
+      }
+    });
+    
+    // Habilitar todas as seções especificadas para MVP
+    const mvpSections = ['filterSection', 'occurrenceHighlights'];
+    mvpSections.forEach(sectionId => {
+      if (mvpToggles[sectionId]) {
+        mvpToggles[sectionId] = { ...mvpToggles[sectionId], enabled: true };
+      }
+    });
+    
+    setFeatureToggles(mvpToggles);
+    
+    toast({
+      title: "Configuração MVP aplicada",
+      description: "Os cards, gráficos e seções padrão do MVP foram habilitados."
+    });
+  };
+
   const setVersion = (version: Version) => {
     setCurrentVersion(version);
+    
+    // Aplicar configuração padrão do MVP quando selecionado
+    if (version === 'MVP') {
+      applyMVPConfiguration();
+    }
+    
     try {
       sessionStorage.setItem('dashboard-version', version);
     } catch (error) {
