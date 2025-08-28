@@ -398,7 +398,7 @@ export const FeatureToggleProvider: React.FC<{ children: ReactNode }> = ({ child
     });
     
     // Seções do MVP
-    const mvpSections = ['filterSection', 'occurrenceHighlights'];
+    const mvpSections = ['filterSection'];
     mvpSections.forEach(sectionId => {
       if (mvpToggles[sectionId]) {
         mvpToggles[sectionId] = { ...mvpToggles[sectionId], enabled: true };
