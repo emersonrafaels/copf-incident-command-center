@@ -252,25 +252,14 @@ export const FeatureToggleProvider: React.FC<{ children: ReactNode }> = ({ child
 
   const loadSettings = () => {
     try {
-      const savedToggles = sessionStorage.getItem('feature-toggles');
       const savedOrder = sessionStorage.getItem('dashboard-order');
       const savedVersion = sessionStorage.getItem('dashboard-version');
 
-      if (savedToggles) {
-        const parsedToggles = JSON.parse(savedToggles);
-        // Filtrar toggles que não existem mais no padrão
-        const validToggles = Object.keys(parsedToggles)
-          .filter(key => key in defaultToggles)
-          .reduce((obj, key) => {
-            obj[key] = parsedToggles[key];
-            return obj;
-          }, {} as Record<string, FeatureToggle>);
-        
-        setFeatureToggles({ ...defaultToggles, ...validToggles });
-      }
-
+      // Carregar versão primeiro
+      let versionToApply: Version = 'MVP'; // padrão
       if (savedVersion) {
-        setCurrentVersion(savedVersion as Version);
+        versionToApply = savedVersion as Version;
+        setCurrentVersion(versionToApply);
       }
 
       if (savedOrder) {
@@ -283,6 +272,13 @@ export const FeatureToggleProvider: React.FC<{ children: ReactNode }> = ({ child
         };
         
         setDashboardOrder(validOrder);
+      }
+
+      // Aplicar configurações da versão salva automaticamente
+      if (versionToApply === 'MVP') {
+        applyMVPConfiguration();
+      } else if (versionToApply === 'VERSAO_FUTURA') {
+        applyFutureVersionConfiguration();
       }
     } catch (error) {
       console.error('Erro ao carregar configurações:', error);
