@@ -16,14 +16,19 @@ export interface DashboardOrder {
   sections: string[];
 }
 
+export type Version = 'MVP' | 'VERSAO_FUTURA';
+
 interface FeatureToggleContextType {
   featureToggles: Record<string, FeatureToggle>;
   dashboardOrder: DashboardOrder;
+  currentVersion: Version;
   updateToggle: (id: string, enabled: boolean) => void;
   reorderItems: (category: keyof DashboardOrder, newOrder: string[]) => void;
   resetToDefaults: () => void;
   clearSession: () => void;
   getOrderedItems: (category: keyof DashboardOrder) => FeatureToggle[];
+  setVersion: (version: Version) => void;
+  getVersionFeatures: (category: keyof DashboardOrder) => FeatureToggle[];
 }
 
 const FeatureToggleContext = createContext<FeatureToggleContextType | undefined>(undefined);
@@ -237,6 +242,7 @@ const defaultOrder: DashboardOrder = {
 export const FeatureToggleProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [featureToggles, setFeatureToggles] = useState<Record<string, FeatureToggle>>(defaultToggles);
   const [dashboardOrder, setDashboardOrder] = useState<DashboardOrder>(defaultOrder);
+  const [currentVersion, setCurrentVersion] = useState<Version>('MVP');
   const { toast } = useToast();
 
   // Carregar configurações do sessionStorage na inicialização
@@ -248,6 +254,7 @@ export const FeatureToggleProvider: React.FC<{ children: ReactNode }> = ({ child
     try {
       const savedToggles = sessionStorage.getItem('feature-toggles');
       const savedOrder = sessionStorage.getItem('dashboard-order');
+      const savedVersion = sessionStorage.getItem('dashboard-version');
 
       if (savedToggles) {
         const parsedToggles = JSON.parse(savedToggles);
@@ -260,6 +267,10 @@ export const FeatureToggleProvider: React.FC<{ children: ReactNode }> = ({ child
           }, {} as Record<string, FeatureToggle>);
         
         setFeatureToggles({ ...defaultToggles, ...validToggles });
+      }
+
+      if (savedVersion) {
+        setCurrentVersion(savedVersion as Version);
       }
 
       if (savedOrder) {
@@ -341,6 +352,8 @@ export const FeatureToggleProvider: React.FC<{ children: ReactNode }> = ({ child
     try {
       sessionStorage.removeItem('feature-toggles');
       sessionStorage.removeItem('dashboard-order');
+      sessionStorage.removeItem('dashboard-version');
+      setCurrentVersion('MVP'); // Reset para MVP
       loadSettings(); // Recarrega as configurações
       toast({
         title: "Sessão limpa",
@@ -363,14 +376,40 @@ export const FeatureToggleProvider: React.FC<{ children: ReactNode }> = ({ child
       .filter(item => item.enabled); // Remove disabled items
   };
 
+  const setVersion = (version: Version) => {
+    setCurrentVersion(version);
+    try {
+      sessionStorage.setItem('dashboard-version', version);
+    } catch (error) {
+      console.error('Erro ao salvar versão:', error);
+    }
+  };
+
+  const getVersionFeatures = (category: keyof DashboardOrder): FeatureToggle[] => {
+    const orderedItems = dashboardOrder[category]
+      .map(id => featureToggles[id])
+      .filter(Boolean); // Remove undefined items
+
+    if (currentVersion === 'MVP') {
+      // MVP: apenas os que estão habilitados na sessão atual
+      return orderedItems.filter(item => item.enabled);
+    } else {
+      // Versão Futura: todos os itens habilitados (incluindo os desabilitados)
+      return orderedItems.map(item => ({ ...item, enabled: true }));
+    }
+  };
+
   const value: FeatureToggleContextType = {
     featureToggles,
     dashboardOrder,
+    currentVersion,
     updateToggle,
     reorderItems,
     resetToDefaults,
     clearSession,
-    getOrderedItems
+    getOrderedItems,
+    setVersion,
+    getVersionFeatures
   };
 
   return (

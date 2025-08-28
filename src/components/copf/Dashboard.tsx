@@ -35,6 +35,7 @@ import { useDashboardData } from "@/hooks/useDashboardData";
 import { useToast } from "@/hooks/use-toast";
 import { useFilters } from "@/contexts/FiltersContext";
 import { useFeatureToggle } from "@/contexts/FeatureToggleContext";
+import { VersionSelector } from "@/components/copf/VersionSelector";
 import { AlertTriangle, CheckCircle2, Clock, TrendingUp, MapPin, Users, Calendar, Download, RefreshCw, CalendarDays, Truck, HelpCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import jsPDF from 'jspdf';
@@ -56,7 +57,7 @@ export function Dashboard() {
     refreshData
   } = useDashboardData();
   const { toast: toastHook } = useToast();
-  const { featureToggles, getOrderedItems, clearSession } = useFeatureToggle();
+  const { featureToggles, getVersionFeatures, currentVersion, setVersion } = useFeatureToggle();
   const [selectedOccurrence, setSelectedOccurrence] = useState<any>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -1098,6 +1099,12 @@ export function Dashboard() {
             </div>
             {/* Action Controls */}
             <div className="flex flex-wrap gap-3">
+              {/* Version Selector */}
+              <VersionSelector 
+                version={currentVersion} 
+                onVersionChange={setVersion} 
+              />
+              
               {/* Filtro de Período */}
               <Select value={filterPeriod} onValueChange={(value) => updateFilter('filterPeriod', value)}>
                 <SelectTrigger className="w-auto min-w-[180px] bg-card border-border/50 hover:border-primary/30 transition-colors shadow-card-default text-foreground font-medium">
@@ -1174,7 +1181,7 @@ export function Dashboard() {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {getOrderedItems('cards').map(item => renderCard(item.id)).filter(Boolean)}
+          {getVersionFeatures('cards').map(item => renderCard(item.id)).filter(Boolean)}
         </div>
       </div>
 
@@ -1197,12 +1204,12 @@ export function Dashboard() {
 
         {/* Charts Section - Dynamic rendering based on feature toggles */}
         <div className="space-y-8">
-          {getOrderedItems('charts').map(item => renderChart(item.id)).filter(Boolean)}
+          {getVersionFeatures('charts').map(item => renderChart(item.id)).filter(Boolean)}
         </div>
       </div>
 
       {/* Sections - Dynamic rendering based on feature toggles (excluding filterSection) */}
-      {getOrderedItems('sections').filter(item => item.id !== 'filterSection').map(item => renderSection(item.id)).filter(Boolean)}
+      {getVersionFeatures('sections').filter(item => item.id !== 'filterSection').map(item => renderSection(item.id)).filter(Boolean)}
 
       {/* Dashboard Content Wrapper for PDF Export */}
       <div id="dashboard-content" className="hidden">
