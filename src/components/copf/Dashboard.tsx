@@ -686,11 +686,6 @@ export function Dashboard() {
     toast('Dados atualizados - Dashboard atualizado com as informações mais recentes.');
   };
 
-  const handleClearSession = () => {
-    clearSession();
-    toast('Sessão limpa - Todas as configurações foram resetadas para o padrão.');
-    window.location.reload(); // Recarregar página para aplicar mudanças
-  };
 
   // Handlers para navegar com filtros específicos
   const handleNavigateToOccurrences = (filter: 'total' | 'pending' | 'reincidence' | 'overdue' | 'agencies' | 'mttr' | 'inoperant' | 'entered-today' | 'due-today' | 'overdue-today' | 'critical') => {
@@ -1147,10 +1142,6 @@ export function Dashboard() {
                 Atualizar
               </Button>
               
-              <Button variant="outline" size="sm" onClick={handleClearSession} className="shadow-card-default hover:shadow-card-hover transition-all hover:border-primary/30 text-destructive hover:text-destructive">
-                <AlertTriangle className="h-4 w-4 mr-2" />
-                Limpar Sessão
-              </Button>
               
               <Button variant="default" size="sm" onClick={handleExport} className="bg-gradient-primary hover:scale-105 transition-all shadow-elegant">
                 <Download className="h-4 w-4 mr-2" />
