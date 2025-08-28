@@ -420,16 +420,21 @@ export const FeatureToggleProvider: React.FC<{ children: ReactNode }> = ({ child
   const applyFutureVersionConfiguration = () => {
     const futureToggles = { ...featureToggles };
     
-    // Habilitar TODOS os cards, gráficos e seções
+    // Gráficos que devem ficar apenas nas configurações (não habilitados automaticamente)
+    const configOnlyCharts = ['criticalityHeatmap', 'interactiveCharts'];
+    
+    // Habilitar TODOS os cards, gráficos e seções, EXCETO os que devem ficar apenas nas configurações
     Object.keys(futureToggles).forEach(toggleId => {
-      futureToggles[toggleId] = { ...futureToggles[toggleId], enabled: true };
+      if (!configOnlyCharts.includes(toggleId)) {
+        futureToggles[toggleId] = { ...futureToggles[toggleId], enabled: true };
+      }
     });
     
     setFeatureToggles(futureToggles);
     
     toast({
       title: "Configuração Versão Futura aplicada",
-      description: "Todos os cards, gráficos e seções foram habilitados."
+      description: "Todos os cards, gráficos e seções principais foram habilitados."
     });
   };
 
