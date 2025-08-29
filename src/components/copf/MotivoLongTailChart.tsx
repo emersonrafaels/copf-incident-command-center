@@ -94,16 +94,20 @@ const MotivoLongTailChart = memo(function MotivoLongTailChart({
 
   // Handler para clique nas barras
   const handleBarClick = (data: MotivoData) => {
-    // Aplicar filtros específicos do gráfico (sem limpar filtros existentes)
-    updateFilter('motivoFilter', [data.motivoCompleto]);
-    
-    // Navegar para a página de ocorrências
-    navigate('/ocorrencias');
-    
-    // Mostrar toast de confirmação
-    toast.success(`Filtro aplicado: ${data.motivoCompleto}`, {
-      description: `${data.count} ocorrências encontradas (${data.percentage}% do total)`
-    });
+    // Aplicar filtros específicos do gráfico e navegar após aplicação
+    setTimeout(() => {
+      updateFilter('motivoFilter', [data.motivoCompleto]);
+      
+      // Navegar para a página de ocorrências com parâmetro para garantir aplicação
+      const params = new URLSearchParams();
+      params.set('motivo', encodeURIComponent(data.motivoCompleto));
+      navigate(`/ocorrencias?${params.toString()}`);
+      
+      // Mostrar toast de confirmação
+      toast.success(`Filtro aplicado: ${data.motivoCompleto}`, {
+        description: `${data.count} ocorrências encontradas (${data.percentage}% do total)`
+      });
+    }, 100);
   };
 
   // Custom Tooltip melhorado

@@ -98,19 +98,21 @@ export function TopAgenciesChart({ occurrences, filteredOccurrences }: TopAgenci
     // Garantir número da agência consistente com filtros
     const agencyNumber = data.agencyNumber || (data.originalAgency?.match(/\d+/)?.[0] || '');
 
-    // Aplicar filtros específicos do gráfico (sem limpar filtros existentes)
-    updateFilter('agenciaFilter', [agencyNumber]);
-    
-    // Navegar para ocorrências com query param para garantir aplicação do filtro na chegada
-    const params = new URLSearchParams();
-    if (agencyNumber) params.set('agency', agencyNumber);
-    navigate(`/ocorrencias?${params.toString()}`);
-    
-    // Mostrar toast de confirmação
-    toast({
-      title: "Filtros aplicados",
-      description: `Visualizando ocorrências do ponto ${agencyNumber}`,
-    });
+    // Aplicar filtros específicos do gráfico e navegar após aplicação
+    setTimeout(() => {
+      updateFilter('agenciaFilter', [agencyNumber]);
+      
+      // Navegar para ocorrências com query param para garantir aplicação do filtro na chegada
+      const params = new URLSearchParams();
+      if (agencyNumber) params.set('agency', agencyNumber);
+      navigate(`/ocorrencias?${params.toString()}`);
+      
+      // Mostrar toast de confirmação
+      toast({
+        title: "Filtros aplicados",
+        description: `Visualizando ocorrências do ponto ${agencyNumber}`,
+      });
+    }, 100);
   };
 
   return (

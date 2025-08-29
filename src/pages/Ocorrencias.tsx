@@ -127,6 +127,7 @@ const Ocorrencias = () => {
     const statusParam = searchParams.get('status');
     const severityParam = searchParams.get('severity');
     const reincidenceParam = searchParams.get('reincidence');
+    const motivoParam = searchParams.get('motivo');
 
     if (agencyParam) updateFilter('agenciaFilter', [agencyParam]);
     if (segmentParam) updateFilter('segmentFilterMulti', [segmentParam]);
@@ -146,6 +147,9 @@ const Ocorrencias = () => {
     }
     if (reincidenceParam === '1' || reincidenceParam === 'true') {
       updateFilter('reincidentFilter', true);
+    }
+    if (motivoParam) {
+      updateFilter('motivoFilter', [decodeURIComponent(motivoParam)]);
     }
 
     if (filterType === 'critical') {

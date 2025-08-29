@@ -77,30 +77,32 @@ export function EquipmentStatusChart({ occurrences }: EquipmentStatusChartProps)
   const handleBarClick = (data: any, stackId: string) => {
     const [segment, equipment] = data.name.split(' - ');
     
-    // Aplicar filtros específicos do gráfico (sem limpar filtros existentes)
-    updateFilter('segmentFilterMulti', [segment]);
-    updateFilter('equipmentFilterMulti', [equipment]);
-    
-    // Se clicar na parte operante ou inoperante, filtrar por status também
-    let equipStatusParam = '';
-    if (stackId === 'operante') {
-      updateFilter('statusEquipamentoFilterMulti', ['operante']);
-      equipStatusParam = 'operante';
-    } else if (stackId === 'inoperante') {
-      updateFilter('statusEquipamentoFilterMulti', ['inoperante']);
-      equipStatusParam = 'inoperante';
-    }
-    
-    // Navegar para ocorrências com parâmetros para garantir aplicação
-    const params = new URLSearchParams({ segment, equipment });
-    if (equipStatusParam) params.set('equip_status', equipStatusParam);
-    navigate(`/ocorrencias?${params.toString()}`);
-    
-    // Mostrar toast de confirmação
-    toast({
-      title: "Filtros aplicados",
-      description: `Visualizando ocorrências de ${equipment} do segmento ${segment}${equipStatusParam ? ` - ${equipStatusParam}` : ''}`,
-    });
+    // Aplicar filtros específicos do gráfico e navegar após aplicação
+    setTimeout(() => {
+      updateFilter('segmentFilterMulti', [segment]);
+      updateFilter('equipmentFilterMulti', [equipment]);
+      
+      // Se clicar na parte operante ou inoperante, filtrar por status também
+      let equipStatusParam = '';
+      if (stackId === 'operante') {
+        updateFilter('statusEquipamentoFilterMulti', ['operante']);
+        equipStatusParam = 'operante';
+      } else if (stackId === 'inoperante') {
+        updateFilter('statusEquipamentoFilterMulti', ['inoperante']);
+        equipStatusParam = 'inoperante';
+      }
+      
+      // Navegar para ocorrências com parâmetros para garantir aplicação
+      const params = new URLSearchParams({ segment, equipment });
+      if (equipStatusParam) params.set('equip_status', equipStatusParam);
+      navigate(`/ocorrencias?${params.toString()}`);
+      
+      // Mostrar toast de confirmação
+      toast({
+        title: "Filtros aplicados",
+        description: `Visualizando ocorrências de ${equipment} do segmento ${segment}${equipStatusParam ? ` - ${equipStatusParam}` : ''}`,
+      });
+    }, 100);
   };
 
   return (
