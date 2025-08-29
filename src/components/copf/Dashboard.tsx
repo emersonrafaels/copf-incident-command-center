@@ -65,10 +65,37 @@ export function Dashboard() {
   // Usar filtros do contexto
   const filters = useFilters();
 
-  // Comentar a limpeza de filtros ao entrar no dashboard para manter consistência
-  // useEffect(() => {
-  //   filters.clearAllFilters();
-  // }, []);
+  // Limpar todos os filtros exceto status ao entrar no dashboard
+  useEffect(() => {
+    // Resetar todos os filtros mantendo apenas os status padrão
+    const defaultStatusFilters = ['a_iniciar', 'em_andamento', 'com_impedimentos'];
+    
+    filters.updateFilter('segmentFilterMulti', []);
+    filters.updateFilter('equipmentFilterMulti', []);
+    filters.updateFilter('statusFilterMulti', defaultStatusFilters);
+    filters.updateFilter('vendorFilterMulti', []);
+    filters.updateFilter('transportadoraFilterMulti', []);
+    filters.updateFilter('severityFilterMulti', []);
+    filters.updateFilter('statusEquipamentoFilterMulti', []);
+    filters.updateFilter('agenciaFilter', []);
+    filters.updateFilter('ufFilter', []);
+    filters.updateFilter('municipioFilter', []);
+    filters.updateFilter('dinegFilter', []);
+    filters.updateFilter('tipoAgenciaFilter', []);
+    filters.updateFilter('pontoVipFilter', []);
+    filters.updateFilter('suptFilter', []);
+    filters.updateFilter('serialNumberFilter', '');
+    filters.updateFilter('equipmentModelFilterMulti', []);
+    filters.updateFilter('overrideFilter', false);
+    filters.updateFilter('vendorPriorityFilter', false);
+    filters.updateFilter('reincidentFilter', false);
+    filters.updateFilter('statusSlaFilter', []);
+    filters.updateFilter('longTailFilter', []);
+    filters.updateFilter('motivoFilter', []);
+    filters.updateFilter('impedimentoFilter', false);
+    filters.updateFilter('motivoImpedimentoFilter', []);
+    filters.updateFilter('previsaoSlaFilter', []);
+  }, []);
   
   // Helper functions para renderizar componentes baseado nos feature toggles
   const renderCard = (cardId: string) => {
