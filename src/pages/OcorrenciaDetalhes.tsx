@@ -11,25 +11,19 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { ArrowLeft, Send, AlertTriangle, Clock, User, FileText, Upload, X, Star, MessageSquare } from 'lucide-react';
-import { useDashboardData } from '@/hooks/useDashboardData';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { MessageTemplates } from '@/components/copf/MessageTemplates';
+import { supabase } from '@/integrations/supabase/client';
+
 export default function OcorrenciaDetalhes() {
-  const {
-    id
-  } = useParams<{
-    id: string;
-  }>();
+  const { id } = useParams<{ id: string; }>();
   const navigate = useNavigate();
-  const {
-    occurrences
-  } = useDashboardData();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+  
   const [occurrence, setOccurrence] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [vendorMessage, setVendorMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [isPrioritized, setIsPrioritized] = useState(false);
@@ -37,40 +31,103 @@ export default function OcorrenciaDetalhes() {
   const [attachments, setAttachments] = useState<File[]>([]);
   const [showTemplates, setShowTemplates] = useState(false);
   const [historyEntries, setHistoryEntries] = useState<any[]>([]);
-  useEffect(() => {
-    console.log('Procurando ocorrência com ID:', id);
-    console.log('Ocorrências disponíveis:', occurrences?.length);
-    if (occurrences && id) {
-      // Buscar por ID real ou displayId
-      const found = occurrences.find(occ => occ.id === id || occ.displayId === id);
-      console.log('Ocorrência encontrada:', found);
-      setOccurrence(found);
-      if (found) {
-        const priority = found.severity === 'critical' || found.severity === 'high';
-        setIsPrioritized(priority);
-        setTempPriority(priority);
-        // Histórico inicial com duas entradas obrigatórias (ordem crescente por timestamp)
-        const openingDate = new Date(found.createdAt);
-        const assignmentDate = new Date(openingDate.getTime() + 2 * 60 * 1000); // 2 minutos depois
 
-        setHistoryEntries([{
-          id: '1',
-          type: 'created',
-          timestamp: openingDate.toISOString(),
-          author: 'Sistema',
-          description: 'Abertura da Ocorrência',
-          details: found.description
-        }, {
-          id: '2',
-          type: 'assigned',
-          timestamp: assignmentDate.toISOString(),
-          author: 'Sistema',
-          description: 'Atribuição da Ocorrência para o Fornecedor',
-          details: `Ocorrência atribuída para ${found.vendor}`
-        }]);
+  // Buscar ocorrência diretamente do Supabase sem filtros
+  useEffect(() => {
+    const fetchOccurrence = async () => {
+      if (!id) return;
+      
+      setIsLoading(true);
+      console.log('Buscando ocorrência com ID:', id);
+      
+      try {
+        const { data, error } = await supabase
+          .from('occurrences')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (error) {
+          console.error('Erro ao buscar ocorrência:', error);
+          setOccurrence(null);
+        } else if (data) {
+          console.log('Ocorrência encontrada:', data);
+          
+          // Mapear dados do banco para estrutura esperada
+          const mappedOccurrence = {
+            id: data.id,
+            agency: `${data.agencia} - Centro`,
+            segment: data.segmento === 'atm' || data.segmento === 'pos' ? 'AA' : 'AB',
+            equipment: data.equipamento,
+            serialNumber: data.numero_serie,
+            description: data.descricao,
+            motivoOcorrencia: data.motivo_ocorrencia || 'Não informado',
+            severity: data.severidade === 'critica' ? 'critical' : 
+                     data.severidade === 'alta' ? 'high' :
+                     data.severidade === 'media' ? 'medium' : 'low',
+            status: data.status === 'pendente' ? 'a_iniciar' :
+                   data.status === 'em_andamento' ? 'em_andamento' :
+                   data.status === 'resolvida' ? 'encerrado' :
+                   data.status === 'com_impedimentos' ? 'com_impedimentos' : 'cancelado',
+            createdAt: data.data_ocorrencia,
+            resolvedAt: data.data_resolucao,
+            dataPrevisaoEncerramento: data.data_previsao_encerramento,
+            dataEncerramento: data.data_encerramento,
+            dataLimiteSla: data.data_limite_sla,
+            assignedTo: data.usuario_responsavel || 'Não atribuído',
+            vendor: data.fornecedor,
+            transportadora: data.transportadora,
+            tipoAgencia: data.tipo_agencia,
+            estado: data.uf,
+            municipio: 'Centro',
+            dineg: data.dineg,
+            supt: data.supt,
+            vip: data.vip,
+            statusEquipamento: data.status_equipamento,
+            possuiImpedimento: data.possui_impedimento,
+            motivoImpedimento: data.motivo_impedimento,
+            displayId: data.id.split('-')[0].toUpperCase() // Criar um ID de exibição amigável
+          };
+          
+          setOccurrence(mappedOccurrence);
+          
+          const priority = mappedOccurrence.severity === 'critical' || mappedOccurrence.severity === 'high';
+          setIsPrioritized(priority);
+          setTempPriority(priority);
+          
+          // Histórico inicial
+          const openingDate = new Date(mappedOccurrence.createdAt);
+          const assignmentDate = new Date(openingDate.getTime() + 2 * 60 * 1000);
+
+          setHistoryEntries([{
+            id: '1',
+            type: 'created',
+            timestamp: openingDate.toISOString(),
+            author: 'Sistema',
+            description: 'Abertura da Ocorrência',
+            details: mappedOccurrence.description
+          }, {
+            id: '2',
+            type: 'assigned',
+            timestamp: assignmentDate.toISOString(),
+            author: 'Sistema',
+            description: 'Atribuição da Ocorrência para o Fornecedor',
+            details: `Ocorrência atribuída para ${mappedOccurrence.vendor}`
+          }]);
+        } else {
+          console.log('Nenhuma ocorrência encontrada com o ID:', id);
+          setOccurrence(null);
+        }
+      } catch (error) {
+        console.error('Erro inesperado ao buscar ocorrência:', error);
+        setOccurrence(null);
+      } finally {
+        setIsLoading(false);
       }
-    }
-  }, [occurrences, id]);
+    };
+
+    fetchOccurrence();
+  }, [id]);
   const formatDate = (dateString: string) => {
     return format(new Date(dateString), "dd/MM/yyyy 'às' HH:mm", {
       locale: ptBR
@@ -172,18 +229,43 @@ export default function OcorrenciaDetalhes() {
       return `${Math.floor(diffInMinutes / 1440)}d`;
     }
   };
-  if (!occurrence) {
-    return <COPFLayout>
+  if (isLoading) {
+    return (
+      <COPFLayout>
         <div className="p-6">
           <Button variant="ghost" onClick={() => navigate('/ocorrencias')} className="mb-6">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Voltar para Ocorrências
           </Button>
           <div className="text-center py-12">
-            <p className="text-muted-foreground">Ocorrência não encontrada</p>
+            <div className="flex items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+            <p className="text-muted-foreground mt-4">Carregando detalhes da ocorrência...</p>
           </div>
         </div>
-      </COPFLayout>;
+      </COPFLayout>
+    );
+  }
+
+  if (!occurrence) {
+    return (
+      <COPFLayout>
+        <div className="p-6">
+          <Button variant="ghost" onClick={() => navigate('/ocorrencias')} className="mb-6">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Voltar para Ocorrências
+          </Button>
+          <div className="text-center py-12">
+            <AlertTriangle className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Ocorrência não encontrada</h2>
+            <p className="text-muted-foreground">
+              A ocorrência com ID {id} não foi encontrada ou não existe.
+            </p>
+          </div>
+        </div>
+      </COPFLayout>
+    );
   }
   return <COPFLayout>
       <div className="p-6 space-y-6">
