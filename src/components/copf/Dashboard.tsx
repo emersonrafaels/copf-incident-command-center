@@ -65,10 +65,10 @@ export function Dashboard() {
   // Usar filtros do contexto
   const filters = useFilters();
 
-  // Limpar todos os filtros ao entrar no dashboard
-  useEffect(() => {
-    filters.clearAllFilters();
-  }, []);
+  // Comentar a limpeza de filtros ao entrar no dashboard para manter consistência
+  // useEffect(() => {
+  //   filters.clearAllFilters();
+  // }, []);
   
   // Helper functions para renderizar componentes baseado nos feature toggles
   const renderCard = (cardId: string) => {

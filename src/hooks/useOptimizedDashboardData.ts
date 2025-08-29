@@ -166,11 +166,11 @@ const fetchOptimizedOccurrences = async (limit: number = 1000): Promise<Occurren
 }
 
 export function useOptimizedDashboardData() {
-  const { filterPeriod } = useFilters()
+  const { filterPeriod, statusFilterMulti } = useFilters()
 
   // Query principal com cache automático do React Query
   const {
-    data: occurrences = [],
+    data: allOccurrences = [],
     isLoading,
     error,
     refetch
@@ -180,6 +180,12 @@ export function useOptimizedDashboardData() {
     staleTime: 3 * 60 * 1000, // 3 minutos
     gcTime: 10 * 60 * 1000, // 10 minutos
   })
+
+  // Aplicar filtros padrão de status
+  const occurrences = useMemo(() => {
+    if (statusFilterMulti.length === 0) return allOccurrences;
+    return allOccurrences.filter(o => statusFilterMulti.includes(o.status));
+  }, [allOccurrences, statusFilterMulti])
 
   // Dados processados para gráficos - Memoizados com cache local
   const severityData: ChartData[] = useMemo(() => {

@@ -9,7 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search, Download, Eye, MessageSquare, Bot, ChevronUp, ChevronDown } from "lucide-react";
 import { StatusBadge } from "@/components/copf/StatusBadge";
 import { useDashboardData } from "@/hooks/useDashboardData";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useFilters } from "@/contexts/FiltersContext";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
@@ -163,9 +163,9 @@ const Ocorrencias = () => {
     }
   }, [filterType, slaStatus, updateFilter, searchParams]);
 
-  // Filtrar ocorrências com o mesmo período da dashboard e reforço de casos >5 dias sem previsão
-  const filteredOccurrences = (() => {
-    // Determinar intervalo de datas baseado no filtro selecionado no contexto
+  // Filtrar ocorrências com o mesmo período da dashboard
+  const filteredOccurrences = useMemo(() => {
+    // Determinar intervalo de datas baseado no filtro selecionado no contexto (igual ao Dashboard)
     const now = new Date();
     let startDate: Date | null = null;
     let endDate: Date | null = now;
@@ -198,13 +198,13 @@ const Ocorrencias = () => {
         }
         break;
       default:
-        // sem filtro de período
+        // fallback: sem filtro de período
         startDate = null;
         endDate = null;
     }
 
-    const base = occurrences.filter(occurrence => {
-      // Filtro por período (Data/Hora Abertura)
+    return occurrences.filter(occurrence => {
+      // Filtro por período (Data/Hora Abertura) - IGUAL AO DASHBOARD
       if (startDate && endDate) {
         const created = new Date(occurrence.createdAt);
         if (isNaN(created.getTime())) return false;
@@ -213,37 +213,53 @@ const Ocorrencias = () => {
 
       const matchesSearch = occurrence.id.toLowerCase().includes(searchTerm.toLowerCase()) || occurrence.agency.toLowerCase().includes(searchTerm.toLowerCase()) || occurrence.description.toLowerCase().includes(searchTerm.toLowerCase());
 
-      // Filtros multiselect
-      const matchesSegment = segmentFilterMulti.length === 0 || segmentFilterMulti.includes(occurrence.segment);
-      const matchesEquipment = equipmentFilterMulti.length === 0 || equipmentFilterMulti.includes(occurrence.equipment);
-      const matchesStatus = statusFilterMulti.length === 0 || statusFilterMulti.includes(occurrence.status);
-      const matchesVendor = vendorFilterMulti.length === 0 || vendorFilterMulti.includes(occurrence.vendor);
-      const matchesSeverity = severityFilterMulti.length === 0 || severityFilterMulti.includes(occurrence.severity);
-
+      // Filtros multiselect - ORDEM E LÓGICA IGUAL AO DASHBOARD
+      if (segmentFilterMulti.length > 0 && !segmentFilterMulti.includes(occurrence.segment)) return false;
+      if (equipmentFilterMulti.length > 0 && !equipmentFilterMulti.includes(occurrence.equipment)) return false;
+      if (statusFilterMulti.length > 0 && !statusFilterMulti.includes(occurrence.status)) return false;
+      if (statusEquipamentoFilterMulti.length > 0 && !statusEquipamentoFilterMulti.includes(occurrence.statusEquipamento)) return false;
+      if (vendorFilterMulti.length > 0 && !vendorFilterMulti.includes(occurrence.vendor)) return false;
+      if (transportadoraFilterMulti.length > 0) {
+        // Verificar se a transportadora existe e não está vazia
+        if (!occurrence.transportadora || occurrence.transportadora.trim() === '') return false;
+        
+        // Verificar se a transportadora está na lista de filtros
+        if (!transportadoraFilterMulti.includes(occurrence.transportadora)) return false;
       // Filtro de série
-      const matchesSerial = !serialNumberFilter || occurrence.serialNumber.toLowerCase().includes(serialNumberFilter.toLowerCase());
+      if (serialNumberFilter && !occurrence.serialNumber.toLowerCase().includes(serialNumberFilter.toLowerCase())) return false;
 
       // Filtro de agência por número
-      const matchesAgencia = !Array.isArray(agenciaFilter) || agenciaFilter.length === 0 || agenciaFilter.some(agency => occurrence.agency.includes(agency));
+      if (agenciaFilter.length > 0) {
+        const agencyNumber = occurrence.agency.match(/\d+/)?.[0] || '';
+        if (!agenciaFilter.includes(agencyNumber)) return false;
+      }
 
       // Filtro de UF (usar campo 'estado' vindo do banco)
-      const matchesUF = ufFilter.length === 0 || ufFilter.includes(occurrence.estado);
+      if (ufFilter.length > 0) {
+        const agencyUF = occurrence.estado;
+        if (!ufFilter.includes(agencyUF)) return false;
+      }
 
-      // Usar o campo tipoAgencia do objeto de dados (igual ao Dashboard)
-      const matchesTipoAgencia = tipoAgenciaFilter.length === 0 || tipoAgenciaFilter.includes(occurrence.tipoAgencia);
+      // Usar o campo tipoAgencia do objeto de dados
+      if (tipoAgenciaFilter.length > 0 && !tipoAgenciaFilter.includes(occurrence.tipoAgencia)) return false;
 
-      // Simular ponto VIP (agências com número terminado em 0, 5 são VIP)
+      // Simular ponto VIP (pontos com número terminado em 0, 5 são VIP)
       const agencyNumber = occurrence.agency.match(/\d+/)?.[0] || '0';
       const isVip = agencyNumber.endsWith('0') || agencyNumber.endsWith('5');
       const pontoVipStatus = isVip ? 'sim' : 'nao';
-      const matchesPontoVip = pontoVipFilter.length === 0 || pontoVipFilter.includes(pontoVipStatus);
+      if (pontoVipFilter.length > 0 && !pontoVipFilter.includes(pontoVipStatus)) return false;
 
       // Filtro de SUPT baseado na DINEG da agência
       const agencyNum = parseInt(agencyNumber);
       let agencySupt = '';
       if (agencyNum >= 210 && agencyNum <= 299) agencySupt = agencyNum.toString().substring(0, 2);
       else if (agencyNum >= 510 && agencyNum <= 599) agencySupt = agencyNum.toString().substring(0, 2);
-      const matchesSupt = suptFilter.length === 0 || (agencySupt && suptFilter.includes(agencySupt));
+      if (suptFilter.length > 0 && (!agencySupt || !suptFilter.includes(agencySupt))) return false;
+
+      // Busca por texto
+      if (!matchesSearch) return false;
+
+      // Filtros especiais e outros filtros continuam como eram antes...
 
       // Filtro de ocorrências que vencem hoje (próximas 24h)
       if (overrideFilter) {
@@ -440,9 +456,6 @@ const Ocorrencias = () => {
     return matchesSearch && matchesStatus && matchesSegment && matchesEquipment && matchesSerial && matchesVendor && matchesSeverity && matchesAgencia && matchesUF && matchesTipoAgencia && matchesPontoVip && matchesSupt && matchesStatusEquipamento && matchesTransportadora && matchesMotivo && matchesMotivoImpedimento && matchesEquipmentModel && matchesPrevisaoSla && matchesImpedimentoFlag;
   });
 
-  // Manter contagem estática - sem geração de dados
-  return base;
-  })();
   const handleExportExcel = () => {
     // Preparar dados para exportação (ordem alinhada à tabela)
     const exportData = filteredOccurrences.map(occurrence => ({
