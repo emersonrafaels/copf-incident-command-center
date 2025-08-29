@@ -66,7 +66,7 @@ const defaultFilters: FiltersState = {
   
   segmentFilterMulti: [],
   equipmentFilterMulti: [],
-  statusFilterMulti: ['a iniciar', 'em andamento', 'com impedimentos'],
+  statusFilterMulti: ['a_iniciar', 'em_andamento', 'com_impedimentos'],
   vendorFilterMulti: [],
   transportadoraFilterMulti: [],
   severityFilterMulti: [],

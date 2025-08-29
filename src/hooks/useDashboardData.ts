@@ -163,19 +163,7 @@ export function useDashboardData() {
 
     // Apply status filter (multiselect)
     if (filters.statusFilterMulti.length > 0) {
-      const statusMap: Record<string, string> = {
-        'a iniciar': 'a_iniciar',
-        'em andamento': 'em_andamento',
-        'com impedimentos': 'com_impedimentos',
-        'encerrado': 'encerrado',
-        'cancelado': 'cancelado'
-      };
-      
-      const mappedStatuses = filters.statusFilterMulti.map(status => 
-        statusMap[status] || status
-      );
-      
-      filtered = filtered.filter(o => mappedStatuses.includes(o.status));
+      filtered = filtered.filter(o => filters.statusFilterMulti.includes(o.status));
     }
 
     console.log('Dashboard - Filtered occurrences:', filtered.length, 'Active filters:', filters.statusFilterMulti)
