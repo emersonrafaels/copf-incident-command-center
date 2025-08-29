@@ -129,9 +129,9 @@ const mapDatabaseToOccurrence = (dbRecord: any): OccurrenceData => {
 }
 
 export function useDashboardData() {
-  const [occurrences, setOccurrences] = useState<OccurrenceData[]>([])
+  const [allOccurrences, setAllOccurrences] = useState<OccurrenceData[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const { filterPeriod } = useFilters()
+  const filters = useFilters()
 
   // Buscar dados do Supabase
   const fetchOccurrences = useCallback(async () => {
@@ -148,13 +148,39 @@ export function useDashboardData() {
       }
 
       const mappedOccurrences = data?.map(mapDatabaseToOccurrence) || []
-      setOccurrences(mappedOccurrences)
+      console.log('Dashboard - All occurrences:', mappedOccurrences.length)
+      setAllOccurrences(mappedOccurrences)
     } catch (error) {
       console.error('Erro na requisição:', error)
     } finally {
       setIsLoading(false)
     }
   }, [])
+
+  // Filter occurrences based on active filters
+  const occurrences = useMemo(() => {
+    let filtered = allOccurrences;
+
+    // Apply status filter (multiselect)
+    if (filters.statusFilterMulti.length > 0) {
+      const statusMap: Record<string, string> = {
+        'a iniciar': 'a_iniciar',
+        'em andamento': 'em_andamento',
+        'com impedimentos': 'com_impedimentos',
+        'encerrado': 'encerrado',
+        'cancelado': 'cancelado'
+      };
+      
+      const mappedStatuses = filters.statusFilterMulti.map(status => 
+        statusMap[status] || status
+      );
+      
+      filtered = filtered.filter(o => mappedStatuses.includes(o.status));
+    }
+
+    console.log('Dashboard - Filtered occurrences:', filtered.length, 'Active filters:', filters.statusFilterMulti)
+    return filtered;
+  }, [allOccurrences, filters.statusFilterMulti]);
 
   // Inicializar dados
   useEffect(() => {
@@ -186,10 +212,10 @@ export function useDashboardData() {
   ], [occurrences])
 
   const timelineData: TimelineData[] = useMemo(() => {
-    const multiplier = filterPeriod === '1-day' ? 0.3 : 
-                      filterPeriod === '7-days' ? 1 :
-                      filterPeriod === '30-days' ? 4.2 :
-                      filterPeriod === '90-days' ? 12.5 : 52;
+    const multiplier = filters.filterPeriod === '1-day' ? 0.3 : 
+                      filters.filterPeriod === '7-days' ? 1 :
+                      filters.filterPeriod === '30-days' ? 4.2 :
+                      filters.filterPeriod === '90-days' ? 12.5 : 52;
 
     return [
       { date: '01/01', ocorrencias: Math.round(45 * multiplier), resolvidas: Math.round(38 * multiplier) },
@@ -200,7 +226,7 @@ export function useDashboardData() {
       { date: '06/01', ocorrencias: Math.round(67 * multiplier), resolvidas: Math.round(59 * multiplier) },
       { date: '07/01', ocorrencias: Math.round(59 * multiplier), resolvidas: Math.round(52 * multiplier) }
     ]
-  }, [filterPeriod])
+  }, [filters.filterPeriod])
 
   const mttrData: MTTRData[] = [
     { mes: 'Jul', mttr: 5.2 },
