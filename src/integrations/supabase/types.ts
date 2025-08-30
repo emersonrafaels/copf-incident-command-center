@@ -44,6 +44,7 @@ export type Database = {
       occurrences: {
         Row: {
           agencia: string
+          codigo_ocorrencia: string
           created_at: string
           data_encerramento: string | null
           data_limite_sla: string | null
@@ -78,6 +79,7 @@ export type Database = {
         }
         Insert: {
           agencia: string
+          codigo_ocorrencia: string
           created_at?: string
           data_encerramento?: string | null
           data_limite_sla?: string | null
@@ -112,6 +114,7 @@ export type Database = {
         }
         Update: {
           agencia?: string
+          codigo_ocorrencia?: string
           created_at?: string
           data_encerramento?: string | null
           data_limite_sla?: string | null
