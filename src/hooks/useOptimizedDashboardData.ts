@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client'
 
 export interface OccurrenceData {
   id: string
+  displayId?: string // COPF formatted ID for display
   agency: string
   segment: 'AA' | 'AB'
   equipment: string
@@ -100,6 +101,7 @@ const mapDatabaseToOccurrence = (dbRecord: any): OccurrenceData => {
   
   return {
     id: dbRecord.id,
+    displayId: dbRecord.codigo_ocorrencia,
     agency: `${dbRecord.agencia} - Centro`,
     segment: segmentMap[dbRecord.segmento] || 'AB',
     equipment: dbRecord.equipamento,
@@ -131,6 +133,7 @@ const fetchOptimizedOccurrences = async (limit: number = 1000): Promise<Occurren
     .from('occurrences')
     .select(`
       id,
+      codigo_ocorrencia,
       agencia,
       equipamento,
       numero_serie,

@@ -99,7 +99,7 @@ const mapDatabaseToOccurrence = (dbRecord: any): OccurrenceData => {
   
   return {
     id: dbRecord.id, // Use real UUID from database for navigation
-    displayId: shortId, // COPF ID for display only
+    displayId: dbRecord.codigo_ocorrencia || shortId, // Use COPF ID from database
     agency: `${agencyNumber} - ${agencyName}`,
     segment: segmentMap[dbRecord.segmento] || 'AB',
     equipment: dbRecord.equipamento,

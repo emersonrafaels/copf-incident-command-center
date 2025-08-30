@@ -44,7 +44,7 @@ export default function OcorrenciaDetalhes() {
         const { data, error } = await supabase
           .from('occurrences')
           .select('*')
-          .eq('id', id)
+          .or(`id.eq.${id},codigo_ocorrencia.eq.${id}`)
           .single();
 
         if (error) {
@@ -56,6 +56,7 @@ export default function OcorrenciaDetalhes() {
           // Mapear dados do banco para estrutura esperada
           const mappedOccurrence = {
             id: data.id,
+            displayId: data.codigo_ocorrencia,
             agency: `${data.agencia} - Centro`,
             segment: data.segmento === 'atm' || data.segmento === 'pos' ? 'AA' : 'AB',
             equipment: data.equipamento,
@@ -85,8 +86,7 @@ export default function OcorrenciaDetalhes() {
             vip: data.vip,
             statusEquipamento: data.status_equipamento,
             possuiImpedimento: data.possui_impedimento,
-            motivoImpedimento: data.motivo_impedimento,
-            displayId: data.id.split('-')[0].toUpperCase() // Criar um ID de exibição amigável
+            motivoImpedimento: data.motivo_impedimento
           };
           
           setOccurrence(mappedOccurrence);
