@@ -573,7 +573,7 @@ const Ocorrencias = () => {
               <CardTitle className="flex items-center gap-2">
                 Lista de Ocorrências
                 <Badge variant="secondary">
-                  {filteredOccurrences.length} de {occurrences.length}
+                  {filteredOccurrences.length} de {occurrences.length} ocorrências
                 </Badge>
               </CardTitle>
               <div className="flex items-center gap-2">
