@@ -79,7 +79,7 @@ export type Database = {
         }
         Insert: {
           agencia: string
-          codigo_ocorrencia: string
+          codigo_ocorrencia?: string
           created_at?: string
           data_encerramento?: string | null
           data_limite_sla?: string | null

@@ -71,6 +71,7 @@ export const AddOccurrenceForm = ({ onSuccess }: AddOccurrenceFormProps) => {
       const { error } = await supabase
         .from('occurrences')
         .insert([{
+          codigo_ocorrencia: '', // Trigger will generate the actual COPF ID
           agencia: formData.agencia,
           equipamento: formData.equipamento,
           numero_serie: formData.numero_serie,
