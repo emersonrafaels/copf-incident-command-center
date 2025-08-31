@@ -28,6 +28,7 @@ export interface OccurrenceData {
   municipio: string
   dineg: string
   vip: boolean
+  statusEquipamento: 'operante' | 'inoperante'
 }
 
 export interface ChartData {
@@ -122,7 +123,8 @@ const mapDatabaseToOccurrence = (dbRecord: any): OccurrenceData => {
     estado: dbRecord.uf,
     municipio: 'Centro',
     dineg: dbRecord.supt,
-    vip: dbRecord.vip
+    vip: dbRecord.vip,
+    statusEquipamento: dbRecord.status_equipamento || 'operante'
   }
 }
 
@@ -149,6 +151,7 @@ const fetchOptimizedOccurrences = async (limit: number = 1000): Promise<Occurren
       tipo_agencia,
       vip,
       supt,
+      status_equipamento,
       data_ocorrencia,
       data_resolucao,
       data_previsao_encerramento,
@@ -169,7 +172,7 @@ const fetchOptimizedOccurrences = async (limit: number = 1000): Promise<Occurren
 }
 
 export function useOptimizedDashboardData() {
-  const { filterPeriod, statusFilterMulti } = useFilters()
+  const { filterPeriod, statusFilterMulti, statusEquipamentoFilterMulti } = useFilters()
 
   // Query principal com cache automático do React Query
   const {
@@ -186,9 +189,18 @@ export function useOptimizedDashboardData() {
 
   // Aplicar filtros padrão de status
   const occurrences = useMemo(() => {
-    if (statusFilterMulti.length === 0) return allOccurrences;
-    return allOccurrences.filter(o => statusFilterMulti.includes(o.status));
-  }, [allOccurrences, statusFilterMulti])
+    let filtered = allOccurrences;
+
+    if (statusFilterMulti.length > 0) {
+      filtered = filtered.filter(o => statusFilterMulti.includes(o.status));
+    }
+
+    if (statusEquipamentoFilterMulti.length > 0) {
+      filtered = filtered.filter(o => statusEquipamentoFilterMulti.includes(o.statusEquipamento));
+    }
+
+    return filtered;
+  }, [allOccurrences, statusFilterMulti, statusEquipamentoFilterMulti])
 
   // Dados processados para gráficos - Memoizados com cache local
   const severityData: ChartData[] = useMemo(() => {

@@ -166,9 +166,14 @@ export function useDashboardData() {
       filtered = filtered.filter(o => filters.statusFilterMulti.includes(o.status));
     }
 
+    // Apply equipment status filter (multiselect)
+    if (filters.statusEquipamentoFilterMulti.length > 0) {
+      filtered = filtered.filter(o => filters.statusEquipamentoFilterMulti.includes(o.statusEquipamento));
+    }
+
     console.log('Dashboard - Filtered occurrences:', filtered.length, 'Active filters:', filters.statusFilterMulti)
     return filtered;
-  }, [allOccurrences, filters.statusFilterMulti]);
+  }, [allOccurrences, filters.statusFilterMulti, filters.statusEquipamentoFilterMulti]);
 
   // Inicializar dados
   useEffect(() => {
