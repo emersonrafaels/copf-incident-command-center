@@ -77,7 +77,6 @@ export default function OcorrenciaDetalhes() {
             dataLimiteSla: data.data_limite_sla,
             assignedTo: data.usuario_responsavel || 'Não atribuído',
             vendor: data.fornecedor,
-            transportadora: data.transportadora,
             tipoAgencia: data.tipo_agencia,
             estado: data.uf,
             municipio: 'Centro',

@@ -37,7 +37,6 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
     equipmentFilterMulti,
     statusFilterMulti,
     vendorFilterMulti,
-    transportadoraFilterMulti,
     severityFilterMulti,
     statusEquipamentoFilterMulti,
     serialNumberFilter,
@@ -149,14 +148,18 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
     'Prosegur': ['Lexmark', 'Nextvision'],
     'Brinks': ['STM', 'Diebold', 'NCR']
   };
-  const uniqueTransportadoras = Object.keys(transportadoraFornecedores);
+  const uniqueTransportadoras: string[] = [];
 
-  // Filtrar fornecedores baseado na transportadora selecionada
+  // Dados de responsáveis
+  const transportadoraFornecedores = {
+    'Grupo A': ['Responsável A', 'Responsável B', 'Responsável C'],
+    'Grupo B': ['Responsável D', 'Responsável E'],
+    'Grupo C': ['Responsável F', 'Responsável G', 'Responsável H']
+  };
+
+  // Filtrar fornecedores baseado no tipo de agência
   const getFilteredVendors = () => {
-    if (!tipoAgenciaFilter.includes('terceirizada')) return uniqueVendors;
-    if (transportadoraFilterMulti.length === 0) return uniqueVendors;
-    const filteredVendors = transportadoraFilterMulti.flatMap(t => transportadoraFornecedores[t] || []);
-    return filteredVendors.length > 0 ? filteredVendors : uniqueVendors;
+    return uniqueVendors;
   };
   const availableVendors = getFilteredVendors();
 
@@ -276,7 +279,6 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
                         statusEquipamento: statusEquipamentoFilterMulti.length > 0,
                         criticidade: severityFilterMulti.length > 0,
                         fornecedor: vendorFilterMulti.length > 0,
-                        transportadora: transportadoraFilterMulti.length > 0,
                         serie: showSerialNumber && serialNumberFilter !== '',
                         vencidas: overrideFilter,
                         priorizado: vendorPriorityFilter,
@@ -298,7 +300,6 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
                         statusEquipamento: statusEquipamentoFilterMulti.length > 0,
                         criticidade: severityFilterMulti.length > 0,
                         fornecedor: vendorFilterMulti.length > 0,
-                        transportadora: transportadoraFilterMulti.length > 0,
                         serie: showSerialNumber && serialNumberFilter !== '',
                         vencidas: overrideFilter,
                         priorizado: vendorPriorityFilter,
@@ -320,7 +321,6 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
                         statusEquipamento: statusEquipamentoFilterMulti.length > 0,
                         criticidade: severityFilterMulti.length > 0,
                         fornecedor: vendorFilterMulti.length > 0,
-                        transportadora: transportadoraFilterMulti.length > 0,
                         serie: showSerialNumber && serialNumberFilter !== '',
                         vencidas: overrideFilter,
                         priorizado: vendorPriorityFilter,
@@ -954,71 +954,11 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <div className="responsive-grid responsive-grid-2">
-                    {/* Transportadora (sempre visível, mas desabilitada se não terceirizada) */}
-                    <div className="group space-y-3">
-                      <Label className={cn(
-                        "text-sm font-medium flex items-center gap-2",
-                        !tipoAgenciaFilter.includes('terceirizada') ? "text-muted-foreground/50" : "text-muted-foreground"
-                      )}>
-                        <Truck className="h-3 w-3 text-accent" />
-                        Transportadora
-                      </Label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button 
-                            variant="outline" 
-                            disabled={!tipoAgenciaFilter.includes('terceirizada')}
-                            className={cn(
-                              "w-full h-10 justify-between transition-all duration-200 group-hover:shadow-sm",
-                              !tipoAgenciaFilter.includes('terceirizada') 
-                                ? "opacity-50 cursor-not-allowed bg-muted/50" 
-                                : "hover:bg-accent/5 hover:border-accent/30"
-                            )}
-                          >
-                            {transportadoraFilterMulti.length > 0 ? (
-                              <div className="flex items-center gap-2">
-                                <Badge variant="secondary" className="h-5 text-xs bg-accent/10 text-accent">
-                                  {transportadoraFilterMulti.length}
-                                </Badge>
-                                <span className="text-sm">
-                                  {transportadoraFilterMulti.length === 1 ? transportadoraFilterMulti[0] : `${transportadoraFilterMulti.length} transportadoras`}
-                                </span>
-                              </div>
-                            ) : "Todas as transportadoras"}
-                            <div className="w-4 h-4 opacity-50">⌄</div>
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
-                          <Command>
-                            <CommandInput placeholder="Buscar transportadora..." className="h-9" />
-                            <CommandEmpty>Nenhuma transportadora encontrada.</CommandEmpty>
-                            <CommandList>
-                              <CommandGroup>
-                                {uniqueTransportadoras.map(transportadora => (
-                                  <CommandItem key={transportadora} onSelect={() => {
-                                    const isSelected = transportadoraFilterMulti.includes(transportadora);
-                                    if (isSelected) {
-                                      updateFilter('transportadoraFilterMulti', transportadoraFilterMulti.filter(t => t !== transportadora));
-                                    } else {
-                                      updateFilter('transportadoraFilterMulti', [...transportadoraFilterMulti, transportadora]);
-                                    }
-                                  }}>
-                                    <Check className={cn("mr-2 h-4 w-4", transportadoraFilterMulti.includes(transportadora) ? "opacity-100" : "opacity-0")} />
-                                    {transportadora}
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-
-                    {/* Fornecedor */}
+                    {/* Responsável */}
                     <div className="group space-y-3">
                       <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                         <div className="w-1 h-4 bg-accent/60 rounded-full"></div>
-                        Fornecedor
+                        Responsável
                       </Label>
                       <Popover>
                         <PopoverTrigger asChild>
@@ -1029,17 +969,17 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
                                   {vendorFilterMulti.length}
                                 </Badge>
                                 <span className="text-sm">
-                                  {vendorFilterMulti.length === 1 ? vendorFilterMulti[0] : `${vendorFilterMulti.length} fornecedores`}
+                                  {vendorFilterMulti.length === 1 ? vendorFilterMulti[0] : `${vendorFilterMulti.length} responsáveis`}
                                 </span>
                               </div>
-                            ) : "Todos os fornecedores"}
+                            ) : "Todos os responsáveis"}
                             <div className="w-4 h-4 opacity-50">⌄</div>
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
                           <Command>
-                            <CommandInput placeholder="Buscar fornecedor..." className="h-9" />
-                            <CommandEmpty>Nenhum fornecedor encontrado.</CommandEmpty>
+                            <CommandInput placeholder="Buscar responsável..." className="h-9" />
+                            <CommandEmpty>Nenhum responsável encontrado.</CommandEmpty>
                             <CommandList>
                               <CommandGroup className="max-h-64 overflow-y-auto">
                                 {availableVendors.map(vendor => (

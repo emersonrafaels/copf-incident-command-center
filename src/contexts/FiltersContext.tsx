@@ -9,14 +9,12 @@ export interface FiltersState {
   equipmentModelFilterMulti: string[];
   statusFilter: string;
   vendorFilter: string;
-  transportadoraFilter: string;
   
   // Filtros multiselect
   segmentFilterMulti: string[];
   equipmentFilterMulti: string[];
   statusFilterMulti: string[];
   vendorFilterMulti: string[];
-  transportadoraFilterMulti: string[];
   severityFilterMulti: string[];
   statusEquipamentoFilterMulti: string[];
   
@@ -62,13 +60,11 @@ const defaultFilters: FiltersState = {
   equipmentModelFilterMulti: [],
   statusFilter: 'all',
   vendorFilter: 'all',
-  transportadoraFilter: 'all',
   
   segmentFilterMulti: [],
   equipmentFilterMulti: [],
   statusFilterMulti: ['a_iniciar', 'em_andamento', 'com_impedimentos'],
   vendorFilterMulti: [],
-  transportadoraFilterMulti: [],
   severityFilterMulti: [],
   statusEquipamentoFilterMulti: [],
   
@@ -115,7 +111,6 @@ export const FiltersProvider: React.FC<{ children: ReactNode }> = ({ children })
     filters.equipmentFilterMulti.length > 0 ||
     filters.statusFilterMulti.length > 0 ||
     filters.vendorFilterMulti.length > 0 ||
-    filters.transportadoraFilterMulti.length > 0 ||
     filters.severityFilterMulti.length > 0 ||
     filters.statusEquipamentoFilterMulti.length > 0 ||
     filters.segmentFilter !== 'all' ||
@@ -128,7 +123,6 @@ export const FiltersProvider: React.FC<{ children: ReactNode }> = ({ children })
     filters.reincidentFilter ||
     filters.impedimentoFilter ||
     filters.vendorFilter !== 'all' ||
-    filters.transportadoraFilter !== 'all' ||
     filters.agenciaFilter.length > 0 ||
     filters.ufFilter.length > 0 ||
     filters.municipioFilter.length > 0 ||

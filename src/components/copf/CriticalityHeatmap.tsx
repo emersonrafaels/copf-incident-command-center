@@ -104,7 +104,6 @@ export function CriticalityHeatmap({
       // Filtros de Fornecedor
       if (filters.vendorFilter !== 'all' && occ.vendor !== filters.vendorFilter) return false;
       if (filters.vendorFilterMulti.length > 0 && !filters.vendorFilterMulti.includes(occ.vendor)) return false;
-      if (filters.transportadoraFilter !== 'all' && occ.transportadora !== filters.transportadoraFilter) return false;
 
       // Filtros de Serial Number
       if (filters.serialNumberFilter && !occ.serialNumber?.toLowerCase().includes(filters.serialNumberFilter.toLowerCase())) return false;
@@ -172,7 +171,6 @@ export function CriticalityHeatmap({
     if (filters.statusFilterMulti.length > 0) count++;
     if (filters.vendorFilter !== 'all') count++;
     if (filters.vendorFilterMulti.length > 0) count++;
-    if (filters.transportadoraFilter !== 'all') count++;
     if (filters.serialNumberFilter) count++;
     if (filters.overrideFilter) count++;
     if (filters.reincidentFilter) count++;

@@ -74,7 +74,6 @@ export function Dashboard() {
     filters.updateFilter('equipmentFilterMulti', []);
     filters.updateFilter('statusFilterMulti', defaultStatusFilters);
     filters.updateFilter('vendorFilterMulti', []);
-    filters.updateFilter('transportadoraFilterMulti', []);
     filters.updateFilter('severityFilterMulti', []);
     filters.updateFilter('statusEquipamentoFilterMulti', []);
     filters.updateFilter('agenciaFilter', []);
@@ -563,7 +562,6 @@ export function Dashboard() {
     equipmentFilterMulti,
     statusFilterMulti,
     vendorFilterMulti,
-    transportadoraFilterMulti,
     statusEquipamentoFilterMulti,
     serialNumberFilter,
     overrideFilter,
@@ -844,13 +842,6 @@ export function Dashboard() {
       if (statusFilterMulti.length > 0 && !statusFilterMulti.includes(occurrence.status)) return false;
       if (statusEquipamentoFilterMulti.length > 0 && !statusEquipamentoFilterMulti.includes(occurrence.statusEquipamento)) return false;
       if (vendorFilterMulti.length > 0 && !vendorFilterMulti.includes(occurrence.vendor)) return false;
-      if (transportadoraFilterMulti.length > 0) {
-        // Verificar se a transportadora existe e não está vazia
-        if (!occurrence.transportadora || occurrence.transportadora.trim() === '') return false;
-        
-        // Verificar se a transportadora está na lista de filtros
-        if (!transportadoraFilterMulti.includes(occurrence.transportadora)) return false;
-      }
 
       // Filtro de série
       if (serialNumberFilter && !occurrence.serialNumber.toLowerCase().includes(serialNumberFilter.toLowerCase())) return false;
@@ -944,7 +935,7 @@ export function Dashboard() {
     });
 
     return filtered;
-  }, [occurrences, filterPeriod, customDateRange, segmentFilterMulti, equipmentFilterMulti, statusFilterMulti, statusEquipamentoFilterMulti, vendorFilterMulti, transportadoraFilterMulti, serialNumberFilter, agenciaFilter, ufFilter, tipoAgenciaFilter, pontoVipFilter, overrideFilter, vendorPriorityFilter, reincidentFilter, longTailFilter, motivoFilter, hasActiveFilters]);
+  }, [occurrences, filterPeriod, customDateRange, segmentFilterMulti, equipmentFilterMulti, statusFilterMulti, statusEquipamentoFilterMulti, vendorFilterMulti, serialNumberFilter, agenciaFilter, ufFilter, tipoAgenciaFilter, pontoVipFilter, overrideFilter, vendorPriorityFilter, reincidentFilter, longTailFilter, motivoFilter, hasActiveFilters]);
 
   // Cálculos memoizados para garantir consistência com a página de ocorrências
   const cardMetrics = useMemo(() => {
@@ -1049,12 +1040,9 @@ export function Dashboard() {
   };
   const uniqueTransportadoras = Object.keys(transportadoraFornecedores);
 
-  // Filtrar fornecedores baseado na transportadora selecionada
+  // Filtrar fornecedores baseado no tipo de agência
   const getFilteredVendors = () => {
-    if (!tipoAgenciaFilter.includes('terceirizada')) return uniqueVendors;
-    if (transportadoraFilterMulti.length === 0) return uniqueVendors;
-    const filteredVendors = transportadoraFilterMulti.flatMap(t => transportadoraFornecedores[t] || []);
-    return filteredVendors.length > 0 ? filteredVendors : uniqueVendors;
+    return uniqueVendors;
   };
   const availableVendors = getFilteredVendors();
 

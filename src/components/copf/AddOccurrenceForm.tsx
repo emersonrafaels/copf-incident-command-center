@@ -33,7 +33,6 @@ export const AddOccurrenceForm = ({ onSuccess }: AddOccurrenceFormProps) => {
     uf: "",
     tipo_agencia: "",
     supt: "",
-    transportadora: "",
     observacoes: "",
     motivo_ocorrencia: "",
     vip: false,
@@ -58,10 +57,9 @@ export const AddOccurrenceForm = ({ onSuccess }: AddOccurrenceFormProps) => {
   const priorityOptions = ["baixa", "media", "alta", "critica"];
   const severityOptions = ["low", "medium", "high", "critical"];
   const segmentOptions = ["Varejo", "Atacado", "Corporativo", "Private"];
-  const vendorOptions = ["Fornecedor A", "Fornecedor B", "Fornecedor C", "Fornecedor D"];
+  const vendorOptions = ["Responsável A", "Responsável B", "Responsável C", "Responsável D"];
   const ufOptions = ["SP", "RJ", "MG", "RS", "PR", "SC", "BA", "GO", "PE", "CE"];
   const tipoAgenciaOptions = ["Convencional (AG)", "Convencional (PAB)", "Terceirizada (Espaço Itaú)", "Terceirizada (PAB)", "Terceirizada (PAE)", "Terceirizada (Phygital)"];
-  const transportadoraOptions = ["Transportadora A", "Transportadora B", "Transportadora C"];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,7 +82,6 @@ export const AddOccurrenceForm = ({ onSuccess }: AddOccurrenceFormProps) => {
           uf: formData.uf,
           tipo_agencia: formData.tipo_agencia,
           supt: formData.supt,
-          transportadora: formData.transportadora,
           observacoes: formData.observacoes || null,
           motivo_ocorrencia: formData.motivo_ocorrencia || null,
           vip: formData.vip,
@@ -113,7 +110,6 @@ export const AddOccurrenceForm = ({ onSuccess }: AddOccurrenceFormProps) => {
         uf: "",
         tipo_agencia: "",
         supt: "",
-        transportadora: "",
         observacoes: "",
         motivo_ocorrencia: "",
         vip: false,
@@ -260,28 +256,14 @@ export const AddOccurrenceForm = ({ onSuccess }: AddOccurrenceFormProps) => {
                 </div>
 
                 <div>
-                  <Label htmlFor="fornecedor" className="font-semibold">Fornecedor *</Label>
+                  <Label htmlFor="fornecedor" className="font-semibold">Responsável *</Label>
                   <Select value={formData.fornecedor} onValueChange={(value) => handleInputChange("fornecedor", value)}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecione o fornecedor" />
+                      <SelectValue placeholder="Selecione o responsável" />
                     </SelectTrigger>
                     <SelectContent>
                       {vendorOptions.map(vendor => (
                         <SelectItem key={vendor} value={vendor}>{vendor}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="transportadora" className="font-semibold">Transportadora *</Label>
-                  <Select value={formData.transportadora} onValueChange={(value) => handleInputChange("transportadora", value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione a transportadora" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {transportadoraOptions.map(transportadora => (
-                        <SelectItem key={transportadora} value={transportadora}>{transportadora}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>

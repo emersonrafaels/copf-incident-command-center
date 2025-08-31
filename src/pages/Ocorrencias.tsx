@@ -32,7 +32,6 @@ const Ocorrencias = () => {
     vendorFilterMulti, 
     severityFilterMulti,
     statusEquipamentoFilterMulti,
-    transportadoraFilterMulti,
     tipoAgenciaFilter,
     agenciaFilter,
     ufFilter,
@@ -209,12 +208,7 @@ const Ocorrencias = () => {
       if (segmentFilterMulti.length > 0 && !segmentFilterMulti.includes(occurrence.segment)) return false;
       if (equipmentFilterMulti.length > 0 && !equipmentFilterMulti.includes(occurrence.equipment)) return false;
       if (statusFilterMulti.length > 0 && !statusFilterMulti.includes(occurrence.status)) return false;
-      if (statusEquipamentoFilterMulti.length > 0 && !statusEquipamentoFilterMulti.includes(occurrence.statusEquipamento)) return false;
       if (vendorFilterMulti.length > 0 && !vendorFilterMulti.includes(occurrence.vendor)) return false;
-      if (transportadoraFilterMulti.length > 0) {
-        if (!occurrence.transportadora || occurrence.transportadora.trim() === '') return false;
-        if (!transportadoraFilterMulti.includes(occurrence.transportadora)) return false;
-      }
       if (severityFilterMulti.length > 0 && !severityFilterMulti.includes(occurrence.severity)) return false;
 
       // Filtro de série
@@ -404,7 +398,7 @@ const Ocorrencias = () => {
 
       return matchesSearch;
     });
-  }, [occurrences, filterPeriod, customDateRange, segmentFilterMulti, equipmentFilterMulti, statusFilterMulti, statusEquipamentoFilterMulti, vendorFilterMulti, transportadoraFilterMulti, severityFilterMulti, serialNumberFilter, agenciaFilter, ufFilter, tipoAgenciaFilter, pontoVipFilter, suptFilter, searchTerm, overrideFilter, vendorPriorityFilter, reincidentFilter, statusSlaFilter, motivoFilter, previsaoSlaFilter, selectedEquipmentModels, impedimentoFilter, motivoImpedimentoFilter, agingMin, agingMax, filterType, createdDate, slaStatus]);
+  }, [occurrences, filterPeriod, customDateRange, segmentFilterMulti, equipmentFilterMulti, statusFilterMulti, statusEquipamentoFilterMulti, vendorFilterMulti, severityFilterMulti, serialNumberFilter, agenciaFilter, ufFilter, tipoAgenciaFilter, pontoVipFilter, suptFilter, searchTerm, overrideFilter, vendorPriorityFilter, reincidentFilter, statusSlaFilter, motivoFilter, previsaoSlaFilter, selectedEquipmentModels, impedimentoFilter, motivoImpedimentoFilter, agingMin, agingMax, filterType, createdDate, slaStatus]);
 
   const handleExportExcel = () => {
     // Preparar dados para exportação (ordem alinhada à tabela)
@@ -414,7 +408,7 @@ const Ocorrencias = () => {
       'Segmento': occurrence.segment,
       'Equipamento': occurrence.equipment,
       'Status Equipamento': occurrence.statusEquipamento === 'operante' ? 'Operante' : 'Inoperante',
-      'Fornecedor': occurrence.vendor,
+      'Responsável': occurrence.vendor,
       'Status': getStatusLabel(occurrence.status),
       'SLA': getSlaStatus(occurrence),
       'Criticidade': getSeverityLabel(occurrence.severity),
@@ -619,7 +613,7 @@ const Ocorrencias = () => {
                     <TableHead>Segmento</TableHead>
                     <TableHead>Equipamento</TableHead>
                     <TableHead>Status Equip.</TableHead>
-                    <TableHead>Fornecedor</TableHead>
+                    <TableHead>Responsável</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>SLA</TableHead>
                     <TableHead>Criticidade</TableHead>
