@@ -201,7 +201,7 @@ const Ocorrencias = () => {
       }
 
       // Busca por texto
-      const matchesSearch = occurrence.id.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      const matchesSearch = occurrence.displayId.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           occurrence.agency.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           occurrence.description.toLowerCase().includes(searchTerm.toLowerCase());
 
@@ -659,7 +659,7 @@ const Ocorrencias = () => {
                   ) : (
                     sortedOccurrences.map((occurrence) => (
                       <TableRow key={occurrence.id} className="hover:bg-muted/50 cursor-pointer">
-                        <TableCell className="font-mono text-xs">{occurrence.id}</TableCell>
+                        <TableCell className="font-mono text-xs">{occurrence.displayId}</TableCell>
                         <TableCell>{occurrence.agency}</TableCell>
                         <TableCell>
                           <Badge variant={occurrence.segment === 'AA' ? 'default' : 'secondary'}>
