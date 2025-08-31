@@ -938,7 +938,7 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
                       <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center">
                         <Truck className="h-3 w-3 text-accent" />
                       </div>
-                      <h4 className="text-base font-semibold text-foreground">Fornecedores</h4>
+                      <h4 className="text-base font-semibold text-foreground">Responsável</h4>
                     </div>
                     {isVendorOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                   </Button>
