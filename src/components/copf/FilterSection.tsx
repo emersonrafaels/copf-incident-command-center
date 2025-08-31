@@ -141,17 +141,8 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
     'Problemas de segurança no local'
   ];
 
-  // Dados de transportadoras e seus fornecedores
-  const transportadoraFornecedores = {
-    'Protege': ['STM', 'NCR', 'Diebold'],
-    'TBFort': ['Artis', 'Azmachi'],
-    'Prosegur': ['Lexmark', 'Nextvision'],
-    'Brinks': ['STM', 'Diebold', 'NCR']
-  };
-  const uniqueTransportadoras: string[] = [];
-
   // Dados de responsáveis
-  const transportadoraFornecedores = {
+  const responsavelFornecedores = {
     'Grupo A': ['Responsável A', 'Responsável B', 'Responsável C'],
     'Grupo B': ['Responsável D', 'Responsável E'],
     'Grupo C': ['Responsável F', 'Responsável G', 'Responsável H']
