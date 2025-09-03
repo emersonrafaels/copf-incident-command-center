@@ -539,7 +539,7 @@ const Ocorrencias = () => {
 
   return (
     <COPFLayout>
-      <div className="container mx-auto p-6 space-y-6">
+      <div className="flex flex-col h-full p-4 space-y-4">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Ocorrências</h1>
@@ -561,8 +561,8 @@ const Ocorrencias = () => {
 
         <FilterSection />
 
-        <Card>
-          <CardHeader>
+        <Card className="flex-1 flex flex-col">
+          <CardHeader className="pb-3">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <CardTitle className="flex items-center gap-2">
                 Lista de Ocorrências
@@ -583,8 +583,8 @@ const Ocorrencias = () => {
               </div>
             </div>
           </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-[600px]">
+          <CardContent className="flex-1 p-0">
+            <ScrollArea className="h-full px-6 pb-6">
               <Table>
                 <TableHeader>
                   <TableRow>
