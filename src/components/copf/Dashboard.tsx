@@ -7,16 +7,23 @@ import { AgingChart } from "./AgingChart";
 import { OccurrenceModal } from "./OccurrenceModal";
 import { EquipmentStatusChart } from "./EquipmentStatusChart";
 import { TopAgenciesChart } from "./TopAgenciesChart";
-
 import { FilterSection } from "./FilterSection";
 
 // Lazy loading de componentes pesados
-const EnhancedInteractiveCharts = lazy(() => import('./EnhancedInteractiveCharts').then(module => ({ default: module.EnhancedInteractiveCharts })))
-const VendorMetricsMatrix = lazy(() => import('./VendorMetricsMatrix').then(module => ({ default: module.VendorMetricsMatrix })))
-const CriticalityHeatmap = lazy(() => import('./CriticalityHeatmap').then(module => ({ default: module.CriticalityHeatmap })))
-const MotivoLongTailChart = lazy(() => import('./MotivoLongTailChart'))
-const SlaPrevisaoChart = lazy(() => import('./SlaPrevisaoChart').then(module => ({ default: module.SlaPrevisaoChart })))
-const VendorSLAChart = lazy(() => import('./VendorSLAChart'))
+const EnhancedInteractiveCharts = lazy(() => import('./EnhancedInteractiveCharts').then(module => ({
+  default: module.EnhancedInteractiveCharts
+})));
+const VendorMetricsMatrix = lazy(() => import('./VendorMetricsMatrix').then(module => ({
+  default: module.VendorMetricsMatrix
+})));
+const CriticalityHeatmap = lazy(() => import('./CriticalityHeatmap').then(module => ({
+  default: module.CriticalityHeatmap
+})));
+const MotivoLongTailChart = lazy(() => import('./MotivoLongTailChart'));
+const SlaPrevisaoChart = lazy(() => import('./SlaPrevisaoChart').then(module => ({
+  default: module.SlaPrevisaoChart
+})));
+const VendorSLAChart = lazy(() => import('./VendorSLAChart'));
 import { OccurrenceHighlights } from "./OccurrenceHighlights";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -43,7 +50,6 @@ import html2canvas from 'html2canvas';
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from 'sonner';
-
 export function Dashboard() {
   const navigate = useNavigate();
   const {
@@ -56,8 +62,15 @@ export function Dashboard() {
     metrics,
     refreshData
   } = useDashboardData();
-  const { toast: toastHook } = useToast();
-  const { featureToggles, getVersionFeatures, currentVersion, setVersion } = useFeatureToggle();
+  const {
+    toast: toastHook
+  } = useToast();
+  const {
+    featureToggles,
+    getVersionFeatures,
+    currentVersion,
+    setVersion
+  } = useFeatureToggle();
   const [selectedOccurrence, setSelectedOccurrence] = useState<any>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -69,7 +82,6 @@ export function Dashboard() {
   useEffect(() => {
     // Resetar todos os filtros mantendo apenas os status padrão
     const defaultStatusFilters = ['a_iniciar', 'em_andamento', 'com_impedimentos'];
-    
     filters.updateFilter('segmentFilterMulti', []);
     filters.updateFilter('equipmentFilterMulti', []);
     filters.updateFilter('statusFilterMulti', defaultStatusFilters);
@@ -95,26 +107,18 @@ export function Dashboard() {
     filters.updateFilter('motivoImpedimentoFilter', []);
     filters.updateFilter('previsaoSlaFilter', []);
   }, []);
-  
+
   // Helper functions para renderizar componentes baseado nos feature toggles
   const renderCard = (cardId: string) => {
     if (!featureToggles[cardId]?.enabled) return null;
-    
     switch (cardId) {
       case 'totalOccurrences':
-        return (
-          <div key={cardId} onClick={() => handleNavigateToOccurrences('total')} className="cursor-pointer">
+        return <div key={cardId} onClick={() => handleNavigateToOccurrences('total')} className="cursor-pointer">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="relative">
-                    <OptimizedMetricCard 
-                      title="Total de Ocorrências" 
-                      value={cardMetrics.totalOccurrences}
-                      icon={<AlertTriangle className="h-4 w-4" />} 
-                      description={`${Math.round(cardMetrics.totalOccurrences / occurrences.length * 100)}% do total`}
-                      isLoading={isLoading}
-                    />
+                    <OptimizedMetricCard title="Total de Ocorrências" value={cardMetrics.totalOccurrences} icon={<AlertTriangle className="h-4 w-4" />} description={`${Math.round(cardMetrics.totalOccurrences / occurrences.length * 100)}% do total`} isLoading={isLoading} />
                     <HelpCircle className="absolute top-2 right-2 h-4 w-4 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
                   </div>
                 </TooltipTrigger>
@@ -123,22 +127,14 @@ export function Dashboard() {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-          </div>
-        );
+          </div>;
       case 'pendingOccurrences':
-        return (
-          <div key={cardId} onClick={() => handleNavigateToOccurrences('pending')} className="cursor-pointer">
+        return <div key={cardId} onClick={() => handleNavigateToOccurrences('pending')} className="cursor-pointer">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="relative">
-                    <OptimizedMetricCard 
-                      title="Ocorrências Pendentes" 
-                      value={cardMetrics.pendingOccurrences}
-                      icon={<Clock className="h-4 w-4" />} 
-                      description="Em andamento ou aguardando"
-                      isLoading={isLoading}
-                    />
+                    <OptimizedMetricCard title="Ocorrências Pendentes" value={cardMetrics.pendingOccurrences} icon={<Clock className="h-4 w-4" />} description="Em andamento ou aguardando" isLoading={isLoading} />
                     <HelpCircle className="absolute top-2 right-2 h-4 w-4 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
                   </div>
                 </TooltipTrigger>
@@ -147,22 +143,14 @@ export function Dashboard() {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-          </div>
-        );
+          </div>;
       case 'inoperantEquipments':
-        return (
-          <div key={cardId} onClick={() => handleNavigateToOccurrences('inoperant')} className="cursor-pointer">
+        return <div key={cardId} onClick={() => handleNavigateToOccurrences('inoperant')} className="cursor-pointer">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="relative">
-                    <OptimizedMetricCard 
-                      title="Equipamentos Inoperantes" 
-                      value={cardMetrics.inoperantEquipments}
-                      icon={<AlertTriangle className="h-4 w-4" />} 
-                      description="Equipamentos fora de operação"
-                      isLoading={isLoading}
-                    />
+                    <OptimizedMetricCard title="Equipamentos Inoperantes" value={cardMetrics.inoperantEquipments} icon={<AlertTriangle className="h-4 w-4" />} description="Equipamentos fora de operação" isLoading={isLoading} />
                     <HelpCircle className="absolute top-2 right-2 h-4 w-4 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
                   </div>
                 </TooltipTrigger>
@@ -171,22 +159,14 @@ export function Dashboard() {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-          </div>
-        );
+          </div>;
       case 'criticalOccurrences':
-        return (
-          <div key={cardId} onClick={() => handleNavigateToOccurrences('critical')} className="cursor-pointer">
+        return <div key={cardId} onClick={() => handleNavigateToOccurrences('critical')} className="cursor-pointer">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="relative">
-                    <OptimizedMetricCard 
-                      title="Ocorrências Críticas" 
-                      value={cardMetrics.criticalOccurrences}
-                      icon={<AlertTriangle className="h-4 w-4" />} 
-                      description="Prioridade máxima"
-                      isLoading={isLoading}
-                    />
+                    <OptimizedMetricCard title="Ocorrências Críticas" value={cardMetrics.criticalOccurrences} icon={<AlertTriangle className="h-4 w-4" />} description="Prioridade máxima" isLoading={isLoading} />
                     <HelpCircle className="absolute top-2 right-2 h-4 w-4 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
                   </div>
                 </TooltipTrigger>
@@ -195,22 +175,14 @@ export function Dashboard() {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-          </div>
-        );
+          </div>;
       case 'overdueOccurrences':
-        return (
-          <div key={cardId} onClick={() => handleNavigateToOccurrences('overdue')} className="cursor-pointer">
+        return <div key={cardId} onClick={() => handleNavigateToOccurrences('overdue')} className="cursor-pointer">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="relative">
-                    <OptimizedMetricCard 
-                      title="SLA em Atraso" 
-                      value={cardMetrics.overdueOccurrences}
-                      icon={<AlertTriangle className="h-4 w-4" />} 
-                      description="Acima do prazo limite"
-                      isLoading={isLoading}
-                    />
+                    <OptimizedMetricCard title="SLA em Atraso" value={cardMetrics.overdueOccurrences} icon={<AlertTriangle className="h-4 w-4" />} description="Acima do prazo limite" isLoading={isLoading} />
                     <HelpCircle className="absolute top-2 right-2 h-4 w-4 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
                   </div>
                 </TooltipTrigger>
@@ -219,22 +191,14 @@ export function Dashboard() {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-          </div>
-        );
+          </div>;
       case 'reincidences':
-        return (
-          <div key={cardId} onClick={() => handleNavigateToOccurrences('reincidence')} className="cursor-pointer">
+        return <div key={cardId} onClick={() => handleNavigateToOccurrences('reincidence')} className="cursor-pointer">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="relative">
-                    <OptimizedMetricCard 
-                      title="Reincidências" 
-                      value={cardMetrics.reincidentOccurrences}
-                      icon={<AlertTriangle className="h-4 w-4" />} 
-                      description="Ocorrências repetidas"
-                      isLoading={isLoading}
-                    />
+                    <OptimizedMetricCard title="Reincidências" value={cardMetrics.reincidentOccurrences} icon={<AlertTriangle className="h-4 w-4" />} description="Ocorrências repetidas" isLoading={isLoading} />
                     <HelpCircle className="absolute top-2 right-2 h-4 w-4 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
                   </div>
                 </TooltipTrigger>
@@ -243,29 +207,21 @@ export function Dashboard() {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-          </div>
-        );
+          </div>;
       case 'affectedAgencies':
-        return (
-          <div key={cardId} onClick={() => handleNavigateToOccurrences('agencies')} className="cursor-pointer">
+        return <div key={cardId} onClick={() => handleNavigateToOccurrences('agencies')} className="cursor-pointer">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="relative">
-                    <OptimizedMetricCard 
-                      title="Pontos Afetados" 
-                      value={(() => {
-                        const affectedAgencies = new Set(filteredOccurrences.map(o => o.agency));
-                        const vipAgencies = Array.from(affectedAgencies).filter(agency => {
-                          const agencyNumber = agency.match(/\d+/)?.[0] || '0';
-                          return agencyNumber.endsWith('0') || agencyNumber.endsWith('5');
-                        });
-                        return `${affectedAgencies.size} (${vipAgencies.length} VIP)`;
-                      })()}
-                      icon={<MapPin className="h-4 w-4" />} 
-                      description="Pontos com ocorrências"
-                      isLoading={isLoading}
-                    />
+                    <OptimizedMetricCard title="Pontos Afetados" value={(() => {
+                    const affectedAgencies = new Set(filteredOccurrences.map(o => o.agency));
+                    const vipAgencies = Array.from(affectedAgencies).filter(agency => {
+                      const agencyNumber = agency.match(/\d+/)?.[0] || '0';
+                      return agencyNumber.endsWith('0') || agencyNumber.endsWith('5');
+                    });
+                    return `${affectedAgencies.size} (${vipAgencies.length} VIP)`;
+                  })()} icon={<MapPin className="h-4 w-4" />} description="Pontos com ocorrências" isLoading={isLoading} />
                     <HelpCircle className="absolute top-2 right-2 h-4 w-4 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
                   </div>
                 </TooltipTrigger>
@@ -274,22 +230,14 @@ export function Dashboard() {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-          </div>
-        );
+          </div>;
       case 'averageMTTR':
-        return (
-          <div key={cardId} onClick={() => handleNavigateToOccurrences('mttr')} className="cursor-pointer">
+        return <div key={cardId} onClick={() => handleNavigateToOccurrences('mttr')} className="cursor-pointer">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="relative">
-                    <OptimizedMetricCard 
-                      title="MTTR" 
-                      value={metrics?.avgMTTR || "4.2h"}
-                      icon={<Clock className="h-4 w-4" />} 
-                      description="Tempo médio de resolução"
-                      isLoading={isLoading}
-                    />
+                    <OptimizedMetricCard title="MTTR" value={metrics?.avgMTTR || "4.2h"} icon={<Clock className="h-4 w-4" />} description="Tempo médio de resolução" isLoading={isLoading} />
                     <HelpCircle className="absolute top-2 right-2 h-4 w-4 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
                   </div>
                 </TooltipTrigger>
@@ -298,22 +246,14 @@ export function Dashboard() {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-          </div>
-        );
+          </div>;
       case 'dueTodayOccurrences':
-        return (
-          <div key={cardId} onClick={() => handleNavigateToOccurrences('due-today')} className="cursor-pointer">
+        return <div key={cardId} onClick={() => handleNavigateToOccurrences('due-today')} className="cursor-pointer">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="relative">
-                    <OptimizedMetricCard 
-                      title="Vencem Hoje" 
-                      value={cardMetrics.dueTodayOccurrences}
-                      icon={<Clock className="h-4 w-4" />} 
-                      description="SLA com vencimento hoje"
-                      isLoading={isLoading}
-                    />
+                    <OptimizedMetricCard title="Vencem Hoje" value={cardMetrics.dueTodayOccurrences} icon={<Clock className="h-4 w-4" />} description="SLA com vencimento hoje" isLoading={isLoading} />
                     <HelpCircle className="absolute top-2 right-2 h-4 w-4 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
                   </div>
                 </TooltipTrigger>
@@ -322,22 +262,14 @@ export function Dashboard() {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-          </div>
-        );
+          </div>;
       case 'todayOccurrences':
-        return (
-          <div key={cardId} onClick={() => handleNavigateToOccurrences('entered-today')} className="cursor-pointer">
+        return <div key={cardId} onClick={() => handleNavigateToOccurrences('entered-today')} className="cursor-pointer">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="relative">
-                    <OptimizedMetricCard 
-                      title="Entraram Hoje" 
-                      value={cardMetrics.todayOccurrences || 0}
-                      icon={<Clock className="h-4 w-4" />} 
-                      description="Ocorrências criadas hoje"
-                      isLoading={isLoading}
-                    />
+                    <OptimizedMetricCard title="Entraram Hoje" value={cardMetrics.todayOccurrences || 0} icon={<Clock className="h-4 w-4" />} description="Ocorrências criadas hoje" isLoading={isLoading} />
                     <HelpCircle className="absolute top-2 right-2 h-4 w-4 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
                   </div>
                 </TooltipTrigger>
@@ -346,32 +278,30 @@ export function Dashboard() {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-          </div>
-        );
+          </div>;
       default:
         return null;
     }
   };
-
   const renderChart = (chartId: string) => {
     if (!featureToggles[chartId]?.enabled) return null;
-    
     switch (chartId) {
       case 'equipmentStatusChart':
-        return (
-          <div key={chartId} className="animate-fade-in" style={{ animationDelay: '0.35s' }}>
+        return <div key={chartId} className="animate-fade-in" style={{
+          animationDelay: '0.35s'
+        }}>
             <EquipmentStatusChart occurrences={filteredOccurrences} />
-          </div>
-        );
+          </div>;
       case 'topAgenciesChart':
-        return (
-          <div key={chartId} className="animate-fade-in" style={{ animationDelay: '0.4s' }}>
+        return <div key={chartId} className="animate-fade-in" style={{
+          animationDelay: '0.4s'
+        }}>
             <TopAgenciesChart occurrences={occurrences} filteredOccurrences={filteredOccurrences} />
-          </div>
-        );
+          </div>;
       case 'agingChart':
-        return (
-          <div key={chartId} className="animate-fade-in" style={{ animationDelay: '0.45s' }}>
+        return <div key={chartId} className="animate-fade-in" style={{
+          animationDelay: '0.45s'
+        }}>
             <Card className="border-l-4 border-l-orange-500">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -396,13 +326,12 @@ export function Dashboard() {
                 <AgingChart occurrences={occurrences} filteredOccurrences={filteredOccurrences} />
               </CardContent>
             </Card>
-          </div>
-        );
+          </div>;
       case 'vendorMetricsMatrix':
-        return (
-          <div key={chartId} className="animate-fade-in" style={{ animationDelay: '0.5s' }}>
-            <Suspense fallback={
-              <Card className="border-l-4 border-l-primary">
+        return <div key={chartId} className="animate-fade-in" style={{
+          animationDelay: '0.5s'
+        }}>
+            <Suspense fallback={<Card className="border-l-4 border-l-primary">
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <Skeleton className="h-5 w-5 rounded" />
@@ -413,20 +342,15 @@ export function Dashboard() {
                 <CardContent>
                   <Skeleton className="h-[400px] w-full rounded-lg" />
                 </CardContent>
-              </Card>
-            }>
-              <VendorMetricsMatrix 
-                occurrences={filteredOccurrences} 
-                onNavigateToOccurrences={handleVendorMetricsNavigation}
-              />
+              </Card>}>
+              <VendorMetricsMatrix occurrences={filteredOccurrences} onNavigateToOccurrences={handleVendorMetricsNavigation} />
             </Suspense>
-          </div>
-        );
+          </div>;
       case 'motivoLongTailChart':
-        return (
-          <div key={chartId} className="animate-fade-in" style={{ animationDelay: '0.55s' }}>
-            <Suspense fallback={
-              <Card className="border-l-4 border-l-orange-500">
+        return <div key={chartId} className="animate-fade-in" style={{
+          animationDelay: '0.55s'
+        }}>
+            <Suspense fallback={<Card className="border-l-4 border-l-orange-500">
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <Skeleton className="h-5 w-5 rounded" />
@@ -437,20 +361,15 @@ export function Dashboard() {
                 <CardContent>
                   <Skeleton className="h-[400px] w-full rounded-lg" />
                 </CardContent>
-              </Card>
-            }>
-              <MotivoLongTailChart 
-                occurrences={occurrences} 
-                filteredOccurrences={filteredOccurrences}
-              />
+              </Card>}>
+              <MotivoLongTailChart occurrences={occurrences} filteredOccurrences={filteredOccurrences} />
             </Suspense>
-          </div>
-        );
-        case 'slaPrevisaoChart':
-        return (
-          <div key={chartId} className="animate-fade-in" style={{ animationDelay: '0.6s' }}>
-            <Suspense fallback={
-              <Card className="border-l-4 border-l-blue-500">
+          </div>;
+      case 'slaPrevisaoChart':
+        return <div key={chartId} className="animate-fade-in" style={{
+          animationDelay: '0.6s'
+        }}>
+            <Suspense fallback={<Card className="border-l-4 border-l-blue-500">
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <Skeleton className="h-5 w-5 rounded" />
@@ -461,20 +380,15 @@ export function Dashboard() {
                 <CardContent>
                   <Skeleton className="h-[400px] w-full rounded-lg" />
                 </CardContent>
-              </Card>
-            }>
-              <SlaPrevisaoChart 
-                occurrences={occurrences} 
-                filteredOccurrences={filteredOccurrences}
-              />
+              </Card>}>
+              <SlaPrevisaoChart occurrences={occurrences} filteredOccurrences={filteredOccurrences} />
             </Suspense>
-          </div>
-        );
+          </div>;
       case 'criticalityHeatmap':
-        return (
-          <div key={chartId} className="animate-fade-in" style={{ animationDelay: '0.7s' }}>
-            <Suspense fallback={
-              <Card className="border-l-4 border-l-red-500">
+        return <div key={chartId} className="animate-fade-in" style={{
+          animationDelay: '0.7s'
+        }}>
+            <Suspense fallback={<Card className="border-l-4 border-l-red-500">
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <Skeleton className="h-5 w-5 rounded" />
@@ -485,31 +399,21 @@ export function Dashboard() {
                 <CardContent>
                   <Skeleton className="h-[400px] w-full rounded-lg" />
                 </CardContent>
-              </Card>
-            }>
-              <CriticalityHeatmap 
-                occurrences={filteredOccurrences}
-              />
+              </Card>}>
+              <CriticalityHeatmap occurrences={filteredOccurrences} />
             </Suspense>
-          </div>
-        );
+          </div>;
       case 'interactiveCharts':
-        return (
-          <div key={chartId} className="animate-fade-in" style={{ animationDelay: '0.75s' }}>
-            <OptimizedInteractiveCharts 
-              severityData={severityData}
-              timelineData={timelineData}
-              mttrData={mttrData}
-              equipmentData={equipmentData}
-              occurrences={occurrences}
-            />
-          </div>
-        );
+        return <div key={chartId} className="animate-fade-in" style={{
+          animationDelay: '0.75s'
+        }}>
+            <OptimizedInteractiveCharts severityData={severityData} timelineData={timelineData} mttrData={mttrData} equipmentData={equipmentData} occurrences={occurrences} />
+          </div>;
       case 'vendorSLAChart':
-        return (
-          <div key={chartId} className="animate-fade-in" style={{ animationDelay: '0.8s' }}>
-            <Suspense fallback={
-              <Card>
+        return <div key={chartId} className="animate-fade-in" style={{
+          animationDelay: '0.8s'
+        }}>
+            <Suspense fallback={<Card>
                 <CardHeader>
                   <CardTitle>Análise de SLA por Fornecedor</CardTitle>
                 </CardHeader>
@@ -518,37 +422,29 @@ export function Dashboard() {
                     <Skeleton className="h-full w-full" />
                   </div>
                 </CardContent>
-              </Card>
-            }>
+              </Card>}>
               <VendorSLAChart occurrences={filteredOccurrences} />
             </Suspense>
-          </div>
-        );
+          </div>;
       default:
         return null;
     }
   };
-
   const renderSection = (sectionId: string) => {
     if (!featureToggles[sectionId]?.enabled) return null;
-    
     switch (sectionId) {
       case 'filterSection':
-        return (
-          <div key={sectionId} className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
+        return <div key={sectionId} className="animate-fade-in" style={{
+          animationDelay: '0.1s'
+        }}>
             <FilterSection defaultOpen />
-          </div>
-        );
+          </div>;
       case 'occurrenceHighlights':
-        return (
-          <div key={sectionId} className="animate-fade-in" style={{ animationDelay: '0.5s' }}>
-            <OccurrenceHighlights 
-              occurrences={filteredOccurrences} 
-              onOccurrenceClick={handleOccurrenceClick}
-              onNavigateToOccurrences={handleNavigateToOccurrences}
-            />
-          </div>
-        );
+        return <div key={sectionId} className="animate-fade-in" style={{
+          animationDelay: '0.5s'
+        }}>
+            <OccurrenceHighlights occurrences={filteredOccurrences} onOccurrenceClick={handleOccurrenceClick} onNavigateToOccurrences={handleNavigateToOccurrences} />
+          </div>;
       default:
         return null;
     }
@@ -592,63 +488,58 @@ export function Dashboard() {
         logging: false,
         removeContainer: false
       });
-
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('l', 'mm', 'a4'); // Paisagem para melhor visualização
-      
+
       // Configurações do PDF
       const pageWidth = 297;
       const pageHeight = 210;
       const margin = 15;
-      const contentWidth = pageWidth - (margin * 2);
-      
+      const contentWidth = pageWidth - margin * 2;
+
       // Header com informações
       const now = new Date();
       const dateTime = now.toLocaleString('pt-BR', {
         dateStyle: 'full',
         timeStyle: 'short'
       });
-      
+
       // Título principal
       pdf.setFontSize(18);
       pdf.setFont('helvetica', 'bold');
       pdf.text('Dashboard COPF - Sistema de Monitoramento', margin, 25);
-      
+
       // Data e hora de geração
       pdf.setFontSize(12);
       pdf.setFont('helvetica', 'normal');
       pdf.text(`Gerado em: ${dateTime}`, margin, 35);
-      
+
       // Informações adicionais sobre filtros
       if (hasActiveFilters) {
         pdf.setFontSize(10);
         pdf.setTextColor(100, 100, 100);
         pdf.text('* Relatório gerado com filtros aplicados', margin, 42);
       }
-      
+
       // Período dos dados
-      const periodText = filterPeriod === '7-days' ? 'Últimos 7 dias' :
-                        filterPeriod === '30-days' ? 'Últimos 30 dias' :
-                        filterPeriod === '60-days' ? 'Últimos 60 dias' :
-                        filterPeriod === '90-days' ? 'Últimos 90 dias' : 'Período personalizado';
-      
+      const periodText = filterPeriod === '7-days' ? 'Últimos 7 dias' : filterPeriod === '30-days' ? 'Últimos 30 dias' : filterPeriod === '60-days' ? 'Últimos 60 dias' : filterPeriod === '90-days' ? 'Últimos 90 dias' : 'Período personalizado';
       pdf.setFontSize(10);
       pdf.setTextColor(80, 80, 80);
       pdf.text(`Período: ${periodText}`, margin, 48);
-      
+
       // Resetar cor para preto
       pdf.setTextColor(0, 0, 0);
-      
+
       // Calcular dimensões da imagem
       const imgAspectRatio = canvas.width / canvas.height;
       const imgWidth = contentWidth;
       const imgHeight = imgWidth / imgAspectRatio;
-      
+
       // Posição inicial da imagem (após o header)
       let yPosition = 55;
-      
+
       // Adicionar imagem da dashboard
-      if (imgHeight <= (pageHeight - yPosition - margin)) {
+      if (imgHeight <= pageHeight - yPosition - margin) {
         // A imagem cabe em uma página
         pdf.addImage(imgData, 'PNG', margin, yPosition, imgWidth, imgHeight);
       } else {
@@ -656,34 +547,30 @@ export function Dashboard() {
         let remainingHeight = imgHeight;
         let currentY = yPosition;
         let sourceY = 0;
-        
         while (remainingHeight > 0) {
           const availableHeight = pageHeight - currentY - margin;
           const sliceHeight = Math.min(remainingHeight, availableHeight);
-          const sourceHeight = (sliceHeight / imgHeight) * canvas.height;
-          
+          const sourceHeight = sliceHeight / imgHeight * canvas.height;
+
           // Criar um canvas temporário para o slice
           const tempCanvas = document.createElement('canvas');
           const tempCtx = tempCanvas.getContext('2d');
           tempCanvas.width = canvas.width;
           tempCanvas.height = sourceHeight;
-          
           if (tempCtx) {
             tempCtx.drawImage(canvas, 0, sourceY, canvas.width, sourceHeight, 0, 0, canvas.width, sourceHeight);
             const sliceData = tempCanvas.toDataURL('image/png');
             pdf.addImage(sliceData, 'PNG', margin, currentY, imgWidth, sliceHeight);
           }
-          
           remainingHeight -= sliceHeight;
           sourceY += sourceHeight;
-          
           if (remainingHeight > 0) {
             pdf.addPage();
             currentY = margin;
           }
         }
       }
-      
+
       // Footer na última página
       const pageCount = pdf.getNumberOfPages();
       for (let i = 1; i <= pageCount; i++) {
@@ -692,11 +579,10 @@ export function Dashboard() {
         pdf.setTextColor(120, 120, 120);
         pdf.text(`Página ${i} de ${pageCount} - Dashboard COPF`, margin, pageHeight - 5);
       }
-      
+
       // Salvar o PDF
       const fileName = `dashboard-copf-${now.toISOString().split('T')[0]}-${now.getHours()}h${now.getMinutes()}.pdf`;
       pdf.save(fileName);
-      
       toast('Download concluído - Dashboard exportada em PDF com sucesso!');
     } catch (error) {
       console.error('Erro na exportação:', error);
@@ -712,11 +598,10 @@ export function Dashboard() {
     toast('Dados atualizados - Dashboard atualizado com as informações mais recentes.');
   };
 
-
   // Handlers para navegar com filtros específicos
   const handleNavigateToOccurrences = (filter: 'total' | 'pending' | 'reincidence' | 'overdue' | 'agencies' | 'mttr' | 'inoperant' | 'entered-today' | 'due-today' | 'overdue-today' | 'critical') => {
     console.log('Card clicked:', filter, 'Current filtered occurrences:', filteredOccurrences.length);
-    
+
     // Aplicar filtros específicos do card clicado SEM limpar os filtros existentes
     const params = new URLSearchParams();
     switch (filter) {
@@ -736,13 +621,25 @@ export function Dashboard() {
         params.set('sla_status', 'overdue');
         break;
       case 'entered-today':
-        navigate('/ocorrencias', { state: { filterType: 'entered-today' } });
+        navigate('/ocorrencias', {
+          state: {
+            filterType: 'entered-today'
+          }
+        });
         return;
       case 'due-today':
-        navigate('/ocorrencias', { state: { filterType: 'due-today' } });
+        navigate('/ocorrencias', {
+          state: {
+            filterType: 'due-today'
+          }
+        });
         return;
       case 'overdue-today':
-        navigate('/ocorrencias', { state: { filterType: 'overdue-today' } });
+        navigate('/ocorrencias', {
+          state: {
+            filterType: 'overdue-today'
+          }
+        });
         return;
       case 'agencies':
         // Sem filtros específicos
@@ -760,7 +657,7 @@ export function Dashboard() {
         params.set('severity', 'critical');
         break;
     }
-    
+
     // Navegar para a página de ocorrências com parâmetros quando necessário
     const query = params.toString();
     navigate(query ? `/ocorrencias?${query}` : '/ocorrencias');
@@ -768,7 +665,11 @@ export function Dashboard() {
   };
 
   // Handler para VendorMetricsMatrix
-  const handleVendorMetricsNavigation = (filter: { vendor?: string; severity?: string; slaStatus?: string }) => {
+  const handleVendorMetricsNavigation = (filter: {
+    vendor?: string;
+    severity?: string;
+    slaStatus?: string;
+  }) => {
     if (filter.vendor) {
       filters.updateFilter('vendorFilterMulti', [filter.vendor]);
     }
@@ -794,7 +695,6 @@ export function Dashboard() {
     const now = new Date();
     let startDate: Date | null = null;
     let endDate: Date | null = now;
-
     switch (filterPeriod) {
       case '7-days':
         startDate = new Date(now);
@@ -827,7 +727,6 @@ export function Dashboard() {
         startDate = null;
         endDate = null;
     }
-
     let filtered = occurrences.filter(occurrence => {
       // Filtro por período (Data/Hora Abertura)
       if (startDate && endDate) {
@@ -881,38 +780,44 @@ export function Dashboard() {
       // Filtro de reincidências (simular campo reincidencia)
       if (reincidentFilter) {
         // Lógica simplificada: equipamentos com mais de uma ocorrência no mesmo ponto
-        const hasReincidence = occurrences.some(other => 
-          other.id !== occurrence.id &&
-          other.equipment === occurrence.equipment && 
-          other.agency === occurrence.agency
-        );
+        const hasReincidence = occurrences.some(other => other.id !== occurrence.id && other.equipment === occurrence.equipment && other.agency === occurrence.agency);
         if (!hasReincidence) return false;
       }
-      
+
       // Filtro de Aging (tempo desde abertura) - apenas ocorrências ativas para consistência com AgingChart
       if (longTailFilter.length > 0) {
         // Primeiro verificar se a ocorrência está ativa (não cancelada/encerrada)
         const isActiveOccurrence = occurrence.status === 'a_iniciar' || occurrence.status === 'em_andamento';
         if (!isActiveOccurrence) return false;
-        
         const createdDate = new Date(occurrence.createdAt);
         const hoursDiff = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60);
         const daysDiff = hoursDiff / 24;
-        
         const matchesFilter = longTailFilter.some(filter => {
           switch (filter) {
-            case '0-0.5h': return hoursDiff >= 0 && hoursDiff <= 0.5;
-            case '0.5-1h': return hoursDiff > 0.5 && hoursDiff <= 1;
-            case '1-2h': return hoursDiff > 1 && hoursDiff <= 2;
-            case '2-4h': return hoursDiff > 2 && hoursDiff <= 4;
-            case '4-8h': return hoursDiff > 4 && hoursDiff <= 8;
-            case '8-12h': return hoursDiff > 8 && hoursDiff <= 12;
-            case '12-24h': return hoursDiff > 12 && hoursDiff <= 24;
-            case '1-2 dias': return daysDiff > 1 && daysDiff <= 2;
-            case '2-3 dias': return daysDiff > 2 && daysDiff <= 3;
-            case '3-5 dias': return daysDiff > 3 && daysDiff <= 5;
-            case '>5 dias': return daysDiff > 5;
-            default: return false;
+            case '0-0.5h':
+              return hoursDiff >= 0 && hoursDiff <= 0.5;
+            case '0.5-1h':
+              return hoursDiff > 0.5 && hoursDiff <= 1;
+            case '1-2h':
+              return hoursDiff > 1 && hoursDiff <= 2;
+            case '2-4h':
+              return hoursDiff > 2 && hoursDiff <= 4;
+            case '4-8h':
+              return hoursDiff > 4 && hoursDiff <= 8;
+            case '8-12h':
+              return hoursDiff > 8 && hoursDiff <= 12;
+            case '12-24h':
+              return hoursDiff > 12 && hoursDiff <= 24;
+            case '1-2 dias':
+              return daysDiff > 1 && daysDiff <= 2;
+            case '2-3 dias':
+              return daysDiff > 2 && daysDiff <= 3;
+            case '3-5 dias':
+              return daysDiff > 3 && daysDiff <= 5;
+            case '>5 dias':
+              return daysDiff > 5;
+            default:
+              return false;
           }
         });
         if (!matchesFilter) return false;
@@ -930,10 +835,8 @@ export function Dashboard() {
         const motivoOcorrencia = occurrence.motivoOcorrencia || 'Não informado';
         if (!motivoFilter.includes(motivoOcorrencia)) return false;
       }
-
       return true;
     });
-
     return filtered;
   }, [occurrences, filterPeriod, customDateRange, segmentFilterMulti, equipmentFilterMulti, statusFilterMulti, statusEquipamentoFilterMulti, vendorFilterMulti, serialNumberFilter, agenciaFilter, ufFilter, tipoAgenciaFilter, pontoVipFilter, overrideFilter, vendorPriorityFilter, reincidentFilter, longTailFilter, motivoFilter, hasActiveFilters]);
 
@@ -943,26 +846,17 @@ export function Dashboard() {
     const totalOccurrences = filteredOccurrences.length;
 
     // 2. Ocorrências pendentes (A iniciar, Em andamento, Com Impedimentos)
-    const pendingOccurrences = filteredOccurrences.filter(o => 
-      o.status === 'a_iniciar' || o.status === 'em_andamento' || o.status === 'com_impedimentos'
-    ).length;
+    const pendingOccurrences = filteredOccurrences.filter(o => o.status === 'a_iniciar' || o.status === 'em_andamento' || o.status === 'com_impedimentos').length;
 
     // 3. Reincidências - ignorar itens sintéticos (id com "-dup-")
     const baseForReincidence = filteredOccurrences.filter(o => !String(o.id).includes('-dup-'));
     const reincidentOccurrences = baseForReincidence.reduce((count, occurrence, index) => {
-      const sameReasonEquipment = baseForReincidence.filter((other, otherIndex) => 
-        otherIndex !== index &&
-        other.description === occurrence.description &&
-        other.equipment === occurrence.equipment &&
-        other.agency === occurrence.agency
-      );
-      
+      const sameReasonEquipment = baseForReincidence.filter((other, otherIndex) => otherIndex !== index && other.description === occurrence.description && other.equipment === occurrence.equipment && other.agency === occurrence.agency);
       if (sameReasonEquipment.length > 0) {
         const hasRecentRecurrence = sameReasonEquipment.some(other => {
           const daysDiff = Math.abs(new Date(occurrence.createdAt).getTime() - new Date(other.createdAt).getTime()) / (1000 * 60 * 60 * 24);
           return daysDiff <= 4;
         });
-        
         if (hasRecentRecurrence) {
           return count + 1;
         }
@@ -1001,7 +895,6 @@ export function Dashboard() {
       const today = new Date();
       return occCreatedDate.toDateString() === today.toDateString();
     }).length;
-
     return {
       totalOccurrences,
       pendingOccurrences,
@@ -1079,9 +972,7 @@ export function Dashboard() {
                   <TrendingUp className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                    Dashboard COPF
-                  </h1>
+                  <h1 className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">Monitora Ops</h1>
                   <p className="text-lg text-muted-foreground">
                     Centro de Operações de Pontos Físicos
                   </p>
@@ -1115,13 +1006,10 @@ export function Dashboard() {
             {/* Action Controls */}
             <div className="flex flex-wrap gap-3">
               {/* Version Selector */}
-              <VersionSelector 
-                version={currentVersion} 
-                onVersionChange={setVersion} 
-              />
+              <VersionSelector version={currentVersion} onVersionChange={setVersion} />
               
               {/* Filtro de Período */}
-              <Select value={filterPeriod} onValueChange={(value) => updateFilter('filterPeriod', value)}>
+              <Select value={filterPeriod} onValueChange={value => updateFilter('filterPeriod', value)}>
                 <SelectTrigger className="w-auto min-w-[180px] bg-card border-border/50 hover:border-primary/30 transition-colors shadow-card-default text-foreground font-medium">
                   <Calendar className="h-4 w-4 mr-2 text-primary" />
                   <SelectValue className="text-foreground" />
@@ -1175,11 +1063,11 @@ export function Dashboard() {
       </div>
 
       {/* Filtros */}
-      {featureToggles.filterSection?.enabled && (
-        <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
+      {featureToggles.filterSection?.enabled && <div className="animate-fade-in" style={{
+      animationDelay: '0.1s'
+    }}>
           <FilterSection defaultOpen />
-        </div>
-      )}
+        </div>}
 
       {/* Métricas principais */}
       <div className="animate-fade-in" style={{

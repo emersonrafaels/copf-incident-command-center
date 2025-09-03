@@ -8,30 +8,25 @@ import { format } from "date-fns";
 interface COPFLayoutProps {
   children: ReactNode;
 }
-
 export function COPFLayout({
   children
 }: COPFLayoutProps) {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   const [showNotifications, setShowNotifications] = useState(false);
-
   useEffect(() => {
     // Atualizar a data quando o layout for montado
     setLastUpdate(new Date());
-    
+
     // Escutar eventos de refresh do dashboard
     const handleRefresh = () => {
       setLastUpdate(new Date());
     };
-    
     window.addEventListener('dashboard-refresh', handleRefresh);
-    
     return () => {
       window.removeEventListener('dashboard-refresh', handleRefresh);
     };
   }, []);
-
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
     document.documentElement.classList.toggle("dark");
@@ -52,9 +47,7 @@ export function COPFLayout({
                       <span className="text-white font-bold text-responsive-sm">C</span>
                     </div>
                     <div className="min-w-0">
-                      <h1 className="text-responsive-base sm:text-responsive-lg font-bold text-foreground truncate bg-gradient-primary bg-clip-text text-transparent">
-                        COPF Dashboard
-                      </h1>
+                      <h1 className="text-responsive-base sm:text-responsive-lg font-bold text-foreground truncate bg-gradient-primary bg-clip-text text-transparent">Monitora Ops</h1>
                       <p className="text-responsive-xs sm:text-responsive-sm text-muted-foreground truncate">
                         Centro de Operações | Itaú Unibanco
                       </p>
@@ -73,12 +66,7 @@ export function COPFLayout({
                 </div>
 
                 {/* Notifications */}
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="relative hover:bg-primary/10 transition-all duration-200 h-8 w-8 sm:h-10 sm:w-10"
-                  onClick={() => setShowNotifications(!showNotifications)}
-                >
+                <Button variant="ghost" size="icon" className="relative hover:bg-primary/10 transition-all duration-200 h-8 w-8 sm:h-10 sm:w-10" onClick={() => setShowNotifications(!showNotifications)}>
                   <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
                   <span className="absolute -top-0.5 -right-0.5 h-4 w-4 sm:h-5 sm:w-5 bg-gradient-primary text-white rounded-full text-responsive-xs flex items-center justify-center font-bold shadow-lg">
                     2
@@ -105,9 +93,9 @@ export function COPFLayout({
             {/* Background Pattern */}
             <div className="absolute inset-0 opacity-5">
               <div className="absolute inset-0" style={{
-                backgroundImage: `radial-gradient(circle at 1px 1px, hsl(var(--primary)) 1px, transparent 0)`,
-                backgroundSize: 'clamp(15px, 3vw, 20px) clamp(15px, 3vw, 20px)'
-              }}></div>
+              backgroundImage: `radial-gradient(circle at 1px 1px, hsl(var(--primary)) 1px, transparent 0)`,
+              backgroundSize: 'clamp(15px, 3vw, 20px) clamp(15px, 3vw, 20px)'
+            }}></div>
             </div>
             <div className="relative z-10 w-full min-w-0">
               {children}
@@ -142,10 +130,7 @@ export function COPFLayout({
         </div>
         
         {/* Notification Panel */}
-        <NotificationPanel 
-          isOpen={showNotifications} 
-          onClose={() => setShowNotifications(false)} 
-        />
+        <NotificationPanel isOpen={showNotifications} onClose={() => setShowNotifications(false)} />
       </div>
     </SidebarProvider>;
 }
