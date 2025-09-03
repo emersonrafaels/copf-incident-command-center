@@ -774,53 +774,66 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
                       </Popover>
                     </div>
 
-                    {/* Modelo do equipamento */}
-                    <div className="group space-y-3">
-                      <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                        <div className="w-1 h-4 bg-secondary/60 rounded-full"></div>
-                        Modelo do equipamento
-                      </Label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button variant="outline" className="w-full h-10 justify-between hover:bg-secondary/5 hover:border-secondary/30 transition-all duration-200 group-hover:shadow-sm">
-                            {equipmentModelFilterMulti.length > 0 ? (
-                              <div className="flex items-center gap-2">
-                                <Badge variant="secondary" className="h-5 text-xs bg-secondary/10 text-secondary">
-                                  {equipmentModelFilterMulti.length}
-                                </Badge>
-                                <span className="text-sm">
-                                  {equipmentModelFilterMulti.length === 1 ? equipmentModelFilterMulti[0] : `${equipmentModelFilterMulti.length} modelos`}
-                                </span>
-                              </div>
-                            ) : "Todos os modelos"}
-                            <div className="w-4 h-4 opacity-50">⌄</div>
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-72 p-0 bg-background/95 backdrop-blur-sm border border-border/80 shadow-lg z-50" align="start">
-                          <Command>
-                            <CommandInput placeholder="Buscar modelo..." className="h-9" />
-                            <CommandEmpty>Nenhum modelo encontrado.</CommandEmpty>
-                            <CommandList>
-                              <CommandGroup className="max-h-64 overflow-y-auto">
-                                {availableEquipmentModels.map(modelo => (
-                                  <CommandItem key={modelo} onSelect={() => {
-                                    const isSelected = equipmentModelFilterMulti.includes(modelo);
-                                    if (isSelected) {
-                                      updateFilter('equipmentModelFilterMulti', equipmentModelFilterMulti.filter(m => m !== modelo));
-                                    } else {
-                                      updateFilter('equipmentModelFilterMulti', [...equipmentModelFilterMulti, modelo]);
-                                    }
-                                  }}>
-                                    <Check className={cn("mr-2 h-4 w-4", equipmentModelFilterMulti.includes(modelo) ? "opacity-100" : "opacity-0")} />
-                                    {modelo}
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
-                    </div>
+                    {/* Modelo do equipamento - Apenas mostrar quando não for MVP */}
+                    {currentVersion !== 'MVP' && (
+                      <div className="group space-y-3">
+                        <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                          <div className="w-1 h-4 bg-secondary/60 rounded-full"></div>
+                          Modelo do equipamento
+                        </Label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="outline" className="w-full h-10 justify-between hover:bg-secondary/5 hover:border-secondary/30 transition-all duration-200 group-hover:shadow-sm">
+                              {equipmentModelFilterMulti.length > 0 ? (
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="secondary" className="h-5 text-xs bg-secondary/10 text-secondary">
+                                    {equipmentModelFilterMulti.length}
+                                  </Badge>
+                                  <span className="text-sm text-secondary truncate">
+                                    {equipmentModelFilterMulti.length === 1 
+                                      ? equipmentModelFilterMulti[0] 
+                                      : `${equipmentModelFilterMulti.length} modelos`}
+                                  </span>
+                                </div>
+                              ) : (
+                                <span className="text-muted-foreground">Selecionar modelos...</span>
+                              )}
+                              <ChevronDown className="h-4 w-4 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="p-0 w-full" align="start">
+                            <Command>
+                              <CommandInput placeholder="Buscar modelos..." />
+                              <CommandList className="max-h-48">
+                                <CommandEmpty>Nenhum modelo encontrado.</CommandEmpty>
+                                <CommandGroup>
+                                  {availableEquipmentModels.map((model) => (
+                                    <CommandItem
+                                      key={model}
+                                      value={model}
+                                      onSelect={() => {
+                                        const newModels = equipmentModelFilterMulti.includes(model)
+                                          ? equipmentModelFilterMulti.filter(m => m !== model)
+                                          : [...equipmentModelFilterMulti, model];
+                                        updateFilter('equipmentModelFilterMulti', newModels);
+                                      }}
+                                    >
+                                      <Check
+                                        className={cn(
+                                          "mr-2 h-4 w-4",
+                                          equipmentModelFilterMulti.includes(model) ? "opacity-100" : "opacity-0"
+                                        )}
+                                      />
+                                      {model}
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                    )}
 
                     {/* Status da ocorrência */}
                     <div className="group space-y-3">
