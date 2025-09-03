@@ -534,7 +534,7 @@ const Ocorrencias = () => {
   };
 
   const handleOccurrenceClick = (occurrence: any) => {
-    navigate(`/ocorrencia-detalhes/${occurrence.id}`);
+    navigate(`/ocorrencia/${occurrence.id}`);
   };
 
   return (
