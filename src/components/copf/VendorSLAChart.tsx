@@ -109,7 +109,7 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
     return (
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>Total de Ocorrências por Fornecedor</CardTitle>
+          <CardTitle>Total de Ocorrências por Fornecedor (Visão SLA e Previsão de Atendimento)</CardTitle>
           <CardDescription>Distribuição de ocorrências entre fornecedores</CardDescription>
         </CardHeader>
         <CardContent>
@@ -124,7 +124,7 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Total de Ocorrências por Fornecedor</CardTitle>
+        <CardTitle>Total de Ocorrências por Fornecedor (Visão SLA e Previsão de Atendimento)</CardTitle>
         <CardDescription>Distribuição de ocorrências entre fornecedores</CardDescription>
       </CardHeader>
       <CardContent>
