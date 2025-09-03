@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 interface OccurrenceData {
   id: string;
@@ -128,35 +128,51 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
         <CardDescription>Distribuição de ocorrências entre fornecedores</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Fornecedor</TableHead>
-                <TableHead className="text-right">Total</TableHead>
-                <TableHead className="text-right">Sem Previsão</TableHead>
-                <TableHead className="text-right">% Sem Previsão</TableHead>
-                <TableHead className="text-right">Previsão &gt; SLA</TableHead>
-                <TableHead className="text-right">% Previsão &gt; SLA</TableHead>
-                <TableHead className="text-right">SLA Vencido</TableHead>
-                <TableHead className="text-right">% SLA Vencido</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {chartData.map((item, index) => (
-                <TableRow key={index}>
-                  <TableCell className="font-medium">{item.vendor}</TableCell>
-                  <TableCell className="text-right">{item.total}</TableCell>
-                  <TableCell className="text-right">{item.semPrevisao}</TableCell>
-                  <TableCell className="text-right">{item.percentualSemPrevisao.toFixed(1)}%</TableCell>
-                  <TableCell className="text-right">{item.previsaoMaiorSla}</TableCell>
-                  <TableCell className="text-right">{item.percentualPrevisaoMaiorSla.toFixed(1)}%</TableCell>
-                  <TableCell className="text-right">{item.slaVencido}</TableCell>
-                  <TableCell className="text-right">{item.percentualSlaVencido.toFixed(1)}%</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+        <div className="h-96 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={chartData}
+              margin={{
+                top: 20,
+                right: 30,
+                left: 20,
+                bottom: 60,
+              }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis 
+                dataKey="vendor" 
+                angle={-45}
+                textAnchor="end"
+                height={80}
+                interval={0}
+              />
+              <YAxis />
+              <Tooltip 
+                formatter={(value: number, name: string) => {
+                  const labels = {
+                    semPrevisao: 'Sem Previsão',
+                    previsaoMaiorSla: 'Previsão > SLA',
+                    slaVencido: 'SLA Vencido'
+                  };
+                  return [value, labels[name as keyof typeof labels] || name];
+                }}
+              />
+              <Legend 
+                formatter={(value: string) => {
+                  const labels = {
+                    semPrevisao: 'Sem Previsão',
+                    previsaoMaiorSla: 'Previsão > SLA',
+                    slaVencido: 'SLA Vencido'
+                  };
+                  return labels[value as keyof typeof labels] || value;
+                }}
+              />
+              <Bar dataKey="semPrevisao" stackId="a" fill="#94a3b8" />
+              <Bar dataKey="previsaoMaiorSla" stackId="a" fill="#f59e0b" />
+              <Bar dataKey="slaVencido" stackId="a" fill="#ef4444" />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </CardContent>
     </Card>
