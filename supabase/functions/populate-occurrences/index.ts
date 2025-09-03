@@ -17,7 +17,6 @@ const vendors = ['Fornecedor A', 'Fornecedor B', 'Fornecedor C', 'Fornecedor D',
 const segments = ['atm', 'pos', 'rede', 'datacenter'];
 const states = ['SP', 'RJ', 'MG', 'RS', 'PR', 'SC', 'BA', 'GO', 'PE', 'CE'];
 const agencyTypes = ['Convencional (AG)', 'Convencional (PAB)', 'Terceirizada (Espaço Itaú)', 'Terceirizada (PAB)', 'Terceirizada (PAE)', 'Terceirizada (Phygital)'];
-const transporters = ['Transportadora Norte', 'Transportadora Sul', 'Transportadora Leste', 'Transportadora Oeste', 'Transportadora Centro'];
 const statuses = ['pendente', 'em_andamento', 'resolvida', 'com_impedimentos'];
 const priorities = ['baixa', 'media', 'alta', 'critica'];
 const severities = ['baixa', 'media', 'alta', 'critica'];
@@ -191,7 +190,6 @@ Deno.serve(async (req) => {
           uf: getRandomElement(states),
           tipo_agencia: getRandomElement(agencyTypes),
           supt: generateSupt(agency),
-          transportadora: getRandomElement(transporters),
           status_equipamento: getRandomElement(equipmentStatuses),
           vip: isVip,
           possui_impedimento: hasImpediment,
