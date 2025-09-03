@@ -11,6 +11,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Filter, RefreshCw, ChevronDown, ChevronUp, Check, Truck, Clock } from "lucide-react";
 import { useFilters } from "@/contexts/FiltersContext";
 import { useDashboardData } from "@/hooks/useDashboardData";
+import { useFeatureToggle } from "@/contexts/FeatureToggleContext";
 import { cn } from "@/lib/utils";
 interface FilterSectionProps {
   className?: string;
@@ -25,6 +26,7 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
   const [isVendorOpen, setIsVendorOpen] = useState(true);
   const [isSpecialFiltersOpen, setIsSpecialFiltersOpen] = useState(true);
   const { occurrences } = useDashboardData();
+  const { currentVersion } = useFeatureToggle();
   const {
     agenciaFilter,
     ufFilter,
@@ -1025,21 +1027,24 @@ export function FilterSection({ className, showSerialNumber = false, defaultOpen
                            <Label htmlFor="due-today-filter" className="text-sm cursor-pointer select-none">
                              Ocorrências Vencem Hoje
                            </Label>
-                        </div>
+                         </div>
 
-                       <div className="flex items-center space-x-2 p-3 border border-border/50 rounded-lg bg-background/50 hover:bg-accent/10 transition-colors">
-                         <Switch
-                           id="reincident-filter"
-                           checked={reincidentFilter}
-                           onCheckedChange={(checked) => updateFilter('reincidentFilter', checked)}
-                           className="data-[state=checked]:bg-primary"
-                         />
-                         <Label htmlFor="reincident-filter" className="text-sm cursor-pointer select-none">
-                           Ocorrências Reincidentes
-                         </Label>
-                       </div>
+                        {/* Apenas mostrar Ocorrências Reincidentes quando não for MVP */}
+                        {currentVersion !== 'MVP' && (
+                          <div className="flex items-center space-x-2 p-3 border border-border/50 rounded-lg bg-background/50 hover:bg-accent/10 transition-colors">
+                            <Switch
+                              id="reincident-filter"
+                              checked={reincidentFilter}
+                              onCheckedChange={(checked) => updateFilter('reincidentFilter', checked)}
+                              className="data-[state=checked]:bg-primary"
+                            />
+                            <Label htmlFor="reincident-filter" className="text-sm cursor-pointer select-none">
+                              Ocorrências Reincidentes
+                            </Label>
+                          </div>
+                        )}
 
-                       <div className="flex items-center space-x-2 p-3 border border-border/50 rounded-lg bg-background/50 hover:bg-accent/10 transition-colors">
+                        <div className="flex items-center space-x-2 p-3 border border-border/50 rounded-lg bg-background/50 hover:bg-accent/10 transition-colors">
                          <Switch
                            id="vendor-priority-filter"
                            checked={vendorPriorityFilter}
