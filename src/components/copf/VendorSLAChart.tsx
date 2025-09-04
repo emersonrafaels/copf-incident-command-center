@@ -115,17 +115,37 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences, filteredOc
     return result;
   }, [occurrences, filteredOccurrences]);
 
-  const handleBarClick = (data: ChartDataItem) => {
+  const handleBarClick = (data: ChartDataItem, segment?: string) => {
     // Atualizar filtro por fornecedor
     updateFilter('vendorFilterMulti', [data.vendor]);
+    
+    // Aplicar filtros específicos baseados no segmento clicado
+    if (segment === 'slaVencido') {
+      updateFilter('previsaoSlaFilter', ['sla_vencido']);
+    } else if (segment === 'previsaoMaiorSla') {
+      updateFilter('previsaoSlaFilter', ['previsao_maior_sla']);
+    } else if (segment === 'semPrevisao') {
+      updateFilter('previsaoSlaFilter', ['sem_previsao']);
+    } else {
+      // Limpar filtro se não for um segmento específico
+      updateFilter('previsaoSlaFilter', []);
+    }
     
     // Navegar para página de ocorrências
     navigate('/ocorrencias');
     
     // Mostrar toast de confirmação
+    const segmentLabels = {
+      slaVencido: 'SLA Vencido',
+      previsaoMaiorSla: 'Previsão > SLA',
+      semPrevisao: 'Sem Previsão'
+    };
+    
+    const segmentText = segment ? ` - ${segmentLabels[segment as keyof typeof segmentLabels]}` : '';
+    
     toast({
-      title: "Filtro aplicado",
-      description: `Exibindo ocorrências do fornecedor: ${data.vendor}`,
+      title: "Filtros aplicados",
+      description: `Exibindo ocorrências do fornecedor: ${data.vendor}${segmentText}`,
     });
   };
 
@@ -196,21 +216,21 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences, filteredOc
                 dataKey="semPrevisao" 
                 stackId="a" 
                 fill="#94a3b8" 
-                onClick={(data) => handleBarClick(data)}
+                onClick={(data) => handleBarClick(data, 'semPrevisao')}
                 style={{ cursor: 'pointer' }}
               />
               <Bar 
                 dataKey="previsaoMaiorSla" 
                 stackId="a" 
                 fill="#f59e0b" 
-                onClick={(data) => handleBarClick(data)}
+                onClick={(data) => handleBarClick(data, 'previsaoMaiorSla')}
                 style={{ cursor: 'pointer' }}
               />
               <Bar 
                 dataKey="slaVencido" 
                 stackId="a" 
                 fill="#ef4444" 
-                onClick={(data) => handleBarClick(data)}
+                onClick={(data) => handleBarClick(data, 'slaVencido')}
                 style={{ cursor: 'pointer' }}
               />
             </BarChart>
