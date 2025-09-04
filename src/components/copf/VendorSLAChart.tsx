@@ -1,6 +1,9 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { useNavigate } from 'react-router-dom';
+import { useFilters } from '@/contexts/FiltersContext';
+import { useToast } from '@/hooks/use-toast';
 
 interface OccurrenceData {
   id: string;
@@ -29,6 +32,10 @@ interface ChartDataItem {
 }
 
 const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
+  const navigate = useNavigate();
+  const { updateFilter } = useFilters();
+  const { toast } = useToast();
+
   // Processar dados dos fornecedores
   const chartData = React.useMemo(() => {
     if (!occurrences || occurrences.length === 0) {
@@ -105,6 +112,20 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
     return result;
   }, [occurrences]);
 
+  const handleBarClick = (data: ChartDataItem) => {
+    // Atualizar filtro por fornecedor
+    updateFilter('vendorFilterMulti', [data.vendor]);
+    
+    // Navegar para página de ocorrências
+    navigate('/ocorrencias');
+    
+    // Mostrar toast de confirmação
+    toast({
+      title: "Filtro aplicado",
+      description: `Exibindo ocorrências do fornecedor: ${data.vendor}`,
+    });
+  };
+
   if (chartData.length === 0) {
     return (
       <Card className="w-full">
@@ -168,9 +189,27 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
                   return labels[value as keyof typeof labels] || value;
                 }}
               />
-              <Bar dataKey="semPrevisao" stackId="a" fill="#94a3b8" />
-              <Bar dataKey="previsaoMaiorSla" stackId="a" fill="#f59e0b" />
-              <Bar dataKey="slaVencido" stackId="a" fill="#ef4444" />
+              <Bar 
+                dataKey="semPrevisao" 
+                stackId="a" 
+                fill="#94a3b8" 
+                onClick={(data) => handleBarClick(data)}
+                style={{ cursor: 'pointer' }}
+              />
+              <Bar 
+                dataKey="previsaoMaiorSla" 
+                stackId="a" 
+                fill="#f59e0b" 
+                onClick={(data) => handleBarClick(data)}
+                style={{ cursor: 'pointer' }}
+              />
+              <Bar 
+                dataKey="slaVencido" 
+                stackId="a" 
+                fill="#ef4444" 
+                onClick={(data) => handleBarClick(data)}
+                style={{ cursor: 'pointer' }}
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>
