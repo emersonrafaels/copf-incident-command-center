@@ -423,7 +423,7 @@ export function Dashboard() {
                   </div>
                 </CardContent>
               </Card>}>
-              <VendorSLAChart occurrences={filteredOccurrences} />
+              <VendorSLAChart occurrences={occurrences} filteredOccurrences={filteredOccurrences} />
             </Suspense>
           </div>;
       default:

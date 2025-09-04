@@ -18,6 +18,7 @@ interface OccurrenceData {
 
 interface VendorSLAChartProps {
   occurrences: OccurrenceData[];
+  filteredOccurrences?: OccurrenceData[];
 }
 
 interface ChartDataItem {
@@ -31,14 +32,16 @@ interface ChartDataItem {
   percentualSlaVencido: number;
 }
 
-const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
+const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences, filteredOccurrences }) => {
   const navigate = useNavigate();
   const { updateFilter } = useFilters();
   const { toast } = useToast();
 
   // Processar dados dos fornecedores
   const chartData = React.useMemo(() => {
-    if (!occurrences || occurrences.length === 0) {
+    const dataToUse = filteredOccurrences || occurrences || [];
+    
+    if (!dataToUse || dataToUse.length === 0) {
       return [];
     }
 
@@ -52,7 +55,7 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
     
     const now = new Date();
     
-    occurrences.forEach((occ) => {
+    dataToUse.forEach((occ) => {
       const vendor = occ.fornecedor || occ.vendor || 'Sem Fornecedor';
       
       if (!vendorData.has(vendor)) {
@@ -110,7 +113,7 @@ const VendorSLAChart: React.FC<VendorSLAChartProps> = ({ occurrences }) => {
       .slice(0, 8); // Top 8 fornecedores
 
     return result;
-  }, [occurrences]);
+  }, [occurrences, filteredOccurrences]);
 
   const handleBarClick = (data: ChartDataItem) => {
     // Atualizar filtro por fornecedor
