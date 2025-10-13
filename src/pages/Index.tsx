@@ -1,12 +1,12 @@
 import { COPFLayout } from "@/components/copf/COPFLayout";
 import { Dashboard } from "@/components/copf/Dashboard";
-import { Onboarding } from "@/components/copf/Onboarding";
+import { SpotlightOnboarding } from "@/components/copf/SpotlightOnboarding";
 
 const Index = () => {
   return (
     <COPFLayout>
       <Dashboard />
-      <Onboarding />
+      <SpotlightOnboarding />
     </COPFLayout>
   );
 };

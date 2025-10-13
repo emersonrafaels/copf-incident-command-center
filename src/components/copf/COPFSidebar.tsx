@@ -14,7 +14,8 @@ const navigation = [{
   title: "Ocorrências",
   url: "/ocorrencias",
   icon: FileText,
-  description: "Lista detalhada de ocorrências"
+  description: "Lista detalhada de ocorrências",
+  tourId: "sidebar-occurrences"
 }, {
   title: "Visão do Fornecedor",
   url: "/visao-fornecedor",
@@ -46,7 +47,8 @@ const adminNavigation = [{
   title: "Configurações",
   url: "/configuracoes",
   icon: Settings,
-  description: "Configurações do sistema"
+  description: "Configurações do sistema",
+  tourId: "sidebar-settings"
 }];
 export function COPFSidebar() {
   const {
@@ -96,7 +98,7 @@ export function COPFSidebar() {
                 
                 const content = (
                   <SidebarMenuButton asChild className="h-10 sm:h-11 px-3 rounded-lg transition-all duration-200 hover:bg-sidebar-accent data-[active=true]:bg-sidebar-accent data-[active=true]:font-semibold">
-                    <NavLink to={item.url} className={getNavCls(item.url)} title={collapsed ? item.description : undefined}>
+                    <NavLink to={item.url} className={getNavCls(item.url)} title={collapsed ? item.description : undefined} data-tour-id={(item as any).tourId}>
                       <div className="flex items-center gap-responsive-sm w-full">
                         <item.icon className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
                         {!collapsed && <div className="flex flex-col min-w-0 flex-1">
@@ -143,7 +145,7 @@ export function COPFSidebar() {
                 
                 const content = (
                   <SidebarMenuButton asChild className="h-10 sm:h-11 px-3 rounded-lg transition-all duration-200 hover:bg-sidebar-accent data-[active=true]:bg-sidebar-accent data-[active=true]:font-semibold">
-                    <NavLink to={item.url} className={getNavCls(item.url)} title={collapsed ? item.description : undefined}>
+                    <NavLink to={item.url} className={getNavCls(item.url)} title={collapsed ? item.description : undefined} data-tour-id={(item as any).tourId}>
                       <div className="flex items-center gap-responsive-sm w-full">
                         <item.icon className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
                         {!collapsed && <div className="flex flex-col min-w-0 flex-1">

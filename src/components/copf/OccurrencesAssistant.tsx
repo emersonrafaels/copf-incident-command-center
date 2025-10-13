@@ -167,6 +167,7 @@ export const OccurrencesAssistant = ({ occurrences, filteredCount }: Occurrences
         onClick={() => setIsOpen(true)}
         className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg"
         size="icon"
+        data-tour-id="ai-assistant-button"
       >
         <MessageCircle className="h-6 w-6" />
       </Button>

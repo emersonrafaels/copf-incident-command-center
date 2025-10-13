@@ -113,7 +113,7 @@ export function Dashboard() {
     if (!featureToggles[cardId]?.enabled) return null;
     switch (cardId) {
       case 'totalOccurrences':
-        return <div key={cardId} onClick={() => handleNavigateToOccurrences('total')} className="cursor-pointer">
+        return <div key={cardId} onClick={() => handleNavigateToOccurrences('total')} className="cursor-pointer" data-tour-id="dashboard-metrics">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -282,7 +282,7 @@ export function Dashboard() {
       case 'equipmentStatusChart':
         return <div key={chartId} className="animate-fade-in" style={{
           animationDelay: '0.35s'
-        }}>
+        }} data-tour-id="dashboard-charts">
             <EquipmentStatusChart occurrences={filteredOccurrences} />
           </div>;
       case 'topAgenciesChart':
