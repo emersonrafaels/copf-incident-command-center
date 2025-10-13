@@ -214,14 +214,7 @@ export function Dashboard() {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="relative">
-                    <OptimizedMetricCard title="Pontos Afetados" value={(() => {
-                    const affectedAgencies = new Set(filteredOccurrences.map(o => o.agency));
-                    const vipAgencies = Array.from(affectedAgencies).filter(agency => {
-                      const agencyNumber = agency.match(/\d+/)?.[0] || '0';
-                      return agencyNumber.endsWith('0') || agencyNumber.endsWith('5');
-                    });
-                    return `${affectedAgencies.size} (${vipAgencies.length} VIP)`;
-                  })()} icon={<MapPin className="h-4 w-4" />} description="Pontos com ocorrências" isLoading={isLoading} />
+                    <OptimizedMetricCard title="Pontos Afetados" value={cardMetrics.affectedAgenciesDisplay} icon={<MapPin className="h-4 w-4" />} description="Pontos com ocorrências" isLoading={isLoading} />
                     <HelpCircle className="absolute top-2 right-2 h-4 w-4 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
                   </div>
                 </TooltipTrigger>
@@ -895,6 +888,15 @@ export function Dashboard() {
       const today = new Date();
       return occCreatedDate.toDateString() === today.toDateString();
     }).length;
+
+    // 9. Pontos afetados
+    const affectedAgencies = new Set(filteredOccurrences.map(o => o.agency));
+    const vipAgencies = Array.from(affectedAgencies).filter(agency => {
+      const agencyNumber = agency.match(/\d+/)?.[0] || '0';
+      return agencyNumber.endsWith('0') || agencyNumber.endsWith('5');
+    });
+    const affectedAgenciesDisplay = `${affectedAgencies.size} (${vipAgencies.length} VIP)`;
+
     return {
       totalOccurrences,
       pendingOccurrences,
@@ -903,7 +905,8 @@ export function Dashboard() {
       inoperantEquipments,
       criticalOccurrences,
       dueTodayOccurrences,
-      todayOccurrences
+      todayOccurrences,
+      affectedAgenciesDisplay
     };
   }, [filteredOccurrences]);
 

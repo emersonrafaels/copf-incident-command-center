@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search, Download, Eye, MessageSquare, Bot, ChevronUp, ChevronDown } from "lucide-react";
 import { StatusBadge } from "@/components/copf/StatusBadge";
+import { OccurrencesAssistant } from "@/components/copf/OccurrencesAssistant";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -717,6 +718,10 @@ const Ocorrencias = () => {
           </CardContent>
         </Card>
       </div>
+      <OccurrencesAssistant 
+        occurrences={filteredOccurrences} 
+        filteredCount={filteredOccurrences.length}
+      />
     </COPFLayout>
   );
 };
