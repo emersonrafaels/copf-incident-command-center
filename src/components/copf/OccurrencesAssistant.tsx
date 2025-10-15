@@ -14,9 +14,10 @@ interface Message {
 interface OccurrencesAssistantProps {
   occurrences: any[];
   filteredCount: number;
+  onClose?: () => void;
 }
 
-export const OccurrencesAssistant = ({ occurrences, filteredCount }: OccurrencesAssistantProps) => {
+export const OccurrencesAssistant = ({ occurrences, filteredCount, onClose }: OccurrencesAssistantProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -31,30 +32,150 @@ export const OccurrencesAssistant = ({ occurrences, filteredCount }: Occurrences
   }, [messages]);
 
   const getOccurrencesContext = () => {
+    const now = new Date();
+    
+    // Contagens básicas
     const statusCount = occurrences.reduce((acc, occ) => {
       acc[occ.status] = (acc[occ.status] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
     const vendorCount = occurrences.reduce((acc, occ) => {
-      acc[occ.fornecedor] = (acc[occ.fornecedor] || 0) + 1;
+      acc[occ.vendor] = (acc[occ.vendor] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
-    const withoutForecast = occurrences.filter(occ => !occ.data_previsao_encerramento).length;
+    const severityCount = occurrences.reduce((acc, occ) => {
+      acc[occ.severity] = (acc[occ.severity] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const segmentCount = occurrences.reduce((acc, occ) => {
+      acc[occ.segment] = (acc[occ.segment] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    // Status de equipamento
+    const equipmentStatus = occurrences.reduce((acc, occ) => {
+      const status = occ.statusEquipamento || 'operante';
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    // Métricas de SLA
+    const withoutForecast = occurrences.filter(occ => !occ.dataPrevisaoEncerramento).length;
+    
     const overdueSla = occurrences.filter(occ => {
-      if (!occ.data_limite_sla) return false;
-      const now = new Date();
-      const slaDate = new Date(occ.data_limite_sla);
-      return now > slaDate && !occ.data_resolucao;
+      if (occ.status === 'encerrado' || occ.status === 'cancelado') return false;
+      const created = new Date(occ.createdAt);
+      const hoursElapsed = (now.getTime() - created.getTime()) / (1000 * 60 * 60);
+      const slaLimit = (occ.severity === 'critical' || occ.severity === 'high') ? 24 : 72;
+      return hoursElapsed > slaLimit;
     }).length;
+
+    const slaDueToday = occurrences.filter(occ => {
+      if (occ.status === 'encerrado' || occ.status === 'cancelado') return false;
+      const created = new Date(occ.createdAt);
+      const slaLimit = (occ.severity === 'critical' || occ.severity === 'high') ? 24 : 72;
+      const slaEndDate = new Date(created.getTime() + slaLimit * 60 * 60 * 1000);
+      return slaEndDate.toDateString() === now.toDateString();
+    }).length;
+
+    const forecastBeyondSla = occurrences.filter(occ => {
+      if (!occ.dataPrevisaoEncerramento) return false;
+      const created = new Date(occ.createdAt);
+      const forecast = new Date(occ.dataPrevisaoEncerramento);
+      const slaLimit = (occ.severity === 'critical' || occ.severity === 'high') ? 24 : 72;
+      const slaDeadline = new Date(created.getTime() + slaLimit * 60 * 60 * 1000);
+      return forecast > slaDeadline;
+    }).length;
+
+    // Equipamentos problemáticos
+    const equipmentCount = occurrences.reduce((acc, occ) => {
+      acc[occ.equipment] = (acc[occ.equipment] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    const topProblematicEquipment = Object.entries(equipmentCount)
+      .sort(([, a], [, b]) => (b as number) - (a as number))
+      .slice(0, 5)
+      .map(([tipo, quantidade]) => ({ tipo, quantidade }));
+
+    // Agências
+    const uniqueAgencies = new Set(occurrences.map(occ => occ.agency)).size;
+    
+    // Calcula VIP dinamicamente (agências terminadas em 0 ou 5)
+    const vipAgencies = occurrences.filter(occ => {
+      const agencyNumber = occ.agency.match(/\d+/)?.[0] || '0';
+      return agencyNumber.endsWith('0') || agencyNumber.endsWith('5');
+    }).length;
+
+    // Reincidência e impedimentos
+    const recurrent = occurrences.filter(occ => {
+      const sameReasonEquipment = occurrences.filter(other => 
+        other.id !== occ.id &&
+        other.description === occ.description &&
+        other.equipment === occ.equipment &&
+        other.agency === occ.agency
+      );
+      
+      if (sameReasonEquipment.length === 0) return false;
+      
+      return sameReasonEquipment.some(other => {
+        const daysDiff = Math.abs(new Date(occ.createdAt).getTime() - new Date(other.createdAt).getTime()) / (1000 * 60 * 60 * 24);
+        return daysDiff <= 4;
+      });
+    }).length;
+    
+    const withImpediments = occurrences.filter(occ => occ.possuiImpedimento).length;
+
+    // Exemplos de ocorrências (para contexto da IA)
+    const examples = occurrences.slice(0, 5).map(occ => {
+      const created = new Date(occ.createdAt);
+      const hoursOpen = (now.getTime() - created.getTime()) / (1000 * 60 * 60);
+      return {
+        id: occ.displayId,
+        equipamento: occ.equipment,
+        status: occ.status,
+        statusEquipamento: occ.statusEquipamento || 'operante',
+        severidade: occ.severity,
+        fornecedor: occ.vendor,
+        motivoOcorrencia: occ.motivoOcorrencia || 'N/A',
+        possuiImpedimento: occ.possuiImpedimento || false,
+        horasAbertas: Math.round(hoursOpen)
+      };
+    });
 
     return {
       total: filteredCount,
       porStatus: statusCount,
       porFornecedor: vendorCount,
-      semPrevisao: withoutForecast,
+      porSeveridade: severityCount,
+      porSegmento: segmentCount,
+      
+      // Status de equipamento
+      equipamentosInoperantes: equipmentStatus['inoperante'] || 0,
+      equipamentosOperantes: equipmentStatus['operante'] || 0,
+      
+      // Métricas de SLA
       slaVencido: overdueSla,
+      slaVenceHoje: slaDueToday,
+      semPrevisao: withoutForecast,
+      previsaoAlemSLA: forecastBeyondSla,
+      
+      // Equipamentos problemáticos
+      equipamentosMaisProblematicos: topProblematicEquipment,
+      
+      // Agências
+      agenciasAfetadas: uniqueAgencies,
+      agenciasVIP: vipAgencies,
+      
+      // Reincidência e impedimentos
+      ocorrenciasReincidentes: recurrent,
+      comImpedimentos: withImpediments,
+      
+      // Exemplos
+      exemplos: examples
     };
   };
 
@@ -162,16 +283,7 @@ export const OccurrencesAssistant = ({ occurrences, filteredCount }: Occurrences
   };
 
   if (!isOpen) {
-    return (
-      <Button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg"
-        size="icon"
-        data-tour-id="ai-assistant-button"
-      >
-        <MessageCircle className="h-6 w-6" />
-      </Button>
-    );
+    return null; // Controlado pelo componente pai agora
   }
 
   return (
@@ -181,7 +293,10 @@ export const OccurrencesAssistant = ({ occurrences, filteredCount }: Occurrences
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => setIsOpen(false)}
+          onClick={() => {
+            setIsOpen(false);
+            onClose?.();
+          }}
           className="h-8 w-8"
         >
           <X className="h-4 w-4" />
@@ -191,9 +306,56 @@ export const OccurrencesAssistant = ({ occurrences, filteredCount }: Occurrences
         <ScrollArea className="flex-1 px-4" ref={scrollRef}>
           <div className="space-y-4 pb-4">
             {messages.length === 0 && (
-              <div className="text-sm text-muted-foreground text-center py-8">
-                <p className="mb-2">👋 Olá! Sou seu assistente de ocorrências.</p>
-                <p>Pergunte-me sobre as {filteredCount} ocorrências listadas.</p>
+              <div className="text-sm text-muted-foreground space-y-4 py-4">
+                <div className="text-center">
+                  <p className="mb-2">👋 Olá! Sou seu assistente de ocorrências.</p>
+                  <p className="mb-4">Pergunte-me sobre as {filteredCount} ocorrências listadas.</p>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-xs font-medium px-2">Sugestões rápidas:</p>
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="justify-start text-left h-auto py-2 px-3"
+                      onClick={() => {
+                        setInput("Quais são as ocorrências mais críticas?");
+                      }}
+                    >
+                      <span className="text-xs">⚠️ Quais são as ocorrências mais críticas?</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="justify-start text-left h-auto py-2 px-3"
+                      onClick={() => {
+                        setInput("Quantas ocorrências estão com SLA vencido?");
+                      }}
+                    >
+                      <span className="text-xs">🚨 Quantas ocorrências estão com SLA vencido?</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="justify-start text-left h-auto py-2 px-3"
+                      onClick={() => {
+                        setInput("Mostre equipamentos inoperantes");
+                      }}
+                    >
+                      <span className="text-xs">🔧 Mostre equipamentos inoperantes</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="justify-start text-left h-auto py-2 px-3"
+                      onClick={() => {
+                        setInput("Qual fornecedor tem mais problemas?");
+                      }}
+                    >
+                      <span className="text-xs">📊 Qual fornecedor tem mais problemas?</span>
+                    </Button>
+                  </div>
+                </div>
               </div>
             )}
             {messages.map((message, index) => (

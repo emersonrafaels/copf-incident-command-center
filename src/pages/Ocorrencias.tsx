@@ -572,6 +572,24 @@ const Ocorrencias = () => {
                 </Badge>
               </CardTitle>
               <div className="flex items-center gap-2">
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => setShowAIAssistant(true)}
+                  className="gap-2"
+                >
+                  <Bot className="h-4 w-4" />
+                  Assistente IA
+                  {filteredOccurrences.filter(occ => 
+                    (occ.statusEquipamento === 'inoperante' || occ.severity === 'critical')
+                  ).length > 0 && (
+                    <Badge variant="destructive" className="ml-1 h-5 px-1.5">
+                      {filteredOccurrences.filter(occ => 
+                        (occ.statusEquipamento === 'inoperante' || occ.severity === 'critical')
+                      ).length}
+                    </Badge>
+                  )}
+                </Button>
                 <div className="relative">
                   <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -718,10 +736,24 @@ const Ocorrencias = () => {
           </CardContent>
         </Card>
       </div>
-      <OccurrencesAssistant 
-        occurrences={filteredOccurrences} 
-        filteredCount={filteredOccurrences.length}
-      />
+      {showAIAssistant && (
+        <OccurrencesAssistant 
+          occurrences={filteredOccurrences}
+          filteredCount={filteredOccurrences.length}
+          onClose={() => setShowAIAssistant(false)}
+        />
+      )}
+      
+      {!showAIAssistant && (
+        <Button
+          onClick={() => setShowAIAssistant(true)}
+          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg"
+          size="icon"
+          data-tour-id="ai-assistant-button"
+        >
+          <Bot className="h-6 w-6" />
+        </Button>
+      )}
     </COPFLayout>
   );
 };
